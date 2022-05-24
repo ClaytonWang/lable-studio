@@ -1,0 +1,6 @@
+[submodule "label_studio/frontend/lib/label-studio-frontend"]
+	path = label_studio/frontend/lib/label-studio-frontend
+	url = git@github.com:Shanghai-Digital-Brain-Laboratory/label-studio-frontend.git
+[submodule "label_studio/frontend/lib/dm2"]
+	path = label_studio/frontend/lib/dm2
+	url = git@github.com:Shanghai-Digital-Brain-Laboratory/dm2.git
