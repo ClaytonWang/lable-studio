@@ -121,7 +121,10 @@ export const Menubar = ({
             closeOnClickOutside={!sidebarPinned}
           >
             <div className={`${menubarClass.elem('trigger')} main-menu-trigger`}>
-              <img src={absoluteURL("/static/icons/logo-black.svg")} alt="Label Studio Logo" height="22"/>
+              <span style={{color: '#09f',fontWeight: 'bold'}}>
+                DigitalBrain
+              </span>
+              {/* <img src={absoluteURL("/static/icons/logo-black.svg")} alt="Label Studio Logo" height="22"/> */}
               <Hamburger opened={sidebarOpened}/>
             </div>
           </Dropdown.Trigger>
