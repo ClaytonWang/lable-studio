@@ -55,7 +55,7 @@ export const CreateProject = ({ onClose }) => {
   const steps = {
     name: <span className={tabClass.mod({ disabled: !!error })}>Project Name</span>,
     import: <span className={tabClass.mod({ disabled: uploadDisabled })}>Data Import</span>,
-    config: "Labeling Setup",
+    // config: "Labeling Setup",
   };
 
   // name intentionally skipped from deps:
@@ -70,6 +70,7 @@ export const CreateProject = ({ onClose }) => {
 
   const onCreate = React.useCallback(async () => {
     const imported = await finishUpload();
+
     if (!imported) return;
 
     setWaitingStatus(true);
@@ -79,6 +80,7 @@ export const CreateProject = ({ onClose }) => {
       },
       body: projectBody,
     });
+
     setWaitingStatus(false);
 
     if (response !== null) {
@@ -96,8 +98,10 @@ export const CreateProject = ({ onClose }) => {
         title: name,
       },
     });
+
     if (res.ok) return;
     const err = await res.json();
+
     setError(err.validation_errors?.title);
   };
 

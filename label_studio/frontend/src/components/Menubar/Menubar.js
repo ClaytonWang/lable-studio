@@ -17,15 +17,15 @@ import './MenuSidebar.styl';
 
 export const MenubarContext = createContext();
 
-const LeftContextMenu = ({className}) => (
+const LeftContextMenu = ({ className }) => (
   <StaticContent
     id="context-menu-left"
     className={className}
   >{(template) => <Breadcrumbs fromTemplate={template} />}</StaticContent>
 );
 
-const RightContextMenu = ({className, ...props}) => {
-  const {ContextComponent, contextProps} = useContextComponent();
+const RightContextMenu = ({ className, ...props }) => {
+  const { ContextComponent, contextProps } = useContextComponent();
 
   return ContextComponent ? (
     <div className={className}>
@@ -69,12 +69,14 @@ export const Menubar = ({
     e.preventDefault();
 
     const newState = !sidebarPinned;
+
     setSidebarPinned(newState);
     onSidebarPin?.(newState);
   }, [sidebarPinned]);
 
   const sidebarToggle = useCallback((visible) => {
     const newState = visible;
+
     setSidebarOpened(newState);
     onSidebarToggle?.(newState);
   }, [sidebarOpened]);
@@ -121,7 +123,7 @@ export const Menubar = ({
             closeOnClickOutside={!sidebarPinned}
           >
             <div className={`${menubarClass.elem('trigger')} main-menu-trigger`}>
-              <span style={{color: '#09f',fontWeight: 'bold'}}>
+              <span style={{ color: '#09f',fontWeight: 'bold' }}>
                 DigitalBrain
               </span>
               {/* <img src={absoluteURL("/static/icons/logo-black.svg")} alt="Label Studio Logo" height="22"/> */}
@@ -130,9 +132,9 @@ export const Menubar = ({
           </Dropdown.Trigger>
 
           <div className={menubarContext}>
-            <LeftContextMenu className={contextItem.mod({left: true})}/>
+            <LeftContextMenu className={contextItem.mod({ left: true })}/>
 
-            <RightContextMenu className={contextItem.mod({right: true})}/>
+            <RightContextMenu className={contextItem.mod({ right: true })}/>
           </div>
 
           <Dropdown.Trigger ref={useMenuRef} align="right" content={(
@@ -167,8 +169,8 @@ export const Menubar = ({
               onToggle={sidebarToggle}
               onVisibilityChanged={() => window.dispatchEvent(new Event('resize'))}
               visible={sidebarOpened}
-              className={[sidebarClass, sidebarClass.mod({floating: !sidebarPinned})].join(" ")}
-              style={{width: 240}}
+              className={[sidebarClass, sidebarClass.mod({ floating: !sidebarPinned })].join(" ")}
+              style={{ width: 240 }}
             >
               <Menu>
                 <Menu.Item
@@ -188,35 +190,6 @@ export const Menubar = ({
 
                 <Menu.Spacer/>
 
-                <VersionNotifier showNewVersion/>
-
-                <Menu.Item
-                  label="API"
-                  href="/docs/api"
-                  icon={<IconTerminal/>}
-                  target="_blank"
-                />
-                <Menu.Item
-                  label="Docs"
-                  href="https://labelstud.io/guide"
-                  icon={<IconBook/>}
-                  target="_blank"
-                />
-                <Menu.Item
-                  label="GitHub"
-                  href="https://github.com/heartexlabs/label-studio"
-                  icon={<LsGitHub/>}
-                  target="_blank"
-                />
-                <Menu.Item
-                  label="Slack Community"
-                  href="https://slack.labelstudio.heartex.com/?source=product-menu"
-                  icon={<LsSlack/>}
-                  target="_blank"
-                />
-
-                <VersionNotifier showCurrentVersion/>
-
                 <Menu.Divider/>
 
                 <Menu.Item
@@ -233,7 +206,7 @@ export const Menubar = ({
           )}
 
           <MenubarContext.Provider value={providerValue}>
-            <div className={contentClass.elem('content').mod({withSidebar: sidebarPinned && sidebarOpened})}>
+            <div className={contentClass.elem('content').mod({ withSidebar: sidebarPinned && sidebarOpened })}>
               {children}
             </div>
           </MenubarContext.Provider>

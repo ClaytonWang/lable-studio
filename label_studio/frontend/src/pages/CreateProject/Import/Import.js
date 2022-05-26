@@ -3,7 +3,7 @@ import { Modal } from '../../../components/Modal/Modal';
 import { cn } from '../../../utils/bem';
 import { unique } from '../../../utils/helpers';
 import "./Import.styl";
-import { IconUpload, IconInfo, IconError } from '../../../assets/icons';
+import { IconError, IconInfo, IconUpload } from '../../../assets/icons';
 import { useAPI } from '../../../providers/ApiProvider';
 
 const importClass = cn("upload_page");
@@ -26,7 +26,7 @@ function traverseFileTree(item, path) {
       const dirReader = item.createReader();
       const dirPath = path + item.name + "/";
 
-      dirReader.readEntries(function (entries) {
+      dirReader.readEntries(function(entries) {
         Promise.all(entries.map(entry => traverseFileTree(entry, dirPath)))
           .then(flatten)
           .then(resolve);
@@ -43,6 +43,7 @@ function getFiles(files) {
 
     // Use DataTransferItemList interface to access the file(s)
     const entries = Array.from(files).map(file => file.webkitGetAsEntry());
+
     Promise.all(entries.map(traverseFileTree))
       .then(flatten)
       .then(fileEntries => fileEntries.map(fileEntry => new Promise(res => fileEntry.file(res))))
@@ -54,9 +55,7 @@ function getFiles(files) {
 const Footer = () => {
   return (
     <Modal.Footer>
-      <IconInfo className={importClass.elem("info-icon")} width="20" height="20" />
-      See the&nbsp;documentation to <a target="_blank" href="https://labelstud.io/guide/predictions.html">import preannotated data</a>{" "}
-      or&nbsp;to <a target="_blank" href="https://labelstud.io/guide/storage.html">sync data from a&nbsp;database or&nbsp;cloud storage</a>.
+      {''}
     </Modal.Footer>
   );
 };
@@ -93,6 +92,7 @@ const ErrorMessage = ({ error }) => {
   if (!error) return null;
   let extra = error.validation_errors ?? error.extra;
   // support all possible responses
+
   if (extra && typeof extra === "object" && !Array.isArray(extra)) {
     extra = extra.non_field_errors ?? Object.values(extra);
   }
@@ -126,13 +126,13 @@ export const ImportPage = ({
 
   const processFiles = (state, action) => {
     if (action.sending) {
-      return {...state, uploading: [...action.sending, ...state.uploading]};
+      return { ...state, uploading: [...action.sending, ...state.uploading] };
     }
     if (action.sent) {
-      return {...state, uploading: state.uploading.filter(f => !action.sent.includes(f))};
+      return { ...state, uploading: state.uploading.filter(f => !action.sent.includes(f)) };
     }
     if (action.uploaded) {
-      return {...state, uploaded: unique([...state.uploaded, ...action.uploaded], (a, b) => a.id === b.id)};
+      return { ...state, uploaded: unique([...state.uploaded, ...action.uploaded], (a, b) => a.id === b.id) };
     }
     // if (action.ids) {
     //   const ids = unique([...state.ids, ...action.ids]);
@@ -141,7 +141,7 @@ export const ImportPage = ({
     // }
     return state;
   };
-  const [files, dispatch] = useReducer(processFiles, {uploaded: [], uploading: []});
+  const [files, dispatch] = useReducer(processFiles, { uploaded: [], uploading: [] });
   const showList = Boolean(files.uploaded?.length || files.uploading?.length);
 
   const setIds = (ids) => {
@@ -151,6 +151,7 @@ export const ImportPage = ({
 
   const loadFilesList = useCallback(async (file_upload_ids) => {
     const query = {};
+
     if (file_upload_ids) {
       // should be stringified array "[1,2]"
       query.ids = JSON.stringify(file_upload_ids);
@@ -158,6 +159,7 @@ export const ImportPage = ({
     const files = await api.callApi("fileUploads", {
       params: { pk: project.id, ...query },
     });
+
     dispatch({ uploaded: files ?? [] });
     if (files?.length) {
       setIds(unique([...ids, ...files.map(f => f.id)]));
@@ -175,6 +177,7 @@ export const ImportPage = ({
     if (typeof err === "string" && err.includes("RequestDataTooBig")) {
       const message = "Imported file is too big";
       const extra = err.match(/"exception_value">(.*)<\/pre>/)?.[1];
+
       err = { message, extra };
     }
     setError(err);
@@ -184,6 +187,7 @@ export const ImportPage = ({
   const onFinish = useCallback(res => {
     const { could_be_tasks_list, data_columns, file_upload_ids } = res;
     const file_ids = [...ids, ...file_upload_ids];
+
     setIds(file_ids);
     if (could_be_tasks_list && !csvHandling) setCsvHandling("choose");
     setLoading(true);
@@ -218,6 +222,7 @@ export const ImportPage = ({
     onWaiting?.(true);
     files = [...files]; // they can be array-like object
     const fd = new FormData;
+
     for (let f of files) fd.append(f.name, f);
     return importFiles(files, fd);
   }, [importFiles, onStart]);
@@ -231,6 +236,7 @@ export const ImportPage = ({
     e.preventDefault();
     onStart();
     const url = urlRef.current?.value;
+
     if (!url) {
       setLoading(false);
       return;
@@ -238,6 +244,7 @@ export const ImportPage = ({
     urlRef.current.value = "";
     onWaiting?.(true);
     const body = new URLSearchParams({ url });
+
     importFiles([{ name: url }], body);
   }, [importFiles]);
 
