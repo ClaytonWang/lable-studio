@@ -7,9 +7,9 @@ import { useProject } from '../../../providers/ProjectProvider';
 import { StorageCard } from './StorageCard';
 import { StorageForm } from './StorageForm';
 
-export const StorageSet = ({title, target, rootClass, buttonLabel}) => {
+export const StorageSet = ({ title, target, rootClass, buttonLabel }) => {
   const api = useContext(ApiContext);
-  const {project} = useProject();
+  const { project } = useProject();
   const [storages, setStorages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -80,8 +80,6 @@ export const StorageSet = ({title, target, rootClass, buttonLabel}) => {
       footer: (
         <>
           Save completed annotations to Amazon S3, Google Cloud, Microsoft Azure, or Redis.
-          <br/>
-          <a href="https://labelstud.io/guide/storage.html">See more in the documentation</a>.
         </>
       ),
     });

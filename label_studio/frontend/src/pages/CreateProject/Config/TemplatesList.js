@@ -21,6 +21,7 @@ const TemplatesInGroup = ({ templates, group, onSelectRecipe }) => {
     .filter(recipe => recipe.group === group)
     // templates without `order` go to the end of the list
     .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity));
+
   return (
     <ul>
       {picked.map(recipe => (
@@ -44,8 +45,10 @@ export const TemplatesList = ({ selectedGroup, selectedRecipe, onCustomTemplate,
 
   React.useEffect(async () => {
     const res = await api.callApi('configTemplates');
+
     if (!res) return;
     const { templates, groups } = res;
+
     setTemplates(templates);
     setGroups(groups);
   }, []);
@@ -77,8 +80,8 @@ export const TemplatesList = ({ selectedGroup, selectedRecipe, onCustomTemplate,
         <TemplatesInGroup templates={templates || []} group={selected} onSelectRecipe={onSelectRecipe} />
       </main>
       <footer>
-        <IconInfo className={listClass.elem("info-icon")} width="20" height="20" />
-        See the documentation to <a href="https://labelstud.io/guide" target="_blank">contribute a template</a>.
+        {/* <IconInfo className={listClass.elem("info-icon")} width="20" height="20" />
+        See the documentation to <a href="https://labelstud.io/guide" target="_blank">contribute a template</a>. */}
       </footer>
     </div>
   );
