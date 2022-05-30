@@ -55,7 +55,7 @@ export const CreateProject = ({ onClose }) => {
   const steps = {
     name: <span className={tabClass.mod({ disabled: !!error })}>Project Name</span>,
     import: <span className={tabClass.mod({ disabled: uploadDisabled })}>Data Import</span>,
-    // config: "Labeling Setup",
+    config: "Labeling Setup",
   };
 
   // name intentionally skipped from deps:
