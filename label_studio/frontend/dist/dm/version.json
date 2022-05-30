@@ -1,6 +1,6 @@
 {
-  "message": "fix: DEV-1703: add scroll to view when focus changes to stickyList in table component (#35)",
-  "commit": "172c8eeb252a2bfef81133a87fdcbca146781d04",
-  "branch": "master",
-  "date": "2022-05-12 13:31:27 -0500"
+  "message": "fix: DEV-2290: Show draft created time (#59)",
+  "commit": "133d0aa2866d871a2217a01e477f1f55cc7f9354",
+  "branch": "development",
+  "date": "2022-05-26 15:40:09 +0400"
 }
