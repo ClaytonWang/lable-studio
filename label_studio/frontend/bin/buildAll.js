@@ -4,10 +4,18 @@ const runAll = require("npm-run-all");
 var git = require('git-rev-sync');
 const gitlog = require("gitlog").default;
 
+Object.assign(process.env, {
+  LSF_DIR: path.join(__dirname, '../../../../label-studio-frontend'),
+  DM_DIR: path.join(__dirname, '../../../../dm2'),
+});
+require('dotenv').config({
+  override: true,
+});
+
 const DIST = path.join(__dirname, '../dist');
-const DM = path.join(__dirname, '../lib/dm2');
+const DM = process.env.DM_DIR;
 const DM_DIST = path.join(DM, 'build/static');
-const LSF = path.join(__dirname, '../lib/label-studio-frontend');
+const LSF = process.env.LSF_DIR;
 const LSF_DIST = path.join(LSF, 'build/static');
 const LICENSE_path = path.join(__dirname, '../lib/index.js.LICENSE.txt');
 

@@ -124,7 +124,7 @@ export const Menubar = ({
           >
             <div className={`${menubarClass.elem('trigger')} main-menu-trigger`}>
               <span style={{ color: '#09f',fontWeight: 'bold' }}>
-                DigitalBrain
+                数字大脑数据标注平台
               </span>
               {/* <img src={absoluteURL("/static/icons/logo-black.svg")} alt="Label Studio Logo" height="22"/> */}
               <Hamburger opened={sidebarOpened}/>
