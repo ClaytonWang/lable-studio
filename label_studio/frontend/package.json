@@ -13,6 +13,9 @@
     "download:dm": "npm run download -- dm",
     "download": "NO_BUILD=true node get-build.js",
     "watch": "npm run start",
+    "watch:lsf": "cd $LSF_DIR && WORK_DIR=$LSF_WORK npm run watch",
+    "watch:dm": "cd $DM_DIR && WORK_DIR=$DM_WORK npm run watch",
+    "watch:all": "node bin/watchAll.js",
     "build:lsf": "cd $LSF_DIR && NODE_ENV=production npm run build:module",
     "build:dm": "cd $DM_DIR && npm run build:module",
     "build:all": "node bin/buildAll.js"
