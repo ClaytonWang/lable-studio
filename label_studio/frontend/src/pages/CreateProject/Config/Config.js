@@ -14,16 +14,6 @@ import { DEFAULT_COLUMN, EMPTY_CONFIG, isEmptyConfig, Template } from './Templat
 import { TemplatesList } from './TemplatesList';
 import { useAPI } from '../../../providers/ApiProvider';
 
-// TEMP 设置默认模版
-const DEFAULT_TEMPLATE = {
-  "title": "Intent Classification and Slot Filling",
-  "type": "community",
-  "group": "Conversational AI",
-  "image": "/static/templates/intent-classification-and-slot-filling.png",
-  "details": "<h1>Build task-oriented dialogue system by selecting dialogue intents and extracting slot entities</h1>",
-  "config": "<View>\n  <ParagraphLabels name=\"entity_slot\" toName=\"dialogue\">\n    <Label value=\"Person\" />\n    <Label value=\"Organization\" />\n    <Label value=\"Location\" />\n    <Label value=\"Datetime\" />\n    <Label value=\"Quantity\" />\n  </ParagraphLabels>\n  <Paragraphs name=\"dialogue\" value=\"$humanMachineDialogue\" layout=\"dialogue\" />\n    <Choices name=\"intent\" toName=\"dialogue\"\n         choice=\"single\" showInLine=\"true\">\n        <Choice value=\"Greeting\"/>\n        <Choice value=\"Customer request\"/>\n        <Choice value=\"Small talk\"/>\n    </Choices>\n</View>\n",
-};
-
 // don't do this, kids
 const formatXML = (xml) => {
   // don't use formatting if the config has new lines
@@ -436,9 +426,6 @@ export const ConfigPage = ({ config: initialConfig = "", columns: externalColumn
       setTemplate(initialConfig);
       setMode("view");
     }
-    // TEMP 设置意图训练为默认值
-    setSelectedGroup(DEFAULT_TEMPLATE.group);
-    onSelectRecipe(DEFAULT_TEMPLATE);
   }, []);
 
   if (!show) return null;
