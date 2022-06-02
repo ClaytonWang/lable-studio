@@ -1,0 +1,15 @@
+title: Intent Classification for Sentence
+type: community
+group: Digital Brain
+image: /static/templates/intent-classification-and-slot-filling.png
+details: <h1>Build task-oriented sentence system by selecting sentence intents</h1>
+config: |
+  <View>
+    <Header value="$id"/>
+    <Text name="data" value="$data"></Text>
+    <Choices name="intent" toName="data" choice="multiple" showInLine="true">
+      <Choice value="升级"/>
+      <Choice value="不知情"/>
+      <Choice value="外呼"/>
+    </Choices>
+  </View>
