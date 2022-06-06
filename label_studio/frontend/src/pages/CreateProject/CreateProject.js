@@ -13,9 +13,8 @@ import { useDraftProject } from './utils/useDraftProject';
 
 // 1期需求：创建项目时，默认的模版
 const DEFAULT_CONFIG = `<View>
-<Header value="$id"/>
-<Text name="data" value="$data"></Text>
-<Choices name="intent" toName="data" choice="multiple" showInLine="true">
+<Paragraphs name="dialogue" value="$dialogue" layout="dialogue" />
+<Choices name="intent" toName="dialogue" choice="multiple" showInLine="true">
   <Choice value="升级"/>
   <Choice value="不知情"/>
   <Choice value="外呼"/>
