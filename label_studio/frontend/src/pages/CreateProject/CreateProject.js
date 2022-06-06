@@ -11,6 +11,16 @@ import { ImportPage } from './Import/Import';
 import { useImportPage } from './Import/useImportPage';
 import { useDraftProject } from './utils/useDraftProject';
 
+// 1期需求：创建项目时，默认的模版
+const DEFAULT_CONFIG = `<View>
+<Header value="$id"/>
+<Text name="data" value="$data"></Text>
+<Choices name="intent" toName="data" choice="multiple" showInLine="true">
+  <Choice value="升级"/>
+  <Choice value="不知情"/>
+  <Choice value="外呼"/>
+</Choices>
+</View>`;
 
 const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, setDescription, show = true }) => !show ? null :(
   <form className={cn("project-name")} onSubmit={e => { e.preventDefault(); onSubmit(); }}>
@@ -70,6 +80,7 @@ export const CreateProject = ({ onClose }) => {
 
   const onCreate = React.useCallback(async () => {
     const imported = await finishUpload();
+
     if (!imported) return;
 
     setWaitingStatus(true);
@@ -79,6 +90,7 @@ export const CreateProject = ({ onClose }) => {
       },
       body: projectBody,
     });
+
     setWaitingStatus(false);
 
     if (response !== null) {
@@ -96,8 +108,10 @@ export const CreateProject = ({ onClose }) => {
         title: name,
       },
     });
+
     if (res.ok) return;
     const err = await res.json();
+
     setError(err.validation_errors?.title);
   };
 
@@ -136,7 +150,7 @@ export const CreateProject = ({ onClose }) => {
           show={step === "name"}
         />
         <ImportPage project={project} show={step === "import"} {...pageProps} />
-        <ConfigPage project={project} onUpdate={setConfig} show={step === "config"} columns={columns} disableSaveButton={true} />
+        <ConfigPage project={project} onUpdate={setConfig} show={step === "config"} columns={columns} disableSaveButton={true} config={DEFAULT_CONFIG} />
       </div>
     </Modal>
   );
