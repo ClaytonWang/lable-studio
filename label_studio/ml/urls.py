@@ -3,6 +3,7 @@
 from django.urls import path, include
 
 from . import api
+from db_ml.api import prediction
 
 app_name = 'ml'
 
@@ -21,4 +22,5 @@ _api_urlpatterns = [
 
 urlpatterns = [
     path('api/ml/', include((_api_urlpatterns, app_name), namespace='api')),
+    path('api/dbml/predict', prediction),
 ]
