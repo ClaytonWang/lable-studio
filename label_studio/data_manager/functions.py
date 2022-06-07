@@ -272,6 +272,17 @@ def get_all_columns(project, *_):
                 'explore': False,
                 'labeling': False
             }
+        },
+        {
+            'id': 'marked_words',
+            'title': "提示语",
+            'type': 'String',
+            'help': '提示语',
+            'target': 'tasks',
+            'visibility_defaults': {
+                'explore': False,
+                'labeling': False
+            }
         }
     ]
 
