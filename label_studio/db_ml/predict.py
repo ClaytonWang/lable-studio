@@ -60,7 +60,9 @@ def job_predict(*args, **kwargs):
             tag_data['created_by_id'] = user_id
 
         task_id = kwargs.get('task_tag_id')
-        if TaskDbTag.objects.exists(task_id=task_id):
+
+        # TODO 异步锁 或是 事务
+        if TaskDbTag.objects.filter(task_id=task_id).exists():
             TaskDbTag.objects.filter().delete()
         obj = TaskDbTag.objects.create(**tag_data)
         print('obj:', obj.tag_text, ' auto: ', res_text)
