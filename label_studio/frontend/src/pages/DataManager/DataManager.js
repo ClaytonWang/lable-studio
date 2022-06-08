@@ -1,6 +1,5 @@
 import { createRef, useCallback, useEffect, useRef,useState } from 'react';
 import { generatePath, useHistory } from 'react-router';
-import { render,unmountComponentAtNode } from "react-dom";
 import { NavLink } from 'react-router-dom';
 import { Spinner } from '../../components';
 import { Button } from '../../components/Button/Button';
@@ -20,7 +19,7 @@ import { Progress } from 'antd';
 import "./DataManager.styl";
 
 const refModal = createRef();
-const onPreButtonClick = (e) => {
+const onPreButtonClick = (e,setProgress) => {
 
   // const btn = e.target ?? null;
 
@@ -28,33 +27,22 @@ const onPreButtonClick = (e) => {
   //   btn.disabled = true;
   //   btn.textContent='预标注中...';
   // }
-  
-  const t= setTimeout(() => { 
-    if (t) { clearTimeout(t); }
-    refModal.current?.hide();
-  },2000);
+  let progress = 0;
 
-  const rootDiv = document.createElement("div");
+  refModal.current?.show();
+  let t = setInterval(() => { 
+    if (progress > 100) {
+      refModal.current?.hide();
+    }
+    if (progress > 110) {
+      clearTimeout(t);
+      setProgress(0);
+      return;
+    }
+    progress = progress + 10;
+    setProgress(progress);
+  },500);
 
-  render(<Modal
-    ref={refModal}
-    bare={true}
-    allowClose={false}
-    body={() => { return <Progress type="circle" percent={75} />;}}
-    onHide={() => {
-      unmountComponentAtNode(rootDiv);
-      rootDiv.remove();
-    }}
-    style={{
-      width: '150px',
-      minWidth:'150px',
-      background: 'transparent',
-      boxShadow: 'none' }}
-    animateAppearance={true}
-  />,rootDiv);
-
-};
-const onWashButtonClick = (e) => { 
 
 };
 
@@ -68,7 +56,7 @@ const initializeDataManager = async (root, props, params) => {
 
   const dmConfig = {
     root,
-    toolbar: "actions columns filters ordering pre-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
+    toolbar: "actions columns filters ordering wash-button pre-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
     apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
     apiVersion: 2,
@@ -88,10 +76,10 @@ const initializeDataManager = async (root, props, params) => {
     },
     instruments: {
       'wash-button': () => {
-        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onWashButtonClick(e);}} >清洗</button>;
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { params.setProgress(30);}} >清洗</button>;
       },
       'pre-button': () => {
-        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e);}} >预标注(普通)</button>;
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params.setProgress);}} >预标注(普通)</button>;
       },
     },
     ...props,
@@ -115,6 +103,7 @@ export const DataManagerPage = ({ ...props }) => {
   const DataManager = useLibrary('dm');
   const setContextProps = useContextProps();
   const [crashed, setCrashed] = useState(false);
+  const [progress, setProgress] = useState(0);
   const dataManagerRef = useRef();
   const projectId = project?.id;
 
@@ -129,6 +118,10 @@ export const DataManagerPage = ({ ...props }) => {
       params: { project: project.id },
     });
 
+    // const mlQueryProgress = await api.callApi('mlPreLabelProgress', {
+    //   params: { project_id: project.id },
+    // });
+
     const interactiveBacked = (mlBackends ?? []).find(({ is_interactive }) => is_interactive);
 
     const dataManager = (dataManagerRef.current = dataManagerRef.current ?? await initializeDataManager(
@@ -138,6 +131,7 @@ export const DataManagerPage = ({ ...props }) => {
         ...params,
         project,
         autoAnnotation: isDefined(interactiveBacked),
+        setProgress,
       },
     ));
 
@@ -201,7 +195,6 @@ export const DataManagerPage = ({ ...props }) => {
     return () => destroyDM();
   }, [root, init]);
 
-
   if (!DataManager || !LabelStudio) {
     return (
       <div style={{
@@ -226,7 +219,22 @@ export const DataManagerPage = ({ ...props }) => {
       </Button>
     </Block>
   ) : (
-    <Block ref={root} name="datamanager"/>
+    <>
+      <Modal
+        ref={refModal}
+        bare={true}
+        allowClose={false}
+        style={{
+          width: '150px',
+          minWidth:'150px',
+          background: 'transparent',
+          boxShadow: 'none' }}
+      >
+        <Progress type="circle" percent={progress} />
+      </Modal>
+      <Block ref={root} name="datamanager"/>
+    </>
+    
   );
 };
 

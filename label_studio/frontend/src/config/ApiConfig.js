@@ -51,6 +51,7 @@ export const API_CONFIG = {
     predictWithML: "POST:/ml/:pk/predict",
     modelVersions: "/projects/:pk/model-versions",
     mlInteractive: "POST:/ml/:pk/interactive-annotating",
+    mlPreLabelProgress:"GET:/dbml/query_task",
 
     // Export
     export: "/projects/:pk/export",
