@@ -30,6 +30,12 @@ def enforce_csrf_checks(func):
         return func
 
 
+class DisableAllCSRF(MiddlewareMixin):
+    @staticmethod
+    def process_request(request):
+        setattr(request, '_dont_enforce_csrf_checks', True)
+
+
 class DisableCSRF(MiddlewareMixin):
     # disable csrf for api requests
     def process_view(self, request, callback, *args, **kwargs):

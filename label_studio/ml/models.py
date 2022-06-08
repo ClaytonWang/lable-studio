@@ -2,6 +2,7 @@
 """
 import logging
 from django.db import models
+from django.conf import settings
 
 # Create your models here.
 from django.utils.translation import gettext_lazy as _
@@ -27,6 +28,39 @@ class MLBackendState(models.TextChoices):
     ERROR = 'ER', _('Error')
     TRAINING = 'TR', _('Training')
     PREDICTING = 'PR', _('Predicting')
+
+
+class DbMLBackend(models.Model):
+
+    url = models.TextField(
+        _('url'),
+        help_text='URL for the machine learning model server',
+    )
+    error_message = models.TextField(
+        _('error_message'),
+        blank=True,
+        null=True,
+        help_text='Error message in error state',
+    )
+    title = models.TextField(
+        _('title'),
+        blank=True,
+        null=True,
+        default='default',
+        help_text='Name of the machine learning backend',
+    )
+    description = models.TextField(
+        _('description'),
+        blank=True,
+        null=True,
+        default='',
+        help_text='Description for the machine learning backend',
+    )
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_db_ml')
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='updated_db_ml',)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_db_ml',)
 
 
 class MLBackend(models.Model):

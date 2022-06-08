@@ -69,9 +69,9 @@ logger.info('=> Database and media directory: %s', BASE_DATA_DIR)
 DJANGO_DB_MYSQL = 'mysql'
 DJANGO_DB_SQLITE = 'sqlite'
 DJANGO_DB_POSTGRESQL = 'postgresql'
-DJANGO_DB = 'default'
+DJANGO_DB = 'postgresql'
 DATABASE_NAME_DEFAULT = os.path.join(BASE_DATA_DIR, 'label_studio.sqlite3')
-DATABASE_NAME = get_env('DATABASE_NAME', DATABASE_NAME_DEFAULT)
+DATABASE_NAME = get_env('DATABASE_NAME', 'postgresql')
 DATABASES_ALL = {
     DJANGO_DB_POSTGRESQL: {
         'ENGINE': 'django.db.backends.postgresql',
@@ -194,7 +194,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'core.middleware.DisableCSRF',
+    # 'core.middleware.DisableCSRF',
+    'core.middleware.DisableAllCSRF',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -281,10 +282,10 @@ TEMPLATES = [
 # RQ
 RQ_QUEUES = {
     'default': {
-        'HOST': 'localhost',
+        'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 0,
-        'DEFAULT_TIMEOUT': 180,
+        'DEFAULT_TIMEOUT': 18000,
     },
 }
 
