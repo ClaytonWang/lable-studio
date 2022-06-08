@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { createRef, useCallback, useEffect, useRef,useState } from 'react';
 import { generatePath, useHistory } from 'react-router';
+import { render,unmountComponentAtNode } from "react-dom";
 import { NavLink } from 'react-router-dom';
 import { Spinner } from '../../components';
 import { Button } from '../../components/Button/Button';
-import { modal } from '../../components/Modal/Modal';
+import { modal,Modal } from '../../components/Modal/Modal';
 import { Space } from '../../components/Space/Space';
 import { useAPI } from '../../providers/ApiProvider';
 import { useLibrary } from '../../providers/LibraryProvider';
@@ -15,15 +16,46 @@ import { isDefined } from '../../utils/helpers';
 import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
+import { Progress } from 'antd';
 import "./DataManager.styl";
 
+const refModal = createRef();
 const onPreButtonClick = (e) => {
-  const btn = e.target ?? null;
 
-  if (btn && !btn.disabled) {
-    btn.disabled = true;
-    btn.textContent='预标注中...';
-  }
+  // const btn = e.target ?? null;
+
+  // if (btn && !btn.disabled) {
+  //   btn.disabled = true;
+  //   btn.textContent='预标注中...';
+  // }
+  
+  const t= setTimeout(() => { 
+    if (t) { clearTimeout(t); }
+    refModal.current?.hide();
+  },2000);
+
+  const rootDiv = document.createElement("div");
+
+  render(<Modal
+    ref={refModal}
+    bare={true}
+    allowClose={false}
+    body={() => { return <Progress type="circle" percent={75} />;}}
+    onHide={() => {
+      unmountComponentAtNode(rootDiv);
+      rootDiv.remove();
+    }}
+    style={{
+      width: '150px',
+      minWidth:'150px',
+      background: 'transparent',
+      boxShadow: 'none' }}
+    animateAppearance={true}
+  />,rootDiv);
+
+};
+const onWashButtonClick = (e) => { 
+
 };
 
 const initializeDataManager = async (root, props, params) => {
@@ -55,6 +87,9 @@ const initializeDataManager = async (root, props, params) => {
       keymap: window.APP_SETTINGS.editor_keymap,
     },
     instruments: {
+      'wash-button': () => {
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onWashButtonClick(e);}} >清洗</button>;
+      },
       'pre-button': () => {
         return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e);}} >预标注(普通)</button>;
       },
