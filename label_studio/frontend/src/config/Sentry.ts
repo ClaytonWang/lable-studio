@@ -5,6 +5,8 @@ import { Integrations } from "@sentry/tracing";
 import { Route } from 'react-router-dom';
 
 export const initSentry = (history: RouterHistory) => {
+  // TEMP 取消Sentry
+  return;
   setTags();
 
   Sentry.init({
