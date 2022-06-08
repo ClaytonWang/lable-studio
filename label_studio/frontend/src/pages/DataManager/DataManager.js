@@ -36,7 +36,7 @@ const initializeDataManager = async (root, props, params) => {
 
   const dmConfig = {
     root,
-    toolbar: "actions columns filters ordering pre-button loading-possum error-box  | refresh import-button export-button view-toggle",
+    toolbar: "actions columns filters ordering pre-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
     apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
     apiVersion: 2,
