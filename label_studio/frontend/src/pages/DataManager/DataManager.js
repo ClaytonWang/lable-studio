@@ -17,6 +17,15 @@ import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
 import "./DataManager.styl";
 
+const onPreButtonClick = (e) => {
+  const btn = e.target ?? null;
+
+  if (btn && !btn.disabled) {
+    btn.disabled = true;
+    btn.textContent='预标注中...';
+  }
+};
+
 const initializeDataManager = async (root, props, params) => {
   if (!window.LabelStudio) throw Error("Label Studio Frontend doesn't exist on the page");
   if (!root && root.dataset.dmInitialized) return;
@@ -27,22 +36,28 @@ const initializeDataManager = async (root, props, params) => {
 
   const dmConfig = {
     root,
+    toolbar: "actions columns filters ordering pre-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
     apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
     apiVersion: 2,
     project: params.project,
     polling: !window.APP_SETTINGS,
-    showPreviews: false,
+    showPreviews: true,
     apiEndpoints: APIConfig.endpoints,
     interfaces: {
-      import: true,
-      export: true,
       backButton: false,
       labelingHeader: false,
+      groundTruth: false,
+      instruction: false,
       autoAnnotation: params.autoAnnotation,
     },
     labelStudio: {
       keymap: window.APP_SETTINGS.editor_keymap,
+    },
+    instruments: {
+      'pre-button': () => {
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e);}} >预标注(普通)</button>;
+      },
     },
     ...props,
     ...settings,
@@ -209,7 +224,8 @@ DataManagerPage.context = ({ dmRef }) => {
       });
       addCrumb({
         key: "dm-crumb",
-        title: "Labeling",
+        // title: "Labeling",
+        title:"对话-意图分类",
       });
     }
   };
