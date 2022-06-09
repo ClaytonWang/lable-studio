@@ -180,7 +180,8 @@ class DataManagerTaskSerializer(TaskSerializer):
     predictions_model_versions = serializers.SerializerMethodField(required=False)
     avg_lead_time = serializers.FloatField(required=False)
     updated_by = serializers.SerializerMethodField(required=False, read_only=True)
-    auto_tags = serializers.SerializerMethodField(required=False)
+    auto_label = serializers.SerializerMethodField(required=False)
+    manual_label = serializers.SerializerMethodField(required=False)
 
     CHAR_LIMITS = 500
 
@@ -188,6 +189,21 @@ class DataManagerTaskSerializer(TaskSerializer):
         model = Task
         ref_name = 'data_manager_task_serializer'
         fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(DataManagerTaskSerializer, self).__init__(*args, **kwargs)
+        self.task_ids = [item.id for item in self.instance]
+        query_values = TaskDbTag.objects.filter(
+            task_id__in=self.task_ids).values(
+           'id', 'task_id', 'auto', 'manual'
+        )
+        self.tag_values = dict()
+        for index, item in enumerate(query_values):
+            if item['auto'] is None:
+                item['auto'] = []
+            if item['manual'] is None:
+                item['manual'] = []
+            self.tag_values[str(item['task_id'])] = item
 
     def to_representation(self, obj):
         """ Dynamically manage including of some fields in the API result
@@ -221,19 +237,18 @@ class DataManagerTaskSerializer(TaskSerializer):
 
         return output[:self.CHAR_LIMITS].replace(',"', ', "').replace('],[', "] [").replace('"', '')
 
-    def get_auto_tags(self, obj):
+    def get_auto_label(self, obj):
         """
         # TODO 列表所有数据一次查出所有 task tag
         :param obj:
         :return:
         """
+        tags = self.tag_values.get(str(obj.id), {})
+        return tags.get('auto', [])
 
-        q_tag = TaskDbTag.objects.filter(task=obj).first()
-        data_tag = TagDetailSerializer(q_tag).data if q_tag else {}
-        return dict(
-            auto=data_tag.get('auto', []),
-            confidence=data_tag.get('confidence', '')
-        )
+    def get_manual_label(self, obj):
+        tags = self.tag_values.get(str(obj.id), {})
+        return tags.get('manual', [])
 
     def get_annotations_results(self, task):
         return self._pretty_results(task, 'annotations_results')
