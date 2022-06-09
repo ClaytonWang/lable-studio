@@ -193,7 +193,9 @@ class DataManagerTaskSerializer(TaskSerializer):
 
     def __init__(self, *args, **kwargs):
         super(DataManagerTaskSerializer, self).__init__(*args, **kwargs)
-        self.task_ids = [item.id for item in self.instance]
+
+        self.task_ids = [item.id for item in self.instance] if isinstance(
+            self.instance, list) else [self.instance.id]
         query_values = TaskDbTag.objects.filter(
             task_id__in=self.task_ids).values(
            'id', 'task_id', 'auto', 'manual'
@@ -252,16 +254,16 @@ class DataManagerTaskSerializer(TaskSerializer):
     #     return tags.get('manual', [])
 
     def join_chart(self, label: list):
-        return [
+        return json.dumps([
             dict(
-                id=uuid.uuid1(),
+                id=str(uuid.uuid1()),
                 type="choices",
                 value=dict(choices=label),
                 origin="manual",
                 to_name="dialogue",
                 from_name="intent"
             )
-        ]
+        ])
 
     def get_annotations_results(self, task):
         tags = self.tag_values.get(str(task.id), {})
