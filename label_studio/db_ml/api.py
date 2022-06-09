@@ -46,7 +46,7 @@ def prediction(request):
             queue_name='pre_tags',
         )
         start_job_async_or_sync(job_predict, **data)
-    return Response(data=dict(msg='Submit success'))
+    return Response(data=dict(msg='Submit success', project_id=project_id))
 
 
 @api_view(['GET'])
@@ -55,7 +55,6 @@ def query_task(request):
     data = request.GET.dict()
     project_id = data.get('project_id')
     total_task = Task.objects.filter(project_id=project_id).count()
-
     pre_task = TaskDbTag.objects.filter(project_id=project_id).count()
     return Response(data=dict(
         total=total_task,
