@@ -1,6 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
 import os
+import uuid
 import ujson as json
 from django.db.models import Avg
 
@@ -180,8 +181,8 @@ class DataManagerTaskSerializer(TaskSerializer):
     predictions_model_versions = serializers.SerializerMethodField(required=False)
     avg_lead_time = serializers.FloatField(required=False)
     updated_by = serializers.SerializerMethodField(required=False, read_only=True)
-    auto_label = serializers.SerializerMethodField(required=False)
-    manual_label = serializers.SerializerMethodField(required=False)
+    # auto_label = serializers.SerializerMethodField(required=False)
+    # manual_label = serializers.SerializerMethodField(required=False)
 
     CHAR_LIMITS = 500
 
@@ -237,24 +238,42 @@ class DataManagerTaskSerializer(TaskSerializer):
 
         return output[:self.CHAR_LIMITS].replace(',"', ', "').replace('],[', "] [").replace('"', '')
 
-    def get_auto_label(self, obj):
-        """
-        # TODO 列表所有数据一次查出所有 task tag
-        :param obj:
-        :return:
-        """
-        tags = self.tag_values.get(str(obj.id), {})
-        return tags.get('auto', [])
+    # def get_auto_label(self, obj):
+    #     """
+    #     # TODO 列表所有数据一次查出所有 task tag
+    #     :param obj:
+    #     :return:
+    #     """
+    #     tags = self.tag_values.get(str(obj.id), {})
+    #     return tags.get('auto', [])
+    #
+    # def get_manual_label(self, obj):
+    #     tags = self.tag_values.get(str(obj.id), {})
+    #     return tags.get('manual', [])
 
-    def get_manual_label(self, obj):
-        tags = self.tag_values.get(str(obj.id), {})
-        return tags.get('manual', [])
+    def join_chart(self, label: list):
+        return [
+            dict(
+                id=uuid.uuid1(),
+                type="choices",
+                value=dict(choices=label),
+                origin="manual",
+                to_name="dialogue",
+                from_name="intent"
+            )
+        ]
 
     def get_annotations_results(self, task):
-        return self._pretty_results(task, 'annotations_results')
+        tags = self.tag_values.get(str(task.id), {})
+        label = tags.get('auto', [])
+        return self.join_chart(label)
+        # return self._pretty_results(task, 'annotations_results')
 
     def get_predictions_results(self, task):
-        return self._pretty_results(task, 'predictions_results')
+        tags = self.tag_values.get(str(task.id), {})
+        label = tags.get('manual', [])
+        return self.join_chart(label)
+        # return self._pretty_results(task, 'predictions_results')
 
     def get_annotations(self, task):
         return AnnotationSerializer(task.annotations, many=True, default=[], read_only=True).data
