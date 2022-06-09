@@ -415,7 +415,8 @@ def check_for_the_latest_version(print_message):
 
 
 # check version ASAP while package loading
-check_for_the_latest_version(print_message=True)
+# Turn off startup version check
+# check_for_the_latest_version(print_message=True)
 
 
 def collect_versions(force=False):

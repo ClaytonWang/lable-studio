@@ -12,6 +12,8 @@ from tasks.models import Task
 from tasks.serializers import TaskSerializer, AnnotationSerializer, PredictionSerializer, AnnotationDraftSerializer
 from projects.models import Project
 from label_studio.core.utils.common import round_floats
+from tasks.models import TaskDbTag
+from tasks.tag_serializers import TagDetailSerializer
 
 
 class FilterSerializer(serializers.ModelSerializer):
@@ -178,6 +180,7 @@ class DataManagerTaskSerializer(TaskSerializer):
     predictions_model_versions = serializers.SerializerMethodField(required=False)
     avg_lead_time = serializers.FloatField(required=False)
     updated_by = serializers.SerializerMethodField(required=False, read_only=True)
+    auto_tags = serializers.SerializerMethodField(required=False)
 
     CHAR_LIMITS = 500
 
@@ -217,6 +220,20 @@ class DataManagerTaskSerializer(TaskSerializer):
             output = json.dumps(result, ensure_ascii=False)[1:-1]  # remove brackets [ ]
 
         return output[:self.CHAR_LIMITS].replace(',"', ', "').replace('],[', "] [").replace('"', '')
+
+    def get_auto_tags(self, obj):
+        """
+        # TODO 列表所有数据一次查出所有 task tag
+        :param obj:
+        :return:
+        """
+
+        q_tag = TaskDbTag.objects.filter(task=obj).first()
+        data_tag = TagDetailSerializer(q_tag).data if q_tag else {}
+        return dict(
+            auto=data_tag.get('auto', []),
+            confidence=data_tag.get('confidence', '')
+        )
 
     def get_annotations_results(self, task):
         return self._pretty_results(task, 'annotations_results')
