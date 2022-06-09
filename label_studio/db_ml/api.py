@@ -35,6 +35,9 @@ def prediction(request):
     if not query:
         return Response(data=dict(msg='Invalid project id'))
 
+    if TaskDbTag.objects.filter(project_id=project_id).exists():
+        TaskDbTag.objects.filter(project_id=project_id).delete()
+
     for item in query:
         # TODO 多对话判断
         text = item.data.get('dialogue')[0].get('text')

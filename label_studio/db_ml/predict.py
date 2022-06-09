@@ -61,9 +61,6 @@ def job_predict(*args, **kwargs):
 
         task_id = kwargs.get('task_tag_id')
 
-        # TODO 异步锁 或是 事务
-        if TaskDbTag.objects.filter(task_id=task_id).exists():
-            TaskDbTag.objects.filter().delete()
         obj = TaskDbTag.objects.create(**tag_data)
         print('obj:', obj.tag_text, ' auto: ', res_text)
 
