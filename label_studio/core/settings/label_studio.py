@@ -21,7 +21,20 @@ SESSION_COOKIE_SECURE = False
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
-RQ_QUEUES = {}
+RQ_QUEUES = {
+    'default': {
+        'HOST': '124.71.161.146',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 18000,
+    },
+    'pre_tags': {
+        'HOST': '124.71.161.146',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 18000,
+    },
+}
 
 SENTRY_DSN = get_env(
     'SENTRY_DSN',
