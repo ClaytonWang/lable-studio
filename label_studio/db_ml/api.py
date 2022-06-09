@@ -52,7 +52,7 @@ def prediction(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def query_task(request):
-    data = request.data
+    data = request.GET.dict()
     project_id = data.get('project_id')
     total_task = Task.objects.filter(project_id=project_id).count()
 
@@ -60,5 +60,5 @@ def query_task(request):
     return Response(data=dict(
         total=total_task,
         finish=pre_task,
-        rate=round(pre_task/total_task, 2)
+        rate=round(pre_task/total_task, 2) if total_task > 0 else 0
     ))
