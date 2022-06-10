@@ -240,6 +240,12 @@ export const DataManagerPage = ({ ...props }) => {
         bare={true}
         allowClose={false}
         animateAppearance={false}
+        onHide={ 
+          async () => {
+            await dataManagerRef?.current?.store?.fetchProject({ force: true, interaction: 'refresh' });
+            await dataManagerRef?.current?.store?.currentView?.reload();
+          }
+        }
         style={{
           width: '150px',
           minWidth:'150px',

@@ -171,7 +171,6 @@ export class APIProxy {
           headers ?? {},
         );
 
-        console.log(body);
         const requestHeaders = new Headers(initialheaders);
 
         const requestParams = {
