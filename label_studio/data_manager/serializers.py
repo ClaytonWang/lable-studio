@@ -1,6 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
 import os
+import uuid
 import ujson as json
 from django.db.models import Avg
 
@@ -184,26 +185,22 @@ class DataManagerTaskSerializer(TaskSerializer):
     manual_label = serializers.SerializerMethodField(required=False)
 
     CHAR_LIMITS = 500
-
+    
     class Meta:
         model = Task
         ref_name = 'data_manager_task_serializer'
         fields = '__all__'
-
+    
     def __init__(self, *args, **kwargs):
         super(DataManagerTaskSerializer, self).__init__(*args, **kwargs)
-        self.task_ids = [item.id for item in self.instance]
-        query_values = TaskDbTag.objects.filter(
-            task_id__in=self.task_ids).values(
-           'id', 'task_id', 'auto', 'manual'
-        )
-        self.tag_values = dict()
-        for index, item in enumerate(query_values):
-            if item['auto'] is None:
-                item['auto'] = []
-            if item['manual'] is None:
-                item['manual'] = []
-            self.tag_values[str(item['task_id'])] = item
+        self.auto_label_val = ''
+        self.manual_label_val = ''
+
+    def get_auto_label(self, obj):
+        return self.auto_label_val
+
+    def get_manual_label(self, obj):
+        return self.manual_label_val
 
     def to_representation(self, obj):
         """ Dynamically manage including of some fields in the API result
@@ -237,19 +234,6 @@ class DataManagerTaskSerializer(TaskSerializer):
 
         return output[:self.CHAR_LIMITS].replace(',"', ', "').replace('],[', "] [").replace('"', '')
 
-    def get_auto_label(self, obj):
-        """
-        # TODO 列表所有数据一次查出所有 task tag
-        :param obj:
-        :return:
-        """
-        tags = self.tag_values.get(str(obj.id), {})
-        return tags.get('auto', [])
-
-    def get_manual_label(self, obj):
-        tags = self.tag_values.get(str(obj.id), {})
-        return tags.get('manual', [])
-
     def get_annotations_results(self, task):
         return self._pretty_results(task, 'annotations_results')
 
@@ -257,10 +241,39 @@ class DataManagerTaskSerializer(TaskSerializer):
         return self._pretty_results(task, 'predictions_results')
 
     def get_annotations(self, task):
-        return AnnotationSerializer(task.annotations, many=True, default=[], read_only=True).data
+        data = AnnotationSerializer(task.annotations, many=True, default=[], read_only=True).data
+        if not len(data):
+            return []
+
+        result = data[0].get('result', []) if len(data) else []
+        choices = []
+        for item in result:
+            tmp_choices = item.get('value', {}).get('choices', [])
+            if not tmp_choices:
+                continue
+            choices += tmp_choices
+        self.manual_label_val = ','.join(choices)
+        return data
 
     def get_predictions(self, task):
-        return PredictionSerializer(task.predictions, many=True, default=[], read_only=True).data
+        data = PredictionSerializer(task.predictions, many=True, default=[], read_only=True).data
+        if not len(data):
+            return []
+
+        result = data[0].get('result', []) if len(data) else []
+        pre_vals = [item.get('pre') for item in result if item.get('pre')]
+        self.auto_label_val = ','.join(pre_vals)
+        data[0]['result'] = [dict(
+                    id=str(uuid.uuid1()),
+                    type='choices',
+                    value={
+                        'choices': pre_vals
+                    },
+                    origin='manual',
+                    to_name='dialogue',
+                    from_name='intent'
+        )]
+        return data
 
     @staticmethod
     def get_file_upload(task):
