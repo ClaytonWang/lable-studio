@@ -61,11 +61,9 @@ def query_task(request):
     data = request.GET.dict()
     project_id = data.get('project_id')
 
-    tag_data = {'task_id': 1177, 'result': dict(value='否定'), 'score': 0.1488}
-    obj = Prediction.objects.create(**tag_data)
-
     query = Task.objects.filter(project_id=project_id)
     total_task = query.count()
+
     task_ids = [item.id for item in query]
     pre_task = Prediction.objects.filter(task_id__in=task_ids).count()
     return Response(data=dict(
