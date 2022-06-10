@@ -39,6 +39,7 @@ const initializeDataManager = async (root, props, params) => {
     toolbar: "actions columns filters ordering pre-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
     apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
+    // apiGateway: `http://124.71.161.146:8080/api/dm`,
     apiVersion: 2,
     project: params.project,
     polling: !window.APP_SETTINGS,
