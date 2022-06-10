@@ -20,6 +20,7 @@ from core.redis import start_job_async_or_sync
 from db_ml.predict import job_predict
 from tasks.models import Task
 from tasks.models import TaskDbTag
+from tasks.models import Prediction
 
 
 @api_view(['POST'])
@@ -35,12 +36,17 @@ def prediction(request):
     if not query:
         return Response(data=dict(msg='Invalid project id'))
 
+    task_ids = [item.id for item in query]
+    if Prediction.objects.filter(task_id__in=task_ids).exists():
+        Prediction.objects.filter(task_id__in=task_ids).delete()
+
     for item in query:
         # TODO 多对话判断
         text = item.data.get('dialogue')[0].get('text')
         data = dict(
             text=text,
             project_id=project_id,
+            task_id=item.id,
             task_tag_id=item.id,
             user_id=request.user.id,
             queue_name='pre_tags',
@@ -54,8 +60,14 @@ def prediction(request):
 def query_task(request):
     data = request.GET.dict()
     project_id = data.get('project_id')
-    total_task = Task.objects.filter(project_id=project_id).count()
-    pre_task = TaskDbTag.objects.filter(project_id=project_id).count()
+
+    tag_data = {'task_id': 1177, 'result': dict(value='否定'), 'score': 0.1488}
+    obj = Prediction.objects.create(**tag_data)
+
+    query = Task.objects.filter(project_id=project_id)
+    total_task = query.count()
+    task_ids = [item.id for item in query]
+    pre_task = Prediction.objects.filter(task_id__in=task_ids).count()
     return Response(data=dict(
         total=total_task,
         finish=pre_task,

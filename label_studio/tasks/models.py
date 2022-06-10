@@ -525,8 +525,8 @@ class Prediction(models.Model):
         self.task.save(update_fields=update_fields)
 
     def save(self, *args, **kwargs):
-        # "result" data can come in different forms - normalize them to JSON
-        self.result = self.prepare_prediction_result(self.result, self.task.project)
+        # # "result" data can come in different forms - normalize them to JSON
+        # self.result = self.prepare_prediction_result(self.result, self.task.project)
         # set updated_at field of task to now()
         self.update_task()
         return super(Prediction, self).save(*args, **kwargs)
