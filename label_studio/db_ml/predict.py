@@ -53,7 +53,7 @@ def job_predict(*args, **kwargs):
         tag_data = dict(
             # project_id=kwargs.get('project_id'),
             task=task,
-            result=dict(pre=res_text, source=text),
+            result=[dict(pre=res_text, source=text)],
             score=round(confidence, 4),
 
         )
