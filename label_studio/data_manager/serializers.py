@@ -181,8 +181,8 @@ class DataManagerTaskSerializer(TaskSerializer):
     predictions_model_versions = serializers.SerializerMethodField(required=False)
     avg_lead_time = serializers.FloatField(required=False)
     updated_by = serializers.SerializerMethodField(required=False, read_only=True)
-    # auto_label = serializers.SerializerMethodField(required=False)
-    # manual_label = serializers.SerializerMethodField(required=False)
+    auto_label = serializers.SerializerMethodField(required=False)
+    manual_label = serializers.SerializerMethodField(required=False)
 
     CHAR_LIMITS = 500
 
@@ -190,23 +190,6 @@ class DataManagerTaskSerializer(TaskSerializer):
         model = Task
         ref_name = 'data_manager_task_serializer'
         fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super(DataManagerTaskSerializer, self).__init__(*args, **kwargs)
-
-        self.task_ids = [item.id for item in self.instance] if isinstance(
-            self.instance, list) else [self.instance.id]
-        query_values = TaskDbTag.objects.filter(
-            task_id__in=self.task_ids).values(
-           'id', 'task_id', 'auto', 'manual'
-        )
-        self.tag_values = dict()
-        for index, item in enumerate(query_values):
-            if item['auto'] is None:
-                item['auto'] = []
-            if item['manual'] is None:
-                item['manual'] = []
-            self.tag_values[str(item['task_id'])] = item
 
     def to_representation(self, obj):
         """ Dynamically manage including of some fields in the API result
@@ -240,42 +223,26 @@ class DataManagerTaskSerializer(TaskSerializer):
 
         return output[:self.CHAR_LIMITS].replace(',"', ', "').replace('],[', "] [").replace('"', '')
 
-    # def get_auto_label(self, obj):
-    #     """
-    #     # TODO 列表所有数据一次查出所有 task tag
-    #     :param obj:
-    #     :return:
-    #     """
-    #     tags = self.tag_values.get(str(obj.id), {})
-    #     return tags.get('auto', [])
-    #
-    # def get_manual_label(self, obj):
-    #     tags = self.tag_values.get(str(obj.id), {})
-    #     return tags.get('manual', [])
+    def get_auto_label(self, obj):
+        """
+        # TODO 列表所有数据一次查出所有 task tag
+        :param obj:
+        :return:
+        """
+        return ''
+        # tags = self.tag_values.get(str(obj.id), {})
+        # return ','.join(tags.get('auto', []))
 
-    def join_chart(self, label: list):
-        return json.dumps([
-            dict(
-                id=str(uuid.uuid1()),
-                type="choices",
-                value=dict(choices=label),
-                origin="manual",
-                to_name="dialogue",
-                from_name="intent"
-            )
-        ])
+    def get_manual_label(self, obj):
+        return ''
+        # tags = self.tag_values.get(str(obj.id), {})
+        # return ','.join(tags.get('manual', []))
 
     def get_annotations_results(self, task):
-        tags = self.tag_values.get(str(task.id), {})
-        label = tags.get('auto', [])
-        return self.join_chart(label)
-        # return self._pretty_results(task, 'annotations_results')
+        return self._pretty_results(task, 'annotations_results')
 
     def get_predictions_results(self, task):
-        tags = self.tag_values.get(str(task.id), {})
-        label = tags.get('manual', [])
-        return self.join_chart(label)
-        # return self._pretty_results(task, 'predictions_results')
+        return self._pretty_results(task, 'predictions_results')
 
     def get_annotations(self, task):
         return AnnotationSerializer(task.annotations, many=True, default=[], read_only=True).data

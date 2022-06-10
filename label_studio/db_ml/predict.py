@@ -8,7 +8,7 @@ import torch
 import pandas as pd
 import torch.nn as nn
 from transformers import BartForSequenceClassification, BertTokenizer
-from tasks.models import TaskDbTag
+from tasks.models import TaskDbTag, Prediction, Task
 
 
 class Predictor:
@@ -46,23 +46,28 @@ def job_predict(*args, **kwargs):
         model_path, label_file=label_file_path, device='cpu'
     )
     text = kwargs.get('text')
-    if text:
+    task_id = kwargs.get('task_id')
+    task = Task.objects.filter(id=task_id).first()
+    if text and task:
         res_text, confidence = predictor.predict(text)
         tag_data = dict(
-            project_id=kwargs.get('project_id'),
-            task_id=kwargs.get('task_tag_id'),
-            tag_text=text,
-            auto=[res_text],
-            confidence=round(confidence, 4),
+            # project_id=kwargs.get('project_id'),
+            task=task,
+            result=dict(pre=res_text, source=text),
+            score=round(confidence, 4),
+
         )
-        user_id = kwargs.get('user_id')
-        if user_id:
-            tag_data['created_by_id'] = user_id
-
-        task_id = kwargs.get('task_tag_id')
-
-        obj = TaskDbTag.objects.create(**tag_data)
-        print('obj:', obj.tag_text, ' auto: ', res_text)
+        # user_id = kwargs.get('user_id')
+        # if user_id:
+        #     tag_data['created_by_id'] = user_id
+        # task_id = kwargs.get('task_tag_id')
+        # obj = TaskDbTag.objects.create(**tag_data)
+        print('results: ....', tag_data)
+        obj = Prediction.objects.create(**tag_data)
+        print('obj:', obj.id, ' auto: ', res_text)
+    else:
+        print(f'Text or task id invalid. Input data: task id [{task_id}], '
+              f'text [{text}]')
 
 
 if __name__ == '__main__':
