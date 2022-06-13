@@ -1,6 +1,7 @@
 
 export const API_CONFIG = {
   gateway: `${window.APP_SETTINGS.hostname}/api`,
+  // gateway: `http://124.71.161.146:8080/api`,
   endpoints: {
     // Users
     users: "/users",
@@ -51,6 +52,8 @@ export const API_CONFIG = {
     predictWithML: "POST:/ml/:pk/predict",
     modelVersions: "/projects/:pk/model-versions",
     mlInteractive: "POST:/ml/:pk/interactive-annotating",
+    mlPreLabelProgress: "GET:/dbml/query_task",
+    mlPredictProcess:'POST:/dbml/predict',
 
     // Export
     export: "/projects/:pk/export",

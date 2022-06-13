@@ -20,14 +20,14 @@ const SENTRY = {
   ORG: process.env.SENTRY_ORG,
   PROJECT: process.env.SENTRY_PROJECT,
   RELEASE,
-}
+};
 
 const devtool = process.env.NODE_ENV === 'production' ? "source-map" : "cheap-module-source-map";
 
 const output = {
   path: path.resolve(__dirname, "dist", "react-app"),
   filename: 'index.js',
-  hashFunction: "sha256"
+  hashFunction: "sha256",
 };
 
 const plugins = [
@@ -58,16 +58,16 @@ if (process.env.BUILD_SENTRY && SENTRY.AUTH_TOKEN && SENTRY.RELEASE) {
     ignore: ["node_modules", "webpack.config.js"],
     deploy: {
       env: process.env.NODE_ENV,
-    }
-  }))
+    },
+  }));
 }
 
 module.exports = {
-  devtool: devtool,
+  devtool,
   mode: process.env.NODE_ENV || "development",
   entry: "./src/index.js",
-  output: output,
-  plugins: plugins,
+  output,
+  plugins,
   optimization: optimizer,
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
@@ -118,6 +118,18 @@ module.exports = {
                   path.resolve(__dirname, './src/themes/default/colors.styl'),
                 ],
               },
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(webm|mov|gif)$/i,
+        use: [
+          {
+            loader: require.resolve("url-loader"),
+            options: {
+              limit: 200000,
+              encoding: "base64",
             },
           },
         ],
