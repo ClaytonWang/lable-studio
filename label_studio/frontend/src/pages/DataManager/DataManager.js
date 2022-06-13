@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { createRef, useCallback, useEffect, useRef,useState } from 'react';
 import { generatePath, useHistory } from 'react-router';
 import { NavLink } from 'react-router-dom';
-import { Spinner } from '../../components';
+import { Loading } from '../../components';
 import { Button } from '../../components/Button/Button';
-import { modal } from '../../components/Modal/Modal';
+import { modal,Modal } from '../../components/Modal/Modal';
 import { Space } from '../../components/Space/Space';
 import { useAPI } from '../../providers/ApiProvider';
 import { useLibrary } from '../../providers/LibraryProvider';
@@ -15,15 +15,34 @@ import { isDefined } from '../../utils/helpers';
 import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
+import { Progress } from 'antd';
 import "./DataManager.styl";
 
-const onPreButtonClick = (e) => {
-  const btn = e.target ?? null;
+const refModal = createRef();
+const onPreButtonClick = (e,params) => {
+  const mlQueryProgress = params.mlQueryProgress;
+  const setProgress = params.setProgress;
+  const mlPredictProcess = params.mlPredictProcess;
 
-  if (btn && !btn.disabled) {
-    btn.disabled = true;
-    btn.textContent='预标注中...';
-  }
+  mlPredictProcess();
+  
+  let progress = 0,count=0;
+
+  refModal.current?.show();
+  let t = setInterval(() => { 
+    count = count + 1;
+    mlQueryProgress().then((rst) => {
+      progress = rst.rate * 100;
+      setProgress(progress);
+  
+      if (progress >= 100 || (progress === 0 && count > 11)) {
+        clearInterval(t);
+        setProgress(0);
+        try { refModal.current?.hide(); } catch (e) { console.log(e); }
+        return;
+      }
+    });
+  },1000);
 };
 
 const initializeDataManager = async (root, props, params) => {
@@ -36,7 +55,7 @@ const initializeDataManager = async (root, props, params) => {
 
   const dmConfig = {
     root,
-    toolbar: "actions columns filters ordering pre-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
+    toolbar: "actions columns filters ordering wash-button pre-button pre-prom-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
     apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
     // apiGateway: `http://124.71.161.146:8080/api/dm`,
@@ -45,6 +64,9 @@ const initializeDataManager = async (root, props, params) => {
     polling: !window.APP_SETTINGS,
     showPreviews: true,
     apiEndpoints: APIConfig.endpoints,
+    // apiHeaders: {
+    //   Authorization: `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
+    // },
     interfaces: {
       backButton: false,
       labelingHeader: false,
@@ -56,8 +78,14 @@ const initializeDataManager = async (root, props, params) => {
       keymap: window.APP_SETTINGS.editor_keymap,
     },
     instruments: {
+      'wash-button': () => {
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={() => { }} >清洗</button>;
+      },
       'pre-button': () => {
-        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e);}} >预标注(普通)</button>;
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(普通)</button>;
+      },
+      'pre-prom-button': () => {
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(提示学习)</button>;
       },
     },
     ...props,
@@ -81,8 +109,23 @@ export const DataManagerPage = ({ ...props }) => {
   const DataManager = useLibrary('dm');
   const setContextProps = useContextProps();
   const [crashed, setCrashed] = useState(false);
+  const [progress, setProgress] = useState(0);
   const dataManagerRef = useRef();
   const projectId = project?.id;
+  
+  const mlPredictProcess = useCallback(async () => { 
+    return await api.callApi('mlPredictProcess', {
+      body: {
+        project_id: project.id,
+      },
+    });
+  }, [project]);
+  
+  const mlQueryProgress = useCallback(async () => { 
+    return await api.callApi('mlPreLabelProgress', {
+      params: { project_id: project.id },
+    });
+  }, [project]);
 
   const init = useCallback(async () => {
     if (!LabelStudio) return;
@@ -94,7 +137,6 @@ export const DataManagerPage = ({ ...props }) => {
     const mlBackends = await api.callApi("mlBackends", {
       params: { project: project.id },
     });
-
     const interactiveBacked = (mlBackends ?? []).find(({ is_interactive }) => is_interactive);
 
     const dataManager = (dataManagerRef.current = dataManagerRef.current ?? await initializeDataManager(
@@ -104,6 +146,9 @@ export const DataManagerPage = ({ ...props }) => {
         ...params,
         project,
         autoAnnotation: isDefined(interactiveBacked),
+        setProgress,
+        mlQueryProgress,
+        mlPredictProcess,
       },
     ));
 
@@ -167,7 +212,6 @@ export const DataManagerPage = ({ ...props }) => {
     return () => destroyDM();
   }, [root, init]);
 
-
   if (!DataManager || !LabelStudio) {
     return (
       <div style={{
@@ -178,7 +222,7 @@ export const DataManagerPage = ({ ...props }) => {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-        <Spinner size={64}/>
+        <Loading size={64}/>
       </div>
     );
   }
@@ -192,7 +236,29 @@ export const DataManagerPage = ({ ...props }) => {
       </Button>
     </Block>
   ) : (
-    <Block ref={root} name="datamanager"/>
+    <>
+      <Modal
+        ref={refModal}
+        bare={true}
+        allowClose={false}
+        animateAppearance={false}
+        onHide={ 
+          async () => {
+            await dataManagerRef?.current?.store?.fetchProject({ force: true, interaction: 'refresh' });
+            await dataManagerRef?.current?.store?.currentView?.reload();
+          }
+        }
+        style={{
+          width: '150px',
+          minWidth:'150px',
+          background: 'transparent',
+          boxShadow: 'none' }}
+      >
+        <Progress type="circle" percent={progress} format={percent => `标注中${percent.toFixed(0)}%`}  />
+      </Modal>
+      <Block ref={root} name="datamanager"/>
+    </>
+    
   );
 };
 
@@ -226,7 +292,7 @@ DataManagerPage.context = ({ dmRef }) => {
       addCrumb({
         key: "dm-crumb",
         // title: "Labeling",
-        title:"对话-意图分类",
+        title:"(对话-意图分类)",
       });
     }
   };
