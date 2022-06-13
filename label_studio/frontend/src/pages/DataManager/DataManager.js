@@ -1,4 +1,3 @@
-import { t } from 'i18next';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { generatePath, useHistory } from 'react-router';
 import { NavLink } from 'react-router-dom';

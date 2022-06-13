@@ -1,4 +1,3 @@
-import { t } from 'i18next';
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StaticContent } from '../../app/StaticContent/StaticContent';
 import { IconBook, IconFolder, IconPersonInCircle, IconPin, IconTerminal, LsDoor, LsGitHub, LsSettings, LsSlack } from '../../assets/icons';
