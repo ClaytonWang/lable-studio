@@ -58,16 +58,16 @@ const initializeDataManager = async (root, props, params) => {
     root,
     toolbar: "actions columns filters ordering wash-button pre-button pre-prom-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
-    // apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
-    apiGateway: `http://124.71.161.146:8080/api/dm`,
+    apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
+    // apiGateway: `http://124.71.161.146:8080/api/dm`,
     apiVersion: 2,
     project: params.project,
     polling: !window.APP_SETTINGS,
     showPreviews: true,
     apiEndpoints: APIConfig.endpoints,
-    apiHeaders: {
-      Authorization: `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
-    },
+    // apiHeaders: {
+    //   Authorization: `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
+    // },
     interfaces: {
       backButton: false,
       labelingHeader: false,
@@ -293,7 +293,7 @@ DataManagerPage.context = ({ dmRef }) => {
       addCrumb({
         key: "dm-crumb",
         // title: "Labeling",
-        title:"对话-意图分类",
+        title:"(对话-意图分类)",
       });
     }
   };
