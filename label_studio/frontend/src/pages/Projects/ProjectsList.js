@@ -18,7 +18,7 @@ export const ProjectsList = ({ projects, currentPage, totalItems, loadNextPage, 
       <Elem name="pages">
         <Pagination
           name="projects-list"
-          label="Projects"
+          label={t("projects")}
           page={currentPage}
           totalItems={totalItems}
           urlParamName="page"

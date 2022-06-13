@@ -174,14 +174,14 @@ export const Menubar = ({
             >
               <Menu>
                 <Menu.Item
-                  label="Projects"
+                  label={t("projects", "Projects")}
                   to="/projects"
                   icon={<IconFolder/>}
                   data-external
                   exact
                 />
                 <Menu.Item
-                  label="Organization"
+                  label={t("organization", "Organization")}
                   to="/organization"
                   icon={<IconPersonInCircle/>}
                   data-external

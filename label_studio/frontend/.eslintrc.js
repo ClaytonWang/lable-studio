@@ -7,6 +7,7 @@ module.exports = {
     process: true,
     __dirname: true,
     APP_SETTINGS: true,
+    t: true,
   },
   extends: [
     "eslint:recommended",

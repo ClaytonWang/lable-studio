@@ -1,10 +1,28 @@
-import './app/App';
+import i18next from 'i18next';
+import resourcesToBackend from 'i18next-resources-to-backend';
 
-// 多语言处理
-(() => {
-  if (typeof window.t !== 'function') {
-    window.t = (key, defaultMessage) => {
-      return defaultMessage || key || 'T';
-    };
-  }
-})();
+// 多语言
+const initI18n = async () => {
+  // 全局变量注册
+  window.i18next = i18next;
+  window.t = i18next.t;
+  // 多语言初始化
+  await i18next
+    .use(resourcesToBackend((language, namespace, callback) => {
+      import(`./i18n/${language}/${namespace}.json`)
+        .then((resources) => {
+          callback(null, resources);
+        })
+        .catch((error) => {
+          callback(error, null);
+        });
+    }))
+    .init({
+      lng: 'zh-CN',
+      debug: true,
+    });
+};
+
+initI18n().then(() => {
+  import('./app/App');
+});

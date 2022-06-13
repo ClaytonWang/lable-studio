@@ -19,7 +19,7 @@
     "build:lsf": "cd $LSF_DIR && NODE_ENV=production npm run build:module",
     "build:dm": "cd $DM_DIR && npm run build:module",
     "build:all": "node bin/buildAll.js",
-    "i18n:extract": "i18next-scanner --config ./bin/i18next-scanner.config.js"
+    "i18n:extract": "i18next-scanner"
   },
   "keywords": [],
   "browser": {},
@@ -165,6 +165,8 @@
     "browserContext": "default"
   },
   "dependencies": {
+    "i18next": "^21.8.9",
+    "i18next-resources-to-backend": "^1.0.0",
     "lodash.clonedeep": "^4.5.0"
   }
 }
