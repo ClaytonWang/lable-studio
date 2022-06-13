@@ -305,13 +305,14 @@ export class APIProxy {
       case "DELETE": {
         return {
           "Content-Type": "application/json",
-          'Authorization': `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
+          // 'Authorization': `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
         };
       }
       default:
-        return {
-          'Authorization': `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
-        };
+        return {};
+        // return {
+        //   'Authorization': `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
+        // };
     }
   }
 
