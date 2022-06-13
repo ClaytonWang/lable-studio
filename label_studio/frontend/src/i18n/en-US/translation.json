@@ -1,5 +1,24 @@
 {
-  "projects": "Projects",
-  "organization": "Organization",
-  "created_projects": "Created Projects"
+  "Projects": "Projects",
+  "Organization": "Organization",
+  "Created Projects": "Created Projects",
+  "Settings": "Settings",
+  "Default": "Default",
+  "Account & Settings": "Account & Settings",
+  "Log Out": "Log Out",
+  "New Tab": "New Tab",
+  "Tasks": "Tasks",
+  "Annotations": "Annotations",
+  "Predictions": "Predictions",
+  "Filters": "Filters",
+  "Columns": "Columns",
+  "Import": "Import",
+  "Export": "Export",
+  "Order": "Order",
+  "not set": "not set",
+  "List": "List",
+  "Grid": "Grid",
+  "per page": "per page",
+  "Submit": "Submit",
+  "Update": "Update"
 }

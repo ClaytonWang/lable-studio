@@ -83,7 +83,7 @@ export const ProjectsPage = () => {
   );
 };
 
-ProjectsPage.title = t("projects");
+ProjectsPage.title = t("Projects");
 ProjectsPage.path = "/projects";
 ProjectsPage.exact = true;
 ProjectsPage.routes = ({ store }) => [

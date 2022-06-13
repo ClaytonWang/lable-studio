@@ -18,7 +18,7 @@ export const ProjectsList = ({ projects, currentPage, totalItems, loadNextPage, 
       <Elem name="pages">
         <Pagination
           name="projects-list"
-          label={t("projects")}
+          label={t("Projects")}
           page={currentPage}
           totalItems={totalItems}
           urlParamName="page"
@@ -69,7 +69,7 @@ const ProjectCard = ({ project }) => {
             }}>
               <Dropdown.Trigger content={(
                 <Menu>
-                  <Menu.Item href={`/projects/${project.id}/settings`}>Settings</Menu.Item>
+                  <Menu.Item href={`/projects/${project.id}/settings`}>{t("Settings")}</Menu.Item>
                   <Menu.Item href={`/projects/${project.id}/data?labeling=1`}>Label</Menu.Item>
                 </Menu>
               )}>

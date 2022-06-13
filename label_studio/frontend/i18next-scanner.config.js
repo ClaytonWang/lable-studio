@@ -1,8 +1,8 @@
 const path = require("path");
 
 Object.assign(process.env, {
-  LSF_DIR: path.join(__dirname, "../../../../label-studio-frontend"),
-  DM_DIR: path.join(__dirname, "../../../../dm2"),
+  LSF_DIR: path.join(__dirname, "../../../label-studio-frontend"),
+  DM_DIR: path.join(__dirname, "../../../dm2"),
 });
 require("dotenv").config({
   override: true,
@@ -20,8 +20,8 @@ module.exports = {
   options: {
     debug: true,
     func: {
-      list: ["t"],
-      extensions: [".js", ".jsx"],
+      list: ["t", "window.t"],
+      extensions: [".js", ".jsx", ".tsx", ".ts"],
     },
     lngs: ["zh-CN", "en-US"],
     defaultLng: "en-US",
@@ -31,5 +31,8 @@ module.exports = {
       jsonIndent: 2,
       lineEnding: "\n",
     },
+    defaultValue: (lng, ng, key, params) => {
+      return params?.defaultValue || key;
+    }
   },
 };

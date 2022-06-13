@@ -45,7 +45,7 @@ export const SelectedUser = ({ user, onClose }) => {
 
       {!!user.created_projects.length && (
         <Elem name="section">
-          <Elem name="section-title">{t("created_projects", "Created Projects")}</Elem>
+          <Elem name="section-title">{t("Created Projects")}</Elem>
 
           <UserProjectsLinks projects={user.created_projects}/>
         </Elem>

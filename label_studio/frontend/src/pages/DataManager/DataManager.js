@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { generatePath, useHistory } from 'react-router';
 import { NavLink } from 'react-router-dom';
@@ -191,7 +192,7 @@ DataManagerPage.context = ({ dmRef }) => {
   const [mode, setMode] = useState(dmRef?.mode ?? "explorer");
 
   const links = {
-    '/settings': 'Settings',
+    '/settings': t("Settings"),
   };
 
   const updateCrumbs = (currentMode) => {

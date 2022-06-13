@@ -1,3 +1,4 @@
+import { t } from 'i18next';
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StaticContent } from '../../app/StaticContent/StaticContent';
 import { IconBook, IconFolder, IconPersonInCircle, IconPin, IconTerminal, LsDoor, LsGitHub, LsSettings, LsSlack } from '../../assets/icons';
@@ -141,14 +142,14 @@ export const Menubar = ({
             <Menu>
               <Menu.Item
                 icon={<LsSettings/>}
-                label="Account & Settings"
+                label={t("Account & Settings")}
                 href="/user/account"
                 data-external
               />
               {/* <Menu.Item label="Dark Mode"/> */}
               <Menu.Item
                 icon={<LsDoor/>}
-                label="Log Out"
+                label={t("Log Out")}
                 href={absoluteURL("/logout")}
                 data-external
               />
@@ -174,14 +175,14 @@ export const Menubar = ({
             >
               <Menu>
                 <Menu.Item
-                  label={t("projects", "Projects")}
+                  label={t("Projects")}
                   to="/projects"
                   icon={<IconFolder/>}
                   data-external
                   exact
                 />
                 <Menu.Item
-                  label={t("organization", "Organization")}
+                  label={t("Organization")}
                   to="/organization"
                   icon={<IconPersonInCircle/>}
                   data-external

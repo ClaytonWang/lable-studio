@@ -1,5 +1,24 @@
 {
-  "projects": "项目",
-  "organization": "组织",
-  "created_projects": "已创建项目"
+  "Projects": "项目",
+  "Organization": "组织",
+  "Created Projects": "已创建项目",
+  "Settings": "设置",
+  "Default": "默认",
+  "Account & Settings": "账户和设置",
+  "Log Out": "登出",
+  "New Tab": "新标签页",
+  "Tasks": "任务",
+  "Annotations": "注释",
+  "Predictions": "预测",
+  "Filters": "筛选",
+  "Columns": "字段",
+  "Import": "导入",
+  "Export": "导出",
+  "Order": "排序",
+  "not set": "未设置",
+  "List": "列表",
+  "Grid": "矩阵",
+  "per page": "每页",
+  "Submit": "提交",
+  "Update": "更新"
 }
