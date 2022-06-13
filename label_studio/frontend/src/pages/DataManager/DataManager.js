@@ -43,7 +43,6 @@ const onPreButtonClick = (e,params) => {
       }
     });
   },1000);
-
 };
 
 const initializeDataManager = async (root, props, params) => {
@@ -80,7 +79,7 @@ const initializeDataManager = async (root, props, params) => {
     },
     instruments: {
       'wash-button': () => {
-        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={() => { params.setProgress(30);}} >清洗</button>;
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={() => { }} >清洗</button>;
       },
       'pre-button': () => {
         return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(普通)</button>;
