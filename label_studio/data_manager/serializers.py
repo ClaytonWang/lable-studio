@@ -240,18 +240,28 @@ class DataManagerTaskSerializer(TaskSerializer):
     def get_predictions_results(self, task):
         return self._pretty_results(task, 'predictions_results')
 
-    def get_annotations(self, task):
-        data = AnnotationSerializer(task.annotations, many=True, default=[], read_only=True).data
-        if not len(data):
-            return []
-
-        result = data[0].get('result', []) if len(data) else []
+    @staticmethod
+    def get_choice_values(result):
+        """
+        [{'type': 'choices', 'value': {'end': 1, 'start': 0, 'choices': ['肯定']}, 'to_name': 'dialogue', 'from_name': 'intent'}]
+        :param result:
+        :return:
+        """
         choices = []
         for item in result:
             tmp_choices = item.get('value', {}).get('choices', [])
             if not tmp_choices:
                 continue
             choices += tmp_choices
+        return choices
+
+    def get_annotations(self, task):
+        data = AnnotationSerializer(task.annotations, many=True, default=[], read_only=True).data
+        if not len(data):
+            return []
+
+        result = data[0].get('result', []) if len(data) else []
+        choices = self.get_choice_values(result)
         self.manual_label_val = ','.join(choices)
         return data
 
@@ -261,18 +271,8 @@ class DataManagerTaskSerializer(TaskSerializer):
             return []
 
         result = data[0].get('result', []) if len(data) else []
-        pre_vals = [item.get('pre') for item in result if item.get('pre')]
-        self.auto_label_val = ','.join(pre_vals)
-        data[0]['result'] = [dict(
-                    id=str(uuid.uuid1()),
-                    type='choices',
-                    value={
-                        'choices': pre_vals
-                    },
-                    origin='manual',
-                    to_name='dialogue',
-                    from_name='intent'
-        )]
+        pre_choices = self.get_choice_values(result)
+        self.auto_label_val = ','.join(pre_choices)
         return data
 
     @staticmethod

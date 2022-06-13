@@ -50,10 +50,19 @@ def job_predict(*args, **kwargs):
     task = Task.objects.filter(id=task_id).first()
     if text and task:
         res_text, confidence = predictor.predict(text)
+        # label-studio数据结构
+        pre_result = {
+            'from_name': 'intent',
+            'to_name': 'dialogue',
+            'type': 'choices',
+            'value': {
+                'choices': [res_text], 'start': 0, 'end': 1
+            },
+        }
         tag_data = dict(
             # project_id=kwargs.get('project_id'),
             task=task,
-            result=[dict(pre=res_text, source=text)],
+            result=[pre_result],
             score=round(confidence, 4),
 
         )
