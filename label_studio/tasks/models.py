@@ -293,6 +293,8 @@ class TaskDbTag(models.Model):
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_tag', on_delete=models.SET_NULL, null=True, verbose_name=_('updated by'), help_text='Last annotator or reviewer who updated this task')
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_tag', on_delete=models.SET_NULL, null=True,)
 
+    def has_permission(self, user):
+        return self.task.project.has_permission(user)
 
 pre_bulk_create = Signal(providing_args=["objs", "batch_size"])
 post_bulk_create = Signal(providing_args=["objs", "batch_size"])
@@ -523,8 +525,8 @@ class Prediction(models.Model):
         self.task.save(update_fields=update_fields)
 
     def save(self, *args, **kwargs):
-        # "result" data can come in different forms - normalize them to JSON
-        self.result = self.prepare_prediction_result(self.result, self.task.project)
+        # # "result" data can come in different forms - normalize them to JSON
+        # self.result = self.prepare_prediction_result(self.result, self.task.project)
         # set updated_at field of task to now()
         self.update_task()
         return super(Prediction, self).save(*args, **kwargs)

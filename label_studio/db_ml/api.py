@@ -20,6 +20,7 @@ from core.redis import start_job_async_or_sync
 from db_ml.predict import job_predict
 from tasks.models import Task
 from tasks.models import TaskDbTag
+from tasks.models import Prediction
 
 
 @api_view(['POST'])
@@ -35,30 +36,38 @@ def prediction(request):
     if not query:
         return Response(data=dict(msg='Invalid project id'))
 
+    task_ids = [item.id for item in query]
+    if Prediction.objects.filter(task_id__in=task_ids).exists():
+        Prediction.objects.filter(task_id__in=task_ids).delete()
+
     for item in query:
         # TODO 多对话判断
         text = item.data.get('dialogue')[0].get('text')
         data = dict(
             text=text,
             project_id=project_id,
+            task_id=item.id,
             task_tag_id=item.id,
             user_id=request.user.id,
             queue_name='pre_tags',
         )
         start_job_async_or_sync(job_predict, **data)
-    return Response(data=dict(msg='Submit success'))
+    return Response(data=dict(msg='Submit success', project_id=project_id))
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def query_task(request):
-    data = request.data
+    data = request.GET.dict()
     project_id = data.get('project_id')
-    total_task = Task.objects.filter(project_id=project_id).count()
 
-    pre_task = TaskDbTag.objects.filter(project_id=project_id).count()
+    query = Task.objects.filter(project_id=project_id)
+    total_task = query.count()
+
+    task_ids = [item.id for item in query]
+    pre_task = Prediction.objects.filter(task_id__in=task_ids).count()
     return Response(data=dict(
         total=total_task,
         finish=pre_task,
-        rate=round(pre_task/total_task, 2)
+        rate=round(pre_task/total_task, 2) if total_task > 0 else 0
     ))

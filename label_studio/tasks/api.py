@@ -180,6 +180,10 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
 
         serializer = self.get_serializer_class()(self.task, many=False, context=context)
         data = serializer.data
+        if 'auto_label' in data:
+            data.pop('auto_label')
+        if 'manual_label' in data:
+            data.pop('manual_label')
         return Response(data)
 
     def get_queryset(self):
