@@ -164,6 +164,7 @@
     "browserContext": "default"
   },
   "dependencies": {
-    "lodash.clonedeep": "^4.5.0"
+    "lodash.clonedeep": "^4.5.0",
+    "url-loader": "^4.1.1"
   }
 }

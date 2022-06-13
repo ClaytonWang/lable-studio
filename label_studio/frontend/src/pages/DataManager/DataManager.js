@@ -1,7 +1,7 @@
 import { createRef, useCallback, useEffect, useRef,useState } from 'react';
 import { generatePath, useHistory } from 'react-router';
 import { NavLink } from 'react-router-dom';
-import { Spinner } from '../../components';
+import { Loading } from '../../components';
 import { Button } from '../../components/Button/Button';
 import { modal,Modal } from '../../components/Modal/Modal';
 import { Space } from '../../components/Space/Space';
@@ -56,10 +56,10 @@ const initializeDataManager = async (root, props, params) => {
 
   const dmConfig = {
     root,
-    toolbar: "actions columns filters ordering pre-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
+    toolbar: "actions columns filters ordering wash-button pre-button pre-prom-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
-    apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
-    // apiGateway: `http://124.71.161.146:8080/api/dm`,
+    // apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
+    apiGateway: `http://124.71.161.146:8080/api/dm`,
     apiVersion: 2,
     project: params.project,
     polling: !window.APP_SETTINGS,
@@ -84,6 +84,9 @@ const initializeDataManager = async (root, props, params) => {
       },
       'pre-button': () => {
         return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(普通)</button>;
+      },
+      'pre-prom-button': () => {
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(提示学习)</button>;
       },
     },
     ...props,
@@ -220,7 +223,7 @@ export const DataManagerPage = ({ ...props }) => {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-        <Spinner size={64}/>
+        <Loading size={64}/>
       </div>
     );
   }

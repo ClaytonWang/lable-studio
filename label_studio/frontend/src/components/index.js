@@ -9,6 +9,7 @@ export { Menu } from "./Menu/Menu";
 export { Menubar } from "./Menubar/Menubar";
 export { SidebarMenu } from "./SidebarMenu/SidebarMenu";
 export { Spinner } from "./Spinner/Spinner";
+export { Loading } from "./Loading/Loading";
 export { ToggleItems } from "./ToggleItems/ToggleItems";
 export { Userpic } from "./Userpic/Userpic";
 export { VersionNotifier } from "./VersionNotifier/VersionNotifier";
