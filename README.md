@@ -4,6 +4,10 @@
 
 [Website](https://labelstud.io/) • [Docs](https://labelstud.io/guide/) • [Twitter](https://twitter.com/heartexlabs) • [Join Slack Community <img src="https://app.heartex.ai/docs/images/slack-mini.png" width="18px"/>](https://slack.labelstudio.heartex.com/?source=github-1)
 
+## 开发文档
+
+[多语言](docs/develop/i18n.md)
+
 
 ## What is Label Studio?
 
