@@ -26,3 +26,4 @@ export { default as LsThumbsUp } from './thumbs-up.svg';
 export { default as IconUpload } from './upload.svg';
 export { default as LsPencil } from './pencil.svg';
 export { default as IconI18n } from './i18n.svg';
+export { default as CircleLoading } from "./loading.gif";

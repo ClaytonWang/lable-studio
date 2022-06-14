@@ -86,6 +86,7 @@ export class APIProxy {
       return new URL(url).toString();
     } catch (e) {
       const gateway = new URL(window.location.href);
+
       gateway.search = "";
       gateway.hash = "";
 
@@ -304,10 +305,14 @@ export class APIProxy {
       case "DELETE": {
         return {
           "Content-Type": "application/json",
+          // 'Authorization': `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
         };
       }
       default:
         return {};
+        // return {
+        //   'Authorization': `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
+        // };
     }
   }
 
@@ -370,6 +375,7 @@ export class APIProxy {
     */
   resolveEndpoint(endpoint, data) {
     let finalEndpoint;
+
     if (endpoint instanceof Function) {
       finalEndpoint = endpoint(data);
     } else {
@@ -406,6 +412,7 @@ export class APIProxy {
     */
   bodyToJSON(body) {
     const object = formDataToJPO(body);
+
     return JSON.stringify(object);
   }
 
@@ -417,6 +424,7 @@ export class APIProxy {
   async generateError(fetchResponse, exception) {
     const result = (async () => {
       const text = await fetchResponse.text();
+
       try {
         return JSON.parse(text);
       } catch (e) {
@@ -445,6 +453,7 @@ export class APIProxy {
         return details;
       }
     };
+
     return {
       error: exception.message,
       details: parsedDetails(),

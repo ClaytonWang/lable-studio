@@ -272,6 +272,39 @@ def get_all_columns(project, *_):
                 'explore': False,
                 'labeling': False
             }
+        },
+        {
+            'id': 'marked_words',
+            'title': "提示语",
+            'type': 'String',
+            'help': '提示语',
+            'target': 'tasks',
+            'visibility_defaults': {
+                'explore': False,
+                'labeling': False
+            }
+        },
+        {
+            'id': 'auto_label',
+            'title': "自动标注",
+            'type': 'String',
+            'help': '自动标注',
+            'target': 'tasks',
+            'visibility_defaults': {
+                'explore': False,
+                'labeling': False
+            }
+        },
+        {
+            'id': 'manual_label',
+            'title': "手动标注",
+            'type': 'String',
+            'help': '手动标注',
+            'target': 'tasks',
+            'visibility_defaults': {
+                'explore': False,
+                'labeling': False
+            }
         }
     ]
 
