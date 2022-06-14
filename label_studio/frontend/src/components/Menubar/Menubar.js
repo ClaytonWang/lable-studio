@@ -1,6 +1,6 @@
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StaticContent } from '../../app/StaticContent/StaticContent';
-import { IconBook, IconFolder, IconPersonInCircle, IconPin, IconTerminal, LsDoor, LsGitHub, LsSettings, LsSlack } from '../../assets/icons';
+import { IconBook, IconFolder, IconI18n, IconPersonInCircle, IconPin, IconTerminal, LsDoor, LsGitHub, LsSettings, LsSlack } from '../../assets/icons';
 import { useConfig } from '../../providers/ConfigProvider';
 import { useContextComponent, useFixedLocation } from '../../providers/RoutesProvider';
 import { cn } from '../../utils/bem';
@@ -146,6 +146,12 @@ export const Menubar = ({
                 data-external
               />
               {/* <Menu.Item label="Dark Mode"/> */}
+              <Menu.Item
+                icon={<IconI18n style={{ width: 20, height: 20 }}/>}
+                label={t("switch_locale", "English")}
+                onClick={() => i18next.switchLocale()}
+                data-external
+              />
               <Menu.Item
                 icon={<LsDoor/>}
                 label={t("Log Out")}

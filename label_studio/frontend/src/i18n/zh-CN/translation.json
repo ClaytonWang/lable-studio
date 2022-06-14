@@ -22,5 +22,11 @@
   "Submit": "提交",
   "Update": "更新",
   "Create Project": "创建项目",
-  "Create": "创建"
+  "Create": "创建",
+  "Account info": "账号信息",
+  "E-mail": "邮箱",
+  "First Name": "名字",
+  "Last Name": "姓",
+  "Phone": "手机号",
+  "switch_locale": "English"
 }

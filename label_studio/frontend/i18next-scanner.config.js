@@ -12,6 +12,7 @@ const tasks = {
   ls: "src/**/*.{js,jsx}",
   dm2: path.join(process.env.DM_DIR, "src/**/*.{js,jsx}"),
   lsf: path.join(process.env.LSF_DIR, "src/**/*.{js,jsx}"),
+  python: path.join(__dirname, "../**/templates/**/*.{html,htm}"),
 };
 
 module.exports = {
@@ -22,6 +23,10 @@ module.exports = {
     func: {
       list: ["t", "window.t"],
       extensions: [".js", ".jsx", ".tsx", ".ts"],
+    },
+    attr: {
+      list: ['data-i18n'],
+      extensions: ['.html', '.htm']
     },
     lngs: ["zh-CN", "en-US"],
     defaultLng: "en-US",

@@ -166,6 +166,7 @@
   },
   "dependencies": {
     "i18next": "^21.8.9",
+    "jquery-i18next": "^1.2.1",
     "lodash.clonedeep": "^4.5.0"
   }
 }

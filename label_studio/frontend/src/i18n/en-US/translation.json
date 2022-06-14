@@ -22,5 +22,11 @@
   "Submit": "Submit",
   "Update": "Update",
   "Create Project": "Create Project",
-  "Create": "Create"
+  "Create": "Create",
+  "Account info": "Account info",
+  "E-mail": "E-mail",
+  "First Name": "First Name",
+  "Last Name": "Last Name",
+  "Phone": "Phone",
+  "switch_locale": "简体中文"
 }
