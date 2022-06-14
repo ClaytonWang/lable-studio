@@ -5,3 +5,4 @@ jest-puppeteer.config.js
 *.html
 release.js
 bin
+i18next-scanner.config.js

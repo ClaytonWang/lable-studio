@@ -18,7 +18,7 @@ export const ProjectsList = ({ projects, currentPage, totalItems, loadNextPage, 
       <Elem name="pages">
         <Pagination
           name="projects-list"
-          label="Projects"
+          label={t("Projects")}
           page={currentPage}
           totalItems={totalItems}
           urlParamName="page"
@@ -37,7 +37,7 @@ export const EmptyProjectsList = ({ openModal }) => {
       <Elem name="heidi" tag="img" src={absoluteURL("/static/images/opossum_looking.png")} />
       <Elem name="header" tag="h1">Heidi doesn’t see any projects here</Elem>
       <p>Create one and start labeling your data</p>
-      <Elem name="action" tag={Button} onClick={openModal} look="primary">Create Project</Elem>
+      <Elem name="action" tag={Button} onClick={openModal} look="primary">{t("Create Project")}</Elem>
     </Block>
   );
 };
@@ -69,7 +69,7 @@ const ProjectCard = ({ project }) => {
             }}>
               <Dropdown.Trigger content={(
                 <Menu>
-                  <Menu.Item href={`/projects/${project.id}/settings`}>Settings</Menu.Item>
+                  <Menu.Item href={`/projects/${project.id}/settings`}>{t("Settings")}</Menu.Item>
                   <Menu.Item href={`/projects/${project.id}/data?labeling=1`}>Label</Menu.Item>
                 </Menu>
               )}>

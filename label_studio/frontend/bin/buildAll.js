@@ -40,7 +40,7 @@ const createGitVersionJson = async (dir, filePath) => {
     recursive: true,
   });
   // 1. Build
-  await runAll(["build", "build:dm", "build:lsf"], {
+  await runAll(["build:production", "build:dm", "build:lsf"], {
     stdout: process.stdout,
     printLabel: true
   });
