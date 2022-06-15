@@ -1,10 +1,11 @@
-import { Button, Divider, Form, Input, Popconfirm, Table, Tooltip, Typography } from 'antd';
+import { Button, Form, Input, Popconfirm, Table, Tooltip, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import React, { useImperativeHandle ,useState } from 'react';
+import React, { useCallback ,useImperativeHandle,useState } from 'react';
 import { FaQuestionCircle } from "react-icons/fa";
 import { Modal } from '../../components/Modal/Modal';
 import { Icon } from "../Icon/Icon";
 import { Space } from "../Space/Space";
+import { useAPI } from '../../providers/ApiProvider';
 import './PromptLearnTemplate.css';
 
 const { TextArea } = Input;
@@ -47,17 +48,27 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
 
   const [form] = Form.useForm();
   const [sourceData, setSourceData] = useState([]);
-
   const [count, setCount] = useState(0);
   const [editingKey, setEditingKey] = useState('');
   const [dlgVisible, setDlgVisible] = useState(false);
+  const [loading,setLoading] = useState(true);
+  const api = useAPI();
 
   const isEditing = (record) => record.key === editingKey || record.isNew;
 
   const showDlg = () => {
-    console.log(projectId);
     setDlgVisible(true);
   };
+
+  const mlPromptTemplateQuery = useCallback(async () => {
+    return await api.callApi('mlPromptTemplateQuery', {
+      params: { project_id: projectId },
+    });
+  }, [projectId]);
+
+  // try {
+  //   mlPromptTemplateQuery();
+  // }catch(e){console.log(e);}
 
   const edit = (record) => {
     form.setFieldsValue({
@@ -213,6 +224,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
                 新增
               </Button>
               <Table
+                loading={loading}
                 components={{
                   body: {
                     cell: EditableCell,
@@ -226,7 +238,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
                   position: ['bottomLeft'],
                   pageSize: 5,
                   size:'small',
-                  showTotal:(total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                  showTotal:(total, range) => `${range[0]}-${range[1]} 共 ${total}`,
                 }}
               />
             </Form>
@@ -243,14 +255,12 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
                 >
                 取消
                 </Button>
-
                 <Button
                   onClick={async () => {
                     try {
                       await form.validateFields();
+                      setDlgVisible(false);
                     }catch(e){console.log(e);}
-
-                    setDlgVisible(false);
                   }}
                   size="compact"
                   type="primary"
