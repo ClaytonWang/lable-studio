@@ -16,6 +16,7 @@ import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
 import { Progress } from 'antd';
+import { PromptLearnTemplate } from '../../components';
 import "./DataManager.styl";
 
 const refModal = createRef();
@@ -45,6 +46,15 @@ const onPreButtonClick = (e,params) => {
   },1000);
 };
 
+const onPrePromButtonClick = (e, params) => { 
+  modal({
+    title: "预标注(提示学习)",
+    closeOnClickOutside: false,
+    body: <PromptLearnTemplate />,
+    style: { width: 760 },
+  });
+};
+
 const initializeDataManager = async (root, props, params) => {
   if (!window.LabelStudio) throw Error("Label Studio Frontend doesn't exist on the page");
   if (!root && root.dataset.dmInitialized) return;
@@ -57,16 +67,16 @@ const initializeDataManager = async (root, props, params) => {
     root,
     toolbar: "actions columns filters ordering wash-button pre-button pre-prom-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
-    apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
-    // apiGateway: `http://124.71.161.146:8080/api/dm`,
+    // apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
+    apiGateway: `http://124.71.161.146:8080/api/dm`,
     apiVersion: 2,
     project: params.project,
     polling: !window.APP_SETTINGS,
     showPreviews: true,
     apiEndpoints: APIConfig.endpoints,
-    // apiHeaders: {
-    //   Authorization: `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
-    // },
+    apiHeaders: {
+      Authorization: `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
+    },
     interfaces: {
       backButton: false,
       labelingHeader: false,
@@ -85,7 +95,7 @@ const initializeDataManager = async (root, props, params) => {
         return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(普通)</button>;
       },
       'pre-prom-button': () => {
-        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(提示学习)</button>;
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >预标注(提示学习)</button>;
       },
     },
     ...props,

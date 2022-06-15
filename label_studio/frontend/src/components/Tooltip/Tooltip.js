@@ -76,7 +76,7 @@ export const Tooltip = forwardRef(
           <Block
             ref={tooltipElement}
             name="tooltip"
-            mod={{align}}
+            mod={{ align }}
             mix={visibilityClasses}
             style={{ ...offset, ...(style ?? {}) }}
           >

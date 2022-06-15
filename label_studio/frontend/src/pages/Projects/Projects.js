@@ -3,7 +3,7 @@ import { useParams as useRouterParams } from 'react-router';
 import { Redirect } from 'react-router-dom';
 import { Button } from '../../components';
 import { Oneof } from '../../components/Oneof/Oneof';
-import { Spinner } from '../../components/Spinner/Spinner';
+import { Loading } from '../../components';
 import { ApiContext } from '../../providers/ApiProvider';
 import { useContextProps } from '../../providers/RoutesProvider';
 import { Block, Elem } from '../../utils/bem';
@@ -62,7 +62,7 @@ export const ProjectsPage = () => {
     <Block name="projects-page">
       <Oneof value={networkState}>
         <Elem name="loading" case="loading">
-          <Spinner size={64}/>
+          <Loading size={64}/>
         </Elem>
         <Elem name="content" case="loaded">
           {projectsList.length ? (

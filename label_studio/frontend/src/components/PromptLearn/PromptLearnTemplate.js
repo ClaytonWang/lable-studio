@@ -1,21 +1,20 @@
-import { Form, Input,Popconfirm,Table,Typography } from 'antd';
-import React, { useState } from 'react';
+import { Button, Divider, Form, Input, Popconfirm, Table, Tooltip, Typography } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import React, { useImperativeHandle ,useState } from 'react';
+import { FaQuestionCircle } from "react-icons/fa";
+import { Modal } from '../../components/Modal/Modal';
+import { Icon } from "../Icon/Icon";
+import { Space } from "../Space/Space";
+import './PromptLearnTemplate.css';
+
 const { TextArea } = Input;
-const originData = [{
-  key: 1,
-  name: `Edrward 1`,
-  age: 32,
-  address: `London Park no. 1`,
-}];
 
 const EditableCell = ({
   editing,
   dataIndex,
-  title,
   children,
   ...restProps
 }) => {
-
   return (
     <td {...restProps}>
       {editing ? (
@@ -27,86 +26,126 @@ const EditableCell = ({
           rules={[
             {
               required: true,
-              message: `Please Input ${title}!`,
+              message: `请输入提示学习模板!`,
             },
           ]}
         >
-          <TextArea placeholder="textarea with clear icon" allowClear onChange={() => { }} />
+          <TextArea placeholder='请输入提示学习模板' allowClear />
         </Form.Item>
       ) : (
-        children
+        <span style={{ width:540, wordWrap: 'break-word', wordBreak: 'break-word' }}>{children}</span>
       )}
     </td>
   );
 };
 
-export const PromptLearnTemplate = () => { 
-  
+export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)=>{
+
+  useImperativeHandle(ref, () => ({
+    show:showDlg,
+  }));
+
   const [form] = Form.useForm();
-  const [data, setData] = useState(originData);
+  const [sourceData, setSourceData] = useState([]);
+
+  const [count, setCount] = useState(0);
   const [editingKey, setEditingKey] = useState('');
-    
-  const isEditing = (record) => record.key === editingKey;
+  const [dlgVisible, setDlgVisible] = useState(false);
+
+  const isEditing = (record) => record.key === editingKey || record.isNew;
+
+  const showDlg = () => {
+    console.log(projectId);
+    setDlgVisible(true);
+  };
 
   const edit = (record) => {
     form.setFieldsValue({
       name: '',
-      age: '',
-      address: '',
+      isNew:false,
       ...record,
     });
     setEditingKey(record.key);
   };
 
-  const cancel = () => {
-    setEditingKey('');
+  const cancel = (record) => {
+    form.setFieldsValue({
+      name:'',
+    });
+    if (record.isNew) {
+      handleDelete(record.key);
+    } else {
+      setEditingKey('');
+    }
   };
-    
+
+  const handleDelete = (key) => {
+    const newData = sourceData.filter((item) => item.key !== key);
+
+    setSourceData(newData);
+  };
+
+  const handleAdd = () => {
+    const newData = {
+      key: count,
+      name: '',
+      isNew:true,
+    };
+
+    setSourceData([newData,...sourceData]);
+    setCount(count + 1);
+  };
+
   const save = async (key) => {
     try {
       const row = await form.validateFields();
-      const newData = [...data];
+
+      row.isNew=false;
+      const newData = [...sourceData];
       const index = newData.findIndex((item) => key === item.key);
 
       if (index > -1) {
         const item = newData[index];
 
         newData.splice(index, 1, { ...item, ...row });
-        setData(newData);
+        setSourceData(newData);
         setEditingKey('');
       } else {
-        newData.push(row);
-        setData(newData);
+        setSourceData([...newData,row]);
         setEditingKey('');
       }
+
+      form.setFieldsValue({
+        name:'',
+      });
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
     }
   };
-    
+
+  const strTip = `[dlg]代表整个对话，[dlg1]代表对话第一行，[dlg2]代表对话第二行，[dlgx]代表对话第x行，[mask]代表被遮罩的内容。`;
+
   const columns = [
     {
-      title: 'name',
+      title: () => {
+        return (
+          <>
+            提示学习模板
+            <Tooltip title={strTip} overlayInnerStyle={{ borderRadius: 5 }} >
+              <Icon icon={FaQuestionCircle} style={{ opacity: 0.5,marginTop:3 }} />
+            </Tooltip>
+          </>
+        );
+      },
       dataIndex: 'name',
-      width: '25%',
+      width: 540,
       editable: true,
     },
     {
-      title: 'age',
-      dataIndex: 'age',
-      width: '15%',
-      editable: true,
-    },
-    {
-      title: 'address',
-      dataIndex: 'address',
-      width: '40%',
-      editable: true,
-    },
-    {
-      title: 'operation',
+      title: '操作',
       dataIndex: 'operation',
       render: (_, record) => {
+        console.log(_);
         const editable = isEditing(record);
 
         return editable ? (
@@ -117,54 +156,112 @@ export const PromptLearnTemplate = () => {
                 marginRight: 8,
               }}
             >
-                  Save
+            保存
             </Typography.Link>
-            <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-              <a>Cancel</a>
+            <Popconfirm title="确定取消吗?" onConfirm={() => { cancel(record);}}>
+              <a>取消</a>
             </Popconfirm>
           </span>
         ) : (
-          <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)}>
-                Edit
-          </Typography.Link>
+          <span>
+            <Space size="middle">
+              <a onClick={() => edit(record)}>修改</a>
+              <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.key)}>
+                <a>删除</a>
+              </Popconfirm>
+            </Space>
+          </span>
         );
       },
     },
   ];
-    
+
   const mergedColumns = columns.map((col) => {
     if (!col.editable) {
       return col;
     }
-    
+
     return {
       ...col,
       onCell: (record) => ({
         record,
-        inputType: col.dataIndex === 'age' ? 'number' : 'text',
         dataIndex: col.dataIndex,
-        title: col.title,
         editing: isEditing(record),
       }),
     };
   });
 
   return (
-    <Form form={form} component={false}>
-      <Table
-        components={{
-          body: {
-            cell: EditableCell,
-          },
-        }}
-        bordered
-        dataSource={data}
-        columns={mergedColumns}
-        rowClassName="editable-row"
-        pagination={{
-          onChange: cancel,
-        }}
-      />
-    </Form>
+    dlgVisible && (
+      <Modal style={{ width:700 }} visible bare closeOnClickOutside={false}>
+        <div className={'dlg-root'}>
+          <Modal.Header>
+            <span style={{ fontSize:16 }}>预标注(提示学习)</span>
+          </Modal.Header>
+          <div className={'dlg-content'}>
+            <Form form={form} component={false}>
+              <Button
+                onClick={handleAdd}
+                type="primary"
+                size={'small'}
+                style={{
+                  marginBottom: 5,
+                  float:'right',
+                }}
+                icon={<PlusOutlined />}
+              >
+                新增
+              </Button>
+              <Table
+                components={{
+                  body: {
+                    cell: EditableCell,
+                  },
+                }}
+                dataSource={sourceData}
+                columns={mergedColumns}
+                rowClassName="editable-row"
+                pagination={{
+                  onChange: cancel,
+                  position: ['bottomLeft'],
+                  pageSize: 5,
+                  size:'small',
+                  showTotal:(total, range) => `${range[0]}-${range[1]} of ${total} items`,
+                }}
+              />
+            </Form>
+          </div>
+          <Modal.Footer>
+            <div style={{ marginRight:20 }}>
+              <Space align="end">
+                <Button
+                  onClick={() => {
+                    setDlgVisible(false);
+                  }}
+                  size="compact"
+                  autoFocus
+                >
+                取消
+                </Button>
+
+                <Button
+                  onClick={async () => {
+                    try {
+                      await form.validateFields();
+                    }catch(e){console.log(e);}
+
+                    setDlgVisible(false);
+                  }}
+                  size="compact"
+                  type="primary"
+                >
+                立即运行
+                </Button>
+              </Space>
+            </div>
+          </Modal.Footer>
+        </div>
+      </Modal>
+    )
   );
-};
+});
