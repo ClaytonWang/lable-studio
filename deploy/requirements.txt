@@ -60,3 +60,8 @@ launchdarkly-server-sdk==7.3.0
 
 label-studio-converter==0.0.40
 label-studio-tools==0.0.0.dev14
+
+tqdm==4.62.3
+torch==1.11.0
+tensorboardX==2.5
+transformers==4.15.0

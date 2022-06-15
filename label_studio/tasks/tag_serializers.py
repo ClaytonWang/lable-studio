@@ -12,29 +12,29 @@ from rest_framework.serializers import SerializerMethodField
 from rest_framework.serializers import CharField
 from rest_framework.serializers import IntegerField
 from rest_framework.serializers import ALL_FIELDS
-from tasks.models import TaskDbTag
+from tasks.models import TaskDbAlgorithm
 from projects.models import Project
 
 
-class TagCreatedSerializer(ModelSerializer):
+class TagCleanCreatedSerializer(ModelSerializer):
     """
     """
     class Meta:
-        model = TaskDbTag
+        model = TaskDbAlgorithm
         fields = ALL_FIELDS
 
 
-class TagUpdatedSerializer(TagCreatedSerializer):
+class TagCleanUpdatedSerializer(TagCleanCreatedSerializer):
     pass
 
 
-class TagListSerializer(ModelSerializer):
+class TagCleanListSerializer(ModelSerializer):
     pass
 
     class Meta:
-        model = TaskDbTag
+        model = TaskDbAlgorithm
         fields = ALL_FIELDS
 
 
-class TagDetailSerializer(TagListSerializer):
+class TagCleanDetailSerializer(TagCleanListSerializer):
     pass
