@@ -26,8 +26,8 @@ const devtool = process.env.NODE_ENV === 'production' ? "source-map" : "cheap-mo
 
 const output = {
   path: path.resolve(__dirname, "dist", "react-app"),
-  filename: 'index.js',
-  hashFunction: "sha256",
+  filename: '[name].js',
+  hashFunction: "sha256"
 };
 
 const plugins = [
@@ -65,9 +65,12 @@ if (process.env.BUILD_SENTRY && SENTRY.AUTH_TOKEN && SENTRY.RELEASE) {
 module.exports = {
   devtool,
   mode: process.env.NODE_ENV || "development",
-  entry: "./src/index.js",
-  output,
-  plugins,
+  entry: {
+    main: "./src/index.js",
+    i18n: "./src/i18n.js",
+  },
+  output: output,
+  plugins: plugins,
   optimization: optimizer,
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
