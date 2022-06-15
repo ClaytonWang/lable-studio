@@ -1,7 +1,7 @@
 
 export const API_CONFIG = {
-  gateway: `${window.APP_SETTINGS.hostname}/api`,
-  // gateway: `http://124.71.161.146:8080/api`,
+  // gateway: `${window.APP_SETTINGS.hostname}/api`,
+  gateway: `http://124.71.161.146:8080/api`,
   endpoints: {
     // Users
     users: "/users",
@@ -53,7 +53,13 @@ export const API_CONFIG = {
     modelVersions: "/projects/:pk/model-versions",
     mlInteractive: "POST:/ml/:pk/interactive-annotating",
     mlPreLabelProgress: "GET:/dbml/query_task",
-    mlPredictProcess:'POST:/dbml/predict',
+    mlPredictProcess: 'POST:/dbml/predict',
+    mlPromptPredict: 'POST:/prompt-learning/predict',
+    mlPromptRetieve: 'GET:/prompt-learning/retrieve',
+    mlPromptTemplateCreate: 'POST:/prompt-learning/create',
+    mlPromptTemplateDelete: 'DELETE:/prompt-learning/delete',
+    mlPromptTemplateUpdate:'PUT:/prompt-learning/update',
+    mlPromptTemplateQuery:'GET:/prompt-learning/get',
 
     // Export
     export: "/projects/:pk/export",
