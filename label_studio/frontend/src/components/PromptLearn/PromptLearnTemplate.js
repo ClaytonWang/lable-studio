@@ -41,11 +41,6 @@ const EditableCell = ({
 };
 
 export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)=>{
-
-  useImperativeHandle(ref, () => ({
-    show:showDlg,
-  }));
-
   const [form] = Form.useForm();
   const [sourceData, setSourceData] = useState([]);
   const [count, setCount] = useState(0);
@@ -59,6 +54,10 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
   const showDlg = () => {
     setDlgVisible(true);
   };
+
+  useImperativeHandle(ref, () => ({
+    show:showDlg,
+  }));
 
   const mlPromptTemplateQuery = useCallback(async () => {
     return await api.callApi('mlPromptTemplateQuery', {
