@@ -17,6 +17,7 @@ from tasks.models import (
 from webhooks.utils import emit_webhooks_for_instance
 from webhooks.models import WebhookAction
 from data_manager.functions import evaluate_predictions
+from tasks.tag_services import delete_algorithm_clean
 
 all_permissions = AllPermissions()
 logger = logging.getLogger(__name__)
@@ -53,6 +54,7 @@ def delete_tasks(project, queryset, **kwargs):
     if count == project.tasks.count():
         with temporary_disconnect_list_signal(signals):
             queryset.delete()
+            delete_algorithm_clean(task_ids=tasks_ids_list)
         project.summary.reset()
 
     # delete only specific tasks
@@ -62,6 +64,7 @@ def delete_tasks(project, queryset, **kwargs):
 
         with temporary_disconnect_list_signal(signals):
             queryset.delete()
+            delete_algorithm_clean(task_ids=tasks_ids_list)
 
     project.update_tasks_states(
         maximum_annotations_changed=False,

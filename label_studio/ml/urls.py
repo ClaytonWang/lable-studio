@@ -5,6 +5,8 @@ from django.urls import path, include
 from . import api
 from db_ml.api import prediction
 from db_ml.api import query_task
+from db_ml.api import clean
+from db_ml.api import replace
 
 app_name = 'ml'
 
@@ -25,4 +27,6 @@ urlpatterns = [
     path('api/ml/', include((_api_urlpatterns, app_name), namespace='api')),
     path('api/dbml/predict', prediction),
     path('api/dbml/query_task', query_task),
+    path('api/dbml/clean', clean),
+    path('api/dbml/replace', replace),
 ]

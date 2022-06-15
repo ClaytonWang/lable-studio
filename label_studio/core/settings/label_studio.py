@@ -31,8 +31,15 @@ RQ_QUEUES = {
         'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 1,
-        'DEFAULT_TIMEOUT': 18000,
+        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
+    'algorithm_clean': {
+        'HOST': '127.0.0.1',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+    },
+
 }
 
 SENTRY_DSN = get_env(

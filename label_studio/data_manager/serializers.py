@@ -13,8 +13,6 @@ from tasks.models import Task
 from tasks.serializers import TaskSerializer, AnnotationSerializer, PredictionSerializer, AnnotationDraftSerializer
 from projects.models import Project
 from label_studio.core.utils.common import round_floats
-from tasks.models import TaskDbTag
-from tasks.tag_serializers import TagDetailSerializer
 
 
 class FilterSerializer(serializers.ModelSerializer):

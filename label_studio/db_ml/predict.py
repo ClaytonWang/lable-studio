@@ -8,7 +8,7 @@ import torch
 import pandas as pd
 import torch.nn as nn
 from transformers import BartForSequenceClassification, BertTokenizer
-from tasks.models import TaskDbTag, Prediction, Task
+from tasks.models import Prediction, Task
 
 
 class Predictor:
@@ -66,11 +66,6 @@ def job_predict(*args, **kwargs):
             score=round(confidence, 4),
 
         )
-        # user_id = kwargs.get('user_id')
-        # if user_id:
-        #     tag_data['created_by_id'] = user_id
-        # task_id = kwargs.get('task_tag_id')
-        # obj = TaskDbTag.objects.create(**tag_data)
         print('results: ....', tag_data)
         obj = Prediction.objects.create(**tag_data)
         print('obj:', obj.id, ' auto: ', res_text)
