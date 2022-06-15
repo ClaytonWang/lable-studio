@@ -16,13 +16,13 @@ export const StorageSettings = () => {
 
       <Columns count={2} gap="40px" size="320px" className={rootClass}>
         <StorageSet
-          title="Source Cloud Storage"
+          title={t("Source Cloud Storage")}
           buttonLabel="Add Source Storage"
           rootClass={rootClass}
         />
 
         <StorageSet
-          title="Target Cloud Storage"
+          title={t("Target Cloud Storage")}
           target="export"
           buttonLabel="Add Target Storage"
           rootClass={rootClass}
@@ -32,5 +32,5 @@ export const StorageSettings = () => {
   );
 };
 
-StorageSettings.title = "Cloud Storage";
+StorageSettings.title = t("Cloud Storage");
 StorageSettings.path = "/storage";

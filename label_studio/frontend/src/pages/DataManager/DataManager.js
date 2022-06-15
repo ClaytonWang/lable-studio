@@ -303,7 +303,7 @@ DataManagerPage.context = ({ dmRef }) => {
 
     if (isLabelStream && show_instruction && expert_instruction) {
       modal({
-        title: "Labeling Instructions",
+        title: t("Labeling Instructions"),
         body: <div dangerouslySetInnerHTML={{ __html: expert_instruction }}/>,
         style: { width: 680 },
       });
@@ -331,11 +331,11 @@ DataManagerPage.context = ({ dmRef }) => {
       {(project.expert_instruction && mode !== 'explorer') && (
         <Button size="compact" onClick={() => {
           modal({
-            title: "Instructions",
+            title: t("Instructions"),
             body: () => <div dangerouslySetInnerHTML={{ __html: project.expert_instruction }}/>,
           });
         }}>
-          Instructions
+          {t("Instructions")}
         </Button>
       )}
 

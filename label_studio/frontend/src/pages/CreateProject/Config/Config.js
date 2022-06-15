@@ -95,12 +95,12 @@ const ConfigureControl = ({ control, template }) => {
   return (
     <div className={configClass.elem("labels")}>
       <form className={configClass.elem("add-labels")} action="">
-        <h4>{tagname === "Choices" ? "Add choices" : "Add label names"}</h4>
+        <h4>{tagname === "Choices" ? t("Add choices") : t("Add label names")}</h4>
         <textarea name="labels" id="" cols="30" rows="5" ref={refLabels} onKeyPress={onKeyPress}></textarea>
-        <input type="button" value="Add" onClick={onAddLabels} />
+        <input type="button" value={t("Add")} onClick={onAddLabels} />
       </form>
       <div className={configClass.elem("current-labels")}>
-        <h3>{tagname === "Choices" ? "Choices" : "Labels"} ({control.children.length})</h3>
+        <h3>{tagname === "Choices" ? t("Choices") : t("Labels")} ({control.children.length})</h3>
         <ul>
           {Array.from(control.children).map(label => (
             <Label
@@ -210,7 +210,7 @@ const ConfigureColumns = ({ columns, template }) => {
 
   return (
     <div className={configClass.elem("object")}>
-      <h4>Configure data</h4>
+      <h4>{t("Configure data")}</h4>
       {template.objects.length > 1 && columns?.length > 0 && columns.length < template.objects.length && (
         <p className={configClass.elem("object-error")}>This template requires more data then you have for now</p>
       )}
@@ -323,8 +323,8 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
     <div className={configClass}>
       <div className={configClass.elem("container")}>
         <header>
-          <button onClick={onBrowse}>Browse Templates</button>
-          <ToggleItems items={{ code: "Code", visual: "Visual" }} active={configure} onSelect={onSelect} />
+          <button onClick={onBrowse}>{t("Browse Templates")}</button>
+          <ToggleItems items={{ code: t("Code"), visual: t("Visual") }} active={configure} onSelect={onSelect} />
         </header>
         <div className={configClass.elem('editor')}>
           {configure === "code" && (
