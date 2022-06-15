@@ -64,5 +64,9 @@
   "Browse Templates": "Browse Templates",
   "Code": "Code",
   "Visual": "Visual",
-  "UI Preview": "UI Preview"
+  "UI Preview": "UI Preview",
+  "Was skipped": "Was skipped",
+  "Cancel skip": "Cancel skip",
+  "Skip": "Skip",
+  "clean_data": "清洗"
 }

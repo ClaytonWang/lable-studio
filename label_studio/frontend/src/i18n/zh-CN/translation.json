@@ -64,5 +64,9 @@
   "Browse Templates": "浏览模板",
   "Code": "代码",
   "Visual": "视图",
-  "UI Preview": "页面预览"
+  "UI Preview": "页面预览",
+  "Was skipped": "已跳过",
+  "Cancel skip": "取消跳过",
+  "Skip": "跳过",
+  "clean_data": "清洗"
 }

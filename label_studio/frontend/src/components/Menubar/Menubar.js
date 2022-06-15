@@ -148,7 +148,7 @@ export const Menubar = ({
               {/* <Menu.Item label="Dark Mode"/> */}
               <Menu.Item
                 icon={<IconI18n style={{ width: 20, height: 20 }}/>}
-                label={t("switch_locale", "简体中文")}
+                label={t("switch_locale", "English")}
                 onClick={() => i18next.switchLocale()}
                 data-external
               />

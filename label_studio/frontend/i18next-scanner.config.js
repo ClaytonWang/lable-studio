@@ -29,7 +29,7 @@ module.exports = {
       extensions: ['.html', '.htm']
     },
     lngs: ["zh-CN", "en-US"],
-    defaultLng: "en-US",
+    defaultLng: "zh-CN",
     resource: {
       loadPath: "src/i18n/{{lng}}/{{ns}}.json",
       savePath: "src/i18n/{{lng}}/{{ns}}.json",
