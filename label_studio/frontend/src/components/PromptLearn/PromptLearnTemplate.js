@@ -72,10 +72,20 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
   const mlPromptPredict = useCallback(async () => {
     return await api.callApi('mlPromptPredict', {
       params: {
-        "project": projectId,
+        project: projectId,
       },
     });
   }, [projectId]);
+
+  const mlPromptTemplateCreate = async (project,template) => {
+    return await api.callApi('mlPromptTemplateCreate', {
+      body: {
+        project,
+        template,
+        taskId:1,
+      },
+    });
+  };
 
   const execPredict = async () => {
     try {
@@ -87,7 +97,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
 
   const edit = (record) => {
     form.setFieldsValue({
-      name: '',
+      template: '',
       isNew:false,
       ...record,
     });
@@ -96,7 +106,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
 
   const cancel = (record) => {
     form.setFieldsValue({
-      name:'',
+      template:'',
     });
     if (record.isNew) {
       handleDelete(record.key);
@@ -114,7 +124,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
   const handleAdd = () => {
     const newData = {
       key: count,
-      name: '',
+      template: '',
       isNew:true,
     };
 
@@ -142,8 +152,9 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
       }
 
       form.setFieldsValue({
-        name:'',
+        template:'',
       });
+      mlPromptTemplateCreate(projectId,row.template);
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
     }
@@ -163,7 +174,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
           </>
         );
       },
-      dataIndex: 'name',
+      dataIndex: 'template',
       width: 540,
       editable: true,
     },
