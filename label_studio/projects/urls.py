@@ -66,7 +66,5 @@ urlpatterns = [
     # 增加两个关于推断学习算法的接口
     path('api/projects/prompt-learning/predict/', prompt_api.PromptLearning.as_view()),
     # re_path(r'api/projects/prompt-learning/retrieve?project=(\d+)&&taskId=(\d+)', prompt_api.PromptExport.as_view()),
-    path('api/projects/prompt-learning/retrieve', prompt_api.PromptExport.as_view()),
+    path(r'api/projects/prompt-learning/retrieve', prompt_api.PromptExport.as_view()),
 ]
-
-
