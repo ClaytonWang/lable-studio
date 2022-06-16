@@ -54,12 +54,13 @@ export const API_CONFIG = {
     mlInteractive: "POST:/ml/:pk/interactive-annotating",
     mlPreLabelProgress: "GET:/dbml/query_task",
     mlPredictProcess: 'POST:/dbml/predict',
-    mlPromptPredict: 'POST:/prompt-learning/predict',
-    mlPromptRetieve: 'GET:/prompt-learning/retrieve',
-    mlPromptTemplateCreate: 'POST:/prompt-learning/create',
-    mlPromptTemplateDelete: 'DELETE:/prompt-learning/delete',
-    mlPromptTemplateUpdate:'PUT:/prompt-learning/update',
-    mlPromptTemplateQuery:'GET:/prompt-learning/get',
+
+    // Prompt Learning
+    mlPromptPredict: 'POST:/projects/prompt-learning/predict',
+    mlPromptTemplateCreate: 'POST:/templates/prompt-learning',
+    mlPromptTemplateDelete: 'DELETE:/templates/prompt-learning',
+    mlPromptTemplateUpdate:'PATCH:/templates/prompt-learning',
+    mlPromptTemplateQuery:'GET:/templates/prompt-learning',
 
     // Export
     export: "/projects/:pk/export",

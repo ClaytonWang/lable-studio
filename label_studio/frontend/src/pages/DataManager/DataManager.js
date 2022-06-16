@@ -1,4 +1,4 @@
-import { createRef, useCallback, useEffect, useRef,useState } from 'react';
+import React,{ createRef, useCallback, useEffect, useRef,useState } from 'react';
 import { generatePath, useHistory } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import { Loading } from '../../components';
@@ -20,22 +20,24 @@ import { PromptLearnTemplate } from '../../components';
 import "./DataManager.styl";
 
 const refModal = createRef();
+const refProm = createRef();
+
 const onPreButtonClick = (e,params) => {
   const mlQueryProgress = params.mlQueryProgress;
   const setProgress = params.setProgress;
   const mlPredictProcess = params.mlPredictProcess;
 
   mlPredictProcess();
-  
+
   let progress = 0,count=0;
 
   refModal.current?.show();
-  let t = setInterval(() => { 
+  let t = setInterval(() => {
     count = count + 1;
     mlQueryProgress().then((rst) => {
       progress = rst.rate * 100;
       setProgress(progress);
-  
+
       if (progress >= 100 || (progress === 0 && count > 11)) {
         clearInterval(t);
         setProgress(0);
@@ -46,13 +48,8 @@ const onPreButtonClick = (e,params) => {
   },1000);
 };
 
-const onPrePromButtonClick = (e, params) => { 
-  modal({
-    title: "预标注(提示学习)",
-    closeOnClickOutside: false,
-    body: <PromptLearnTemplate />,
-    style: { width: 760 },
-  });
+const onPrePromButtonClick = () => {
+  refProm.current?.show();
 };
 
 const initializeDataManager = async (root, props, params) => {
@@ -122,16 +119,16 @@ export const DataManagerPage = ({ ...props }) => {
   const [progress, setProgress] = useState(0);
   const dataManagerRef = useRef();
   const projectId = project?.id;
-  
-  const mlPredictProcess = useCallback(async () => { 
+
+  const mlPredictProcess = useCallback(async () => {
     return await api.callApi('mlPredictProcess', {
       body: {
         project_id: project.id,
       },
     });
   }, [project]);
-  
-  const mlQueryProgress = useCallback(async () => { 
+
+  const mlQueryProgress = useCallback(async () => {
     return await api.callApi('mlPreLabelProgress', {
       params: { project_id: project.id },
     });
@@ -247,12 +244,13 @@ export const DataManagerPage = ({ ...props }) => {
     </Block>
   ) : (
     <>
+      <PromptLearnTemplate ref={refProm} projectId={projectId} />
       <Modal
         ref={refModal}
         bare={true}
         allowClose={false}
         animateAppearance={false}
-        onHide={ 
+        onHide={
           async () => {
             await dataManagerRef?.current?.store?.fetchProject({ force: true, interaction: 'refresh' });
             await dataManagerRef?.current?.store?.currentView?.reload();
@@ -268,7 +266,7 @@ export const DataManagerPage = ({ ...props }) => {
       </Modal>
       <Block ref={root} name="datamanager"/>
     </>
-    
+
   );
 };
 

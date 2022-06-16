@@ -53,6 +53,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
 
   const showDlg = () => {
     setDlgVisible(true);
+    mlPromptTemplateQuery();
   };
 
   useImperativeHandle(ref, () => ({
@@ -60,14 +61,29 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
   }));
 
   const mlPromptTemplateQuery = useCallback(async () => {
-    return await api.callApi('mlPromptTemplateQuery', {
+    const tmps = await api.callApi('mlPromptTemplateQuery', {
       params: { project_id: projectId },
+    });
+
+    setLoading(false);
+    return tmps;
+  }, [projectId]);
+
+  const mlPromptPredict = useCallback(async () => {
+    return await api.callApi('mlPromptPredict', {
+      params: {
+        "project": projectId,
+      },
     });
   }, [projectId]);
 
-  // try {
-  //   mlPromptTemplateQuery();
-  // }catch(e){console.log(e);}
+  const execPredict = async () => {
+    try {
+      await form.validateFields();
+      mlPromptPredict();
+      setDlgVisible(false);
+    }catch(e){console.log(e);}
+  };
 
   const edit = (record) => {
     form.setFieldsValue({
@@ -168,7 +184,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
             >
             保存
             </Typography.Link>
-            <Popconfirm title="确定取消吗?" onConfirm={() => { cancel(record);}}>
+            <Popconfirm title="确定取消吗?" okText="是" cancelText="否" onConfirm={() => { cancel(record);}}>
               <a>取消</a>
             </Popconfirm>
           </span>
@@ -176,7 +192,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
           <span>
             <Space size="middle">
               <a onClick={() => edit(record)}>修改</a>
-              <Popconfirm title="确定删除吗?" onConfirm={() => handleDelete(record.key)}>
+              <Popconfirm title="确定删除吗?" okText="是" cancelText="否" onConfirm={() => handleDelete(record.key)}>
                 <a>删除</a>
               </Popconfirm>
             </Space>
@@ -203,15 +219,16 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
 
   return (
     dlgVisible && (
-      <Modal style={{ width:700 }} visible bare closeOnClickOutside={false}>
+      <Modal style={{ width:800 }} visible bare closeOnClickOutside={false}>
         <div className={'dlg-root'}>
           <Modal.Header>
-            <span style={{ fontSize:16 }}>预标注(提示学习)</span>
+            <span style={{ fontSize: 16,fontWeight:700 }}>预标注(提示学习)</span>
           </Modal.Header>
           <div className={'dlg-content'}>
             <Form form={form} component={false}>
               <Button
                 onClick={handleAdd}
+                disabled={loading}
                 type="primary"
                 size={'small'}
                 style={{
@@ -248,6 +265,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
                 <Button
                   onClick={() => {
                     setDlgVisible(false);
+                    setSourceData([]);
                   }}
                   size="compact"
                   autoFocus
@@ -255,12 +273,8 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
                 取消
                 </Button>
                 <Button
-                  onClick={async () => {
-                    try {
-                      await form.validateFields();
-                      setDlgVisible(false);
-                    }catch(e){console.log(e);}
-                  }}
+                  disabled={loading || sourceData.length===0}
+                  onClick={execPredict}
                   size="compact"
                   type="primary"
                 >
