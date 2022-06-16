@@ -30,7 +30,7 @@ class PromptLearning(APIView):
             result = patch_prompt(params['templates'], params['task'])
             print('result', result)
             # 入库
-            c = PromptResult.objects.create(project_id=params['projectId'], task_id=params['taskId'], metrics=result)
+            c = PromptResult.objects.create(project_id=params['project'], task_id=params['taskId'], metrics=result)
             c.save()
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK
@@ -48,19 +48,28 @@ class PromptExport(APIView):
     permission_classes = [permissions.AllowAny]
 
     def get(self, request, *args, **kwargs):
-        return Response('hello promptExport', status=status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
-        params = request.data
-        print('params', params)
+        params = request.GET.dict()
+        print('get params', params)
         try:
-            c = PromptResult.objects.filter(project_id=params['projectId']).filter(task_id=params['taskId']).values()
-            result = c[0]['metrics']
+            c = PromptResult.objects.filter(project_id=params['project']).filter(task_id=params['taskId']).values()
+            result = c[0]['metrics'] if len(c) else []
             resp_status = status.HTTP_200_OK
         except Exception as e:
             result = str(e)
             resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR
         return Response(result, status=resp_status)
+
+    # def post(self, request, *args, **kwargs):
+    #     params = request.data
+    #     print('params', params)
+    #     try:
+    #         c = PromptResult.objects.filter(project_id=params['project']).filter(task_id=params['taskId']).values()
+    #         result = c[0]['metrics']
+    #         resp_status = status.HTTP_200_OK
+    #     except Exception as e:
+    #         result = str(e)
+    #         resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+    #     return Response(result, status=resp_status)
 
 
 @method_decorator(name='post', decorator=swagger_auto_schema(
@@ -107,7 +116,7 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
     # create
     def post(self, request, *args, **kwargs):
         params = request.data
-        c = PromptTemplates.objects.create(project_id=params['projectId'],
+        c = PromptTemplates.objects.create(project_id=params['project'],
                                            task_id=params['taskId'],
                                            template=params['template'],
                                            )
@@ -122,9 +131,9 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
 
     # read
     def get(self, request, *args, **kwargs):
-        projectId = kwargs.get('projectId')
-        print('projectId', projectId)
-        ts = PromptTemplates.objects.filter(project_id=projectId).values()
+        project_id = kwargs.get('project')
+        print('project_id', project_id)
+        ts = PromptTemplates.objects.filter(project_id=project_id).values()
         # import pdb
         # pdb.set_trace()
         # print('ts', ts)
@@ -139,7 +148,7 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
         params = request.data
         print('params', params)
         try:
-            c = PromptTemplates.objects.filter(project_id=params['projectId']).\
+            c = PromptTemplates.objects.filter(project_id=params['project']).\
                 filter(task_id=params['taskId']).filter(template=params['template'])
             c.delete()
             result = {'status': 0, 'error': ''}
@@ -155,7 +164,7 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
         return self.put(request, *args, **kwargs)
 
     def get_queryset(self):
-        return PromptTemplates.objects.filter(project_id=self.request.data.get('projectId')).\
+        return PromptTemplates.objects.filter(project_id=self.request.data.get('project')).\
             filter(task_id=self.request.data.get('taskId')).\
             filter(template=self.request.data.get('template'))
 
