@@ -32,6 +32,12 @@ from data_manager.managers import PreparedTaskManager, TaskManager
 from core.bulk_update_utils import bulk_update
 from data_import.models import FileUpload
 
+CLEAN_STATE = (
+    (0, 'initial'),
+    (1, 'ongoing'),
+    (2, 'success'),
+    (3, 'fail'),
+)
 
 logger = logging.getLogger(__name__)
 
@@ -284,7 +290,7 @@ class TaskDbAlgorithm(models.Model):
     algorithm = models.JSONField(verbose_name='算法清洗', null=True, blank=True)
     # 人工修改
     manual = models.JSONField(verbose_name='手动标注', null=True, blank=True)
-
+    state = models.IntegerField(verbose_name='状态', choices=CLEAN_STATE, default=0)
     # 标注备注
     remarks = models.TextField(verbose_name='备注',  max_length=200, null=True, blank=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Time a task was created')

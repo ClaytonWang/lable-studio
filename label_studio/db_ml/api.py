@@ -43,6 +43,7 @@ def clean(request):
     TaskDbAlgorithm.objects.filter(project_id=project_id).update(
         algorithm='',
         manual='',
+        state=1,
     )
     for item in query:
         dialog = item.source
@@ -69,7 +70,9 @@ def replace(request):
     """
     data = request.data
     project_id = data.get('project_id')
-    query = TaskDbAlgorithm.objects.filter(project_id=project_id)
+    query = TaskDbAlgorithm.objects.filter(
+        project_id=project_id, state=2
+    )
     if not query:
         return Response(data=dict(msg='Invalid project id'))
 
@@ -96,13 +99,19 @@ def query_clean_task(request):
         project_id=project_id
     )
     total = clean_task_query.count()
-    finish_query = clean_task_query.filter(
-        Q(~Q(algorithm= '')) | Q(algorithm__isnull=True)
-    )
-    finish = finish_query.count()
+    success_query = clean_task_query.filter(state=2)
+    failed_query = clean_task_query.filter(state=3)
+    #     clean_task_query.filter(
+    #     Q(~Q(algorithm= '')) | Q(algorithm__isnull=True)
+    # )
+    success_count = success_query.count()
+    failed_count = failed_query.count()
+    finish = success_count + failed_count
     return Response(data=dict(
         total=total,
         finish=finish,
+        falied=failed_count,
+        success=success_count,
         rate=round(finish / total, 2) if total > 0 else 0
     ))
 
