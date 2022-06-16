@@ -11,6 +11,7 @@ import logging
 from django.db import connection
 from django.db.models import Count
 from datetime import datetime, timedelta
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
@@ -81,6 +82,29 @@ def replace(request):
             item.task.data = dict(dialogue=item.algorithm)
             item.task.save()
             continue
+
+    return Response(data=dict(msg='Replace finished', project_id=project_id))
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def query_clean_task(request):
+    data = request.GET.dict()
+    project_id = data.get('project_id')
+
+    clean_task_query = TaskDbAlgorithm.objects.filter(
+        project_id=project_id
+    )
+    total = clean_task_query.count()
+    finish_query = clean_task_query.filter(
+        Q(~Q(algorithm= '')) | Q(algorithm__isnull=True)
+    )
+    finish = finish_query.count()
+    return Response(data=dict(
+        total=total,
+        finish=finish,
+        rate=round(finish / total, 2) if total > 0 else 0
+    ))
 
 
 @api_view(['POST'])

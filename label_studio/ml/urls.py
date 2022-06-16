@@ -7,6 +7,7 @@ from db_ml.api import prediction
 from db_ml.api import query_task
 from db_ml.api import clean
 from db_ml.api import replace
+from db_ml.api import query_clean_task
 
 app_name = 'ml'
 
@@ -29,4 +30,5 @@ urlpatterns = [
     path('api/dbml/query_task', query_task),
     path('api/dbml/clean', clean),
     path('api/dbml/replace', replace),
+    path('api/dbml/clean/query_task', query_clean_task),
 ]

@@ -7,7 +7,6 @@
   > FileName   : api_db.py
   > CreateTime : 2022/6/7 10:12
 """
-
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from tasks.tag_serializers import TagCleanListSerializer
@@ -63,7 +62,9 @@ class DbTaskTagCleanViews(ModelViewSet):
         :return: dict
         """
 
-        self.queryset = TaskDbAlgorithm.objects.order_by('id').all()
+        self.queryset = TaskDbAlgorithm.objects.filter(
+            project_id=request.GET.dict().get('project_id', '')
+        ).order_by('id').all()
         return super(DbTaskTagCleanViews, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
