@@ -1,31 +1,132 @@
+import { useEffect, useMemo, useRef, useState } from "react";
 import { EditableProTable } from "@ant-design/pro-components";
-import ReactDiffViewer from "react-diff-viewer";
 import { Block, Elem } from "../../utils/bem";
 import { Button } from "../../components/Button/Button";
 import { Modal } from "../../components/Modal/Modal";
 import { Space } from "../../components/Space/Space";
+import { useAPI } from "../../providers/ApiProvider";
+import { useProject } from "../../providers/ProjectProvider";
+
+const PADDING = 32;
+
+const formatResponse = (response) => {
+  const { count, results } = response;
+
+  return {
+    data: results.map((item) => {
+      const res = {
+        id: item.id,
+        origin: item.source ? JSON.stringify(item.source) : "",
+        cleaning: item.algorithm ? JSON.stringify(item.algorithm) : "",
+        _manual: item.manual ? JSON.stringify(item.manual) : "",
+      };
+
+      res.manual = res._manual || res.cleaning || res.origin || "";
+      return res;
+    }),
+    success: true,
+    total: count,
+  };
+};
 
 export default ({ modalRef }) => {
-  const handleRowDataChange = (...params) => {
-    console.log(params, "handleRowDataChange.params");
+  const api = useAPI();
+  const { project } = useProject();
+  const [status, setStatus] = useState({});
+  const tableRef = useRef();
+
+  const request = useMemo(() => {
+    return {
+      clExec: () => {
+        return api.callApi("clExec", {
+          body: {
+            project_id: project.id,
+          },
+        });
+      },
+      clReplace: () => {
+        const form = new FormData();
+
+        form.append("project_id", project.id);
+        return api.callApi("clReplace", {
+          body: form,
+        });
+      },
+      clList: (params) => {
+        return api.callApi("clList", {
+          params: {
+            project_id: project.id,
+            ...params,
+          },
+        });
+      },
+      clQueryStatus: () => {
+        return api.callApi("clQueryStatus", {
+          params: {
+            project_id: project.id,
+          },
+        });
+      },
+      clLabelManually: (taskId, manual) => {
+        const form = new FormData();
+
+        form.append("manual", manual);
+        return api.callApi("clLabelManually", {
+          body: form,
+          params: {
+            id: taskId,
+          },
+        });
+      },
+    };
+  }, [project.id]);
+
+  useEffect(() => {
+    const sync = () => {
+      request.clQueryStatus().then((res) => {
+        setStatus(res);
+      });
+    };
+
+    sync();
+    const timer = setInterval(sync, 3000);
+
+    return clearInterval(timer);
+  }, [request.clQueryStatus]);
+
+  const handleExec = () => {
+    request.clExec();
+  };
+  const handleReplace = () => {
+    request.clReplace();
+  };
+  const handleRowDataChange = (id, data) => {
+    request.clLabelManually(id, JSON.stringify(data.manual)).then(() => {
+      tableRef?.current.reload();
+    });
   };
 
   return (
     <Block name="cleandata">
       <Modal
         bare
-        visible
+        // visible
         ref={modalRef}
         style={{
           width: "calc(100vw - 96px)",
-          height: "calc(100vh - 96px)",
           minWidth: 1000,
-          padding: 40,
+          minHeight: 500,
+          padding: PADDING,
         }}
       >
         <Elem name="wrapper">
           <Elem name="header">
-            <Elem name="title">{t("clean_data_title", "数据清洗")}</Elem>
+            <Space>
+              <Elem name="title">{t("clean_data_title", "数据清洗")}</Elem>
+              <span>
+                {status ? `${status.finish} / ${status.total}` : null}
+              </span>
+            </Space>
             <Space>
               <Elem name="buttons">
                 <Button size="compact" onClick={() => modalRef?.current.hide()}>
@@ -33,9 +134,14 @@ export default ({ modalRef }) => {
                 </Button>
               </Elem>
               <Elem name="buttons">
-                <Button size="compact" look="primary">
-                  {t("clean_data")}
-                </Button>
+                <Space>
+                  <Button size="compact" look="primary" onClick={handleExec}>
+                    {t("clean_exec", "导入清洗算法")}
+                  </Button>
+                  <Button size="compact" look="primary" onClick={handleReplace}>
+                    {t("clean_replace_data", "替换原对话")}
+                  </Button>
+                </Space>
               </Elem>
             </Space>
           </Elem>
@@ -44,6 +150,13 @@ export default ({ modalRef }) => {
               rowKey="id"
               size="small"
               recordCreatorProps={false}
+              scroll={{
+                y: 500,
+              }}
+              pagination={{
+                defaultPageSize: 30,
+              }}
+              actionRef={tableRef}
               editable={{
                 type: "single",
                 actionRender: (row, config, defaultDom) => [
@@ -68,40 +181,13 @@ export default ({ modalRef }) => {
                   dataIndex: "cleaning",
                   title: t("cleaning_dialogue", "对话（清洗后）"),
                   editable: false,
-                  render: (value, record) => {
-                    const prev = record.origin;
-
-                    if (!value || value === prev) {
-                      return value;
-                    }
-                    return (
-                      <ReactDiffViewer
-                        oldValue={prev}
-                        newValue={value}
-                        splitView={false}
-                        hideLineNumbers
-                      />
-                    );
-                  },
                 },
                 {
                   dataIndex: "manual",
                   title: t("manual_dialogue", "对话（人工修改）"),
                   valueType: "textarea",
                   render: (value, record) => {
-                    const prev = record.origin;
-
-                    if (!value || value === prev) {
-                      return value;
-                    }
-                    return (
-                      <ReactDiffViewer
-                        oldValue={prev}
-                        newValue={value}
-                        splitView={false}
-                        hideLineNumbers
-                      />
-                    );
+                    return record._manual;
                   },
                 },
                 {
@@ -120,17 +206,13 @@ export default ({ modalRef }) => {
                   ],
                 },
               ]}
-              request={() => {
-                return {
-                  data: [
-                    {
-                      id: 1,
-                      origin: "春花秋月何时了",
-                      cleaning: "春花秋月何时了",
-                      manual: "春花秋月何时了2",
-                    },
-                  ],
-                };
+              request={({ pageSize, current }) => {
+                return request
+                  .clList({
+                    page: current,
+                    page_size: pageSize,
+                  })
+                  .then((res) => formatResponse(res));
               }}
             />
           </Elem>

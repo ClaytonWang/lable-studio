@@ -73,5 +73,9 @@
   "Cancel": "取消",
   "origin_dialogue": "origin_dialogue",
   "cleaning_dialogue": "cleaning_dialogue",
-  "manual_dialogue": "manual_dialogue"
+  "manual_dialogue": "manual_dialogue",
+  "clean_exec": "导入清洗算法",
+  "clean_replace_data": "替换原对话",
+  "clean_manually": "人工修改",
+  "Edit": "编辑"
 }

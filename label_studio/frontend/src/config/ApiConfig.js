@@ -1,4 +1,3 @@
-
 export const API_CONFIG = {
   gateway: `${window.APP_SETTINGS.hostname}/api`,
   // gateway: `http://124.71.161.146:8080/api`,
@@ -30,7 +29,7 @@ export const API_CONFIG = {
     dataSummary: "/projects/:pk/summary",
 
     // DM
-    deleteTabs: 'DELETE:/dm/views/reset',
+    deleteTabs: "DELETE:/dm/views/reset",
 
     // Storages
     listStorages: "/storages/:target?",
@@ -53,7 +52,14 @@ export const API_CONFIG = {
     modelVersions: "/projects/:pk/model-versions",
     mlInteractive: "POST:/ml/:pk/interactive-annotating",
     mlPreLabelProgress: "GET:/dbml/query_task",
-    mlPredictProcess:'POST:/dbml/predict',
+    mlPredictProcess: "POST:/dbml/predict",
+
+    // Clean
+    clExec: "POST:/dbml/clean",
+    clReplace: "PUT:/dbml/replace",
+    clList: "GET:/clean_tag",
+    clQueryStatus: "GET:/dbml/clean/query_task",
+    clLabelManually: "PUT:/clean_tag/:id",
 
     // Export
     export: "/projects/:pk/export",
@@ -61,7 +67,7 @@ export const API_CONFIG = {
     exportFormats: "/projects/:pk/export/formats",
 
     // Version
-    version: '/version',
+    version: "/version",
 
     // Webhook
     webhooks: "/webhooks",
