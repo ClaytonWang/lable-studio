@@ -92,7 +92,7 @@ export default ({ modalRef }) => {
       sync();
       const timer = setInterval(sync, 3000);
 
-      return clearInterval(timer);
+      return () => clearInterval(timer);
     }
   }, [request.clQueryStatus, project.id]);
 
