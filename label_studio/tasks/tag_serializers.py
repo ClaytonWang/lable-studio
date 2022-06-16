@@ -11,6 +11,7 @@ from rest_framework.serializers import ModelSerializer
 from rest_framework.serializers import SerializerMethodField
 from rest_framework.serializers import CharField
 from rest_framework.serializers import IntegerField
+from rest_framework.serializers import Serializer
 from rest_framework.serializers import ALL_FIELDS
 from tasks.models import TaskDbAlgorithm
 from projects.models import Project
@@ -25,6 +26,8 @@ class TagCleanCreatedSerializer(ModelSerializer):
 
 
 class TagCleanUpdatedSerializer(TagCleanCreatedSerializer):
+    project = Serializer(required=False)
+    task = Serializer(required=False)
     pass
 
 
