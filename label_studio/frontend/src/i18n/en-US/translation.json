@@ -68,5 +68,10 @@
   "Was skipped": "Was skipped",
   "Cancel skip": "Cancel skip",
   "Skip": "Skip",
-  "clean_data": "清洗"
+  "clean_data": "清洗",
+  "clean_data_title": "数据清洗",
+  "Cancel": "取消",
+  "origin_dialogue": "origin_dialogue",
+  "cleaning_dialogue": "cleaning_dialogue",
+  "manual_dialogue": "manual_dialogue"
 }

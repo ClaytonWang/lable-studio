@@ -3,7 +3,7 @@ import { generatePath, useHistory } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import { Loading } from '../../components';
 import { Button } from '../../components/Button/Button';
-import { modal,Modal } from '../../components/Modal/Modal';
+import { modal, Modal } from '../../components/Modal/Modal';
 import { Space } from '../../components/Space/Space';
 import { useAPI } from '../../providers/ApiProvider';
 import { useLibrary } from '../../providers/LibraryProvider';
@@ -15,6 +15,7 @@ import { isDefined } from '../../utils/helpers';
 import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
+import CleanData from './CleanData';
 import { Progress } from 'antd';
 import "./DataManager.styl";
 
@@ -79,7 +80,7 @@ const initializeDataManager = async (root, props, params) => {
     },
     instruments: {
       'wash-button': () => {
-        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={() => { }} >{t("clean_data", "清洗")}</button>;
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={params.handleClickClear} >{t("clean_data", "清洗")}</button>;
       },
       'pre-button': () => {
         return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(普通)</button>;
@@ -110,6 +111,7 @@ export const DataManagerPage = ({ ...props }) => {
   const setContextProps = useContextProps();
   const [crashed, setCrashed] = useState(false);
   const [progress, setProgress] = useState(0);
+  const clearModalRef = useRef();
   const dataManagerRef = useRef();
   const projectId = project?.id;
   
@@ -149,6 +151,7 @@ export const DataManagerPage = ({ ...props }) => {
         setProgress,
         mlQueryProgress,
         mlPredictProcess,
+        handleClickClear: () => clearModalRef?.current.show(),
       },
     ));
 
@@ -256,6 +259,9 @@ export const DataManagerPage = ({ ...props }) => {
       >
         <Progress type="circle" percent={progress} format={percent => `标注中${percent.toFixed(0)}%`}  />
       </Modal>
+      <CleanData
+        modalRef={clearModalRef}
+      />
       <Block ref={root} name="datamanager"/>
     </>
     
