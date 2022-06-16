@@ -32,34 +32,43 @@ def job_clean(*args, **kwargs):
     if not project_id or not task_id:
         logger.warning('Project, task is invalid.')
 
-    # 原数据拼接成 轮次纠正的格式
-    dialog_text = ''.join([
-        item.get('author', '') + item.get('text', '') for item in dialog
-    ])
-    turn = bart_for_turn([{'段落-1': dialog_text}])
-    intell_text = []
-    # 规则
-    for index, item in enumerate(turn):
-        for k, v in item.items():
-            rule_text = RuleClean()(v)
-            intell_text.append(rule_text)
-            turn[index][k] = rule_text
-            break
-    # 智能
-    intell = intelligent(intell_text)
-    for index, item in enumerate(turn):
-        for k, v in item.items():
-            if index <= len(intell) - 1:
-                turn[index][k] = intell[index].get('generated_text', '')
-            break
+    try:
+        # 原数据拼接成 轮次纠正的格式
+        dialog_text = ''.join([
+            item.get('author', '') + item.get('text', '') for item in dialog
+        ])
+        turn = bart_for_turn([{'段落-1': dialog_text}])
+        intell_text = []
+        # 规则
+        for index, item in enumerate(turn):
+            for k, v in item.items():
+                rule_text = RuleClean()(v)
+                intell_text.append(rule_text)
+                turn[index][k] = rule_text
+                break
+        # 智能
+        intell = intelligent(intell_text)
+        for index, item in enumerate(turn):
+            for k, v in item.items():
+                if index <= len(intell) - 1:
+                    turn[index][k] = intell[index].get('generated_text', '')
+                break
 
-    # 拼接回对话模式
-    result = []
-    for item in turn:
-        for k, v in item.items():
-            result.append(dict(author=str(k), text=v))
-            break
+        # 拼接回对话模式
+        result = []
+        for item in turn:
+            for k, v in item.items():
+                result.append(dict(author=str(k), text=v))
+                break
 
-    # 数据写回数据库
-    algorithm_id = kwargs.get('algorithm_id')
-    TaskDbAlgorithm.objects.filter(id=algorithm_id).update(algorithm=result)
+        # 数据写回数据库
+        algorithm_id = kwargs.get('algorithm_id')
+        TaskDbAlgorithm.objects.filter(id=algorithm_id).update(
+            algorithm=result, state=2, remark=''
+        )
+    except Exception as e:
+        TaskDbAlgorithm.objects.filter(id=algorithm_id).update(
+            state=3, remark=str(e)
+        )
+
+
