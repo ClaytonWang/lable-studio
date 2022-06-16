@@ -82,17 +82,19 @@ export default ({ modalRef }) => {
   }, [project.id]);
 
   useEffect(() => {
-    const sync = () => {
-      request.clQueryStatus().then((res) => {
-        setStatus(res);
-      });
-    };
+    if (project.id) {
+      const sync = () => {
+        request.clQueryStatus().then((res) => {
+          setStatus(res);
+        });
+      };
 
-    sync();
-    const timer = setInterval(sync, 3000);
+      sync();
+      const timer = setInterval(sync, 3000);
 
-    return clearInterval(timer);
-  }, [request.clQueryStatus]);
+      return clearInterval(timer);
+    }
+  }, [request.clQueryStatus, project.id]);
 
   const handleExec = () => {
     request.clExec();
