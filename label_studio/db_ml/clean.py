@@ -64,11 +64,11 @@ def job_clean(*args, **kwargs):
 
         # 数据写回数据库
         TaskDbAlgorithm.objects.filter(id=algorithm_id).update(
-            algorithm=result, state=2, remark=''
+            algorithm=result, state=2, remarks=''
         )
     except Exception as e:
         TaskDbAlgorithm.objects.filter(id=algorithm_id).update(
-            state=3, remark=str(e)
+            state=3, remarks=str(e)
         )
 
 
