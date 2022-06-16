@@ -4,7 +4,8 @@ import data_export.api
 from django.shortcuts import redirect
 from django.urls import include, path
 
-from . import api, views
+# 增加promt - api.py
+from . import api, views, prompt_api
 
 app_name = 'projects'
 
@@ -55,4 +56,13 @@ urlpatterns = [
     path('projects/', include(_urlpatterns)),
     path('api/projects/', include((_api_urlpatterns, app_name), namespace='api')),
     path('api/templates/', include((_api_urlpatterns_templates, app_name), namespace='api-templates')),
+
+    # 推断学习模版curd
+    path('prompt-learning/template/', prompt_api.PromptAPI.as_view()),
+    path('prompt-learning/template/<int:projectId>/', prompt_api.PromptAPI.as_view(), name='template-detail'),
+
+    # 增加两个关于推断学习算法的接口
+    path('prompt-learning/predict/', prompt_api.PromptLearning.as_view()),
+    path('prompt-learning/retrieve/', prompt_api.PromptExport.as_view())
 ]
+
