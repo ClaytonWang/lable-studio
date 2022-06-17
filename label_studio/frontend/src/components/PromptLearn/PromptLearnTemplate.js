@@ -40,10 +40,9 @@ const EditableCell = ({
   );
 };
 
-export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)=>{
+export const PromptLearnTemplate = React.forwardRef(({ projectId },ref)=>{
   const [form] = Form.useForm();
   const [sourceData, setSourceData] = useState([]);
-  const [count, setCount] = useState(0);
   const [editingKey, setEditingKey] = useState('');
   const [dlgVisible, setDlgVisible] = useState(false);
   const [loading,setLoading] = useState(true);
@@ -51,39 +50,69 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
 
   const isEditing = (record) => record.key === editingKey || record.isNew;
 
-  const showDlg = () => {
+  const showDlg = async () => {
     setDlgVisible(true);
-    mlPromptTemplateQuery();
+    await mlPromptTemplateQuery();
   };
 
   useImperativeHandle(ref, () => ({
     show:showDlg,
   }));
 
+  //模版查询
   const mlPromptTemplateQuery = useCallback(async () => {
     const tmps = await api.callApi('mlPromptTemplateQuery', {
-      params: { project_id: projectId },
+      params: { project: projectId },
     });
 
+    const tmpSource = [];
+
+    if (tmps?.templates?.length > 0) {
+      tmps?.templates?.forEach(v => {
+        tmpSource.push({
+          key: v?.id ?? Math.random() * 1000,
+          template: v?.template ?? v ?? '',
+          isNew:false,
+        });
+      });
+    }
+    setSourceData(tmpSource);
     setLoading(false);
-    return tmps;
+    return tmpSource;
   }, [projectId]);
 
+  //模型调用
   const mlPromptPredict = useCallback(async () => {
     return await api.callApi('mlPromptPredict', {
-      params: {
+      body: {
         project: projectId,
       },
     });
   }, [projectId]);
 
+  //模版增加
   const mlPromptTemplateCreate = async (project,template) => {
     return await api.callApi('mlPromptTemplateCreate', {
       body: {
         project,
         template,
-        taskId:1,
       },
+    });
+  };
+
+  //模版删除
+  const mlPromptTemplateDelete = async (id) => {
+    return await api.callApi('mlPromptTemplateDelete', {
+      body: { id },
+    });
+  };
+
+  //模版修改
+  const mlPromptTemplateUpdate = async (id, template) => {
+    console.log(template);
+    return await api.callApi('mlPromptTemplateUpdate', {
+      params: { id },
+      body: { template },
     });
   };
 
@@ -108,6 +137,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
     form.setFieldsValue({
       template:'',
     });
+
     if (record.isNew) {
       handleDelete(record.key);
     } else {
@@ -119,30 +149,38 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
     const newData = sourceData.filter((item) => item.key !== key);
 
     setSourceData(newData);
+    if (!newData?.isNew) {
+      mlPromptTemplateDelete(newData.key);
+    }
   };
 
   const handleAdd = () => {
     const newData = {
-      key: count,
+      key: Math.random()*10000,
       template: '',
       isNew:true,
     };
 
     setSourceData([newData,...sourceData]);
-    setCount(count + 1);
   };
 
   const save = async (key) => {
     try {
       const row = await form.validateFields();
-
-      row.isNew=false;
       const newData = [...sourceData];
       const index = newData.findIndex((item) => key === item.key);
+      let isNew = false;
 
+      form.setFieldsValue({
+        template:'',
+      });
+      row.isNew = isNew;
+
+      //存在就更新
       if (index > -1) {
         const item = newData[index];
 
+        isNew = item.isNew;
         newData.splice(index, 1, { ...item, ...row });
         setSourceData(newData);
         setEditingKey('');
@@ -151,10 +189,11 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
         setEditingKey('');
       }
 
-      form.setFieldsValue({
-        template:'',
-      });
-      mlPromptTemplateCreate(projectId,row.template);
+      if (isNew) {
+        await mlPromptTemplateCreate(projectId,row.template);
+      } else {
+        await mlPromptTemplateUpdate(key,row.template);
+      }
     } catch (errInfo) {
       console.log('Validate Failed:', errInfo);
     }
@@ -182,7 +221,6 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId,...props },ref)
       title: '操作',
       dataIndex: 'operation',
       render: (_, record) => {
-        console.log(_);
         const editable = isEditing(record);
 
         return editable ? (

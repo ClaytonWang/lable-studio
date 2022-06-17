@@ -60,7 +60,7 @@ export const API_CONFIG = {
     mlPromptTemplateCreate: 'POST:/templates/prompt-learning',
     mlPromptTemplateDelete: 'DELETE:/templates/prompt-learning',
     mlPromptTemplateUpdate:'PATCH:/templates/prompt-learning',
-    mlPromptTemplateQuery:'GET:/templates/prompt-learning',
+    mlPromptTemplateQuery:'GET:/templates/prompt-learning/:project',
 
     // Export
     export: "/projects/:pk/export",
