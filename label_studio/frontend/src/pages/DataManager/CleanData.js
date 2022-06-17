@@ -119,7 +119,6 @@ export default ({ modalRef }) => {
     <Block name="cleandata">
       <Modal
         bare
-        visible
         ref={modalRef}
         style={{
           width: "calc(100vw - 96px)",
