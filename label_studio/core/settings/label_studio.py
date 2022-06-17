@@ -2,7 +2,7 @@
 """
 from core.settings.base import *
 
-DJANGO_DB = get_env('DJANGO_DB', DJANGO_DB_SQLITE)
+DJANGO_DB = get_env('DJANGO_DB', DJANGO_DB_POSTGRESQL)
 DATABASES = {'default': DATABASES_ALL[DJANGO_DB]}
 
 MIDDLEWARE.append('organizations.middleware.DummyGetSessionMiddleware')
@@ -22,19 +22,19 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 RQ_QUEUES = {
     'default': {
-        'HOST': '127.0.0.1',
+        'HOST': '124.71.161.146',
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,
     },
     'pre_tags': {
-        'HOST': '127.0.0.1',
+        'HOST': '124.71.161.146',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
     'algorithm_clean': {
-        'HOST': '127.0.0.1',
+        'HOST': '124.71.161.146',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,

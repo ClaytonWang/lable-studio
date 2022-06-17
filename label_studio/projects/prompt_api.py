@@ -11,6 +11,7 @@ from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from .models import PromptResult, PromptTemplates
+from tasks.models import Task
 
 
 class PromptLearning(APIView):
@@ -23,19 +24,49 @@ class PromptLearning(APIView):
     def get(self, request, *args, **kwargs):
         return Response('hello prompt-learning', status=status.HTTP_200_OK)
 
+    # def post(self, request, *args, **kwargs):
+    #     params = request.data
+    #     print('params', params)
+    #     try:
+    #         result = patch_prompt(params['templates'], params['task'])
+    #         print('result', result)
+    #         # 入库
+    #         c = PromptResult.objects.create(project_id=params['project'], task_id=params['taskId'], metrics=result)
+    #         c.save()
+    #         result = {'status': 0, 'error': ''}
+    #         resp_status = status.HTTP_200_OK
+    #     except Exception as e:
+    #         result = {'status': 0, 'error': str(e)}
+    #         resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+    #     return Response(result, status=resp_status)
+
     def post(self, request, *args, **kwargs):
         params = request.data
         print('params', params)
+        project_id = params['project']
         try:
-            result = patch_prompt(params['templates'], params['task'])
-            print('result', result)
-            # 入库
-            c = PromptResult.objects.create(project_id=params['project'], task_id=params['taskId'], metrics=result)
-            c.save()
+            # 获取templates
+            template_list = PromptTemplates.objects.filter(project_id=params['project']).values()
+            # print('template_list', template_list)
+            templates = [item['template'] for item in template_list]
+            # 获取tasks
+            tasks = Task.objects.filter(project_id=params['project']).values()
+            # print('tasks', tasks)
+            if templates and tasks:
+                aggregate = []
+                for task in tasks:
+                    result = patch_prompt(templates, task['data']['dialogue'])
+                    c = PromptResult(project_id=project_id, task_id=task['id'], metrics=result)
+                    # c.save()
+                    aggregate.append(c)
+                print('aggregate', aggregate)
+                # 批量入库
+                PromptResult.objects.bulk_create(aggregate)
+
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK
         except Exception as e:
-            result = {'status': 0, 'error': str(e)}
+            result = {'status': 1, 'error': str(e)}
             resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR
         return Response(result, status=resp_status)
 
@@ -117,8 +148,7 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
     def post(self, request, *args, **kwargs):
         params = request.data
         c = PromptTemplates.objects.create(project_id=params['project'],
-                                           task_id=params['taskId'],
-                                           template=params['template'],
+                                           template=params['template']
                                            )
         try:
             c.save()
@@ -148,8 +178,7 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
         params = request.data
         print('params', params)
         try:
-            c = PromptTemplates.objects.filter(project_id=params['project']).\
-                filter(task_id=params['taskId']).filter(template=params['template'])
+            c = PromptTemplates.objects.filter(project_id=params['project']).filter(template=params['template'])
             c.delete()
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK
@@ -165,7 +194,6 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return PromptTemplates.objects.filter(project_id=self.request.data.get('project')).\
-            filter(task_id=self.request.data.get('taskId')).\
             filter(template=self.request.data.get('template'))
 
     #  put must queryset or get_queryset

@@ -1004,9 +1004,6 @@ class PromptTemplates(models.Model):
     # 关联项目 project
     project = models.ForeignKey(Project, related_name='project_PromptTemplates_id', on_delete=models.CASCADE, null=False, help_text='Project ID for this task')
 
-    # 关联任务 task
-    task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE, related_name='task_id', null=False, help_text='Corresponding task for this annotation')
-
     # 模版
     template = models.JSONField(verbose_name='模版',  max_length=1000, null=True, blank=True)
 
@@ -1021,7 +1018,7 @@ class PromptTemplates(models.Model):
 
     # 设立联合主键
     class Meta:
-        unique_together = ("project_id", "task_id", "template")
+        unique_together = ("project_id", "template")
 
     # def has_permission(self, user):
     #     return self.project.has_permission(user)
@@ -1052,7 +1049,7 @@ class PromptResult(models.Model):
 
     # 设立联合主键
     class Meta:
-        unique_together = ("project_id", "task_id")
+        unique_together = ("task_id", "project_id", "metrics")
 
     # def has_permission(self, user):
     #     return self.project.has_permission(user)
