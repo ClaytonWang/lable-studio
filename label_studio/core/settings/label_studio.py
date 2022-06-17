@@ -22,19 +22,19 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 RQ_QUEUES = {
     'default': {
-        'HOST': '124.71.161.146',
+        'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,
     },
     'pre_tags': {
-        'HOST': '124.71.161.146',
+        'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
     'algorithm_clean': {
-        'HOST': '124.71.161.146',
+        'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
