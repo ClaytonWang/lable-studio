@@ -60,7 +60,7 @@ def clean(request):
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
 
-@api_view(['PUT'])
+@api_view(['PATCH', 'PUT'])
 @permission_classes([IsAuthenticated])
 def replace(request):
     """
