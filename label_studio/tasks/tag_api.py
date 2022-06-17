@@ -85,7 +85,8 @@ class DbTaskTagCleanViews(ModelViewSet):
         return super(DbTaskTagCleanViews, self).update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
-        self.update(request, args, kwargs)
+        self.queryset = TaskDbAlgorithm.objects.filter(pk=kwargs.get('pk'))
+        return super(DbTaskTagCleanViews, self).partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         self.queryset = TaskDbAlgorithm.objects.filter(pk=kwargs.get('pk'))
