@@ -112,6 +112,7 @@ def query_clean_task(request):
         finish=finish,
         falied=failed_count,
         success=success_count,
+        state=True if clean_task_query.filter(state=1).count() else False,
         rate=round(finish / total, 2) if total > 0 else 0
     ))
 

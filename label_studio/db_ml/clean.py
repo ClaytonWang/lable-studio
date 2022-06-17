@@ -32,6 +32,7 @@ def job_clean(*args, **kwargs):
     if not project_id or not task_id:
         logger.warning('Project, task is invalid.')
 
+    algorithm_id = kwargs.get('algorithm_id')
     try:
         # 原数据拼接成 轮次纠正的格式
         dialog_text = ''.join([
@@ -62,13 +63,12 @@ def job_clean(*args, **kwargs):
                 break
 
         # 数据写回数据库
-        algorithm_id = kwargs.get('algorithm_id')
         TaskDbAlgorithm.objects.filter(id=algorithm_id).update(
-            algorithm=result, state=2, remark=''
+            algorithm=result, state=2, remarks=''
         )
     except Exception as e:
         TaskDbAlgorithm.objects.filter(id=algorithm_id).update(
-            state=3, remark=str(e)
+            state=3, remarks=str(e)
         )
 
 
