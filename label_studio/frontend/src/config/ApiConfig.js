@@ -54,6 +54,14 @@ export const API_CONFIG = {
     mlPreLabelProgress: "GET:/dbml/query_task",
     mlPredictProcess: "POST:/dbml/predict",
 
+    // Prompt Learning
+    mlPromptPredict: 'POST:/projects/prompt-learning/predict',
+    mlPromptTemplateCreate: 'POST:/templates/prompt-learning',
+    mlPromptTemplateDelete: 'DELETE:/templates/prompt-learning',
+    mlPromptTemplateUpdate:'PATCH:/templates/prompt-learning',
+    mlPromptTemplateQuery:'GET:/templates/prompt-learning/:project',
+
+
     // Clean
     clExec: "POST:/dbml/clean",
     clReplace: "PATCH:/dbml/replace",
