@@ -76,9 +76,9 @@ DATABASES_ALL = {
     DJANGO_DB_POSTGRESQL: {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': get_env('POSTGRE_USER', 'postgres'),
-        'PASSWORD': get_env('POSTGRE_PASSWORD', 'postgres'),
+        'PASSWORD': get_env('POSTGRE_PASSWORD', 'Dbtest'),
         'NAME': get_env('POSTGRE_NAME', 'postgres'),
-        'HOST': get_env('POSTGRE_HOST', 'localhost'),
+        'HOST': get_env('POSTGRE_HOST', '124.71.161.146'),
         'PORT': int(get_env('POSTGRE_PORT', '5432')),
     },
     DJANGO_DB_MYSQL: {
@@ -282,7 +282,7 @@ TEMPLATES = [
 # RQ
 RQ_QUEUES = {
     'default': {
-        'HOST': '127.0.0.1',
+        'HOST': '124.71.161.146',
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,

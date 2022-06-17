@@ -2,7 +2,7 @@
 """
 from core.settings.base import *
 
-DJANGO_DB = get_env('DJANGO_DB', DJANGO_DB_SQLITE)
+DJANGO_DB = get_env('DJANGO_DB', DJANGO_DB_POSTGRESQL)
 DATABASES = {'default': DATABASES_ALL[DJANGO_DB]}
 
 MIDDLEWARE.append('organizations.middleware.DummyGetSessionMiddleware')
@@ -31,8 +31,15 @@ RQ_QUEUES = {
         'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 1,
-        'DEFAULT_TIMEOUT': 18000,
+        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
+    'algorithm_clean': {
+        'HOST': '127.0.0.1',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+    },
+
 }
 
 SENTRY_DSN = get_env(

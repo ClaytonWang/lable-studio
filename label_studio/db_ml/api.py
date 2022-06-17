@@ -11,6 +11,7 @@ import logging
 from django.db import connection
 from django.db.models import Count
 from datetime import datetime, timedelta
+from django.db.models import Q
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
@@ -18,9 +19,102 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from core.redis import start_job_async_or_sync
 from db_ml.predict import job_predict
+from db_ml.clean import job_clean
 from tasks.models import Task
-from tasks.models import TaskDbTag
 from tasks.models import Prediction
+from tasks.models import TaskDbAlgorithm
+from core.redis import redis_connected
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def clean(request):
+    """
+    调用清洗算法
+    :param request:
+    :return:
+    """
+    data = request.data
+    project_id = data.get('project_id')
+    query = TaskDbAlgorithm.objects.filter(project_id=project_id)
+    if not query:
+        return Response(data=dict(msg='Invalid project id'))
+
+    TaskDbAlgorithm.objects.filter(project_id=project_id).update(
+        algorithm='',
+        manual='',
+        state=1,
+    )
+    for item in query:
+        dialog = item.source
+        data = dict(
+            project_id=project_id,
+            task_id=item.task.id,
+            user_id=request.user.id,
+            algorithm_id=item.id,
+            queue_name='algorithm_clean',
+            dialog=dialog,
+        )
+        start_job_async_or_sync(job_clean, **data)
+        # job_clean(**data)
+    return Response(data=dict(msg='Submit success', project_id=project_id))
+
+
+@api_view(['PATCH', 'PUT'])
+@permission_classes([IsAuthenticated])
+def replace(request):
+    """
+    清洗-替换数据
+    :param request:
+    :return:
+    """
+    data = request.data
+    project_id = data.get('project_id')
+    query = TaskDbAlgorithm.objects.filter(
+        project_id=project_id, state=2
+    )
+    if not query:
+        return Response(data=dict(msg='Invalid project id'))
+
+    for item in query:
+        if item.manual:
+            item.task.data = dict(dialogue=item.manual)
+            item.task.save()
+            continue
+        elif item.algorithm:
+            item.task.data = dict(dialogue=item.algorithm)
+            item.task.save()
+            continue
+
+    return Response(data=dict(msg='Replace finished', project_id=project_id))
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def query_clean_task(request):
+    data = request.GET.dict()
+    project_id = data.get('project_id')
+
+    clean_task_query = TaskDbAlgorithm.objects.filter(
+        project_id=project_id
+    )
+    total = clean_task_query.count()
+    success_query = clean_task_query.filter(state=2)
+    failed_query = clean_task_query.filter(state=3)
+    #     clean_task_query.filter(
+    #     Q(~Q(algorithm= '')) | Q(algorithm__isnull=True)
+    # )
+    success_count = success_query.count()
+    failed_count = failed_query.count()
+    finish = success_count + failed_count
+    return Response(data=dict(
+        total=total,
+        finish=finish,
+        falied=failed_count,
+        success=success_count,
+        state=True if clean_task_query.filter(state=1).count() else False,
+        rate=round(finish / total, 2) if total > 0 else 0
+    ))
 
 
 @api_view(['POST'])

@@ -78,7 +78,7 @@
       </div>
       <footer>
         <p class="secondary">Registered {{ user.date_joined|date:"M j, Y" }}, user ID {{ user.id }}</p>
-        <button class="ls-button ls-button_look_primary" onclick="smart_submit()">Save</button>
+        <button class="ls-button ls-button_look_primary" onclick="smart_submit()"><span data-i18n="Save">Save</span></button>
       </footer>
     </form>
 
@@ -89,8 +89,8 @@
         <label for="access_token">Use this token to authenticate with our API:</label>
         <input id="access_token" class="ls-input" name="access_token" type="text" value="{{token}}" readonly />
         <p class="actions">
-          <button type="button" class="blinking-status ls-button" data-copy="access_token">Copy</button>
-          <button type="button" class="blinking-status ls-button" name="renew">Renew</button>
+          <button type="button" class="blinking-status ls-button" data-copy="access_token"><span data-i18n="Copy">Copy</span></button>
+          <button type="button" class="blinking-status ls-button" name="renew"><span data-i18n="Renew">Renew</span></button>
         </p>
       </div>
       <!-- Example -->
@@ -105,8 +105,8 @@
           {% endif %}
         </textarea>
         <p class="actions">
-          <button type="button" class="blinking-status ls-button" data-copy="example_fetch">Copy</button>
-          <a class="ls-button" href="https://labelstud.io/guide/api.html" target="_blank">Documentation</a>
+          <button type="button" class="blinking-status ls-button" data-copy="example_fetch"><span data-i18n="Copy">Copy</span></button>
+          <a class="ls-button" href="https://labelstud.io/guide/api.html" target="_blank"><span data-i18n="Documentation">Documentation</span></a>
         </p>
       </div>
     </form>

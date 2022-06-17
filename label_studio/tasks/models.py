@@ -32,6 +32,12 @@ from data_manager.managers import PreparedTaskManager, TaskManager
 from core.bulk_update_utils import bulk_update
 from data_import.models import FileUpload
 
+CLEAN_STATE = (
+    (0, 'initial'),
+    (1, 'ongoing'),
+    (2, 'success'),
+    (3, 'fail'),
+)
 
 logger = logging.getLogger(__name__)
 
@@ -272,22 +278,21 @@ class Task(TaskMixin, models.Model):
         super().save(*args, **kwargs)
 
 
-class TaskDbTag(models.Model):
+class TaskDbAlgorithm(models.Model):
     # 关联项目 project
-    project = models.ForeignKey('projects.Project', related_name='project_tag', on_delete=models.CASCADE, null=True, help_text='Project ID for this task')
     db_backend = models.ForeignKey('ml.DbMLBackend', related_name='db_tag', on_delete=models.CASCADE, null=True, help_text='Project ID for this task')
+    project = models.ForeignKey('projects.Project', related_name='project_tag', on_delete=models.CASCADE, help_text='Project ID for this task')
     # 关联任务 task
-    task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE, related_name='task_tag', null=True, help_text='Corresponding task for this annotation')
-    # 标注使用的原始文本
-    tag_text = models.TextField(verbose_name='标注原始文本', max_length=400, null=True, blank=True)
-    # 自动标准内容
-    auto = models.JSONField(verbose_name='算法计算',  max_length=400, null=True, blank=True)
-    # 手动标注内容
-    manual = models.JSONField(verbose_name='手动标注',  max_length=400, null=True, blank=True)
-    # state = models.IntegerField(verbose_name='状态', null=True, blank=True)
-    confidence = models.FloatField(verbose_name='可信度', null=True)
+    task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE, related_name='task_tag', help_text='Corresponding task for this annotation')
+    # 原始文本
+    source = models.JSONField(verbose_name='原始文本', max_length=400, null=True, blank=True)
+    # 算法清洗
+    algorithm = models.JSONField(verbose_name='算法清洗', null=True, blank=True)
+    # 人工修改
+    manual = models.JSONField(verbose_name='手动标注', null=True, blank=True)
+    state = models.IntegerField(verbose_name='状态', choices=CLEAN_STATE, default=0)
     # 标注备注
-    remarks = models.TextField(verbose_name='备注',  max_length=400, null=True, blank=True)
+    remarks = models.TextField(verbose_name='备注',  max_length=200, null=True, blank=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Time a task was created')
     updated_at = models.DateTimeField(_('updated at'), auto_now=True, help_text='Last time a task was updated')
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_tag', on_delete=models.SET_NULL, null=True, verbose_name=_('updated by'), help_text='Last annotator or reviewer who updated this task')
@@ -295,6 +300,7 @@ class TaskDbTag(models.Model):
 
     def has_permission(self, user):
         return self.task.project.has_permission(user)
+
 
 pre_bulk_create = Signal(providing_args=["objs", "batch_size"])
 post_bulk_create = Signal(providing_args=["objs", "batch_size"])
