@@ -150,7 +150,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId },ref)=>{
 
     setSourceData(newData);
     if (!newData?.isNew) {
-      mlPromptTemplateDelete(newData.key);
+      mlPromptTemplateDelete(key);
     }
   };
 
