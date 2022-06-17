@@ -36,6 +36,18 @@ License: MIT
  * @license BSD-3-Clause
  */
 
+/*!
+ * wavesurfer.js regions plugin 6.2.0 (2022-05-16)
+ * https://wavesurfer-js.org
+ * @license BSD-3-Clause
+ */
+
+/*!
+ * wavesurfer.js timeline plugin 6.2.0 (2022-05-16)
+ * https://wavesurfer-js.org
+ * @license BSD-3-Clause
+ */
+
 /*! *****************************************************************************
 Copyright (c) Microsoft Corporation.
 

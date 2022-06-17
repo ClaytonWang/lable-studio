@@ -83,7 +83,7 @@ export const ProjectsPage = () => {
   );
 };
 
-ProjectsPage.title = "Projects";
+ProjectsPage.title = t("Projects");
 ProjectsPage.path = "/projects";
 ProjectsPage.exact = true;
 ProjectsPage.routes = ({ store }) => [
@@ -104,5 +104,5 @@ ProjectsPage.routes = ({ store }) => [
 ];
 ProjectsPage.context = ({ openModal, showButton }) => {
   if (!showButton) return null;
-  return <Button onClick={openModal} look="primary" size="compact">Create</Button>;
+  return <Button onClick={openModal} look="primary" size="compact">{t("Create")}</Button>;
 };
