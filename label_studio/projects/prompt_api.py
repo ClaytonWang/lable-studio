@@ -168,17 +168,33 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
         # pdb.set_trace()
         # print('ts', ts)
         # transform
-        result = [item['template'] for item in ts]
+        # result = [item['template'] for item in ts]
+        result = [{'template': item['template'], 'id': item['id']} for item in ts]
         print('result', result)
         # return Response(result, status=status.HTTP_200_OK)
         return Response({'templates': result}, status=status.HTTP_200_OK)
+
+    # # delete
+    # def delete(self, request, *args, **kwargs):
+    #     params = request.data
+    #     print('params', params)
+    #     try:
+    #         c = PromptTemplates.objects.filter(project_id=params['project']).filter(template=params['template'])
+    #         c.delete()
+    #         result = {'status': 0, 'error': ''}
+    #         resp_status = status.HTTP_200_OK
+    #     except Exception as e:
+    #         print('e', e)
+    #         result = {'status': 1, 'error': e}
+    #         resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+    #     return Response(result, status=resp_status)
 
     # delete
     def delete(self, request, *args, **kwargs):
         params = request.data
         print('params', params)
         try:
-            c = PromptTemplates.objects.filter(project_id=params['project']).filter(template=params['template'])
+            c = PromptTemplates.objects.filter(id=params['id'])
             c.delete()
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK
@@ -192,21 +208,40 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         return self.put(request, *args, **kwargs)
 
-    def get_queryset(self):
-        return PromptTemplates.objects.filter(project_id=self.request.data.get('project')).\
-            filter(template=self.request.data.get('template'))
+    # def get_queryset(self):
+    #     return PromptTemplates.objects.filter(project_id=self.request.data.get('project')).\
+    #         filter(template=self.request.data.get('template'))
+    #
+    # #  put must queryset or get_queryset
+    # # @swagger_auto_schema(auto_schema=None)
+    # def put(self, request, *args, **kwargs):
+    #     params = request.data
+    #     try:
+    #         c = self.get_queryset()
+    #         print('c', c)
+    #         c.update(template=params['new'])
+    #         result = {'status': 0, 'error': ''}
+    #         resp_status = status.HTTP_200_OK
+    #     except Exception as e:
+    #         result = {'status': 1, 'error': str(e)}
+    #         resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+    #     return Response(result, status=resp_status)
+
+    def get_queryset(self, idx):
+        return PromptTemplates.objects.filter(id=idx)
 
     #  put must queryset or get_queryset
     # @swagger_auto_schema(auto_schema=None)
     def put(self, request, *args, **kwargs):
         params = request.data
         try:
-            c = self.get_queryset()
+            c = self.get_queryset(kwargs.get('id'))
             print('c', c)
-            c.update(template=params['new'])
+            c.update(template=params['template'])
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK
         except Exception as e:
             result = {'status': 1, 'error': str(e)}
             resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR
         return Response(result, status=resp_status)
+

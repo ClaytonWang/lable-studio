@@ -61,7 +61,8 @@ urlpatterns = [
 
     # 推断学习模版curd
     path('api/templates/prompt-learning/', prompt_api.PromptAPI.as_view()),
-    path('api/templates/prompt-learning/<int:project>/', prompt_api.PromptAPI.as_view(), name='template-detail'),
+    path('api/templates/prompt-learning/<int:project>/', prompt_api.PromptAPI.as_view(), name='template-detail-get'),
+    path('api/templates/prompt-learning/<int:id>/', prompt_api.PromptAPI.as_view(), name='template-detail-update'),
 
     # 增加两个关于推断学习算法的接口
     path('api/projects/prompt-learning/predict/', prompt_api.PromptLearning.as_view()),
