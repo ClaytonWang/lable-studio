@@ -56,10 +56,10 @@ export const API_CONFIG = {
 
     // Clean
     clExec: "POST:/dbml/clean",
-    clReplace: "PUT:/dbml/replace",
+    clReplace: "PATCH:/dbml/replace",
     clList: "GET:/clean_tag",
     clQueryStatus: "GET:/dbml/clean/query_task",
-    clLabelManually: "PUT:/clean_tag/:id",
+    clLabelManually: "PATCH:/clean_tag/:id",
 
     // Export
     export: "/projects/:pk/export",

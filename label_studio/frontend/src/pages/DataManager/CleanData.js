@@ -4,6 +4,7 @@ import { Block, Elem } from "../../utils/bem";
 import { Button } from "../../components/Button/Button";
 import { Modal } from "../../components/Modal/Modal";
 import { Space } from "../../components/Space/Space";
+import { DiffChars } from "../../components/Diff";
 import { useAPI } from "../../providers/ApiProvider";
 import { useProject } from "../../providers/ProjectProvider";
 
@@ -45,11 +46,10 @@ export default ({ modalRef }) => {
         });
       },
       clReplace: () => {
-        const form = new FormData();
-
-        form.append("project_id", project.id);
         return api.callApi("clReplace", {
-          body: form,
+          body: {
+            project_id: project.id,
+          },
         });
       },
       clList: (params) => {
@@ -68,11 +68,18 @@ export default ({ modalRef }) => {
         });
       },
       clLabelManually: (taskId, manual) => {
-        const form = new FormData();
+        const manualData = (() => {
+          try {
+            return JSON.parse(manual);
+          } catch (error) {
+            return manual;
+          }
+        })();
 
-        form.append("manual", manual);
         return api.callApi("clLabelManually", {
-          body: form,
+          body: {
+            manual: manualData,
+          },
           params: {
             id: taskId,
           },
@@ -103,7 +110,7 @@ export default ({ modalRef }) => {
     request.clReplace();
   };
   const handleRowDataChange = (id, data) => {
-    request.clLabelManually(id, JSON.stringify(data.manual)).then(() => {
+    request.clLabelManually(id, data.manual).then(() => {
       tableRef?.current.reload();
     });
   };
@@ -112,7 +119,7 @@ export default ({ modalRef }) => {
     <Block name="cleandata">
       <Modal
         bare
-        // visible
+        visible
         ref={modalRef}
         style={{
           width: "calc(100vw - 96px)",
@@ -183,13 +190,28 @@ export default ({ modalRef }) => {
                   dataIndex: "cleaning",
                   title: t("cleaning_dialogue", "对话（清洗后）"),
                   editable: false,
+                  render: (value, record) => {
+                    if (value && value !== "-" && value !== record.origin) {
+                      return (
+                        <DiffChars oldValue={record.origin} newValue={value} />
+                      );
+                    }
+                    return value || "-";
+                  },
                 },
                 {
                   dataIndex: "manual",
                   title: t("manual_dialogue", "对话（人工修改）"),
                   valueType: "textarea",
-                  render: (value, record) => {
-                    return record._manual;
+                  render: (v, record) => {
+                    const value = record._manual;
+
+                    if (value && value !== "-" && value !== record.origin) {
+                      return (
+                        <DiffChars oldValue={record.origin} newValue={value} />
+                      );
+                    }
+                    return value || "-";
                   },
                 },
                 {
