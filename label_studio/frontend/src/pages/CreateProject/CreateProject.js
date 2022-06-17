@@ -24,12 +24,12 @@ const DEFAULT_CONFIG = `<View>
 const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, setDescription, show = true }) => !show ? null :(
   <form className={cn("project-name")} onSubmit={e => { e.preventDefault(); onSubmit(); }}>
     <div className="field field--wide">
-      <label htmlFor="project_name">Project Name</label>
+      <label htmlFor="project_name">{t("Project Name")}</label>
       <input name="name" id="project_name" value={name} onChange={e => setName(e.target.value)} onBlur={onSaveName} />
       {error && <span className="error">{error}</span>}
     </div>
     <div className="field field--wide">
-      <label htmlFor="project_description">Description</label>
+      <label htmlFor="project_description">{t("Description")}</label>
       <textarea
         name="description"
         id="project_description"
@@ -62,7 +62,7 @@ export const CreateProject = ({ onClose }) => {
   const rootClass = cn("create-project");
   const tabClass = rootClass.elem("tab");
   const steps = {
-    name: <span className={tabClass.mod({ disabled: !!error })}>Project Name</span>,
+    name: <span className={tabClass.mod({ disabled: !!error })}>{t("Project Name")}</span>,
     import: <span className={tabClass.mod({ disabled: uploadDisabled })}>Data Import</span>,
     config: "Labeling Setup",
   };

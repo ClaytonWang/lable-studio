@@ -96,5 +96,5 @@ export const DangerZone = () => {
   );
 };
 
-DangerZone.title = "Danger Zone";
+DangerZone.title = t("Danger Zone");
 DangerZone.path = "/danger-zone";
