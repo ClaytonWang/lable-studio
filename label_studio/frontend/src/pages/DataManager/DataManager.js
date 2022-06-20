@@ -1,4 +1,4 @@
-import { createRef, useCallback, useEffect, useRef,useState } from 'react';
+import React,{ createRef, useCallback, useEffect, useRef,useState } from 'react';
 import { generatePath, useHistory } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import { Loading } from '../../components';
@@ -17,25 +17,28 @@ import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
 import CleanData from './CleanData';
 import { Progress } from 'antd';
+import { PromptLearnTemplate } from '../../components';
 import "./DataManager.styl";
 
 const refModal = createRef();
+const refProm = createRef();
+
 const onPreButtonClick = (e,params) => {
   const mlQueryProgress = params.mlQueryProgress;
   const setProgress = params.setProgress;
   const mlPredictProcess = params.mlPredictProcess;
 
   mlPredictProcess();
-  
+
   let progress = 0,count=0;
 
   refModal.current?.show();
-  let t = setInterval(() => { 
+  let t = setInterval(() => {
     count = count + 1;
     mlQueryProgress().then((rst) => {
       progress = rst.rate * 100;
       setProgress(progress);
-  
+
       if (progress >= 100 || (progress === 0 && count > 11)) {
         clearInterval(t);
         setProgress(0);
@@ -44,6 +47,10 @@ const onPreButtonClick = (e,params) => {
       }
     });
   },1000);
+};
+
+const onPrePromButtonClick = () => {
+  refProm.current?.show();
 };
 
 const initializeDataManager = async (root, props, params) => {
@@ -65,9 +72,9 @@ const initializeDataManager = async (root, props, params) => {
     polling: !window.APP_SETTINGS,
     showPreviews: true,
     apiEndpoints: APIConfig.endpoints,
-    // apiHeaders: {
-    //   Authorization: `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
-    // },
+    apiHeaders: {
+      Authorization: `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
+    },
     interfaces: {
       backButton: false,
       labelingHeader: false,
@@ -86,7 +93,7 @@ const initializeDataManager = async (root, props, params) => {
         return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(普通)</button>;
       },
       'pre-prom-button': () => {
-        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(提示学习)</button>;
+        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >预标注(提示学习)</button>;
       },
     },
     ...props,
@@ -114,16 +121,16 @@ export const DataManagerPage = ({ ...props }) => {
   const clearModalRef = useRef();
   const dataManagerRef = useRef();
   const projectId = project?.id;
-  
-  const mlPredictProcess = useCallback(async () => { 
+
+  const mlPredictProcess = useCallback(async () => {
     return await api.callApi('mlPredictProcess', {
       body: {
         project_id: project.id,
       },
     });
   }, [project]);
-  
-  const mlQueryProgress = useCallback(async () => { 
+
+  const mlQueryProgress = useCallback(async () => {
     return await api.callApi('mlPreLabelProgress', {
       params: { project_id: project.id },
     });
@@ -240,12 +247,13 @@ export const DataManagerPage = ({ ...props }) => {
     </Block>
   ) : (
     <>
+      <PromptLearnTemplate ref={refProm} projectId={projectId} />
       <Modal
         ref={refModal}
         bare={true}
         allowClose={false}
         animateAppearance={false}
-        onHide={ 
+        onHide={
           async () => {
             await dataManagerRef?.current?.store?.fetchProject({ force: true, interaction: 'refresh' });
             await dataManagerRef?.current?.store?.currentView?.reload();
@@ -264,7 +272,7 @@ export const DataManagerPage = ({ ...props }) => {
       />
       <Block ref={root} name="datamanager"/>
     </>
-    
+
   );
 };
 

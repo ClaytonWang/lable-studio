@@ -274,10 +274,10 @@ def get_all_columns(project, *_):
             }
         },
         {
-            'id': 'marked_words',
-            'title': "提示语",
+            'id': 'marked_methode',
+            'title': "标注方法",
             'type': 'String',
-            'help': '提示语',
+            'help': '标注方法',
             'target': 'tasks',
             'visibility_defaults': {
                 'explore': False,
