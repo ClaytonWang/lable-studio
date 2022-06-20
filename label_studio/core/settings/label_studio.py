@@ -65,3 +65,11 @@ versions = collect_versions()
 
 # in Label Studio Community version, feature flags are always ON
 FEATURE_FLAGS_DEFAULT_VALUE = True
+
+
+# 增加配置文件
+ENV = os.getenv('ENV', '').upper()
+if 'DEV' == ENV:
+    from core.settings.dev_settings import *
+else:
+    pass
