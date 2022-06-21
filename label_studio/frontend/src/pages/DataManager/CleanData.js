@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { message } from 'antd';
 import { EditableProTable } from "@ant-design/pro-components";
+import { compact, trim } from "lodash";
 import { Block, Elem } from "../../utils/bem";
 import { Button } from "../../components/Button/Button";
 import { Modal } from "../../components/Modal/Modal";
@@ -10,6 +12,35 @@ import { useProject } from "../../providers/ProjectProvider";
 
 const PADDING = 32;
 
+const jsonToString = (value) => {
+  try {
+    if (value && typeof value === "object") {
+      return value.map((item) => `${item.author}:${item.text}`).join("\n");
+    }
+  } catch (error) {
+    return value;
+  }
+  return value;
+};
+const stringToJson = (string) => {
+  return compact(
+    trim(string)
+      .split("\n")
+      .map((item) => {
+        const line = trim(item);
+        const [author, text] = line.split(":");
+
+        if (author || text) {
+          return {
+            author,
+            text,
+          };
+        }
+        return null;
+      }),
+  );
+};
+
 const formatResponse = (response) => {
   const { count, results } = response;
 
@@ -17,9 +48,9 @@ const formatResponse = (response) => {
     data: results.map((item) => {
       const res = {
         id: item.id,
-        origin: item.source ? JSON.stringify(item.source) : "",
-        cleaning: item.algorithm ? JSON.stringify(item.algorithm) : "",
-        _manual: item.manual ? JSON.stringify(item.manual) : "",
+        origin: jsonToString(item.source),
+        cleaning: jsonToString(item.algorithm),
+        _manual: jsonToString(item.manual),
       };
 
       res.manual = res._manual || res.cleaning || res.origin || "";
@@ -70,9 +101,10 @@ export default ({ modalRef }) => {
       clLabelManually: (taskId, manual) => {
         const manualData = (() => {
           try {
-            return JSON.parse(manual);
+            return stringToJson(manual);
           } catch (error) {
-            return manual;
+            message.error(t('data_format_error', '数据格式错误'));
+            throw(error);
           }
         })();
 
@@ -160,6 +192,9 @@ export default ({ modalRef }) => {
               recordCreatorProps={false}
               scroll={{
                 y: 500,
+              }}
+              style={{
+                whiteSpace: "pre-wrap",
               }}
               pagination={{
                 defaultPageSize: 30,
