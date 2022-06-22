@@ -186,7 +186,7 @@ class DataManagerTaskSerializer(TaskSerializer):
     updated_by = serializers.SerializerMethodField(required=False, read_only=True)
     auto_label = serializers.SerializerMethodField(required=False)
     manual_label = serializers.SerializerMethodField(required=False)
-    # marked_methode = serializers.SerializerMethodField(required=False)
+    marked_methode = serializers.SerializerMethodField(required=False)
 
     CHAR_LIMITS = 500
     
