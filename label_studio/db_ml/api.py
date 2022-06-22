@@ -154,14 +154,42 @@ def prediction(request):
 def query_task(request):
     data = request.GET.dict()
     project_id = data.get('project_id')
+    algorithm_type = data.get('type')
 
-    query = Task.objects.filter(project_id=project_id)
-    total_task = query.count()
+    if algorithm_type == 'prediction':
+        query = Task.objects.filter(project_id=project_id)
+        total_task = query.count()
 
-    task_ids = [item.id for item in query]
-    pre_task = Prediction.objects.filter(task_id__in=task_ids).count()
-    return Response(data=dict(
-        total=total_task,
-        finish=pre_task,
-        rate=round(pre_task/total_task, 2) if total_task > 0 else 0
-    ))
+        task_ids = [item.id for item in query]
+        pre_task = Prediction.objects.filter(task_id__in=task_ids).count()
+        return Response(data=dict(
+            total=total_task,
+            finish=pre_task,
+            # true 是进行中  false是结束或未开始
+            state=True if 0 < pre_task < total_task else False,
+            rate=round(pre_task/total_task, 2) if total_task > 0 else 0
+        ))
+    elif algorithm_type == 'clean':
+        clean_task_query = TaskDbAlgorithm.objects.filter(
+            project_id=project_id
+        )
+        total = clean_task_query.count()
+        success_query = clean_task_query.filter(state=2)
+        failed_query = clean_task_query.filter(state=3)
+        #     clean_task_query.filter(
+        #     Q(~Q(algorithm= '')) | Q(algorithm__isnull=True)
+        # )
+        success_count = success_query.count()
+        failed_count = failed_query.count()
+        finish = success_count + failed_count
+        return Response(data=dict(
+            total=total,
+            finish=finish,
+            falied=failed_count,
+            success=success_count,
+            state=True if clean_task_query.filter(state=1).count() else False,
+            rate=round(finish / total, 2) if total > 0 else 0
+        ))
+    else:
+        return Response(dict(rate=0, state=False))
+
