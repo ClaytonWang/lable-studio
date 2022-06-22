@@ -48,30 +48,34 @@ def job_predict(*args, **kwargs):
     text = kwargs.get('text')
     task_id = kwargs.get('task_id')
     task = Task.objects.filter(id=task_id).first()
-    if text and task:
-        res_text, confidence = predictor.predict(text)
-        # label-studio数据结构
-        pre_result = {
-            'from_name': 'intent',
-            'to_name': 'dialogue',
-            'type': 'choices',
-            'value': {
-                'choices': [res_text], 'start': 0, 'end': 1
-            },
-        }
-        tag_data = dict(
-            # project_id=kwargs.get('project_id'),
-            task=task,
-            result=[pre_result],
-            score=round(confidence, 4),
 
-        )
-        print('results: ....', tag_data)
-        obj = Prediction.objects.create(**tag_data)
-        print('obj:', obj.id, ' auto: ', res_text)
+    res_text, confidence = '', 0
+    if not task:
+        print(f'Task id invalid. Input data: task id [{task_id}]')
+        return
+    elif task and text:
+        res_text, confidence = predictor.predict(text)
     else:
-        print(f'Text or task id invalid. Input data: task id [{task_id}], '
-              f'text [{text}]')
+        pass
+    # label-studio数据结构
+    pre_result = {
+        'from_name': 'intent',
+        'to_name': 'dialogue',
+        'type': 'choices',
+        'value': {
+            'choices': [res_text], 'start': 0, 'end': 1
+        },
+    }
+    tag_data = dict(
+        # project_id=kwargs.get('project_id'),
+        task=task,
+        result=[pre_result],
+        score=round(confidence, 4),
+
+    )
+    print('results: ....', tag_data)
+    obj = Prediction.objects.create(**tag_data)
+    print('obj:', obj.id, ' auto: ', res_text)
 
 
 if __name__ == '__main__':
