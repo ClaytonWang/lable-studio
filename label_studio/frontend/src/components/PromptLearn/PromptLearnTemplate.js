@@ -1,8 +1,9 @@
-import { Button, Form, Input, Popconfirm, Table, Tooltip, Typography } from 'antd';
+import { Form, Input, Popconfirm, Table, Tooltip, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import React, { useCallback ,useImperativeHandle,useState } from 'react';
 import { FaQuestionCircle } from "react-icons/fa";
 import { Modal } from '../../components/Modal/Modal';
+import { Button } from "../Button/Button";
 import { Icon } from "../Icon/Icon";
 import { Space } from "../Space/Space";
 import { useAPI } from '../../providers/ApiProvider';
@@ -278,7 +279,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId },ref)=>{
               <Button
                 onClick={handleAdd}
                 disabled={loading}
-                type="primary"
+                look={ "primary"}
                 size={'small'}
                 style={{
                   marginBottom: 5,
@@ -322,10 +323,10 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId },ref)=>{
                 取消
                 </Button>
                 <Button
-                  disabled={loading || sourceData.length===0}
+                  disabled={loading || sourceData.length === 0}
                   onClick={execPredict}
                   size="compact"
-                  type="primary"
+                  look={ "primary"}
                 >
                 立即运行
                 </Button>
