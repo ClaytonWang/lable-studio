@@ -246,9 +246,9 @@ class DataManagerTaskSerializer(TaskSerializer):
         compare_dt = [pre_update_at, ann_update_at, prompt_update_at]
         rst_index = compare_dt.index(max(compare_dt))
         if rst_index == 0:
-            return '预标注'
+            return '普通'
         elif rst_index == 1:
-            return '手工标注'
+            return '普通'
         elif rst_index == 2:
             return '提示学习'
         else:
