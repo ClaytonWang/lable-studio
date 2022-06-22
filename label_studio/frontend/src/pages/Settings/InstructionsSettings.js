@@ -23,10 +23,10 @@ export const InstructionsSettings = () => {
         <Form.Row columnCount={1}>
           <Label text={t("Labeling Instructions")} large/>
           <div style={{ paddingLeft: 16 }}>
-            <Toggle label="Show before labeling" name="show_instruction"/>
+            <Toggle label={t("Show before labeling", "展示标注前数据")} name="show_instruction"/>
           </div>
           <div style={{ color: "rgba(0,0,0,0.4)", paddingLeft: 16 }}>
-            Write instructions to help users complete labeling tasks.
+            {t("write_label_help")}
           </div>
         </Form.Row>
 
@@ -36,9 +36,9 @@ export const InstructionsSettings = () => {
 
         <Form.Actions>
           <Form.Indicator>
-            <span case="success">Saved!</span>
+            <span case="success">{t("Saved!")}</span>
           </Form.Indicator>
-          <Button type="submit" look="primary" style={{ width: 120 }}>Save</Button>
+          <Button type="submit" look="primary" style={{ width: 120 }}>{t("Save")}</Button>
         </Form.Actions>
       </Form>
     </div>

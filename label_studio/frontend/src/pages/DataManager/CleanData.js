@@ -65,6 +65,7 @@ export default ({ modalRef }) => {
   const api = useAPI();
   const { project } = useProject();
   const [status, setStatus] = useState({});
+  const [modalVisible, setModalVisible] = useState(false);
   const tableRef = useRef();
 
   const request = useMemo(() => {
@@ -121,7 +122,7 @@ export default ({ modalRef }) => {
   }, [project.id]);
 
   useEffect(() => {
-    if (project.id) {
+    if (modalVisible && project.id) {
       const sync = () => {
         request.clQueryStatus().then((res) => {
           setStatus(res);
@@ -133,7 +134,7 @@ export default ({ modalRef }) => {
 
       return () => clearInterval(timer);
     }
-  }, [request.clQueryStatus, project.id]);
+  }, [request.clQueryStatus, project.id, modalVisible]);
 
   const handleExec = () => {
     request.clExec();
@@ -152,6 +153,8 @@ export default ({ modalRef }) => {
       <Modal
         bare
         ref={modalRef}
+        onShow={() => setModalVisible(true)}
+        onHide={() => setModalVisible(false)}
         style={{
           width: "calc(100vw - 96px)",
           minWidth: 1000,
