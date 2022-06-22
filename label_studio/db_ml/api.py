@@ -23,7 +23,7 @@ from db_ml.clean import job_clean
 from tasks.models import Task
 from tasks.models import Prediction
 from tasks.models import TaskDbAlgorithm
-from core.redis import redis_connected
+from projects.models import PromptResult
 
 
 @api_view(['POST'])
@@ -156,19 +156,16 @@ def query_task(request):
     project_id = data.get('project_id')
     algorithm_type = data.get('type')
 
-    if algorithm_type == 'prediction':
-        query = Task.objects.filter(project_id=project_id)
-        total_task = query.count()
+    query = Task.objects.filter(project_id=project_id)
+    total_task = query.count()
+    task_ids = [item.id for item in query]
+    state = False
 
-        task_ids = [item.id for item in query]
-        pre_task = Prediction.objects.filter(task_id__in=task_ids).count()
-        return Response(data=dict(
-            total=total_task,
-            finish=pre_task,
-            # true 是进行中  false是结束或未开始
-            state=True if 0 < pre_task < total_task else False,
-            rate=round(pre_task/total_task, 2) if total_task > 0 else 0
-        ))
+    if algorithm_type == 'prediction':
+        finish_task = Prediction.objects.filter(
+            task_id__in=task_ids
+        ).count()
+        state = True if 0 < finish_task < total_task else False
     elif algorithm_type == 'clean':
         clean_task_query = TaskDbAlgorithm.objects.filter(
             project_id=project_id
@@ -176,20 +173,22 @@ def query_task(request):
         total = clean_task_query.count()
         success_query = clean_task_query.filter(state=2)
         failed_query = clean_task_query.filter(state=3)
-        #     clean_task_query.filter(
-        #     Q(~Q(algorithm= '')) | Q(algorithm__isnull=True)
-        # )
         success_count = success_query.count()
         failed_count = failed_query.count()
-        finish = success_count + failed_count
-        return Response(data=dict(
-            total=total,
-            finish=finish,
-            falied=failed_count,
-            success=success_count,
-            state=True if clean_task_query.filter(state=1).count() else False,
-            rate=round(finish / total, 2) if total > 0 else 0
-        ))
+        finish_task = success_count + failed_count
+        state = True if clean_task_query.filter(state=1).count() else False
+    elif algorithm_type == 'prompt':
+        finish_task = PromptResult.objects.filter(
+            task_id__in=task_ids, project_id=project_id
+        ).count()
+        state = True if 0 < finish_task < total_task else False
     else:
         return Response(dict(rate=0, state=False))
 
+    return Response(data=dict(
+        total=total_task,
+        finish=finish_task,
+        # true 是进行中  false是结束或未开始
+        state=state,
+        rate=round(finish_task / total_task, 2) if total_task > 0 else 0
+    ))
