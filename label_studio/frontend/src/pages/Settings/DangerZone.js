@@ -1,3 +1,4 @@
+import { t } from "i18next";
 import { useMemo, useState } from "react";
 import { useHistory } from "react-router";
 import { Button } from "../../components";
@@ -16,9 +17,10 @@ export const DangerZone = () => {
 
   const handleOnClick = (type) => () => {
     confirm({
-      title: "Action confirmation",
-      body: "You're about to delete all things. This action cannot be undone.",
-      okText: "Proceed",
+      title: t("Action confirmation"),
+      body: t("action_confirm_tip"),
+      okText: t("Proceed"),
+      cancelText: t("Cancel"),
       buttonLook: "destructive",
       onOk: async () => {
         setProcessing(type);

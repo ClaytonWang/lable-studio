@@ -12,7 +12,7 @@ import { useImportPage } from './Import/useImportPage';
 import { useDraftProject } from './utils/useDraftProject';
 
 // 1期需求：创建项目时，默认的模版
-const DEFAULT_CONFIG = `<View>
+const DEFAULT_CONFIG = `<View className="template-intent-classification-for-dialog">
 <Paragraphs name="dialogue" value="$dialogue" layout="dialogue" />
 <Choices name="intent" toName="dialogue" choice="multiple" showInLine="true">
   <Choice value="升级"/>
