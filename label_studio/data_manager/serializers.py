@@ -1,5 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+import datetime
+
 import os
 import uuid
 import ujson as json
@@ -13,6 +15,9 @@ from tasks.models import Task
 from tasks.serializers import TaskSerializer, AnnotationSerializer, PredictionSerializer, AnnotationDraftSerializer
 from projects.models import Project
 from label_studio.core.utils.common import round_floats
+from tasks.models import Annotation, Prediction
+from projects.models import PromptResult
+UTC_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class FilterSerializer(serializers.ModelSerializer):
@@ -181,6 +186,7 @@ class DataManagerTaskSerializer(TaskSerializer):
     updated_by = serializers.SerializerMethodField(required=False, read_only=True)
     auto_label = serializers.SerializerMethodField(required=False)
     manual_label = serializers.SerializerMethodField(required=False)
+    # marked_methode = serializers.SerializerMethodField(required=False)
 
     CHAR_LIMITS = 500
     
@@ -191,14 +197,79 @@ class DataManagerTaskSerializer(TaskSerializer):
     
     def __init__(self, *args, **kwargs):
         super(DataManagerTaskSerializer, self).__init__(*args, **kwargs)
-        self.auto_label_val = ''
-        self.manual_label_val = ''
+
+        self.task_ids = [item.id for item in self.instance] if isinstance(
+            self.instance, list) else [self.instance.id]
+
+        self.anno_query = Annotation.objects.filter(task_id__in=self.task_ids)
+        self.pre_query = Prediction.objects.filter(task_id__in=self.task_ids)
+        self.prompt_query = PromptResult.objects.filter(
+            task_id__in=self.task_ids
+        )
+
+        self.anno_data = {
+            str(item['task']): item for item in
+            AnnotationSerializer(
+                self.anno_query, many=True, read_only=True, default=[]
+            ).data
+        }
+        self.pre_data = {
+            str(item['task']): item for item in
+            PredictionSerializer(
+                self.pre_query, many=True, read_only=True, default=[]
+            ).data
+        }
+        self.prompt_data = {
+            str(item['task']): item for item in
+            self.prompt_query.values(
+                'task', 'metrics', 'created_at', 'updated_at'
+            )
+        }
+
+    def get_marked_methode(self, obj):
+        ann = self.anno_data.get(str(obj.id), {})
+        pre = self.pre_data.get(str(obj.id), {})
+        prompt = self.prompt_data.get(str(obj.id), {})
+        if not ann and not pre and not prompt:
+            return ''
+        ann_update_at = ann.get('updated_at', '')
+        ann_update_at = datetime.datetime.strptime(
+            ann_update_at, UTC_FORMAT
+        ).timestamp() if ann_update_at else 0
+        pre_update_at = pre.get('updated_at', '')
+        pre_update_at = datetime.datetime.strptime(
+            pre_update_at, UTC_FORMAT
+        ).timestamp() if pre_update_at else 0
+        prompt_update_at = prompt.get('updated_at', '')
+        prompt_update_at = prompt_update_at.replace(tzinfo=None).timestamp() \
+            if prompt_update_at else 0
+        compare_dt = [pre_update_at, ann_update_at, prompt_update_at]
+        rst_index = compare_dt.index(max(compare_dt))
+        if rst_index == 0:
+            return '预标注'
+        elif rst_index == 1:
+            return '手工标注'
+        elif rst_index == 2:
+            return '提示学习'
+        else:
+            return ''
 
     def get_auto_label(self, obj):
-        return self.auto_label_val
+        data = self.pre_data.get(str(obj.id), [])
+        if not len(data):
+            return ''
+
+        result = data.get('result', []) if len(data) else []
+        pre_choices = self.get_choice_values(result)
+        return ','.join(pre_choices)
 
     def get_manual_label(self, obj):
-        return self.manual_label_val
+        data = self.anno_data.get(str(obj.id), [])
+        if not len(data):
+            return ''
+        result = data.get('result', []) if len(data) else []
+        choices = self.get_choice_values(result)
+        return ','.join(choices)
 
     def to_representation(self, obj):
         """ Dynamically manage including of some fields in the API result
@@ -254,24 +325,12 @@ class DataManagerTaskSerializer(TaskSerializer):
         return choices
 
     def get_annotations(self, task):
-        data = AnnotationSerializer(task.annotations, many=True, default=[], read_only=True).data
-        if not len(data):
-            return []
-
-        result = data[0].get('result', []) if len(data) else []
-        choices = self.get_choice_values(result)
-        self.manual_label_val = ','.join(choices)
-        return data
+        rst = self.anno_data.get(str(task.id), [])
+        return [rst] if rst else []
 
     def get_predictions(self, task):
-        data = PredictionSerializer(task.predictions, many=True, default=[], read_only=True).data
-        if not len(data):
-            return []
-
-        result = data[0].get('result', []) if len(data) else []
-        pre_choices = self.get_choice_values(result)
-        self.auto_label_val = ','.join(pre_choices)
-        return data
+        rst = self.pre_data.get(str(task.id))
+        return [rst] if rst else []
 
     @staticmethod
     def get_file_upload(task):
