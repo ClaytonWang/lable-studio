@@ -10,21 +10,23 @@ export const StorageSettings = () => {
 
   return (
     <Block name="storage-settings">
-      <Description style={{marginTop: 0}}>
-        Use cloud or database storage as the source for your labeling tasks or the target of your completed annotations.
+      <Description style={{ marginTop: 0 }}>
+        {
+          t("storage_add_tip")
+        }
       </Description>
 
       <Columns count={2} gap="40px" size="320px" className={rootClass}>
         <StorageSet
           title={t("Source Cloud Storage")}
-          buttonLabel="Add Source Storage"
+          buttonLabel={t("Add Source Storage")}
           rootClass={rootClass}
         />
 
         <StorageSet
           title={t("Target Cloud Storage")}
           target="export"
-          buttonLabel="Add Target Storage"
+          buttonLabel={t("Add Target Storage")}
           rootClass={rootClass}
         />
       </Columns>

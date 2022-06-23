@@ -11,12 +11,6 @@ object-assign
 */
 
 /*!
-  Copyright (c) 2018 Jed Watson.
-  Licensed under the MIT License (MIT), see
-  http://jedwatson.github.io/classnames
-*/
-
-/*!
  * hotkeys-js v3.8.1
  * A simple micro-library for defining and dispatching keyboard shortcuts. It has no dependencies.
  * 

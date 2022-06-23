@@ -278,13 +278,15 @@ export const ImportPage = ({
 
       <header>
         <form className={importClass.elem("url-form") + " inline"} method="POST" onSubmit={onLoadURL}>
-          <input placeholder="Dataset URL" name="url" ref={urlRef} />
-          <button type="submit">Add URL</button>
+          <input placeholder={t("Dataset URL", "数据链接")} name="url" ref={urlRef} />
+          <button type="submit">{t("Add URL", "添加链接")}</button>
         </form>
         <span>or</span>
         <button onClick={() => document.getElementById('file-input').click()} className={importClass.elem("upload-button")}>
           <IconUpload width="16" height="16" className={importClass.elem("upload-icon")} />
-          Upload {files.uploaded.length ? "More " : ""}Files
+          {
+            t("Upload Files", "上传文件")
+          }
         </button>
         <div className={importClass.elem("csv-handling").mod({ highlighted: highlightCsvHandling, hidden: !csvHandling })}>
           <span>Treat CSV/TSV as</span>
@@ -293,7 +295,7 @@ export const ImportPage = ({
         </div>
         <div className={importClass.elem("status")}>
           {files.uploaded.length
-            ? `${files.uploaded.length} files uploaded`
+            ? `${files.uploaded.length} ${t("files uploaded", "文件已上传")}`
             : ""}
         </div>
       </header>
@@ -305,15 +307,15 @@ export const ImportPage = ({
           {!showList && (
             <label htmlFor="file-input">
               <div className={dropzoneClass.elem("content")}>
-                <header>Drag & drop files here<br/>or click to browse</header>
+                <header>{t("drag_tips_0")}<br/>{t("drag_tips_1")}</header>
                 <IconUpload height="64" className={dropzoneClass.elem("icon")} />
                 <dl>
-                  <dt>Text</dt><dd>txt</dd>
-                  <dt>Audio</dt><dd>wav, aiff, mp3, au, flac, m4a, ogg</dd>
-                  <dt>Images</dt><dd>jpg, png, gif, bmp, svg, webp</dd>
-                  <dt>HTML</dt><dd>html, htm, xml</dd>
-                  <dt>Time Series</dt><dd>csv, tsv</dd>
-                  <dt>Common Formats</dt><dd>csv, tsv, txt, json</dd>
+                  <dt>{t("Text", "文本")}</dt><dd>txt</dd>
+                  <dt>{t("Audio", "音频")}</dt><dd>wav, aiff, mp3, au, flac, m4a, ogg</dd>
+                  <dt>{t("Images", "图片")}</dt><dd>jpg, png, gif, bmp, svg, webp</dd>
+                  <dt>{t("HTML", "网页")}</dt><dd>html, htm, xml</dd>
+                  <dt>{t("Time Series", "时间文件")}</dt><dd>csv, tsv</dd>
+                  <dt>{t("Common Formats", "常见格式")}</dt><dd>csv, tsv, txt, json</dd>
                 </dl>
               </div>
             </label>

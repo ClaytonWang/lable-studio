@@ -7,7 +7,7 @@ import { Block, Elem } from "../../../utils/bem";
 import { isDefined } from "../../../utils/helpers";
 import { useUpdateEffect } from "../../../utils/hooks";
 import './PeopleList.styl';
-import { CopyableTooltip } from '../../../components/CopyableTooltip/CopyableTooltip'
+import { CopyableTooltip } from '../../../components/CopyableTooltip/CopyableTooltip';
 
 export const PeopleList = ({ onSelect, selectedUser, defaultSelected }) => {
   const api = useAPI();
@@ -63,9 +63,9 @@ export const PeopleList = ({ onSelect, selectedUser, defaultSelected }) => {
             <Elem name="users">
               <Elem name="header">
                 <Elem name="column" mix="avatar"/>
-                <Elem name="column" mix="email">Email</Elem>
-                <Elem name="column" mix="name">Name</Elem>
-                <Elem name="column" mix="last-activity">Last Activity</Elem>
+                <Elem name="column" mix="email">{t("Email")}</Elem>
+                <Elem name="column" mix="name">{t("Name")}</Elem>
+                <Elem name="column" mix="last-activity">{t("Last Activity")}</Elem>
               </Elem>
               <Elem name="body">
                 {usersList.map(({ user }) => {

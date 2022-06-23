@@ -72,7 +72,7 @@ export const confirm = ({ okText, onOk, cancelText, onCancel, buttonLook, ...pro
           size="compact"
           autoFocus
         >
-          {cancelText ?? "Cancel"}
+          {cancelText ?? t("Cancel")}
         </Button>
 
         <Button
@@ -83,7 +83,7 @@ export const confirm = ({ okText, onOk, cancelText, onCancel, buttonLook, ...pro
           size="compact"
           look={buttonLook ?? 'primary'}
         >
-          {okText ?? "OK"}
+          {okText ?? t("OK")}
         </Button>
       </Space>
     ),

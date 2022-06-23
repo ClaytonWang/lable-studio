@@ -60,13 +60,15 @@ const initializeDataManager = async (root, props, params) => {
   root.dataset.dmInitialized = true;
 
   const { ...settings } = root.dataset;
+  const { label_config } = params.project;
+  let isIndentTemplate = label_config?.indexOf('template-intent-classification-for-dialog')!==-1;
 
   const dmConfig = {
     root,
     toolbar: "actions columns filters ordering wash-button pre-button pre-prom-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
-    apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
-    // apiGateway: `http://124.71.161.146:8080/api/dm`,
+    // apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
+    apiGateway: `http://124.71.161.146:8080/api/dm`,
     apiVersion: 2,
     project: params.project,
     polling: !window.APP_SETTINGS,
@@ -87,13 +89,13 @@ const initializeDataManager = async (root, props, params) => {
     },
     instruments: {
       'wash-button': () => {
-        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={params.handleClickClear} >{t("clean_data", "清洗")}</button>;
+        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={params.handleClickClear} >{t("clean_data", "清洗")}</button>;
       },
       'pre-button': () => {
-        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(普通)</button>;
+        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(普通)</button>;
       },
       'pre-prom-button': () => {
-        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >预标注(提示学习)</button>;
+        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >预标注(提示学习)</button>;
       },
     },
     ...props,
@@ -121,6 +123,7 @@ export const DataManagerPage = ({ ...props }) => {
   const clearModalRef = useRef();
   const dataManagerRef = useRef();
   const projectId = project?.id;
+
 
   const mlPredictProcess = useCallback(async () => {
     return await api.callApi('mlPredictProcess', {
@@ -303,11 +306,11 @@ DataManagerPage.context = ({ dmRef }) => {
         e.stopPropagation();
         dmRef?.store?.closeLabeling?.();
       });
-      addCrumb({
-        key: "dm-crumb",
-        // title: "Labeling",
-        title:"(对话-意图分类)",
-      });
+      // addCrumb({
+      //   key: "dm-crumb",
+      //   // title: "Labeling",
+      //   title:"(对话-意图分类)",
+      // });
     }
   };
 

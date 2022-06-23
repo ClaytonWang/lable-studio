@@ -60,6 +60,9 @@ class PromptLearning(APIView):
                     # c.save()
                     aggregate.append(c)
                 print('aggregate', aggregate)
+                # 清空project_id对应的PromtResult表
+                c = PromptResult.objects.filter(project_id=project_id)
+                c.delete()
                 # 批量入库
                 PromptResult.objects.bulk_create(aggregate)
 

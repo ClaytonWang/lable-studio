@@ -172,7 +172,7 @@
     "diff": "^5.1.0",
     "i18next": "^21.8.9",
     "jquery-i18next": "^1.2.1",
-    "lodash.clonedeep": "^4.5.0",
+    "lodash": "^4.17.21",
     "url-loader": "^4.1.1"
   }
 }

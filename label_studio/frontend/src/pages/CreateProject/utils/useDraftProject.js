@@ -12,12 +12,12 @@ export const useDraftProject = () => {
     const projects = response?.results ?? [];
     const lastIndex = projects.length;
     let projectNumber = lastIndex + 1;
-    let projectName = `New Project #${projectNumber}`;
+    let projectName = `${t('New Project')} #${projectNumber}`;
 
     // dirty hack to get proper non-duplicate name
     while(projects.find(({ title }) => title === projectName)) {
       projectNumber++;
-      projectName = `New Project #${projectNumber}`;
+      projectName = `${t('New Project')} #${projectNumber}`;
     }
 
     const draft = await api.callApi('createProject', {
