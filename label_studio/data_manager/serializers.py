@@ -187,6 +187,7 @@ class DataManagerTaskSerializer(TaskSerializer):
     auto_label = serializers.SerializerMethodField(required=False)
     manual_label = serializers.SerializerMethodField(required=False)
     marked_methode = serializers.SerializerMethodField(required=False)
+    label_at = serializers.SerializerMethodField(required=False)
 
     CHAR_LIMITS = 500
     
@@ -225,6 +226,7 @@ class DataManagerTaskSerializer(TaskSerializer):
                 'task', 'metrics', 'created_at', 'updated_at'
             )
         }
+        self.label_at_dt = ''
 
     def get_marked_methode(self, obj):
         ann = self.anno_data.get(str(obj.id), {})
@@ -245,6 +247,9 @@ class DataManagerTaskSerializer(TaskSerializer):
             if prompt_update_at else 0
         compare_dt = [pre_update_at, ann_update_at, prompt_update_at]
         rst_index = compare_dt.index(max(compare_dt))
+        if compare_dt[rst_index]:
+            dt = datetime.datetime.fromtimestamp(compare_dt[rst_index])
+            self.label_at_dt = dt.strftime('%Y-%m-%d %H:%M:%S')
         if rst_index == 0:
             return '普通'
         elif rst_index == 1:
@@ -253,6 +258,9 @@ class DataManagerTaskSerializer(TaskSerializer):
             return '提示学习'
         else:
             return ''
+
+    def get_label_at(self, obj):
+        return self.label_at_dt
 
     def get_auto_label(self, obj):
         data = self.pre_data.get(str(obj.id), [])
