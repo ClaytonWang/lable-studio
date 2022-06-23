@@ -99,7 +99,7 @@ const initializeDataManager = async (root, props, params) => {
         return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >{t("label_prediction", "预标注(普通)")}</button>;
       },
       'pre-prom-button': () => {
-        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >{t('label_prompt', "预标注(提示学习)")}预标注(提示学习)</button>;
+        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >{t('label_prompt', "预标注(提示学习)")})</button>;
       },
     },
     ...props,

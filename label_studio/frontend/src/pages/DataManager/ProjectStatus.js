@@ -76,6 +76,8 @@ export default forwardRef((props, ref) => {
     status: () => {
       request();
       setTimeout(request, 1000);
+      setTimeout(request, 2000);
+      setTimeout(request, 3000);
     },
   }));
 
