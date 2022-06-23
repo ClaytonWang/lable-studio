@@ -319,17 +319,20 @@ class ReImportAPI(ImportAPI):
         with transaction.atomic():
             project.remove_tasks_by_file_uploads(file_upload_ids)
             tasks, serializer = self._save(tasks)
-            # 创建清洗的数据基础
-            clean_data = [dict(
-                source=item.data.get('dialogue', []),
-                project=self.kwargs['pk'],
-                task=item.id,
-                created_by=request.user.id,
-                # task_id=item.id,
-                # project_id=self.kwargs['pk'],
-                # created_by_id=request.user.id
-            ) for item in tasks]
-            bulk_create_algorithm_clean(clean_data)
+
+            if 'template-intent-classification-for-dialog' in \
+                    project.label_config:
+                # 创建清洗的数据基础
+                clean_data = [dict(
+                    source=item.data.get('dialogue', []),
+                    project=self.kwargs['pk'],
+                    task=item.id,
+                    created_by=request.user.id,
+                    # task_id=item.id,
+                    # project_id=self.kwargs['pk'],
+                    # created_by_id=request.user.id
+                ) for item in tasks]
+                bulk_create_algorithm_clean(clean_data)
         duration = time.time() - start
 
         # Update task states if there are related settings in project
