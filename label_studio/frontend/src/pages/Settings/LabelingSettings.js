@@ -49,8 +49,8 @@ export const LabelingSettings = () => {
   const onSave = useCallback(async () => {
     if (essentialDataChanged && projectAlreadySetUp) {
       confirm({
-        title: "Config data changed",
-        body: "Labeling config has essential changes that affect data displaying. Saving the config may lead to deleting all tabs previously created in the Data Manager.",
+        title: t("Config data changed"),
+        body: t("config_data_changed_tip"),
         buttonLook: "destructive",
         onOk: () => saveConfig(),
         okText: t("Save"),

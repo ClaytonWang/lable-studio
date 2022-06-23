@@ -260,7 +260,7 @@ const WebhookDetail = ({ webhook, webhooksInfo, fetchWebhooks, onBack, onSelectA
                 type='button'
                 className={rootClass.elem('cancel-button')}
                 onClick={onBack}
-              >Cancel
+              >{t('Cancel')}
               </Button>
               <Button 
                 primary
