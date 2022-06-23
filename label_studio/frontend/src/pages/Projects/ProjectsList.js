@@ -1,5 +1,6 @@
 import chr from 'chroma-js';
 import { format } from 'date-fns';
+import { t } from 'i18next';
 import React, { useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { LsBulb, LsCheck, LsEllipsis, LsMinus } from '../../assets/icons';
@@ -60,7 +61,7 @@ const ProjectCard = ({ project }) => {
         <Elem name="header">
           <Elem name="title">
             <Elem name="title-text">
-              {project.title ?? "New project"}
+              {project.title ?? t("New Project")}
             </Elem>
 
             <Elem name="menu" onClick={(e) => {

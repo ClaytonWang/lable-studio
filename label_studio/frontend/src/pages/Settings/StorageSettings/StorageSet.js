@@ -79,7 +79,7 @@ export const StorageSet = ({ title, target, rootClass, buttonLabel }) => {
       ),
       footer: (
         <>
-          Save completed annotations to Amazon S3, Google Cloud, Microsoft Azure, or Redis.
+          {t("save_to_cloud_tip")}
         </>
       ),
     });

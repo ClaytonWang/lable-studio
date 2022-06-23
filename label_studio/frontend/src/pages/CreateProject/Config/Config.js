@@ -45,7 +45,7 @@ const configClass = cn("configure");
 
 const EmptyConfigPlaceholder = () => (
   <div className={configClass.elem("empty-config")}>
-    <p>Your labeling configuration is empty. It is required to label your data.</p>
+    <p>{t("label_config_empty_tip")}</p>
   </div>
 );
 
@@ -216,7 +216,8 @@ const ConfigureColumns = ({ columns, template }) => {
       )}
       {columns?.length === 0 && (
         <p className={configClass.elem("object-error")}>
-          To select which field(s) to label you need to upload the data. Alternatively, you can provide it using Code mode.
+          {t("select_field_tip", "请选择需要上传的字段。可以使用代码模式编辑")}
+          {/* To select which field(s) to label you need to upload the data. Alternatively, you can provide it using Code mode. */}
         </p>
       )}
       {template.objects.map(obj => (
@@ -351,7 +352,7 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
         {disableSaveButton !== true && onSaveClick && (
           <Form.Actions size="small" extra={configure === "code" && extra} valid>
             <Button look="primary" size="compact" style={{ width: 120 }} onClick={onSave} waiting={waiting}>
-              Save
+              {t("Save")}
             </Button>
           </Form.Actions>
         )}
