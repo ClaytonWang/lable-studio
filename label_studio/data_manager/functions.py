@@ -305,6 +305,17 @@ def get_all_columns(project, *_):
                 'explore': False,
                 'labeling': False
             }
+        },
+        {
+            'id': 'label_at',
+            'title': "标注时间",
+            'type': 'String',
+            'help': '标注时间',
+            'target': 'tasks',
+            'visibility_defaults': {
+                'explore': True,
+                'labeling': False
+            }
         }
     ]
 
