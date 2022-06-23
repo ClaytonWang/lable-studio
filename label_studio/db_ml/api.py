@@ -23,7 +23,7 @@ from db_ml.clean import job_clean
 from tasks.models import Task
 from tasks.models import Prediction
 from tasks.models import TaskDbAlgorithm
-from projects.models import PromptResult
+from projects.models import PromptResult, PromptTemplates
 
 
 @api_view(['POST'])
@@ -178,8 +178,11 @@ def query_task(request):
         finish_task = success_count + failed_count
         state = True if clean_task_query.filter(state=1).count() else False
     elif algorithm_type == 'prompt':
+        total_task = PromptTemplates.objects.filter(
+            project_id=project_id
+        ).count() * total_task
         finish_task = PromptResult.objects.filter(
-            task_id__in=task_ids, project_id=project_id
+            project_id=project_id
         ).count()
         state = True if 0 < finish_task < total_task else False
     else:
