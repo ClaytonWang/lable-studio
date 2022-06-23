@@ -1,6 +1,6 @@
 {
-  "message": "Merge branch 'development' into xizheng",
-  "commit": "c0dda9e14ccb910317c6e82c055b3e70a24a5c9e",
-  "branch": "development",
-  "date": "2022-06-23 09:12:36 +0800"
+  "message": "fix: 修复按钮状态",
+  "commit": "34be188442473b997497178e43b358e2b3ad9b57",
+  "branch": "xizheng",
+  "date": "2022-06-23 11:46:16 +0800"
 }

@@ -16,37 +16,41 @@ import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
 import CleanData from './CleanData';
+import ProjectStatus from './ProjectStatus';
 import { Progress } from 'antd';
 import { PromptLearnTemplate } from '../../components';
 import "./DataManager.styl";
 
-const refModal = createRef();
+const refStatus = createRef();
 const refProm = createRef();
+const showStatus = () => {
+  refStatus?.current.status();
+};
 
 const onPreButtonClick = (e,params) => {
-  const mlQueryProgress = params.mlQueryProgress;
-  const setProgress = params.setProgress;
+  // const mlQueryProgress = params.mlQueryProgress;
+  // const setProgress = params.setProgress;
   const mlPredictProcess = params.mlPredictProcess;
 
-  mlPredictProcess();
+  mlPredictProcess().then(showStatus);
 
-  let progress = 0,count=0;
+  // let progress = 0,count=0;
 
-  refModal.current?.show();
-  let t = setInterval(() => {
-    count = count + 1;
-    mlQueryProgress().then((rst) => {
-      progress = rst.rate * 100;
-      setProgress(progress);
+  // refModal.current?.show();
+  // let t = setInterval(() => {
+  //   count = count + 1;
+  //   mlQueryProgress().then((rst) => {
+  //     progress = rst.rate * 100;
+  //     setProgress(progress);
 
-      if (progress >= 100 || (progress === 0 && count > 11)) {
-        clearInterval(t);
-        setProgress(0);
-        try { refModal.current?.hide(); } catch (e) { console.log(e); }
-        return;
-      }
-    });
-  },1000);
+  //     if (progress >= 100 || (progress === 0 && count > 11)) {
+  //       clearInterval(t);
+  //       setProgress(0);
+  //       try { refModal.current?.hide(); } catch (e) { console.log(e); }
+  //       return;
+  //     }
+  //   });
+  // },1000);
 };
 
 const onPrePromButtonClick = () => {
@@ -89,13 +93,13 @@ const initializeDataManager = async (root, props, params) => {
     },
     instruments: {
       'wash-button': () => {
-        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={params.handleClickClear} >{t("clean_data", "清洗")}</button>;
+        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={params.handleClickClear} >{t("label_clean", "清洗")}</button>;
       },
       'pre-button': () => {
-        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >预标注(普通)</button>;
+        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >{t("label_prediction", "预标注(普通)")}</button>;
       },
       'pre-prom-button': () => {
-        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >预标注(提示学习)</button>;
+        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >{t('label_prompt', "预标注(提示学习)")}预标注(提示学习)</button>;
       },
     },
     ...props,
@@ -250,8 +254,8 @@ export const DataManagerPage = ({ ...props }) => {
     </Block>
   ) : (
     <>
-      <PromptLearnTemplate ref={refProm} projectId={projectId} />
-      <Modal
+      <PromptLearnTemplate ref={refProm} projectId={projectId} showStatus={showStatus} />
+      {/* <Modal
         ref={refModal}
         bare={true}
         allowClose={false}
@@ -269,8 +273,10 @@ export const DataManagerPage = ({ ...props }) => {
           boxShadow: 'none' }}
       >
         <Progress type="circle" percent={progress} format={percent => `标注中${percent.toFixed(0)}%`}  />
-      </Modal>
+      </Modal> */}
+      <ProjectStatus ref={refStatus} />
       <CleanData
+        showStatus={showStatus}
         modalRef={clearModalRef}
       />
       <Block ref={root} name="datamanager"/>

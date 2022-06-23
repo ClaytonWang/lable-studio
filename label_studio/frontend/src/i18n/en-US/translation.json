@@ -108,12 +108,12 @@
   "HTML": "HTML",
   "Time Series": "Time Series",
   "Common Formats": "Common Formats",
-  "Saved!": "已保存",
-  "Validate and Save": "校验并保存",
-  "Add Storage": "添加存储",
+  "Saved!": "Saved!",
+  "Validate and Save": "Validate and Save",
+  "Add Storage": "Add Storage",
   "save_to_cloud_tip": "Save completed annotations to Amazon S3, Google Cloud, Microsoft Azure, or Redis.",
   "label_config_empty_tip": "Your labeling configuration is empty. It is required to label your data.",
-  "Show before labeling": "展示标注前数据",
+  "Show before labeling": "Show before labeling",
   "write_label_help": "Write instructions to help users complete labeling tasks.",
   "ml_add_desc": "Add one or more machine learning models to predict labels for your data. To import predictions without connecting a model.",
   "Add Model": "Add Model",
@@ -186,5 +186,8 @@
   "updated_by": "Updated by",
   "updated_by_help": "User who did the last task update",
   "avg_lead_time": "Lead Time",
-  "avg_lead_time_help": "Average lead time over all annotations (seconds)"
+  "avg_lead_time_help": "Average lead time over all annotations (seconds)",
+  "label_clean": "Clean",
+  "label_prediction": "Prediction",
+  "label_prompt": "Prompt"
 }
