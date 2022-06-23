@@ -207,7 +207,7 @@ const WebhookDetail = ({ webhook, webhooksInfo, fetchWebhooks, onBack, onSelectA
                     !sendForAllActions ? (
                       <Elem name='content-row-actions'>
                         <Elem tag='h4' name='title' mod={{ black:true }}>
-                        Send Payload for
+                          {t('Send Payload for')}
                         </Elem>
                         <Elem name='actions'>
                           {Object.entries(webhooksInfo).map(([key, value]) => {
@@ -250,7 +250,7 @@ const WebhookDetail = ({ webhook, webhooksInfo, fetchWebhooks, onBack, onSelectA
                           await fetchWebhooks();
                         },
                       })}>
-                Delete Webhook...
+                      {$('Delete')}
                     </Button>
                   )}
               <div className={rootClass.elem('status')}>

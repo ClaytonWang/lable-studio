@@ -12,7 +12,7 @@ import { Block, cn } from "../../utils/bem";
 
 export const WebhookDeleteModal = ({ onDelete }) => {
   return modal({
-    title: "Delete",
+    title: t("Delete"),
     body: ()=>{
       const ctrl = useModalControls();
       const rootClass = cn('webhook-delete-modal');
@@ -20,8 +20,9 @@ export const WebhookDeleteModal = ({ onDelete }) => {
       return (
         <div className={rootClass}>
           <div className={rootClass.elem('modal-text')}>
-              Are you sure you want to delete the webhook? This action
-              cannot be undone.  
+            {t('tip_cannot_undone')}
+            {/* Are you sure you want to delete the webhook? This action */}
+            {/* cannot be undone.   */}
           </div>
 
         </div>
@@ -46,7 +47,7 @@ export const WebhookDeleteModal = ({ onDelete }) => {
                 ctrl.hide();
               }
             }
-          >Delete</Button>
+          >{t('Delete')}</Button>
         </Space>
       );
     },

@@ -134,7 +134,7 @@ export const CreateProject = ({ onClose }) => {
           <ToggleItems items={steps} active={step} onSelect={setStep} />
 
           <Space>
-            <Button look="danger" size="compact" onClick={onDelete} waiting={waiting}>Delete</Button>
+            <Button look="danger" size="compact" onClick={onDelete} waiting={waiting}>{t('Delete')}</Button>
             <Button look="primary" size="compact" onClick={onCreate} waiting={waiting || uploading} disabled={!project || uploadDisabled || error}>{t("Save")}</Button>
           </Space>
         </Modal.Header>

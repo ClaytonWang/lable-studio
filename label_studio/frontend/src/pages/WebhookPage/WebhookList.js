@@ -57,13 +57,13 @@ const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) 
                         {obj.url}
                       </Elem>
                       <Elem name='item-date'>
-                  Created {format(new Date(obj.created_at), 'dd MMM yyyy, HH:mm')}
+                        {t('Created')} {format(new Date(obj.created_at), 'dd MMM yyyy, HH:mm')}
                       </Elem>
                       <Elem name='item-control'>
                         <Button
                           onClick={() => onSelectActive(obj.id)}
                           icon={<LsPencil />}
-                        >Edit</Button>
+                        >{t('Edit')}</Button>
                         <Button
                           onClick={()=> WebhookDeleteModal({ 
                             onDelete: async ()=>{
@@ -73,7 +73,7 @@ const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) 
                           })}
                           look='danger'
                           icon={<LsCross />}
-                        >Delete</Button>
+                        >{t('Delete')}</Button>
                       </Elem>
                     </Elem>
                   ),
