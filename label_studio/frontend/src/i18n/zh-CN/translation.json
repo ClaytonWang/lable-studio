@@ -189,5 +189,9 @@
   "avg_lead_time_help": "所有注释（秒）的平均提货时间",
   "label_clean": "清洗",
   "label_prediction": "预标注(普通)",
-  "label_prompt": "预标注(提示学习)"
+  "label_prompt": "预标注(提示学习)",
+  "Nothing found": "空数据",
+  "Try adjusting the filter": "调整筛选",
+  "tip_nodata_yet": "还没有导入数据",
+  "Go to import": "开始导入"
 }

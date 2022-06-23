@@ -189,5 +189,9 @@
   "avg_lead_time_help": "Average lead time over all annotations (seconds)",
   "label_clean": "Clean",
   "label_prediction": "Prediction",
-  "label_prompt": "Prompt"
+  "label_prompt": "Prompt",
+  "Nothing found": "Nothing found",
+  "Try adjusting the filter": "Try adjusting the filter",
+  "tip_nodata_yet": "Looks like you have not imported any data yet",
+  "Go to import": "Go to import"
 }
