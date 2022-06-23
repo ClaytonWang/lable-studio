@@ -41,7 +41,7 @@ const EditableCell = ({
   );
 };
 
-export const PromptLearnTemplate = React.forwardRef(({ projectId },ref)=>{
+export const PromptLearnTemplate = React.forwardRef(({ projectId, showStatus },ref)=>{
   const [form] = Form.useForm();
   const [sourceData, setSourceData] = useState([]);
   const [editingKey, setEditingKey] = useState('');
@@ -120,7 +120,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId },ref)=>{
   const execPredict = async () => {
     try {
       await form.validateFields();
-      mlPromptPredict();
+      mlPromptPredict().then(showStatus);
       setDlgVisible(false);
     }catch(e){console.log(e);}
   };

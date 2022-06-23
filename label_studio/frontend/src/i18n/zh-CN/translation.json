@@ -186,5 +186,8 @@
   "updated_by": "更新",
   "updated_by_help": "执行最后任务更新的用户",
   "avg_lead_time": "平均完成时间",
-  "avg_lead_time_help": "所有注释（秒）的平均提货时间"
+  "avg_lead_time_help": "所有注释（秒）的平均提货时间",
+  "label_clean": "清洗",
+  "label_prediction": "预标注(普通)",
+  "label_prompt": "预标注(提示学习)"
 }

@@ -61,7 +61,7 @@ const formatResponse = (response) => {
   };
 };
 
-export default ({ modalRef }) => {
+export default ({ modalRef, showStatus }) => {
   const api = useAPI();
   const { project } = useProject();
   const [status, setStatus] = useState({});
@@ -137,7 +137,7 @@ export default ({ modalRef }) => {
   }, [request.clQueryStatus, project.id, modalVisible]);
 
   const handleExec = () => {
-    request.clExec();
+    request.clExec().then(showStatus);
   };
   const handleReplace = () => {
     request.clReplace();

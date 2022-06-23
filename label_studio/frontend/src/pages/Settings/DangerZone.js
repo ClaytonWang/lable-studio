@@ -1,4 +1,3 @@
-import { t } from "i18next";
 import { useMemo, useState } from "react";
 import { useHistory } from "react-router";
 import { Button } from "../../components";
