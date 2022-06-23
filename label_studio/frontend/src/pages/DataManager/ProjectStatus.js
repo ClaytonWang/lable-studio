@@ -19,35 +19,37 @@ export default forwardRef((props, ref) => {
   const [task, setTask] = useState(null);
 
   const request = useMemo(() => {
-    const fetchStatus = (type) => {
-      return api.callApi("mlPreLabelProgress", {
-        params: {
-          project_id: project.id,
-          type,
-        },
-      });
-    };
-
-    return async (fetchType) => {
-      const tasks = fetchType ? [fetchType] : TASK_TYPE;
-      const list = await Promise.all(tasks.map(async item => {
-        const data = await fetchStatus(item);
-
-        return {
-          ...data,
-          type: item,
-        };
-      }));
-      const running = find(list, { state: true });
-
-      if (running) {
-        setTask({
-          ...running,
+    if (project.id) {
+      const fetchStatus = (type) => {
+        return api.callApi("mlPreLabelProgress", {
+          params: {
+            project_id: project.id,
+            type,
+          },
         });
-      } else {
-        setTask(null);
-      }
-    };
+      };
+  
+      return async (fetchType) => {
+        const tasks = fetchType ? [fetchType] : TASK_TYPE;
+        const list = await Promise.all(tasks.map(async item => {
+          const data = await fetchStatus(item);
+  
+          return {
+            ...data,
+            type: item,
+          };
+        }));
+        const running = find(list, { state: true });
+  
+        if (running) {
+          setTask({
+            ...running,
+          });
+        } else {
+          setTask(null);
+        }
+      };
+    }
   }, [project.id]);
 
   useEffect(() => {
