@@ -32,7 +32,6 @@ const formatDMColumns = (data) => {
       }
     });
   }
-  console.log("🚀 ~ file: index.js ~ line 37 ~ formatDMColumns ~ data", data)
 
   return data;
 };
