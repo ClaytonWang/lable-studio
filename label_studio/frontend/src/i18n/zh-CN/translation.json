@@ -247,5 +247,18 @@
   "tip_no_labeld_regins_yet": "尚未创建标记的区域",
   "Create copy of current": "创建当前的副本",
   "Send Payload for": "发送有效载荷",
-  "Created": "创建"
+  "Created": "创建",
+  "Use": "选择",
+  "from": "从",
+  "<imported file>": "<导入文件>",
+  "paragraphs": "段落",
+  "field": "字段",
+  "false": "无",
+  "Hotkeys": "快捷键",
+  "Layout": "布局",
+  "setting_move_to_bottom": "将侧板移到底部",
+  "setting_display_default": "默认情况下显示标签在结果面板中",
+  "setting_show_annot": "显示注释面板",
+  "setting_show_prediction": "显示预测面板",
+  "View All": "查看全部"
 }

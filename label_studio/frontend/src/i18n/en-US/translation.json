@@ -247,5 +247,18 @@
   "tip_no_labeld_regins_yet": "No Labeled Regions created yet",
   "Create copy of current": "Create copy of current",
   "Send Payload for": "Send Payload for",
-  "Created": "Created"
+  "Created": "Created",
+  "Use": "Use",
+  "from": "from",
+  "<imported file>": "<imported file>",
+  "paragraphs": "paragraphs",
+  "field": "field",
+  "false": "false",
+  "Hotkeys": "Hotkeys",
+  "Layout": "Layout",
+  "setting_move_to_bottom": "Move sidepanel to the bottom",
+  "setting_display_default": "Display Labels by default in Results panel",
+  "setting_show_annot": "Show Annotations panel",
+  "setting_show_prediction": "Show Predictions panel",
+  "View All": "View All"
 }

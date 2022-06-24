@@ -1,5 +1,6 @@
-import { t } from 'i18next';
-import { map, forEach, isArray } from 'lodash';
+import { forEach, isArray, map } from 'lodash';
+
+const t = window.t;
 
 const Formatter = {
   trans: window.t,

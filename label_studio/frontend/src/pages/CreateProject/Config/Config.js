@@ -220,24 +220,28 @@ const ConfigureColumns = ({ columns, template }) => {
           {/* To select which field(s) to label you need to upload the data. Alternatively, you can provide it using Code mode. */}
         </p>
       )}
-      {template.objects.map(obj => (
-        <p key={obj.getAttribute("name")}>
-          Use {obj.tagName.toLowerCase()}
-          {template.objects > 1 && ` for ${obj.getAttribute("name")}`}
-          {" from "}
-          {columns?.length > 0 && columns[0] !== DEFAULT_COLUMN && "field "}
-          <select onChange={updateValue(obj)} value={obj.getAttribute("value")?.replace(/^\$/, "")}>
-            {columns?.map(column => (
-              <option key={column} value={column}>
-                {column === DEFAULT_COLUMN ? "<imported file>" : `$${column}`}
-              </option>
-            ))}
-            {!columns?.length && (
-              <option value={obj.getAttribute("value")?.replace(/^\$/, "")}>{"<imported file>"}</option>
-            )}
-          </select>
-        </p>
-      ))}
+      {template.objects.map(obj => {
+        const tagName = obj.tagName.toLowerCase();
+        const _field = columns?.length > 0 && columns[0] !== DEFAULT_COLUMN && "field ";
+
+        return (
+          <p key={obj.getAttribute("name")}>
+            {t("Use")} {t(tagName, tagName)}
+            {template.objects > 1 && ` ${'for'} ${obj.getAttribute("name")}`}
+            {` ${t('from')} `}
+            {t(_field, '字段')}
+            <select onChange={updateValue(obj)} value={obj.getAttribute("value")?.replace(/^\$/, "")}>
+              {columns?.map(column => (
+                <option key={column} value={column}>
+                  {column === DEFAULT_COLUMN ? t("<imported file>") : `$${column}`}
+                </option>
+              ))}
+              {!columns?.length && (
+                <option value={obj.getAttribute("value")?.replace(/^\$/, "")}>{t("<imported file>")}</option>
+              )}
+            </select>
+          </p>
+        );})}
     </div>
   );
 };
