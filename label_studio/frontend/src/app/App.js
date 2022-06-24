@@ -4,6 +4,9 @@ import { createBrowserHistory } from 'history';
 import React from 'react';
 import { render } from 'react-dom';
 import { Router } from 'react-router-dom';
+import { ConfigProvider as AntConfigProvider } from 'antd';
+import enUS from 'antd/lib/locale/en_US';
+import zhCN from 'antd/lib/locale/zh_CN';
 import { initSentry } from "../config/Sentry";
 import { ApiProvider } from '../providers/ApiProvider';
 import { AppStoreProvider } from '../providers/AppStoreProvider';
@@ -51,6 +54,7 @@ const App = ({content}) => {
           <LibraryProvider key="lsf" libraries={libraries}/>,
           <RoutesProvider key="rotes"/>,
           <ProjectProvider key="project"/>,
+          <AntConfigProvider key="ant" locale={window.i18next.language === 'en-US' ? enUS : zhCN} />,
         ]}>
           <AsyncPage>
             <RootPage content={content}/>

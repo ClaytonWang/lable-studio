@@ -18,11 +18,18 @@ const format = (key, data, ...options) => {
       return formatDMColumns(data, ...options);
     } else if (key === 'ls_export_formats') {
       return formatExportFormats(data, ...options);
+    } else if (key === 'dm_actions') {
+      return formatDMActions(data, ...options);
     }
     return data;
   } catch (error) {
     return data;
   }
+};
+
+const formatDMActions = (data) => {
+  console.log("🚀 ~ file: index.js ~ line 31 ~ formatDMActions ~ data", data)
+  return data;
 };
 
 const formatExportFormats = (data) => {
@@ -39,11 +46,10 @@ const formatDMColumns = (data) => {
     forEach(data.columns, item => {
       if (item.id) {
         item.title = Formatter.trans(item.id, item.title);
-        item.help = Formatter.trans(`${item.id}_help`, item.help);
+        item.help = Formatter.trans(`${item.id}_help`, '');
       }
     });
   }
-
   return data;
 };
 

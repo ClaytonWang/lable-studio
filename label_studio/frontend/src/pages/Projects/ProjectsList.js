@@ -1,5 +1,6 @@
 import chr from 'chroma-js';
 import { format } from 'date-fns';
+import { t } from 'i18next';
 import React, { useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import { LsBulb, LsCheck, LsEllipsis, LsMinus } from '../../assets/icons';
@@ -35,8 +36,8 @@ export const EmptyProjectsList = ({ openModal }) => {
   return (
     <Block name="empty-projects-page">
       <Elem name="heidi" tag="img" src={absoluteURL("/static/images/opossum_looking.png")} />
-      <Elem name="header" tag="h1">Heidi doesn’t see any projects here</Elem>
-      <p>Create one and start labeling your data</p>
+      <Elem name="header" tag="h1">{t('Nothing found')}</Elem>
+      <p>{t('Go to import')}</p>
       <Elem name="action" tag={Button} onClick={openModal} look="primary">{t("Create Project")}</Elem>
     </Block>
   );

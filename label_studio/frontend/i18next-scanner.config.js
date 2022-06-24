@@ -24,6 +24,7 @@ module.exports = {
       list: ["t", "window.t"],
       extensions: [".js", ".jsx", ".tsx", ".ts"],
     },
+    keySeparator: false,
     attr: {
       list: ['data-i18n'],
       extensions: ['.html', '.htm']
