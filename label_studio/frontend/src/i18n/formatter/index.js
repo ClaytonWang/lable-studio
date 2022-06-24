@@ -1,7 +1,5 @@
 import { forEach, isArray, map } from 'lodash';
 
-const t = window.t;
-
 const Formatter = {
   trans: window.t,
   init: (transFunc, parent) => {
@@ -31,7 +29,7 @@ const formatExportFormats = (data) => {
   return map(data, item => {
     return {
       ...item,
-      description: t(`export_${item.title}`, item.description),
+      description: Formatter.trans(`export_${item.title}`, item.description),
     };
   });
 };
@@ -40,8 +38,8 @@ const formatDMColumns = (data) => {
   if (isArray(data?.columns)) {
     forEach(data.columns, item => {
       if (item.id) {
-        item.title = t(item.id, item.title);
-        item.help = t(`${item.id}_help`, item.help);
+        item.title = Formatter.trans(item.id, item.title);
+        item.help = Formatter.trans(`${item.id}_help`, item.help);
       }
     });
   }
