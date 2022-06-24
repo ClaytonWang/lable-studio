@@ -105,47 +105,71 @@ def get_all_columns(project, *_):
         }]
 
     result['columns'] += [
+        data_root,
         {
-            'id': 'completed_at',
-            'title': 'Completed',
+            'id': 'auto_label',
+            'title': "Auto label",
+            'type': 'String',
+            'help': 'Auto label',
+            'target': 'tasks',
+            'visibility_defaults': {
+                'explore': True,
+                'labeling': False
+            }
+        },
+        {
+            'id': 'manual_label',
+            'title': "Manual label",
+            'type': 'String',
+            'help': 'Manual label',
+            'target': 'tasks',
+            'visibility_defaults': {
+                'explore': True,
+                'labeling': False
+            }
+        },
+        {
+            'id': 'marked_methode',
+            'title': "Label methode",
+            'type': 'String',
+            'help': 'Label methode help',
+            'target': 'tasks',
+            'visibility_defaults': {
+                'explore': True,
+                'labeling': False
+            }
+        },
+        {
+            'id': 'predictions_score',
+            'title': "Prediction score",
+            'type': "Number",
+            'target': 'tasks',
+            'help': 'Average prediction score over all task predictions',
+            'visibility_defaults': {
+                'explore': True,
+                'labeling': False
+            }
+        },
+        {
+            'id': 'updated_at',
+            'title': 'Updated at',
             'type': 'Datetime',
             'target': 'tasks',
-            'help': 'Last annotation date',
+            'help': 'Task update time',
             'visibility_defaults': {
                 'explore': True,
                 'labeling': False
             }
         },
         {
-            'id': 'total_annotations',
-            'title': 'Annotations',
-            'type': "Number",
+            'id': 'updated_by',
+            'title': 'Updated by',
+            'type': 'List',
             'target': 'tasks',
-            'help': 'Total annotations per task',
+            'help': 'User who did the last task update',
+            'schema': {'items': project.organization.members.values_list('user__id', flat=True)},
             'visibility_defaults': {
-                'explore': True,
-                'labeling': True
-            }
-        },
-        {
-            'id': 'cancelled_annotations',
-            'title': "Cancelled",
-            'type': "Number",
-            'target': 'tasks',
-            'help': 'Total cancelled (skipped) annotations',
-            'visibility_defaults': {
-                'explore': True,
-                'labeling': False
-            }
-        },
-        {
-            'id': 'total_predictions',
-            'title': "Predictions",
-            'type': "Number",
-            'target': 'tasks',
-            'help': 'Total predictions per task',
-            'visibility_defaults': {
-                'explore': True,
+                'explore': False,
                 'labeling': False
             }
         },
@@ -157,16 +181,71 @@ def get_all_columns(project, *_):
             'help': 'All users who completed the task',
             'schema': {'items': project.organization.members.values_list('user__id', flat=True)},
             'visibility_defaults': {
-                'explore': True,
+                'explore': False,
                 'labeling': False
             }
         },
         {
-            'id': 'annotations_results',
-            'title': "Annotation results",
-            'type': "String",
+            'id': 'completed_at',
+            'title': 'Completed',
+            'type': 'Datetime',
             'target': 'tasks',
-            'help': 'Annotation results stacked over all annotations',
+            'help': 'Last annotation date',
+            'visibility_defaults': {
+                'explore': False,
+                'labeling': False
+            }
+        },
+        {
+            'id': 'label_at',
+            'title': "Label at",
+            'type': 'String',
+            'help': 'Label at',
+            'target': 'tasks',
+            'visibility_defaults': {
+                'explore': False,
+                'labeling': False
+            }
+        },
+        {
+            'id': 'created_at',
+            'title': 'Created at',
+            'type': 'Datetime',
+            'target': 'tasks',
+            'help': 'Task creation time',
+            'visibility_defaults': {
+                'explore': False,
+                'labeling': False
+            }
+        },
+        {
+            'id': 'total_predictions',
+            'title': "Predictions",
+            'type': "Number",
+            'target': 'tasks',
+            'help': 'Total predictions per task',
+            'visibility_defaults': {
+                'explore': False,
+                'labeling': False
+            }
+        },
+        {
+            'id': 'cancelled_annotations',
+            'title': "Cancelled",
+            'type': "Number",
+            'target': 'tasks',
+            'help': 'Total cancelled (skipped) annotations',
+            'visibility_defaults': {
+                'explore': False,
+                'labeling': False
+            }
+        },
+        {
+            'id': 'total_annotations',
+            'title': 'Annotations',
+            'type': "Number",
+            'target': 'tasks',
+            'help': 'Total annotations per task',
             'visibility_defaults': {
                 'explore': False,
                 'labeling': False
@@ -178,17 +257,6 @@ def get_all_columns(project, *_):
             'type': "String",
             'target': 'tasks',
             'help': 'Annotation IDs stacked over all annotations',
-            'visibility_defaults': {
-                'explore': False,
-                'labeling': False
-            }
-        },
-        {
-            'id': 'predictions_score',
-            'title': "Prediction score",
-            'type': "Number",
-            'target': 'tasks',
-            'help': 'Average prediction score over all task predictions',
             'visibility_defaults': {
                 'explore': False,
                 'labeling': False
@@ -207,11 +275,11 @@ def get_all_columns(project, *_):
             }
         },
         {
-            'id': 'predictions_results',
-            'title': "Prediction results",
-            'type': "String",
+            'id': 'avg_lead_time',
+            'title': "Lead Time",
+            'type': 'Number',
+            'help': 'Average lead time over all annotations (seconds)',
             'target': 'tasks',
-            'help': 'Prediction results stacked over all predictions',
             'visibility_defaults': {
                 'explore': False,
                 'labeling': False
@@ -227,99 +295,33 @@ def get_all_columns(project, *_):
                 'explore': False,
                 'labeling': False
             }
-        },
-        {
-            'id': 'created_at',
-            'title': 'Created at',
-            'type': 'Datetime',
-            'target': 'tasks',
-            'help': 'Task creation time',
-            'visibility_defaults': {
-                'explore': False,
-                'labeling': False
-            }
-        },
-        {
-            'id': 'updated_at',
-            'title': 'Updated at',
-            'type': 'Datetime',
-            'target': 'tasks',
-            'help': 'Task update time',
-            'visibility_defaults': {
-                'explore': False,
-                'labeling': False
-            }
-        },
-        {
-            'id': 'updated_by',
-            'title': 'Updated by',
-            'type': 'List',
-            'target': 'tasks',
-            'help': 'User who did the last task update',
-            'schema': {'items': project.organization.members.values_list('user__id', flat=True)},
-            'visibility_defaults': {
-                'explore': False,
-                'labeling': False
-            }
-        },
-        {
-            'id': 'avg_lead_time',
-            'title': "Lead Time",
-            'type': 'Number',
-            'help': 'Average lead time over all annotations (seconds)',
-            'target': 'tasks',
-            'visibility_defaults': {
-                'explore': False,
-                'labeling': False
-            }
-        },
-        {
-            'id': 'marked_methode',
-            'title': "标注方法",
-            'type': 'String',
-            'help': '标注方法',
-            'target': 'tasks',
-            'visibility_defaults': {
-                'explore': False,
-                'labeling': False
-            }
-        },
-        {
-            'id': 'auto_label',
-            'title': "自动标注",
-            'type': 'String',
-            'help': '自动标注',
-            'target': 'tasks',
-            'visibility_defaults': {
-                'explore': False,
-                'labeling': False
-            }
-        },
-        {
-            'id': 'manual_label',
-            'title': "手动标注",
-            'type': 'String',
-            'help': '手动标注',
-            'target': 'tasks',
-            'visibility_defaults': {
-                'explore': False,
-                'labeling': False
-            }
-        },
-        {
-            'id': 'label_at',
-            'title': "自动标注时间",
-            'type': 'String',
-            'help': '自动标注时间',
-            'target': 'tasks',
-            'visibility_defaults': {
-                'explore': True,
-                'labeling': False
-            }
         }
+
+        # {
+        #     'id': 'annotations_results',
+        #     'title': "Annotation results",
+        #     'type': "String",
+        #     'target': 'tasks',
+        #     'help': 'Annotation results stacked over all annotations',
+        #     'visibility_defaults': {
+        #         'explore': False,
+        #         'labeling': False
+        #     }
+        # },
+        # {
+        #     'id': 'predictions_results',
+        #     'title': "Prediction results",
+        #     'type': "String",
+        #     'target': 'tasks',
+        #     'help': 'Prediction results stacked over all predictions',
+        #     'visibility_defaults': {
+        #         'explore': False,
+        #         'labeling': False
+        #     }
+        # }
     ]
 
-    result['columns'].append(data_root)
+    # result['columns'].append(data_root)
 
     return result
 

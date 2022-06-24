@@ -88,7 +88,8 @@ ProjectsPage.path = "/projects";
 ProjectsPage.exact = true;
 ProjectsPage.routes = ({ store }) => [
   {
-    title: () => store.project?.title,
+    title: () => store.project?.bread_crumbs_title ? store.project?.bread_crumbs_title : store.project?.title,
+    bread_crumbs_title:()=>store.project?.bread_crumbs_title,
     path: "/:id(\\d+)",
     exact: true,
     component: () => {

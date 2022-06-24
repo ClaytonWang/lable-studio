@@ -21,6 +21,7 @@ const LeftContextMenu = ({ className }) => (
   <StaticContent
     id="context-menu-left"
     className={className}
+    raw={ true}
   >{(template) => <Breadcrumbs fromTemplate={template} />}</StaticContent>
 );
 

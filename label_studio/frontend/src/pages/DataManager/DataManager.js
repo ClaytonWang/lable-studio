@@ -3,13 +3,13 @@ import { generatePath, useHistory } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import { Loading } from '../../components';
 import { Button } from '../../components/Button/Button';
-import { modal, Modal } from '../../components/Modal/Modal';
+import { modal } from '../../components/Modal/Modal';
 import { Space } from '../../components/Space/Space';
 import { useAPI } from '../../providers/ApiProvider';
 import { useLibrary } from '../../providers/LibraryProvider';
 import { useProject } from '../../providers/ProjectProvider';
 import { useContextProps, useFixedLocation, useParams } from '../../providers/RoutesProvider';
-import { addAction, addCrumb, deleteAction, deleteCrumb } from '../../services/breadrumbs';
+import { addAction, deleteAction, deleteCrumb } from '../../services/breadrumbs';
 import { Block, Elem } from '../../utils/bem';
 import { isDefined } from '../../utils/helpers';
 import { ImportModal } from '../CreateProject/Import/ImportModal';
@@ -17,7 +17,6 @@ import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
 import CleanData from './CleanData';
 import ProjectStatus from './ProjectStatus';
-import { Progress } from 'antd';
 import { PromptLearnTemplate } from '../../components';
 import "./DataManager.styl";
 
@@ -71,16 +70,16 @@ const initializeDataManager = async (root, props, params) => {
     root,
     toolbar: "actions columns filters ordering wash-button pre-button pre-prom-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
-    // apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
-    apiGateway: `http://124.71.161.146:8080/api/dm`,
+    apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
+    // apiGateway: `http://124.71.161.146:8080/api/dm`,
     apiVersion: 2,
     project: params.project,
     polling: !window.APP_SETTINGS,
     showPreviews: true,
     apiEndpoints: APIConfig.endpoints,
-    apiHeaders: {
-      Authorization: `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
-    },
+    // apiHeaders: {
+    //   Authorization: `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
+    // },
     interfaces: {
       backButton: false,
       labelingHeader: false,

@@ -15,10 +15,10 @@ import { LibraryProvider } from '../providers/LibraryProvider';
 import { MultiProvider } from '../providers/MultiProvider';
 import { ProjectProvider } from '../providers/ProjectProvider';
 import { RoutesProvider } from '../providers/RoutesProvider';
-import './App.styl';
 import { AsyncPage } from './AsyncPage/AsyncPage';
 import ErrorBoundary from './ErrorBoundary';
 import { RootPage } from './RootPage';
+import './App.styl';
 
 const baseURL = new URL(APP_SETTINGS.hostname || location.origin);
 
@@ -30,7 +30,7 @@ window.LSH = browserHistory;
 
 initSentry(browserHistory);
 
-const App = ({content}) => {
+const App = ({ content }) => {
   const libraries = {
     lsf: {
       scriptSrc: window.EDITOR_JS,

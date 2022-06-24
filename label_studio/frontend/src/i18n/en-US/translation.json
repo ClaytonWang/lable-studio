@@ -185,11 +185,13 @@
   "updated_at_help": "Task update time",
   "updated_by": "Updated by",
   "updated_by_help": "User who did the last task update",
+  "inner_id": "Inner ID",
   "avg_lead_time": "Lead Time",
   "avg_lead_time_help": "Average lead time over all annotations (seconds)",
   "label_clean": "Clean",
   "label_prediction": "Prediction",
   "label_prompt": "Prompt",
+  "intent_type_dlg": "Dialog - Intent type",
   "Nothing found": "Nothing found",
   "Try adjusting the filter": "Try adjusting the filter",
   "tip_nodata_yet": "Looks like you have not imported any data yet",
@@ -289,5 +291,12 @@
   "delete_tasks_annotations": "删除注释",
   "delete_tasks_annotations_dialog": "您将从所选任务中删除所有注释。请确认您的行动。",
   "delete_tasks_predictions": "删除预测",
-  "delete_tasks_predictions_dialog": "您将从所选任务中删除所有预测。请确认您的行动。"
+  "delete_tasks_predictions_dialog": "您将从所选任务中删除所有预测。请确认您的行动。",
+  "dialogue": "dialogue",
+  "dialogue_help": "change dialogue data type",
+  "marked_methode": "Label methode",
+  "marked_methode_help": "普通模型标注/提示学习方法标注",
+  "auto_label": "Auto label",
+  "manual_label": "Manual label",
+  "label_at": "Label at"
 }
