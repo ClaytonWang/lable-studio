@@ -15,7 +15,7 @@ const PADDING = 32;
 const jsonToString = (value) => {
   try {
     if (value && typeof value === "object") {
-      return value.map((item) => `${item.author}:${item.text}`).join("\n");
+      return value.map((item) => `${item.author}:${item.text||''}`).join("\n");
     }
   } catch (error) {
     return value;
@@ -28,7 +28,7 @@ const stringToJson = (string) => {
       .split("\n")
       .map((item) => {
         const line = trim(item);
-        const [author, text] = line.split(":");
+        const [author, text] = line.split(/:|：/);
 
         if (author || text) {
           return {

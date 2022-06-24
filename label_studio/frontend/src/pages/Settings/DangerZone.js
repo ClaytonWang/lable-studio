@@ -51,15 +51,15 @@ export const DangerZone = () => {
   const buttons = useMemo(() => [{
     type: 'annotations',
     disabled: true, //&& !project.total_annotations_number,
-    label: `Delete ${project.total_annotations_number} Annotations`,
+    label: `${t('Delete')} ${project.total_annotations_number} ${t('Annotations')}`,
   }, {
     type: 'tasks',
     disabled: true, //&& !project.task_number,
-    label: `Delete ${project.task_number} Tasks`,
+    label: `${t('Delete')} ${project.task_number} ${t('Tasks')}`,
   }, {
     type: 'predictions',
     disabled: true, //&& !project.total_predictions_number,
-    label: `Delete ${project.total_predictions_number} Predictions`,
+    label: `${t('Delete')} ${project.total_predictions_number} ${t('Predictions')}`,
   }, {
     type: 'tabs',
     label: t('Drop All Tabs'),

@@ -2,3 +2,4 @@ report.*.json
 .env*
 !.env.example
 !*.lock
+translation.csv

@@ -53,7 +53,7 @@ export const Inner = () => {
 
   return (
     <Modal
-      title="Import data"
+      title={t("Import Data")}
       ref={modal}
       onHide={() => backToDM()}
       closeOnClickOutside={false}
@@ -62,12 +62,12 @@ export const Inner = () => {
       bare
     >
       <Modal.Header divided>
-        <Elem block="modal" name="title">Import Data</Elem>
+        <Elem block="modal" name="title">{t('Import Data')}</Elem>
 
         <Space>
-          <Button waiting={waiting} onClick={onCancel}>Cancel</Button>
+          <Button waiting={waiting} onClick={onCancel}>{t('Cancel')}</Button>
           <Button look="primary" onClick={onFinish} waiting={waiting || uploading} disabled={uploadDisabled}>
-            Import
+            {t('Import')}
           </Button>
         </Space>
       </Modal.Header>

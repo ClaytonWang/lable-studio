@@ -49,8 +49,8 @@ export const StorageCard = ({
       extra={(
         <Dropdown.Trigger align="right" content={(
           <Menu size="compact" style={{ width: 110 }}>
-            <Menu.Item onClick={() => onEditStorage(storageData)}>Edit</Menu.Item>
-            <Menu.Item onClick={() => onDeleteStorage(storageData)}>Delete</Menu.Item>
+            <Menu.Item onClick={() => onEditStorage(storageData)}>{t('Edit')}</Menu.Item>
+            <Menu.Item onClick={() => onDeleteStorage(storageData)}>{t('Delete')}</Menu.Item>
           </Menu>
         )}>
           <Button type="link" style={{ width: 32, height: 32, marginRight: -10 }} icon={<FaEllipsisV/>}/>
@@ -65,11 +65,11 @@ export const StorageCard = ({
       <div className={rootClass.elem('sync')}>
         <Space size="small">
           <Button waiting={syncing} onClick={startSync}>
-              Sync Storage
+            {t('Sync Storage')}
           </Button>
           {synced !== null ? (
             <div className={rootClass.elem('sync-count')}>
-                Synced {synced} task(s)
+              {t('Synced')} {synced} {t('task(s)')}
             </div>
           ) : null}
         </Space>

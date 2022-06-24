@@ -1,4 +1,5 @@
-import { forEach, isArray } from 'lodash';
+import { t } from 'i18next';
+import { map, forEach, isArray } from 'lodash';
 
 const Formatter = {
   trans: window.t,
@@ -16,11 +17,22 @@ const format = (key, data, ...options) => {
   try {
     if (key === 'dm_columns') {
       return formatDMColumns(data, ...options);
+    } else if (key === 'ls_export_formats') {
+      return formatExportFormats(data, ...options);
     }
     return data;
   } catch (error) {
     return data;
   }
+};
+
+const formatExportFormats = (data) => {
+  return map(data, item => {
+    return {
+      ...item,
+      description: t(`export_${item.title}`, item.description),
+    };
+  });
 };
 
 const formatDMColumns = (data) => {
@@ -32,7 +44,6 @@ const formatDMColumns = (data) => {
       }
     });
   }
-  console.log("🚀 ~ file: index.js ~ line 37 ~ formatDMColumns ~ data", data)
 
   return data;
 };

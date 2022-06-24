@@ -20,6 +20,9 @@ export default forwardRef((props, ref) => {
 
   const request = useMemo(() => {
     const fetchStatus = (type) => {
+      if (!project.id) {
+        return {};
+      }
       return api.callApi("mlPreLabelProgress", {
         params: {
           project_id: project.id,
