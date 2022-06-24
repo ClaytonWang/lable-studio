@@ -18,7 +18,7 @@ ProjectContext.displayName = 'ProjectContext';
 
 const projectCache = new Map<number, APIProject>();
 
-export const ProjectProvider: React.FunctionComponent = ({children}) => {
+export const ProjectProvider: React.FunctionComponent = ({ children }) => {
   const api = useAPI();
   const params = useParams();
   const { update: updateStore } = useAppStore();
@@ -31,7 +31,7 @@ export const ProjectProvider: React.FunctionComponent = ({children}) => {
     if (isNaN(finalProjectId)) return;
 
     if (!force && projectCache.has(finalProjectId)) {
-      setProjectData({...projectCache.get(finalProjectId)!});
+      setProjectData({ ...projectCache.get(finalProjectId)! });
     }
 
     const result = await api.callApi<APIProject>('project', {
@@ -41,9 +41,13 @@ export const ProjectProvider: React.FunctionComponent = ({children}) => {
 
     const projectInfo = result as unknown as APIProject;
 
+    const isIndentTemplate = projectInfo?.label_config?.indexOf('template-intent-classification-for-dialog') !== -1;
+
+    projectInfo.bread_crumbs_title = isIndentTemplate ? projectInfo?.title + window.t('intent_type_dlg',' (对话-意图分类)') : projectInfo?.title;
+
     if (shallowEqualObjects(projectData, projectInfo) === false) {
       setProjectData(projectInfo);
-      updateStore({project: projectInfo});
+      updateStore({ project: projectInfo });
       projectCache.set(projectInfo.id, projectInfo);
     }
 
@@ -60,7 +64,7 @@ export const ProjectProvider: React.FunctionComponent = ({children}) => {
 
     if (result.$meta) {
       setProjectData(result as unknown as APIProject);
-      updateStore({project: result});
+      updateStore({ project: result });
     }
 
     return result;

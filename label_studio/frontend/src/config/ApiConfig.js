@@ -1,6 +1,6 @@
 export const API_CONFIG = {
-  // gateway: `${window.APP_SETTINGS.hostname}/api`,
-  gateway: `http://124.71.161.146:8080/api`,
+  gateway: `${window.APP_SETTINGS.hostname}/api`,
+  // gateway: `http://124.71.161.146:8080/api`,
   endpoints: {
     // Users
     users: "/users",

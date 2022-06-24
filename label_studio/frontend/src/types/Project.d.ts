@@ -5,6 +5,9 @@ declare type APIProject = {
   /** Project name. Must be between 3 and 50 characters long. */
   title: string;
 
+  /** Project name. Must be between 3 and 50 characters long. use for display bread crumbs*/
+  bread_crumbs_title: string;
+
   /** Project description */
   description?: string | null;
 

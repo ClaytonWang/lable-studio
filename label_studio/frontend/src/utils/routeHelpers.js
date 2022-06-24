@@ -32,6 +32,7 @@ export const pageSetToRoutes = (pages, config) => {
     route.modal = !!page.modal;
 
     if (page.title) route.title = page.title;
+    if (page.bread_crumbs_title) route.bread_crumbs_title = page.bread_crumbs_title;
     if (page.render) route.render = page.render;
 
     if (page instanceof React.Component || page instanceof Function) {
@@ -103,9 +104,12 @@ export const resolveRoutes = (routes, props) => {
       );
     } else {
       const routeProps = { key: fullPath, path: fullPath, modal: !!Component.modal };
-      return <Route {...routeProps} exact render={() => (
-        <Component {...(props ?? {})}/>
-      )} {...rest}/>;
+
+      return (
+        <Route {...routeProps} exact render={() => (
+          <Component {...(props ?? {})}/>
+        )} {...rest}/>
+      );
     }
   };
 
