@@ -308,9 +308,9 @@ def get_all_columns(project, *_):
         },
         {
             'id': 'label_at',
-            'title': "标注时间",
+            'title': "自动标注时间",
             'type': 'String',
-            'help': '标注时间',
+            'help': '自动标注时间',
             'target': 'tasks',
             'visibility_defaults': {
                 'explore': True,
