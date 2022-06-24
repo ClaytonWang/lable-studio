@@ -157,8 +157,8 @@
   "No Relations added yet": "还没有添加关系",
   "New Project": "新项目",
   "Completed": "完成",
-  "completed_at": "完成",
-  "completed_at_help": "最后注释日期",
+  "completed_at": "手动标注时间",
+  "completed_at_help": "手动标注时间",
   "total_annotations": "注释",
   "total_annotations_help": "每个任务的总注释",
   "cancelled_annotations": "取消",
@@ -189,5 +189,6 @@
   "avg_lead_time_help": "所有注释（秒）的平均提货时间",
   "label_clean": "清洗",
   "label_prediction": "预标注(普通)",
-  "label_prompt": "预标注(提示学习)"
+  "label_prompt": "预标注(提示学习)",
+  "intent_type_dlg":" (对话-意图分类)"
 }

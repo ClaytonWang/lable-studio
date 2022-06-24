@@ -189,5 +189,6 @@
   "avg_lead_time_help": "Average lead time over all annotations (seconds)",
   "label_clean": "Clean",
   "label_prediction": "Prediction",
-  "label_prompt": "Prompt"
+  "label_prompt": "Prompt",
+  "intent_type_dlg":"Dialog - Intent type"
 }

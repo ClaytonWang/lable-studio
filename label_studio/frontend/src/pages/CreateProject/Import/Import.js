@@ -279,15 +279,14 @@ export const ImportPage = ({
       <header>
         <form className={importClass.elem("url-form") + " inline"} method="POST" onSubmit={onLoadURL}>
           <input placeholder={t("Dataset URL", "数据链接")} name="url" ref={urlRef} />
-          <button type="submit">{t("Add URL", "添加链接")}</button>
+          {/* <button type="submit">{t("Add URL", "添加链接")}</button> */}
+          <button onClick={() => document.getElementById('file-input').click()} className={importClass.elem("upload-button")}>
+            <IconUpload width="16" height="16" className={importClass.elem("upload-icon")} />
+            {
+              t("Upload Files", "上传文件")
+            }
+          </button>
         </form>
-        <span>or</span>
-        <button onClick={() => document.getElementById('file-input').click()} className={importClass.elem("upload-button")}>
-          <IconUpload width="16" height="16" className={importClass.elem("upload-icon")} />
-          {
-            t("Upload Files", "上传文件")
-          }
-        </button>
         <div className={importClass.elem("csv-handling").mod({ highlighted: highlightCsvHandling, hidden: !csvHandling })}>
           <span>Treat CSV/TSV as</span>
           <label><input {...csvProps} value="tasks" checked={csvHandling === "tasks"}/> List of tasks</label>
