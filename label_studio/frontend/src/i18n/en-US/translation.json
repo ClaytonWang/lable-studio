@@ -185,6 +185,7 @@
   "updated_at_help": "Task update time",
   "updated_by": "Updated by",
   "updated_by_help": "User who did the last task update",
+  "inner_id":"Inner ID",
   "avg_lead_time": "Lead Time",
   "avg_lead_time_help": "Average lead time over all annotations (seconds)",
   "label_clean": "Clean",
@@ -248,5 +249,12 @@
   "tip_no_labeld_regins_yet": "No Labeled Regions created yet",
   "Create copy of current": "Create copy of current",
   "Send Payload for": "Send Payload for",
-  "Created": "Created"
+  "Created": "Created",
+  "dialogue":"dialogue",
+  "dialogue_help":"change dialogue data type",
+  "marked_methode":"Label methode",
+  "marked_methode_help":"普通模型标注/提示学习方法标注",
+  "auto_label":"Auto label",
+  "manual_label":"Manual label",
+  "label_at":"Label at"
 }
