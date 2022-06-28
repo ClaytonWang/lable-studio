@@ -3,3 +3,4 @@ report.*.json
 !.env.example
 !*.lock
 translation.csv
+src/i18n/label_studio*.csv

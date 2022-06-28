@@ -28,7 +28,6 @@ const format = (key, data, ...options) => {
 };
 
 const formatDMActions = (data) => {
-  console.log("🚀 ~ file: index.js ~ line 31 ~ formatDMActions ~ data", data)
   return data;
 };
 
