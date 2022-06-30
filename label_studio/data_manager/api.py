@@ -25,7 +25,8 @@ from tasks.serializers import TaskIDOnlySerializer
 from data_manager.functions import get_prepared_queryset, evaluate_predictions, get_prepare_params
 from data_manager.models import View, PrepareParams
 from data_manager.managers import get_fields_for_evaluation
-from data_manager.serializers import ViewSerializer, DataManagerTaskSerializer, SelectedItemsSerializer, ViewResetSerializer
+from data_manager.serializers import ViewSerializer, DataManagerTaskSerializer, \
+    SelectedItemsSerializer, ViewResetSerializer, CustomViewSerializer
 from data_manager.actions import get_all_actions, perform_action
 
 
@@ -124,6 +125,10 @@ class ViewAPI(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return View.objects.filter(project__organization=self.request.user.active_organization)
+
+    def update(self, request, *args, **kwargs):
+        self.serializer_class = CustomViewSerializer
+        return super(ViewAPI, self).update(request, *args, **kwargs)
 
 
 class TaskPagination(PageNumberPagination):

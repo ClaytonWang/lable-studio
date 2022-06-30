@@ -165,6 +165,52 @@ class ViewSerializer(serializers.ModelSerializer):
             return instance
 
 
+class CustomViewSerializer(ViewSerializer):
+
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            filter_group_data = validated_data.pop("filter_group", None)
+            if filter_group_data:
+                filters_data = filter_group_data.pop("filters", [])
+
+                filter_group = instance.filter_group
+                if filter_group is None:
+                    filter_group = FilterGroup.objects.create(**filter_group_data)
+
+                conjunction = filter_group_data.get("conjunction")
+                if conjunction and filter_group.conjunction != conjunction:
+                    filter_group.conjunction = conjunction
+                    filter_group.save()
+
+                filter_group.filters.clear()
+                self._create_filters(filter_group=filter_group, filters_data=filters_data)
+
+            ordering = validated_data.pop("ordering", None)
+            # 修改新加的两个字段
+            # manual_label auto_label
+            if ordering:
+                for index, item in enumerate(ordering):
+                    # tasks: avg_lead_time
+                    if 'manual_label' in item:
+                        ordering[index] = item.replace(
+                            'manual_label', 'annotations_results'
+                        )
+                    elif 'auto_label' in item:
+                        ordering[index] = item.replace(
+                            'auto_label', 'predictions_results'
+                        )
+
+            if ordering and ordering != instance.ordering:
+                instance.ordering = ordering
+                instance.save()
+
+            if validated_data["data"] != instance.data:
+                instance.data = validated_data["data"]
+                instance.save()
+
+            return instance
+
+
 class DataManagerTaskSerializer(TaskSerializer):
     predictions = serializers.SerializerMethodField(required=False, read_only=True)
     annotations = serializers.SerializerMethodField(required=False, read_only=True)

@@ -20,24 +20,25 @@ SESSION_COOKIE_SECURE = False
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
+
 RQ_QUEUES = {
     'default': {
         'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 0,
-        'DEFAULT_TIMEOUT': 18000,
+        'DEFAULT_TIMEOUT': 180,
     },
     'pre_tags': {
         'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 1,
-        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+        'DEFAULT_TIMEOUT': 180,
     },
     'algorithm_clean': {
         'HOST': '127.0.0.1',
         'PORT': 6379,
         'DB': 1,
-        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+        'DEFAULT_TIMEOUT': 180,
     },
 
 }
