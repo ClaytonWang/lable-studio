@@ -4,6 +4,7 @@ import { find } from 'lodash';
 import { useAPI } from "../../providers/ApiProvider";
 import { useProject } from "../../providers/ProjectProvider";
 import { Modal } from "../../components/Modal/Modal";
+import { Button } from '../../components';
 
 const TASK_TYPE = [
   'prediction',
@@ -104,6 +105,10 @@ export default forwardRef((props, ref) => {
             <Space direction="vertical">
               <h2>{t(`label_${task.type}`, task.type)}...</h2>
               <Progress type="circle" percent={progress} />
+              <Space style={{ marginTop: 8 }}>
+                <Button look="danger">{t('Cancel')}</Button>
+                <Button href="/projects" look="primary">{t('back_pm_page', '返回项目管理页')}</Button>
+              </Space>
             </Space>
           </div>
         ) : null
