@@ -68,7 +68,7 @@ const initializeDataManager = async (root, props, params) => {
 
   const dmConfig = {
     root,
-    toolbar: "actions columns filters ordering wash-button pre-button pre-prom-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
+    toolbar: "actions columns filters ordering wash-button pre-prom-button pre-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
     apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
     // apiGateway: `http://124.71.161.146:8080/api/dm`,
@@ -98,7 +98,7 @@ const initializeDataManager = async (root, props, params) => {
         return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >{t("label_prediction", "预标注(普通)")}</button>;
       },
       'pre-prom-button': () => {
-        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >{t('label_prompt', "预标注(提示学习)")}</button>;
+        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >{t('label_prompt', "预标注(0样本)")}</button>;
       },
     },
     ...props,
