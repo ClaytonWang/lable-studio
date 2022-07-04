@@ -82,7 +82,7 @@ const BackendCard = ({backend, onStartTrain, onEdit, onDelete}) => {
           />
         )}
         <DescriptionList.Item term="Version">
-          {backend.version ? format(new Date(backend.version), 'MMMM dd, yyyy ∙ HH:mm:ss') : 'unknown'}
+          {backend.version ? format(new Date(backend.version), 'yyyy-MM-dd HH:mm:ss') : 'unknown'}
         </DescriptionList.Item>
       </DescriptionList>
 

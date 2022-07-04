@@ -60,7 +60,7 @@ export const SelectedUser = ({ user, onClose }) => {
       )}
 
       <Elem tag="p" name="last-active">
-        {t("Last activity on", "最近活动时间")}: {format(new Date(user.last_activity), 'dd MMM yyyy, KK:mm a')}
+        {t("Last activity on", "最近活动时间")}: {format(new Date(user.last_activity), 'yyyy-MM-dd HH:mm:ss')}
       </Elem>
     </Block>
   );

@@ -298,5 +298,12 @@
   "marked_methode_help": "普通模型标注/提示学习方法标注",
   "auto_label": "Auto label",
   "manual_label": "Manual label",
-  "label_at": "Label at"
+  "label_at": "Label at",
+  "back_pm_page": "Back To Projects",
+  "Label": "Label",
+  "Never synced": "Never synced",
+  "Registered": "Registered",
+  "user ID": "user ID",
+  "tip_token": "Use this token to authenticate with our API:",
+  "tip_fetchdata": "Example fetch projects data:"
 }

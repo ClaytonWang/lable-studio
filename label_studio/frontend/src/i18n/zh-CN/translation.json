@@ -298,5 +298,12 @@
   "marked_methode_help": "普通模型标注/提示学习方法标注",
   "auto_label": "自动标注",
   "manual_label": "手动标注",
-  "label_at": "自动标注时间"
+  "label_at": "自动标注时间",
+  "back_pm_page": "返回项目管理页",
+  "Label": "手动标注",
+  "Never synced": "未同步",
+  "Registered": "注册时间",
+  "user ID": "用户ID",
+  "tip_token": "使用此令牌与我们的API进行身份验证：",
+  "tip_fetchdata": "示例获取项目数据："
 }

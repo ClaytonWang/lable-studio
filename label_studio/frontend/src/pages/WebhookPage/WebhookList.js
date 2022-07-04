@@ -57,7 +57,7 @@ const WebhookList = ({ onSelectActive, onAddWebhook, webhooks, fetchWebhooks }) 
                         {obj.url}
                       </Elem>
                       <Elem name='item-date'>
-                        {t('Created')} {format(new Date(obj.created_at), 'dd MMM yyyy, HH:mm')}
+                        {t('Created')} {format(new Date(obj.created_at), 'yyyy-MM-dd HH:mm')}
                       </Elem>
                       <Elem name='item-control'>
                         <Button
