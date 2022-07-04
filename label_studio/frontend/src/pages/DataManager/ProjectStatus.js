@@ -66,8 +66,9 @@ export default forwardRef((props, ref) => {
     } else {
       modalRef.current?.hide();
       if (visible) {
+        setVisible(false);
         // 进度结束后，刷新页面
-        window.location.reload();
+        // window.location.reload();
       }
     }
   }, [task?.state], visible);
