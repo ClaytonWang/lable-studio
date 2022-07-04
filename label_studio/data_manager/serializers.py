@@ -172,6 +172,15 @@ class CustomViewSerializer(ViewSerializer):
             filter_group_data = validated_data.pop("filter_group", None)
             if filter_group_data:
                 filters_data = filter_group_data.pop("filters", [])
+                # 修改新加的两个字段 manual_label auto_label
+                for index, item in enumerate(filters_data):
+                    column = item.get('column')
+                    if column and column.endswith(':manual_label'):
+                        column = column.replace(':manual_label', ':annotations_results')
+                        filters_data[index]['column'] = column
+                    elif column and column.endswith(':auto_label'):
+                        column = column.replace(':auto_label', ':predictions_results')
+                        filters_data[index]['column'] = column
 
                 filter_group = instance.filter_group
                 if filter_group is None:

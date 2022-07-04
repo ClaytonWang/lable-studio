@@ -190,7 +190,7 @@
   "avg_lead_time_help": "所有注释（秒）的平均提货时间",
   "label_clean": "清洗",
   "label_prediction": "预标注(普通)",
-  "label_prompt": "预标注(提示学习)",
+  "label_prompt": "预标注(0样本)",
   "intent_type_dlg": " (对话-意图分类)",
   "Nothing found": "空数据",
   "Try adjusting the filter": "调整筛选",
