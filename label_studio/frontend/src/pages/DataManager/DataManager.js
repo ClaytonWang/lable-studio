@@ -163,7 +163,7 @@ export const DataManagerPage = ({ ...props }) => {
         setProgress,
         mlQueryProgress,
         mlPredictProcess,
-        handleClickClear: () => clearModalRef?.current.show(),
+        handleClickClear: () => clearModalRef.current?.show(),
       },
     ));
 
@@ -256,7 +256,7 @@ export const DataManagerPage = ({ ...props }) => {
       <ProjectStatus
         ref={refStatus}
         onFinish={{
-          clean: clearModalRef.reload,
+          clean: () => clearModalRef.current?.reload(),
         }}
       />
       <CleanData

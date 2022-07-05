@@ -60,7 +60,7 @@ export default forwardRef((props, ref) => {
       setVisible(task.type);
       const timer = setInterval(() => {
         request(task.type);
-      }, 1000);
+      }, 3000);
       
       return () => clearInterval(timer);
     } else {
