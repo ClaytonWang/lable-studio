@@ -57,21 +57,26 @@ export default forwardRef((props, ref) => {
   useEffect(() => {
     if (task) {
       modalRef.current?.show();
-      setVisible(true);
+      setVisible(task.type);
       const timer = setInterval(() => {
         request(task.type);
-      }, 1000);
+      }, 3000);
       
       return () => clearInterval(timer);
     } else {
-      modalRef.current?.hide();
       if (visible) {
-        setVisible(false);
-        // 进度结束后，刷新页面
-        // window.location.reload();
+        // 进度结束后操作，默认刷新页面
+        if (props.onFinish?.[visible]) {
+          props.onFinish?.[visible]();
+        } else {
+          window.location.reload();
+        }
+
+        modalRef.current?.hide();
+        setVisible(null);
       }
     }
-  }, [task?.state], visible);
+  }, [task?.state, visible]);
 
   useEffect(() => {
     request();
@@ -107,7 +112,7 @@ export default forwardRef((props, ref) => {
               <h2>{t(`label_${task.type}`, task.type)}...</h2>
               <Progress type="circle" percent={progress} />
               <Space style={{ marginTop: 8 }}>
-                <Button look="danger">{t('Cancel')}</Button>
+                <Button>{t('Cancel')}</Button>
                 <Button href="/projects" look="primary">{t('back_pm_page', '返回项目管理页')}</Button>
               </Space>
             </Space>

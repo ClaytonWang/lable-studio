@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { message } from 'antd';
 import { EditableProTable } from "@ant-design/pro-components";
 import { compact, trim } from "lodash";
@@ -61,12 +61,13 @@ const formatResponse = (response) => {
   };
 };
 
-export default ({ modalRef, showStatus }) => {
+export default forwardRef(({ showStatus }, ref) => {
   const api = useAPI();
   const { project } = useProject();
   const [status, setStatus] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const tableRef = useRef();
+  const modalRef = useRef();
 
   const request = useMemo(() => {
     return {
@@ -120,6 +121,15 @@ export default ({ modalRef, showStatus }) => {
       },
     };
   }, [project.id]);
+
+  useImperativeHandle(ref, () => ({
+    reload: () => {
+      tableRef.current?.reload();
+    },
+    show: () => {
+      modalRef.current?.show();
+    },
+  }));
 
   useEffect(() => {
     if (modalVisible && project.id) {
@@ -281,4 +291,4 @@ export default ({ modalRef, showStatus }) => {
       </Modal>
     </Block>
   );
-};
+});
