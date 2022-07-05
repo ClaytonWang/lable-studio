@@ -58,7 +58,7 @@ export const StorageSet = ({ title, target, rootClass, buttonLabel }) => {
   const showStorageFormModal = useCallback((storage) => {
     const action = storage ? "Edit" : "Add";
     const actionTarget = target === 'export' ? 'Target' : 'Source';
-    const title = `${action} ${actionTarget} Storage`;
+    const title = `${t(action)} ${t(actionTarget)} ${t('Storage')}`;
 
     const modalRef = modal({
       title,
@@ -91,8 +91,8 @@ export const StorageSet = ({ title, target, rootClass, buttonLabel }) => {
 
   const onDeleteStorage = useCallback(async (storage) => {
     confirm({
-      title: "Deleting storage",
-      body: "This action cannot be undone. Are you sure?",
+      title: t("Deleting storage"),
+      body: t("tip_cannot_undone"),
       buttonLook: "destructive",
       onOk: async () => {
         const response = await api.callApi('deleteStorage', {

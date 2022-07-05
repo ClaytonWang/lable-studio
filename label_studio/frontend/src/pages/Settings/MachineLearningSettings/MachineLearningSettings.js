@@ -51,7 +51,7 @@ export const MachineLearningSettings = () => {
     for (const [key, value] of Object.entries(modelVersions)) {
       versions.push({
         value: key,
-        label: key + " (" + value + " predictions)",
+        label: key + " (" + value + ` ${t('predictions')})`,
       });
     }
 
@@ -63,7 +63,7 @@ export const MachineLearningSettings = () => {
 
     console.log({ backend });
     const modalProps = {
-      title: `${backend ? 'Edit' : 'Add'} model`,
+      title: `${backend ? t('Edit') : t('Add')} ${t('model')}`,
       style: { width: 760 },
       closeOnClickOutside: false,
       body: (
@@ -92,7 +92,7 @@ export const MachineLearningSettings = () => {
           <Form.Row columnCount={1}>
             <Toggle
               name="is_interactive"
-              label="Use for interactive preannotations"
+              label={t("is_interactive")}
             />
           </Form.Row>
 
@@ -175,8 +175,8 @@ export const MachineLearningSettings = () => {
         {versions.length > 1 && (
           <Form.Row columnCount={1}>
             <Label
-              text="Model Version"
-              description="Model version allows you to specify which prediction will be shown to the annotators."
+              text={t("Model Version")}
+              description={t("tip_model_version")}
               style={{ marginTop: 16 }}
               large
             />
@@ -189,12 +189,12 @@ export const MachineLearningSettings = () => {
                   options={[
                     ...versions,
                   ]}
-                  placeholder="No model version selected"
+                  placeholder={t("No model version selected")}
                 />
               </div>
 
               <Button onClick={resetMLVersion}>
-                Reset
+                {t('Reset')}
               </Button>
             </div>
 

@@ -85,7 +85,7 @@ export const PeopleList = ({ onSelect, selectedUser, defaultSelected }) => {
                         {user.first_name} {user.last_name}
                       </Elem>
                       <Elem name="field" mix="last-activity">
-                        {formatDistance(new Date(user.last_activity), new Date(), { addSuffix: true })}
+                        {formatDistance(new Date(user.last_activity), new Date(), { addSuffix: true }, { locale: window?.i18next?.datefnsLocale })}
                       </Elem>
                     </Elem>
                   );

@@ -77,7 +77,7 @@ export const PeoplePage = () => {
         <Space spread>
           <Space>
             <Button style={{ width: 170 }} onClick={() => updateLink()}>
-              {t("Reset Link", "重制链接")}
+              {t("Reset Link")}
             </Button>
           </Space>
           <Space>
