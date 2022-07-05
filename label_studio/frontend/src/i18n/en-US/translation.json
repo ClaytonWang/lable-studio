@@ -319,5 +319,7 @@
   "Task": "Task",
   "tip_task_completed": "You have completed all tasks in the queue!",
   "task": "task",
-  "Go to Previous Task": "Go to Previous Task"
+  "Go to Previous Task": "Go to Previous Task",
+  "tip_deleted_not_created": "Project was deleted or not yet created",
+  "Back to projects": "Back to projects"
 }

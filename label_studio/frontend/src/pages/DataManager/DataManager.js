@@ -127,7 +127,6 @@ export const DataManagerPage = ({ ...props }) => {
   const dataManagerRef = useRef();
   const projectId = project?.id;
 
-
   const mlPredictProcess = useCallback(async () => {
     return await api.callApi('mlPredictProcess', {
       body: {
@@ -245,38 +244,24 @@ export const DataManagerPage = ({ ...props }) => {
 
   return crashed ? (
     <Block name="crash">
-      <Elem name="info">Project was deleted or not yet created</Elem>
+      <Elem name="info">{t('tip_deleted_not_created', 'Project was deleted or not yet created')}</Elem>
 
       <Button to="/projects">
-        Back to projects
+        {t('Back to projects')}
       </Button>
     </Block>
   ) : (
     <>
       <PromptLearnTemplate ref={refProm} projectId={projectId} showStatus={showStatus} />
-      {/* <Modal
-        ref={refModal}
-        bare={true}
-        allowClose={false}
-        animateAppearance={false}
-        onHide={
-          async () => {
-            await dataManagerRef?.current?.store?.fetchProject({ force: true, interaction: 'refresh' });
-            await dataManagerRef?.current?.store?.currentView?.reload();
-          }
-        }
-        style={{
-          width: '150px',
-          minWidth:'150px',
-          background: 'transparent',
-          boxShadow: 'none' }}
-      >
-        <Progress type="circle" percent={progress} format={percent => `标注中${percent.toFixed(0)}%`}  />
-      </Modal> */}
-      <ProjectStatus ref={refStatus} />
+      <ProjectStatus
+        ref={refStatus}
+        onFinish={{
+          clean: clearModalRef.reload,
+        }}
+      />
       <CleanData
         showStatus={showStatus}
-        modalRef={clearModalRef}
+        ref={clearModalRef}
       />
       <Block ref={root} name="datamanager"/>
     </>

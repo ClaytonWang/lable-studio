@@ -319,5 +319,7 @@
   "Task": "任务",
   "tip_task_completed": "队列任务已全部完成！",
   "task": "任务",
-  "Go to Previous Task": "返回上个任务"
+  "Go to Previous Task": "返回上个任务",
+  "tip_deleted_not_created": "项目被删除或尚未创建",
+  "Back to projects": "返回项目列表"
 }
