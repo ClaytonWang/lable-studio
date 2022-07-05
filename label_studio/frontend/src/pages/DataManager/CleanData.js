@@ -131,20 +131,20 @@ export default forwardRef(({ showStatus }, ref) => {
     },
   }));
 
-  useEffect(() => {
-    if (modalVisible && project.id) {
-      const sync = () => {
-        request.clQueryStatus().then((res) => {
-          setStatus(res);
-        });
-      };
+  // useEffect(() => {
+  //   if (modalVisible && project.id) {
+  //     const sync = () => {
+  //       request.clQueryStatus().then((res) => {
+  //         setStatus(res);
+  //       });
+  //     };
 
-      sync();
-      const timer = setInterval(sync, 3000);
+  //     sync();
+  //     const timer = setInterval(sync, 3000);
 
-      return () => clearInterval(timer);
-    }
-  }, [request.clQueryStatus, project.id, modalVisible]);
+  //     return () => clearInterval(timer);
+  //   }
+  // }, [request.clQueryStatus, project.id, modalVisible]);
 
   const handleExec = () => {
     request.clExec().then(showStatus);
@@ -176,9 +176,9 @@ export default forwardRef(({ showStatus }, ref) => {
           <Elem name="header">
             <Space>
               <Elem name="title">{t("clean_data_title", "数据清洗")}</Elem>
-              <span>
+              {/* <span>
                 {status ? `${status.finish} / ${status.total}` : null}
-              </span>
+              </span> */}
             </Space>
             <Space>
               <Elem name="buttons">
