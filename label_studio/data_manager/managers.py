@@ -261,6 +261,10 @@ def apply_filters(queryset, filters, only_undefined_field=False):
             filter_expressions.append(Q(predictions__model_version__isnull=value))
             continue
 
+        if field_name == 'updated_by' and _filter.operator == Operator.CONTAINS:
+            filter_expressions.append(Q(updated_by=_filter.value))
+            continue
+
         # use other name because of model names conflict
         if field_name == 'file_upload':
             field_name = 'file_upload_field'
