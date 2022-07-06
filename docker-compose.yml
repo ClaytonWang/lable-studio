@@ -32,7 +32,7 @@ services:
     stdin_open: true
     tty: true
     build: .
-    image: heartexlabs/label-studio:latest
+    image: claydocker/label-studio:latest
     expose:
       - "8080"
     depends_on:
