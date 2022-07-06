@@ -10,7 +10,7 @@ COPY label_studio/frontend .
 COPY label_studio/__init__.py /label-studio/label_studio/__init__.py
 
 RUN --mount=type=cache,target=$NPM_CACHE_LOCATION \
-    npm install -g yarn && \
+    npm install --location=global yarn && \
     yarn && \
     yarn run build:production
 
