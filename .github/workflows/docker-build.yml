@@ -2,8 +2,7 @@ name: "Docker build & push"
 
 on:
   push:
-    branches:
-      - master
+    branches: [ "master" , "development"]
     paths:
       - deploy/**
       - label_studio/**
@@ -13,7 +12,7 @@ on:
 
 env:
   DOCKER_CLI_EXPERIMENTAL: enabled
-  IMAGE_NAME: heartexlabs/label-studio
+  IMAGE_NAME: claydocker/label-studio
   DOCKER_TAG: 'latest'
 
 jobs:
@@ -36,7 +35,7 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v1.14.1
         with:
-          username: heartexlabs
+          username: claydocker
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Set up Python
