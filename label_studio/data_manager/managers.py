@@ -264,6 +264,14 @@ def apply_filters(queryset, filters, only_undefined_field=False):
         if field_name == 'updated_by' and _filter.operator == Operator.CONTAINS:
             filter_expressions.append(Q(updated_by=_filter.value))
             continue
+        elif field_name == 'updated_by' and _filter.operator == \
+                Operator.NOT_CONTAINS:
+            filter_expressions.append(~Q(updated_by=_filter.value))
+            continue
+        elif field_name == 'updated_by' and _filter.operator == \
+                Operator.EMPTY:
+            filter_expressions.append(Q(updated_by__isnull=_filter.value))
+            pass
 
         # use other name because of model names conflict
         if field_name == 'file_upload':
