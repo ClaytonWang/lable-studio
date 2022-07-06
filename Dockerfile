@@ -10,8 +10,11 @@ COPY label_studio/frontend .
 COPY label_studio/__init__.py /label-studio/label_studio/__init__.py
 
 RUN --mount=type=cache,target=$NPM_CACHE_LOCATION \
-    npm install \
- && npm run build:production
+    #npm install \
+ #&& npm run build:production
+    npm install -g -s --no-progress yarn && \
+    yarn && \
+    yarn run build:production
 
 
 FROM ubuntu:20.04
