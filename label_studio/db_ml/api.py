@@ -7,11 +7,14 @@
   > FileName   : api.py
   > CreateTime : 2022/6/7 15:29
 """
+import time
 import logging
 from django.db import connection
 from django.db.models import Count
 from datetime import datetime, timedelta
 from django.db.models import Q
+from django_rq.queues import get_queue
+from django.db.transaction import atomic
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
@@ -21,9 +24,14 @@ from core.redis import start_job_async_or_sync
 from db_ml.predict import job_predict
 from db_ml.clean import job_clean
 from tasks.models import Task
-from tasks.models import Prediction
-from tasks.models import TaskDbAlgorithm
+from tasks.models import Prediction, PredictionDraft
+from tasks.models import TaskDbAlgorithm, TaskDbAlgorithmDraft
 from projects.models import PromptResult, PromptTemplates
+from db_ml.services import PREDICTION_BACKUP_FIELDS
+from db_ml.services import CLEAN_ALGORITHM_BACKUP_FIELDS
+from db_ml.services import rollback_prediction
+from db_ml.services import rollback_clean
+from db_ml.services import save_raw_data
 
 
 @api_view(['POST'])
@@ -40,11 +48,19 @@ def clean(request):
     if not query:
         return Response(data=dict(msg='Invalid project id'))
 
-    TaskDbAlgorithm.objects.filter(project_id=project_id).update(
-        algorithm='',
-        manual='',
-        state=1,
-    )
+    # 备份一份原数据后删除原记录
+    with atomic():
+        query_alg = TaskDbAlgorithm.objects.filter(project_id=project_id).all()
+        if len(query_alg):
+            save_raw_data(
+                query_alg, TaskDbAlgorithmDraft, CLEAN_ALGORITHM_BACKUP_FIELDS
+            )
+            TaskDbAlgorithm.objects.filter(project_id=project_id).update(
+                algorithm='',
+                manual='',
+                state=1,
+            )
+
     for item in query:
         dialog = item.source
         data = dict(
@@ -64,6 +80,7 @@ def clean(request):
 @permission_classes([IsAuthenticated])
 def replace(request):
     """
+    手工替换数据
     清洗-替换数据
     :param request:
     :return:
@@ -131,8 +148,15 @@ def prediction(request):
         return Response(data=dict(msg='Invalid project id'))
 
     task_ids = [item.id for item in query]
-    if Prediction.objects.filter(task_id__in=task_ids).exists():
-        Prediction.objects.filter(task_id__in=task_ids).delete()
+    if PredictionDraft.objects.filter(task_id__in=task_ids).exists():
+        PredictionDraft.objects.filter(task_id__in=task_ids).delete()
+
+    # 备份一份原数据后删除原记录
+    with atomic():
+        query_pre = Prediction.objects.filter(task_id__in=task_ids).all()
+        if len(query_pre):
+            save_raw_data(query_pre, PredictionDraft, PREDICTION_BACKUP_FIELDS)
+            Prediction.objects.filter(task_id__in=task_ids).delete()
 
     for item in query:
         # TODO 多对话判断
@@ -195,3 +219,39 @@ def query_task(request):
         state=state,
         rate=round(finish_task / total_task, 2) if total_task > 0 else 0
     ))
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def cancel_job(request):
+    data = request.GET.dict()
+    project_id = data.get('project_id')
+    algorithm_type = data.get('type')
+    if algorithm_type not in ('prediction', 'clean', 'prompt') or not project_id:
+        return Response(status=400, data=dict(error='Type/Project Error.'))
+
+    queue_mapping = dict(
+        prediction='pre_tags',
+        clean='algorithm_clean',
+        prompt='prompt',
+    )
+
+    queue_name = queue_mapping[algorithm_type]
+    count = 0
+    for job in get_queue(queue_name).jobs:
+        if project_id != str(job.kwargs.get('project_id', -1)):
+            continue
+        job.delete()
+        count += 1
+
+    if not count:
+        return Response(status=400, data=dict(
+            msg=f'End of task execution. Project Id:{project_id}'
+        ))
+
+    if algorithm_type == 'prediction':
+        rollback_prediction(project_id)
+    elif algorithm_type == 'clean':
+        rollback_clean(project_id)
+
+    return Response(data=dict(msg='cancel successfully'))

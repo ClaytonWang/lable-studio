@@ -9,6 +9,9 @@ import pandas as pd
 import torch.nn as nn
 from transformers import BartForSequenceClassification, BertTokenizer
 from tasks.models import Prediction, Task
+# from tasks.models import PredictionDraft
+# from db_ml.services import PREDICTION_BACKUP_FIELDS
+# from django.db import transaction
 
 
 class Predictor:
@@ -74,8 +77,17 @@ def job_predict(*args, **kwargs):
 
     )
     print('results: ....', tag_data)
-    obj = Prediction.objects.create(**tag_data)
-    print('obj:', obj.id, ' auto: ', res_text)
+    obj, is_created = Prediction.objects.update_or_create(
+        defaults=tag_data, task=task
+    )
+    # if not PredictionDraft.objects.filter(task=task).exists():
+    #     data = dict()
+    #     for field in PREDICTION_BACKUP_FIELDS:
+    #         data[field] = getattr(obj, field)
+    #     PredictionDraft.objects.update_or_create(
+    #         defaults=data, task=task
+    #     )
+    print('obj:', obj.id, ' auto: ', res_text, ' is_ created:', is_created)
 
 
 if __name__ == '__main__':
