@@ -321,5 +321,18 @@
   "task": "任务",
   "Go to Previous Task": "返回上个任务",
   "tip_deleted_not_created": "项目被删除或尚未创建",
-  "Back to projects": "返回项目列表"
+  "Back to projects": "返回项目列表",
+  "more than year ago": "一年前",
+  "a year ago": "一年前",
+  "months ago": "数月前",
+  "a month ago": "一月前",
+  "weeks ago": "数周前",
+  "a week ago": "一周前",
+  "three days ago": "三天前",
+  "a day ago": "一天前",
+  "today": "今天",
+  "hours ago": "数小时前",
+  "a hour ago": "一小时前",
+  "this hour": "一小时内",
+  "just now": "刚刚"
 }

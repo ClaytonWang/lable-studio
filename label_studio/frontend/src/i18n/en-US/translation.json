@@ -321,5 +321,18 @@
   "task": "task",
   "Go to Previous Task": "Go to Previous Task",
   "tip_deleted_not_created": "Project was deleted or not yet created",
-  "Back to projects": "Back to projects"
+  "Back to projects": "Back to projects",
+  "more than year ago": "more than year ago",
+  "a year ago": "a year ago",
+  "months ago": "months ago",
+  "a month ago": "a month ago",
+  "weeks ago": "weeks ago",
+  "a week ago": "a week ago",
+  "three days ago": "three days ago",
+  "a day ago": "a day ago",
+  "today": "today",
+  "hours ago": "hours ago",
+  "a hour ago": "a hour ago",
+  "this hour": "this hour",
+  "just now": "just now"
 }
