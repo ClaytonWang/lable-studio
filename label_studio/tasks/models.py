@@ -280,10 +280,10 @@ class Task(TaskMixin, models.Model):
 
 class TaskDbAlgorithm(models.Model):
     # 关联项目 project
-    db_backend = models.ForeignKey('ml.DbMLBackend', related_name='db_tag', on_delete=models.CASCADE, null=True, help_text='Project ID for this task')
-    project = models.ForeignKey('projects.Project', related_name='project_tag', on_delete=models.CASCADE, help_text='Project ID for this task')
+    db_backend = models.ForeignKey('ml.DbMLBackend', related_name='db_clean', on_delete=models.CASCADE, null=True, help_text='Project ID for this task')
+    project = models.ForeignKey('projects.Project', related_name='project_clean', on_delete=models.CASCADE, help_text='Project ID for this task')
     # 关联任务 task
-    task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE, related_name='task_tag', help_text='Corresponding task for this annotation')
+    task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE, related_name='task_clean', help_text='Corresponding task for this annotation')
     # 原始文本
     source = models.JSONField(verbose_name='原始文本', max_length=400, null=True, blank=True)
     # 算法清洗
@@ -295,8 +295,36 @@ class TaskDbAlgorithm(models.Model):
     remarks = models.TextField(verbose_name='备注',  max_length=200, null=True, blank=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Time a task was created')
     updated_at = models.DateTimeField(_('updated at'), auto_now=True, help_text='Last time a task was updated')
-    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_tag', on_delete=models.SET_NULL, null=True, verbose_name=_('updated by'), help_text='Last annotator or reviewer who updated this task')
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_tag', on_delete=models.SET_NULL, null=True,)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_clean', on_delete=models.SET_NULL, null=True, verbose_name=_('updated by'), help_text='Last annotator or reviewer who updated this task')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_clean', on_delete=models.SET_NULL, null=True,)
+
+    def has_permission(self, user):
+        return self.task.project.has_permission(user)
+
+
+class TaskDbAlgorithmDraft(models.Model):
+    """
+    'source', 'algorithm', 'manual', 'state',
+    'created_at', 'updated_at', 'updated_by', 'created_by'
+    """
+    # 原始文本
+    source = models.JSONField(verbose_name='原始文本', max_length=400, null=True,
+                              blank=True)
+    # 算法清洗
+    algorithm = models.JSONField(verbose_name='算法清洗', null=True, blank=True)
+    # 人工修改
+    manual = models.JSONField(verbose_name='手动标注', null=True, blank=True)
+    state = models.IntegerField(verbose_name='状态', choices=CLEAN_STATE, default=0)
+    algorithm = models.ForeignKey('tasks.TaskDbAlgorithm', on_delete=models.CASCADE, related_name='drafts', blank=True, null=True, help_text='Corresponding Algorithm for this draft')
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Time a task was created')
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True, help_text='Last time a task was updated')
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_clean_draft', on_delete=models.SET_NULL, null=True, verbose_name=_('updated by'), help_text='Last annotator or reviewer who updated this task')
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_clean_draft', on_delete=models.SET_NULL, null=True,)
+    task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE, related_name='task_clean_draft', help_text='Corresponding task for this annotation')
+
+    def created_ago(self):
+        """ Humanize date """
+        return timesince(self.created_at)
 
     def has_permission(self, user):
         return self.task.project.has_permission(user)
@@ -545,6 +573,26 @@ class Prediction(models.Model):
 
     class Meta:
         db_table = 'prediction'
+
+
+class PredictionDraft(models.Model):
+    result = JSONField(_('result'), help_text='Draft result in JSON format')
+    score = models.FloatField(_('score'), default=None, help_text='Prediction score', null=True)
+    model_version = models.TextField(_('model version'), default='', blank=True, null=True)
+    task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE, related_name='pre_draft', blank=True, null=True, help_text='Corresponding task for this draft')
+    created_at = models.DateTimeField(_('created at'), null=True, blank=True)
+    updated_at = models.DateTimeField(_('updated at'), null=True, blank=True)
+    # backups_created_at = models.DateTimeField(
+    #     _('created at'), auto_now_add=True, help_text='Creation time'
+    # )
+    # backups_created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='pre_draft', on_delete=models.CASCADE, help_text='User who created this draft')
+
+    def created_ago(self):
+        """ Humanize date """
+        return timesince(self.created_at)
+
+    def has_permission(self, user):
+        return self.task.project.has_permission(user)
 
 
 @receiver(post_delete, sender=Task)
