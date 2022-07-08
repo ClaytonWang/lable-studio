@@ -27,7 +27,7 @@ def rollback_clean(project_id):
         # query = TaskDbAlgorithm.objects.filter(project_id=project_id).all()
         # 查询上费时，后续优化吧
         for item in queryset:
-            query = TaskDbAlgorithm.objects.flter(task=item.task)
+            query = TaskDbAlgorithm.objects.filter(task=item.task)
             if not query:
                 continue
             for field in CLEAN_ALGORITHM_BACKUP_FIELDS:
