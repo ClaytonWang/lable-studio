@@ -68,6 +68,7 @@ export const API_CONFIG = {
     clList: "GET:/clean_tag",
     clQueryStatus: "GET:/dbml/clean/query_task",
     clLabelManually: "PATCH:/clean_tag/:id",
+    cancelJob: "GET:/dbml/cancel_job",
 
     // Export
     export: "/projects/:pk/export",
