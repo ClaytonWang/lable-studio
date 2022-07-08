@@ -15,7 +15,7 @@ PREDICTION_BACKUP_FIELDS = [
     'result', 'score', 'model_version', 'task', 'created_at', 'updated_at'
 ]
 CLEAN_ALGORITHM_BACKUP_FIELDS = [
-    'source', 'algorithm', 'manual', 'state', 'task',
+    'source', 'algorithm', 'manual', 'state', 'task', 'project',
     'created_at', 'updated_at', 'updated_by', 'created_by',
 ]
 

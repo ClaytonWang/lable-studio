@@ -49,6 +49,8 @@ def clean(request):
         return Response(data=dict(msg='Invalid project id'))
 
     # 备份一份原数据后删除原记录
+    if TaskDbAlgorithmDraft.objects.filter(project_id=project_id).exists():
+        TaskDbAlgorithmDraft.objects.filter(project_id=project_id).delete()
     with atomic():
         query_alg = TaskDbAlgorithm.objects.filter(project_id=project_id).all()
         if len(query_alg):
