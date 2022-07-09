@@ -19,7 +19,7 @@ jobs:
   docker_build_and_push:
     name: "Docker build and push"
     timeout-minutes: 10
-    runs-on: self-host
+    runs-on: self-hosted
     steps:
       - name: Override image tag on 'tag'
         if: startsWith(github.ref, 'refs/tags/')
