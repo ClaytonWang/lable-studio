@@ -5,7 +5,7 @@
   <form id="signup-form" action="{% url 'user-signup' %}?{% if next %}&next={{ next }}{% endif %}{% if token %}&token={{ token }}{% endif %}" method="post">
     {% csrf_token %}
     <div>
-      <input type="text" class="ls-input" name="email" id="email" placeholder="Email" value="{{ form.data.email }}">
+      <input type="text" class="ls-input" name="email" id="email" placeholder="邮箱" value="{{ form.data.email }}">
       {% if user_form.errors.email %}
         <ul class="field_errors">
           {% for error in user_form.errors.email %}
@@ -15,7 +15,7 @@
       {% endif %}
       </div>
     <div>
-      <input type="password" class="ls-input" name="password" id="password" placeholder="Password">
+      <input type="password" class="ls-input" name="password" id="password" placeholder="密码">
       {% if user_form.errors.password %}
         <ul class="field_errors">
           {% for error in user_form.errors.password %}
@@ -31,7 +31,7 @@
         </p>
       {% endfor %}
     {% endif %}
-    <p><button type="submit" aria-label="Create Account" class="ls-button ls-button_look_primary">Create Account</button></p>
+    <p><button type="submit" aria-label="Create Account" class="ls-button ls-button_look_primary">创建账号</button></p>
   </form>
 
 {% endblock %}

@@ -20,12 +20,17 @@ jobs:
   docker_build_and_push:
     name: "Docker build and push"
     timeout-minutes: 10
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Override image tag on 'tag'
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           echo "DOCKER_TAG=$(echo ${GITHUB_REF#refs/tags/})" >> $GITHUB_ENV
+
+      - name: Override registry
+        if: github.repository == 'Shanghai-Digital-Brain-Laboratory/label-studio'
+        run: |
+          echo "REGISTRY=ghcr.io" >> $GITHUB_ENV
 
       - name: Checkout
         uses: actions/checkout@v3
