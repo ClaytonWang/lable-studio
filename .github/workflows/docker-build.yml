@@ -14,7 +14,8 @@ env:
   DOCKER_CLI_EXPERIMENTAL: enabled
   IMAGE_NAME: ${{ github.repository }}
   DOCKER_TAG: 'latest'
-  REGISTRY: containers.git.digitalbrain.cn
+  #REGISTRY: containers.git.digitalbrain.cn
+  REGISTRY: ghcr.io
 
 jobs:
   docker_build_and_push:
