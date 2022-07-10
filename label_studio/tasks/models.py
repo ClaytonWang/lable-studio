@@ -315,12 +315,12 @@ class TaskDbAlgorithmDraft(models.Model):
     # 人工修改
     manual = models.JSONField(verbose_name='手动标注', null=True, blank=True)
     state = models.IntegerField(verbose_name='状态', choices=CLEAN_STATE, default=0)
-    algorithm = models.ForeignKey('tasks.TaskDbAlgorithm', on_delete=models.CASCADE, related_name='drafts', blank=True, null=True, help_text='Corresponding Algorithm for this draft')
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Time a task was created')
     updated_at = models.DateTimeField(_('updated at'), auto_now=True, help_text='Last time a task was updated')
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_clean_draft', on_delete=models.SET_NULL, null=True, verbose_name=_('updated by'), help_text='Last annotator or reviewer who updated this task')
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_clean_draft', on_delete=models.SET_NULL, null=True,)
     task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE, related_name='task_clean_draft', help_text='Corresponding task for this annotation')
+    project = models.ForeignKey('projects.Project', related_name='project_clean_draft', on_delete=models.CASCADE, help_text='Project ID for this task')
 
     def created_ago(self):
         """ Humanize date """

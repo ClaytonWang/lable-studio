@@ -15,7 +15,7 @@ PREDICTION_BACKUP_FIELDS = [
     'result', 'score', 'model_version', 'task', 'created_at', 'updated_at'
 ]
 CLEAN_ALGORITHM_BACKUP_FIELDS = [
-    'source', 'algorithm', 'manual', 'state', 'task',
+    'source', 'algorithm', 'manual', 'state', 'task', 'project',
     'created_at', 'updated_at', 'updated_by', 'created_by',
 ]
 
@@ -27,13 +27,15 @@ def rollback_clean(project_id):
         # query = TaskDbAlgorithm.objects.filter(project_id=project_id).all()
         # 查询上费时，后续优化吧
         for item in queryset:
-            query = TaskDbAlgorithm.objects.flter(task=item.task)
+            query = TaskDbAlgorithm.objects.filter(task=item.task).first()
             if not query:
                 continue
             for field in CLEAN_ALGORITHM_BACKUP_FIELDS:
                 setattr(query, field, getattr(item, field))
             update_objs.append(query)
-        TaskDbAlgorithm.objects.bulk_update(update_objs)
+        TaskDbAlgorithm.objects.bulk_update(
+            update_objs, CLEAN_ALGORITHM_BACKUP_FIELDS
+        )
         TaskDbAlgorithmDraft.objects.filter(project_id=project_id).delete()
 
 
