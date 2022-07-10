@@ -337,5 +337,8 @@
   "just now": "刚刚",
   "Sign up": "注册",
   "Log in": "登陆",
-  "Create Account": "创建账号"
+  "Create Account": "创建账号",
+  "Rename": "重命名",
+  "Duplicate": "复制",
+  "Close": "关闭"
 }
