@@ -14,8 +14,7 @@ env:
   DOCKER_CLI_EXPERIMENTAL: enabled
   IMAGE_NAME: ${{ github.repository }}
   DOCKER_TAG: 'latest'
-  #REGISTRY: containers.git.digitalbrain.cn
-  REGISTRY: ghcr.io
+  REGISTRY: containers.git.digitalbrain.cn
 
 jobs:
   docker_build_and_push:
@@ -27,6 +26,11 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/')
         run: |
           echo "DOCKER_TAG=$(echo ${GITHUB_REF#refs/tags/})" >> $GITHUB_ENV
+
+      - name: Override registry
+        if: github.repository == 'Shanghai-Digital-Brain-Laboratory/label-studio'
+        run: |
+          echo "REGISTRY=ghcr.io" >> $GITHUB_ENV
 
       - name: Checkout
         uses: actions/checkout@v3
