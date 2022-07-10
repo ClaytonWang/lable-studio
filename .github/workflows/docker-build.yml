@@ -66,5 +66,5 @@ jobs:
           platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=user/${{ steps.meta.outputs.tags }}
-          cache-to: type=registry,ref=user/${{ steps.meta.outputs.tags }},mode=min
+          cache-from: type=registry,ref=${{ steps.meta.outputs.tags }}
+          cache-to: type=registry,ref=${{ steps.meta.outputs.tags }},mode=min
