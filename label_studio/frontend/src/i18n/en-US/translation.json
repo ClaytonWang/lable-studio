@@ -334,5 +334,11 @@
   "hours ago": "hours ago",
   "a hour ago": "a hour ago",
   "this hour": "this hour",
-  "just now": "just now"
+  "just now": "just now",
+  "Sign up": "Sign up",
+  "Log in": "Log in",
+  "Create Account": "Create Account",
+  "Rename": "Rename",
+  "Duplicate": "Duplicate",
+  "Close": "Close"
 }

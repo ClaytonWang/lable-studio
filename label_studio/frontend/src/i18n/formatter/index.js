@@ -28,7 +28,16 @@ const format = (key, data, ...options) => {
 };
 
 const formatDMActions = (data) => {
-  return data;
+  return map(data, item => {
+    return {
+      ...item,
+      title: Formatter.trans(item.id, item.title),
+      dialog: {
+        ...item.dialog,
+        text: Formatter.trans(`${item.id}_dialog`, item.dialog.text),
+      },
+    };
+  });
 };
 
 const formatExportFormats = (data) => {

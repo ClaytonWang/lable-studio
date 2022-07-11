@@ -334,5 +334,11 @@
   "hours ago": "数小时前",
   "a hour ago": "一小时前",
   "this hour": "一小时内",
-  "just now": "刚刚"
+  "just now": "刚刚",
+  "Sign up": "注册",
+  "Log in": "登陆",
+  "Create Account": "创建账号",
+  "Rename": "重命名",
+  "Duplicate": "复制",
+  "Close": "关闭"
 }
