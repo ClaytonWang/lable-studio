@@ -47,14 +47,14 @@ export default forwardRef((props, ref) => {
         const tasks = fetchType ? [fetchType] : TASK_TYPE;
         const list = await Promise.all(tasks.map(async item => {
           const data = await fetchStatus(item);
-  
+
           return {
             ...data,
             type: item,
           };
         }));
         const running = find(list, { state: true });
-  
+
         if (running) {
           setTask({
             ...running,
@@ -73,7 +73,7 @@ export default forwardRef((props, ref) => {
       const timer = setInterval(() => {
         request.sync(task.type);
       }, 3000);
-      
+
       return () => clearInterval(timer);
     } else {
       if (visible) {
@@ -136,7 +136,7 @@ export default forwardRef((props, ref) => {
               <h2>{t(`label_${task.type}`, task.type)}...</h2>
               <Progress type="circle" percent={progress} />
               <Space style={{ marginTop: 8 }}>
-                <Button onClick={handleCancel}>{t('Cancel')}</Button>
+                {/* <Button onClick={handleCancel}>{t('Cancel')}</Button> */}
                 <Button onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</Button>
               </Space>
             </Space>
