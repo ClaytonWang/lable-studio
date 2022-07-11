@@ -325,13 +325,31 @@ class DataManagerTaskSerializer(TaskSerializer):
             return ''
 
     def get_auto_label(self, obj):
-        data = self.pre_data.get(str(obj.id), [])
-        if not len(data):
+        """
+        自动标注字段：预标注（普通）和提示学习取最新的值
+        :param obj:
+        :return:
+        """
+        pre = self.pre_data.get(str(obj.id), {})
+        prompt = self.prompt_data.get(str(obj.id), {})
+        if not pre and not prompt:
             return ''
 
-        result = data.get('result', []) if len(data) else []
-        pre_choices = self.get_choice_values(result)
-        return ','.join(pre_choices)
+        pre_update_at = pre.get('updated_at', '')
+        pre_update_at = datetime.datetime.strptime(
+            pre_update_at, UTC_FORMAT
+        ).timestamp() if pre_update_at else 0
+        prompt_update_at = prompt.get('updated_at', '')
+        prompt_update_at = prompt_update_at.replace(tzinfo=None).timestamp() \
+            if prompt_update_at else 0
+
+        if pre_update_at > prompt_update_at:
+            result = pre.get('result', []) if len(pre) else []
+            pre_choices = self.get_choice_values(result)
+            return ','.join(pre_choices)
+        else:
+            metrics = prompt.get('metrics', {})
+            return metrics.get('annotation', '')
 
     def get_manual_label(self, obj):
         data = self.anno_data.get(str(obj.id), [])
