@@ -19,7 +19,7 @@ env:
 jobs:
   docker_build_and_push:
     name: "Docker build and push"
-    timeout-minutes: 10
+    timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
       - name: Override image tag on 'tag'
