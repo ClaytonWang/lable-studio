@@ -125,7 +125,7 @@ export const Menubar = ({
           >
             <div className={`${menubarClass.elem('trigger')} main-menu-trigger`}>
               <LabelLogo />
-              <b style={{ height:35,border:'1px solid #ccc' }}></b>
+              <b style={{ height:35,borderLeft:'1px solid #ccc' }}></b>
               <span style={{ color: '#000',fontWeight: 'bold',fontSize:13 }}>
               人在环路自动化平台
               </span>
