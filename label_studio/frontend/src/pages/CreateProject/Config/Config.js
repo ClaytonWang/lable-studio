@@ -328,7 +328,7 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
     <div className={configClass}>
       <div className={configClass.elem("container")}>
         <header>
-          <button onClick={onBrowse}>{t("Browse Templates")}</button>
+          {/* <button onClick={onBrowse}>{t("Browse Templates")}</button> */}
           <ToggleItems items={{ code: t("Code"), visual: t("Visual") }} active={configure} onSelect={onSelect} />
         </header>
         <div className={configClass.elem('editor')}>
