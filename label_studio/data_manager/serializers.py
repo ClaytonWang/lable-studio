@@ -415,8 +415,21 @@ class DataManagerTaskSerializer(TaskSerializer):
         return [rst] if rst else []
 
     def get_predictions(self, task):
-        rst = self.pre_data.get(str(task.id))
-        return [rst] if rst else []
+        label, rst = self.check_update_time(task)
+        if label == 'pre':
+            return [rst] if rst else []
+        elif label == 'prompt':
+            metrics = rst.get('metrics', {})
+            enw_val = metrics.get('annotation', '')
+
+            old_rst = self.pre_data.get(str(task.id))
+            if old_rst and enw_val:
+                try:
+                    old_rst['result'][0]['value']['choices'] = [enw_val]
+                except Exception as e:
+                    print(e)
+            return [old_rst]
+        return []
 
     @staticmethod
     def get_file_upload(task):
