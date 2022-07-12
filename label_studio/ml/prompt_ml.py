@@ -35,7 +35,7 @@ def patch_prompt(templates, dailogue):
 
     result = {
                 "task": "我是对话",
-                "annotation": "正面",
+                "annotation": res_text,
                 "confidence": confidence,
                 "average": {"正面标签": np.random.rand(), "负面标签": np.random.rand()},
                 "output":
