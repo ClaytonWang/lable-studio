@@ -20,7 +20,7 @@ class Predictor:
         self.model.eval()
         self.tokenizer = BertTokenizer.from_pretrained(model_path)
         self.device = device
-        self.id2class = {0: '负面', 1:'中性', 2:'正面'}
+        self.id2class = {0: '负面', 1: '中性', 2: '正面'}
 
     def process(self, text):
         # text = (server, client)
