@@ -4,8 +4,8 @@ services:
   nginx:
     image: nginx:1.21
     ports:
-      - "8080:80"
-      - "8081:443"
+      - "8082:80"
+      #- "8081:443"
     depends_on:
       - app
     environment:
@@ -22,7 +22,7 @@ services:
         type: volume
         volume:
           nocopy: true
-      - ./mydata:/label-studio/data:rw
+      - ./label-data:/label-studio/data:rw
       - ./deploy/nginx/${NGINX_FILE:-default.conf}:/etc/nginx/templates/${NGINX_FILE:-default.conf}.template
       - ./deploy/nginx/scripts:/docker-entrypoint.d/label-studio
       - ./deploy/nginx/certs:/certs:ro
@@ -32,45 +32,26 @@ services:
     stdin_open: true
     tty: true
     build: .
-    image: claydocker/label-studio:latest
+    image: containers.git.digitalbrain.cn/engineering-group/label-studio:development
     expose:
       - "8080"
-    depends_on:
-      - db
     environment:
       - DJANGO_DB=default
       - POSTGRE_NAME=postgres
-      - POSTGRE_USER=postgres
-      - POSTGRE_PASSWORD=
+      - POSTGRE_USER=root
+      - POSTGRE_PASSWORD=linshimima2!
       - POSTGRE_PORT=5432
-      - POSTGRE_HOST=db
+      - POSTGRE_HOST=192.168.0.92
       - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
       - LABEL_STUDIO_COPY_STATIC_DATA=true
     volumes:
-      - ./mydata:/label-studio/data:rw
+      - ./label-data:/label-studio/data:rw
       # keep in sync with deploy/docker-entrypoint.d/30-copy-static-data.sh
       - source: static
         target: /label-studio/static_volume
         type: volume
         volume:
           nocopy: true
-
-  db:
-    image: postgres:11.5
-    hostname: db
-    restart: always
-    # Optional: Enable TLS on PostgreSQL
-    # Just drop your server.crt and server.key into folder 'deploy/pgsql/certs'
-    # NOTE: Both files must have permissions u=rw (0600) or less
-#    command: >
-#      -c ssl=on
-#      -c ssl_cert_file=/var/lib/postgresql/certs/server.crt
-#      -c ssl_key_file=/var/lib/postgresql/certs/server.key
-    environment:
-      - POSTGRES_HOST_AUTH_METHOD=trust
-    volumes:
-      - ${POSTGRES_DATA_DIR:-./postgres-data}:/var/lib/postgresql/data
-      - ./deploy/pgsql/certs:/var/lib/postgresql/certs:ro
 
 volumes:
   static: {}
