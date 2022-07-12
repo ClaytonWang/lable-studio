@@ -305,7 +305,7 @@ class DataManagerTaskSerializer(TaskSerializer):
         label, rst = self.check_update_time(obj)
         if label == 'pre':
             return obj.predictions_score
-        elif label == 'prompt':
+        elif label == 'prompt' and rst:
             metrics = rst.get('metrics', {})
             return metrics.get('confidence')
         else:
@@ -346,6 +346,8 @@ class DataManagerTaskSerializer(TaskSerializer):
             pre_choices = self.get_choice_values(result)
             return ','.join(pre_choices)
         else:
+            if not rst:
+                return None
             metrics = rst.get('metrics', {})
             return metrics.get('annotation', '')
 
@@ -418,7 +420,7 @@ class DataManagerTaskSerializer(TaskSerializer):
         label, rst = self.check_update_time(task)
         if label == 'pre':
             return [rst] if rst else []
-        elif label == 'prompt':
+        elif label == 'prompt' and rst:
             metrics = rst.get('metrics', {})
             enw_val = metrics.get('annotation', '')
 
