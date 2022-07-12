@@ -122,7 +122,7 @@ export const PromptLearnTemplate = React.forwardRef(({ projectId, showStatus },r
       await form.validateFields();
       mlPromptPredict().then(showStatus);
       setDlgVisible(false);
-      window.location.reload();
+      // window.location.reload();
     }catch(e){console.log(e);}
   };
 
