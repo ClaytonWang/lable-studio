@@ -1,6 +1,6 @@
 {
-  "message": "chore: 多语言支持时间函数",
-  "commit": "8d400672c25ca8e342d132992b55b0bfa10c0972",
-  "branch": "development",
-  "date": "2022-07-05 10:40:14 +0800"
+  "message": "chore: label展示自动标注",
+  "commit": "4a5f2316753b5366d7ef9a24accb324277663bfb",
+  "branch": "feature/demo",
+  "date": "2022-07-12 15:57:06 +0800"
 }
