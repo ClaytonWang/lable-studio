@@ -4,6 +4,9 @@ import { createBrowserHistory } from 'history';
 import React from 'react';
 import { render } from 'react-dom';
 import { Router } from 'react-router-dom';
+import { ConfigProvider as AntConfigProvider } from 'antd';
+import enUS from 'antd/lib/locale/en_US';
+import zhCN from 'antd/lib/locale/zh_CN';
 import { initSentry } from "../config/Sentry";
 import { ApiProvider } from '../providers/ApiProvider';
 import { AppStoreProvider } from '../providers/AppStoreProvider';
@@ -12,10 +15,10 @@ import { LibraryProvider } from '../providers/LibraryProvider';
 import { MultiProvider } from '../providers/MultiProvider';
 import { ProjectProvider } from '../providers/ProjectProvider';
 import { RoutesProvider } from '../providers/RoutesProvider';
-import './App.styl';
 import { AsyncPage } from './AsyncPage/AsyncPage';
 import ErrorBoundary from './ErrorBoundary';
 import { RootPage } from './RootPage';
+import './App.styl';
 
 const baseURL = new URL(APP_SETTINGS.hostname || location.origin);
 
@@ -27,7 +30,7 @@ window.LSH = browserHistory;
 
 initSentry(browserHistory);
 
-const App = ({content}) => {
+const App = ({ content }) => {
   const libraries = {
     lsf: {
       scriptSrc: window.EDITOR_JS,
@@ -51,6 +54,7 @@ const App = ({content}) => {
           <LibraryProvider key="lsf" libraries={libraries}/>,
           <RoutesProvider key="rotes"/>,
           <ProjectProvider key="project"/>,
+          <AntConfigProvider key="ant" locale={window.i18next.language === 'en-US' ? enUS : zhCN} />,
         ]}>
           <AsyncPage>
             <RootPage content={content}/>

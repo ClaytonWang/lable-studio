@@ -49,8 +49,8 @@ export const MachineLearningList = ({ backends, fetchBackends, onEdit }) => {
 const BackendCard = ({backend, onStartTrain, onEdit, onDelete}) => {
   const confirmDelete = useCallback((backend) => {
     confirm({
-      title: "Delete ML Backend",
-      body: "This action cannot be undone. Are you sure?",
+      title: t("Delete ML Backend"),
+      body: t("tip_cannot_undone"),
       buttonLook: "destructive",
       onOk(){ onDelete?.(backend); },
     });
@@ -63,8 +63,8 @@ const BackendCard = ({backend, onStartTrain, onEdit, onDelete}) => {
 
         <Dropdown.Trigger align="right" content={(
           <Menu size="small">
-            <Menu.Item onClick={() => onEdit(backend)}>Edit</Menu.Item>
-            <Menu.Item onClick={() => confirmDelete(backend)}>Delete</Menu.Item>
+            <Menu.Item onClick={() => onEdit(backend)}>{t('Edit')}</Menu.Item>
+            <Menu.Item onClick={() => confirmDelete(backend)}>{t('Delete')}</Menu.Item>
           </Menu>
         )}>
           <Button type="link" icon={<FaEllipsisV/>}/>
@@ -82,12 +82,12 @@ const BackendCard = ({backend, onStartTrain, onEdit, onDelete}) => {
           />
         )}
         <DescriptionList.Item term="Version">
-          {backend.version ? format(new Date(backend.version), 'MMMM dd, yyyy ∙ HH:mm:ss') : 'unknown'}
+          {backend.version ? format(new Date(backend.version), 'yyyy-MM-dd HH:mm:ss') : 'unknown'}
         </DescriptionList.Item>
       </DescriptionList>
 
       <Button disabled={backend.state !== "CO"} onClick={() => onStartTrain(backend)}>
-        Start Training
+        {t('Start Training')}
       </Button>
     </Card>
   );
@@ -99,11 +99,11 @@ const BackendState = ({backend}) => {
     <div className={cn('ml').elem('status')}>
       <span className={cn('ml').elem('indicator').mod({state})}></span>
       <Oneof value={state} className={cn('ml').elem('status-label')}>
-        <span case="DI">Disconnected</span>
-        <span case="CO">Connected</span>
-        <span case="ER">Error</span>
-        <span case="TR">Training</span>
-        <span case="PR">Predicting</span>
+        <span case="DI">{t('Disconnected')}</span>
+        <span case="CO">{t('Connected')}</span>
+        <span case="ER">{t('Error')}</span>
+        <span case="TR">{t('Training')}</span>
+        <span case="PR">{t('Predicting')}</span>
       </Oneof>
     </div>
   );

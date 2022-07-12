@@ -29,7 +29,7 @@ export const VersionProvider = ({children}) => {
           version: data.version,
           latestVersion: data.latest_version_from_pypi,
           newVersion: data.current_version_is_outdated,
-          updateTime: format(new Date(data.latest_version_upload_time), 'MMM d'),
+          updateTime: format(new Date(data.latest_version_upload_time), 'MM-dd'),
         },
       });
     }

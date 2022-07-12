@@ -1,6 +1,6 @@
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StaticContent } from '../../app/StaticContent/StaticContent';
-import { IconBook, IconFolder, IconPersonInCircle, IconPin, IconTerminal, LsDoor, LsGitHub, LsSettings, LsSlack } from '../../assets/icons';
+import { IconFolder, IconPersonInCircle, IconPin, LsDoor, LsSettings, NineCMC } from '../../assets/icons';
 import { useConfig } from '../../providers/ConfigProvider';
 import { useContextComponent, useFixedLocation } from '../../providers/RoutesProvider';
 import { cn } from '../../utils/bem';
@@ -21,6 +21,7 @@ const LeftContextMenu = ({ className }) => (
   <StaticContent
     id="context-menu-left"
     className={className}
+    raw={ true}
   >{(template) => <Breadcrumbs fromTemplate={template} />}</StaticContent>
 );
 
@@ -123,8 +124,10 @@ export const Menubar = ({
             closeOnClickOutside={!sidebarPinned}
           >
             <div className={`${menubarClass.elem('trigger')} main-menu-trigger`}>
-              <span style={{ color: '#09f',fontWeight: 'bold' }}>
-                数字大脑数据标注平台
+              <NineCMC />
+              <b style={{ height:35,borderLeft:'1px solid #ccc' }}></b>
+              <span style={{ color: '#000',fontWeight: 'bold',fontSize:13 }}>
+              人在环路自动化平台
               </span>
               {/* <img src={absoluteURL("/static/icons/logo-black.svg")} alt="Label Studio Logo" height="22"/> */}
               <Hamburger opened={sidebarOpened}/>
@@ -141,14 +144,20 @@ export const Menubar = ({
             <Menu>
               <Menu.Item
                 icon={<LsSettings/>}
-                label="Account & Settings"
+                label={t("Account & Settings")}
                 href="/user/account"
                 data-external
               />
               {/* <Menu.Item label="Dark Mode"/> */}
+              {/* <Menu.Item
+                icon={<IconI18n style={{ width: 20, height: 20 }}/>}
+                label={t("switch_locale", "English")}
+                onClick={() => i18next.switchLocale()}
+                data-external
+              /> */}
               <Menu.Item
                 icon={<LsDoor/>}
-                label="Log Out"
+                label={t("Log Out")}
                 href={absoluteURL("/logout")}
                 data-external
               />
@@ -174,14 +183,14 @@ export const Menubar = ({
             >
               <Menu>
                 <Menu.Item
-                  label="Projects"
+                  label={t("Projects")}
                   to="/projects"
                   icon={<IconFolder/>}
                   data-external
                   exact
                 />
                 <Menu.Item
-                  label="Organization"
+                  label={t("Organization")}
                   to="/organization"
                   icon={<IconPersonInCircle/>}
                   data-external
@@ -198,7 +207,7 @@ export const Menubar = ({
                   onClick={sidebarPin}
                   active={sidebarPinned}
                 >
-                  {sidebarPinned ?  "Unpin menu" : "Pin menu"}
+                  {sidebarPinned ?  t("Unpin menu", "取消固定") : t("Pin menu", "固定菜单")}
                 </Menu.Item>
 
               </Menu>

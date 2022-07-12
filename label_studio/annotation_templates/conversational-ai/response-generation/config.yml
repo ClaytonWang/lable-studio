@@ -6,7 +6,7 @@ details: <h1>Collect chatbot training data by generating next dialogue response<
 config: |
   <View>
     <Paragraphs name="chat" value="$dialogue" layout="dialogue" />
-    <Header value="Provide response" />
+    <Header value="提供对话" />
     <TextArea name="response" toName="chat" rows="4" editable="true" maxSubmissions="1" />
   </View>
 

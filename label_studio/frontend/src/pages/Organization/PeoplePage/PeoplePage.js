@@ -24,7 +24,9 @@ const InvitationModal = ({ link }) => {
       />
 
       <Description style={{ width: '70%', marginTop: 16 }}>
-        Invite people to join your Label Studio instance. People that you invite have full access to all of your projects. <a href="https://labelstud.io/guide/signup.html">Learn more</a>.
+        {t("invite_description", "邀请加入的用户，拥有所有项目权限")}
+        {/* Invite people to join your Label Studio instance. People that you invite have full access to all of your projects.  */}
+        {/* <a href="https://labelstud.io/guide/signup.html">Learn more</a>. */}
       </Description>
     </Block>
   );
@@ -57,7 +59,7 @@ export const PeoplePage = () => {
   }, [setInviteLink]);
 
   const inviteModalProps = useCallback((link) => ({
-    title: "Invite people",
+    title: t("Invite people", "邀请加入"),
     style: { width: 640, height: 472 },
     body: () => (
       <InvitationModal link={link}/>
@@ -75,12 +77,12 @@ export const PeoplePage = () => {
         <Space spread>
           <Space>
             <Button style={{ width: 170 }} onClick={() => updateLink()}>
-              Reset Link
+              {t("Reset Link")}
             </Button>
           </Space>
           <Space>
             <Button primary style={{ width: 170 }} onClick={copyLink}>
-              {copied ? "Copied!" : "Copy link"}
+              {copied ? t("Copied!", "已复制！") : t("Copy link", "复制链接")}
             </Button>
           </Space>
         </Space>
@@ -115,7 +117,7 @@ export const PeoplePage = () => {
 
           <Space>
             <Button icon={<LsPlus/>} primary onClick={showInvitationModal}>
-              Add People
+              {t("Add People", "添加用户")}
             </Button>
           </Space>
         </Space>
@@ -138,5 +140,5 @@ export const PeoplePage = () => {
   );
 };
 
-PeoplePage.title = "People";
+PeoplePage.title = t("People");
 PeoplePage.path = "/";

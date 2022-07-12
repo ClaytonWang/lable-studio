@@ -9,7 +9,7 @@
   {
     breadcrumbs: [
       {
-        title: "People"
+        title: t("People", "用户")
       }
     ],
   }
@@ -145,9 +145,9 @@
           selected: null,
           fields: [
             { name: 'avatar', type: 'image' },
-            { name: 'email', title: 'Email' },
-            { name: 'name', title: 'Name' },
-            { name: 'last_activity', title: 'Last Activity' },
+            { name: 'email', title: t('Email') },
+            { name: 'name', title: t('Name') },
+            { name: 'last_activity', title: t('Last Activity') },
           ],
           projects: null,
           users: null,
@@ -202,7 +202,8 @@
           field_last_activity_render(user) {
             const diff = new Date() - new Date(user.last_activity);
             const interval = INTERVALS.find(i => diff > i[0]);
-            return interval ? interval[1] : 'just now';
+            console.log(interval ? interval[1] : 'just now', t(interval ? interval[1] : 'just now'));
+            return t(interval ? interval[1] : 'just now');
           },
           field_name_render(user) {
             return user.first_name + " " + user.last_name

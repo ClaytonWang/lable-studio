@@ -9,16 +9,17 @@ import { useAPI } from "../../providers/ApiProvider";
 import { useProject } from "../../providers/ProjectProvider";
 
 export const DangerZone = () => {
-  const {project} = useProject();
+  const { project } = useProject();
   const api = useAPI();
   const history = useHistory();
   const [processing, setProcessing] = useState(null);
 
   const handleOnClick = (type) => () => {
     confirm({
-      title: "Action confirmation",
-      body: "You're about to delete all things. This action cannot be undone.",
-      okText: "Proceed",
+      title: t("Action confirmation"),
+      body: t("action_confirm_tip"),
+      okText: t("Proceed"),
+      cancelText: t("Cancel"),
       buttonLook: "destructive",
       onOk: async () => {
         setProcessing(type);
@@ -50,36 +51,37 @@ export const DangerZone = () => {
   const buttons = useMemo(() => [{
     type: 'annotations',
     disabled: true, //&& !project.total_annotations_number,
-    label: `Delete ${project.total_annotations_number} Annotations`,
+    label: `${t('Delete')} ${project.total_annotations_number} ${t('Annotations')}`,
   }, {
     type: 'tasks',
     disabled: true, //&& !project.task_number,
-    label: `Delete ${project.task_number} Tasks`,
+    label: `${t('Delete')} ${project.task_number} ${t('Tasks')}`,
   }, {
     type: 'predictions',
     disabled: true, //&& !project.total_predictions_number,
-    label: `Delete ${project.total_predictions_number} Predictions`,
+    label: `${t('Delete')} ${project.total_predictions_number} ${t('Predictions')}`,
   }, {
     type: 'tabs',
-    label: `Drop All Tabs`,
+    label: t('Drop All Tabs'),
   }, {
     type: 'project',
-    label: 'Delete Project',
+    label: t('Delete Project'),
   }], [project]);
 
   return (
-    <div style={{width: 480}}>
+    <div style={{ width: 480 }}>
       <Label
-        text="Delete Annotations, Tasks, or Project"
-        description="Perform these actions at your own risk. Actions you take on this page can't be reverted. Make sure your data is backed up."
-        style={{display: 'block', width: 415}}
+        text={t("danger_delete_tip")}
+        description={t("danger_delete_desc")}
+        style={{ display: 'block', width: 415 }}
       />
 
       {project.id ? (
-        <Space direction="vertical" spread style={{marginTop: 32}}>
+        <Space direction="vertical" spread style={{ marginTop: 32 }}>
           {buttons.map((btn) => {
             const waiting = processing === btn.type;
             const disabled = btn.disabled || (processing && !waiting);
+
             return (btn.disabled !== true) && (
               <Button key={btn.type} look="danger" disabled={disabled} waiting={waiting} onClick={handleOnClick(btn.type)}>
                 {btn.label}
@@ -88,7 +90,7 @@ export const DangerZone = () => {
           })}
         </Space>
       ) : (
-        <div style={{display: "flex", justifyContent: "center", marginTop: 32}}>
+        <div style={{ display: "flex", justifyContent: "center", marginTop: 32 }}>
           <Spinner size={32}/>
         </div>
       )}
@@ -96,5 +98,5 @@ export const DangerZone = () => {
   );
 };
 
-DangerZone.title = "Danger Zone";
+DangerZone.title = t("Danger Zone");
 DangerZone.path = "/danger-zone";

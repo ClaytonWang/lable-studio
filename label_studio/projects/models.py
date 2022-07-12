@@ -996,3 +996,60 @@ class ProjectSummary(models.Model):
         self.created_annotations = created_annotations
         self.created_labels = labels
         self.save(update_fields=['created_annotations', 'created_labels'])
+
+
+# 提示学习表
+class PromptTemplates(models.Model):
+
+    # 关联项目 project
+    project = models.ForeignKey(Project, related_name='project_PromptTemplates_id', on_delete=models.CASCADE, null=False, help_text='Project ID for this task')
+
+    # 模版
+    template = models.JSONField(verbose_name='模版',  max_length=1000, null=True, blank=True)
+
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Time a task was created')
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True, help_text='Last time a task was updated')
+
+    # updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_tag', on_delete=models.SET_NULL,
+    #                                null=True, verbose_name=_('updated by'),
+    #                                help_text='Last annotator or reviewer who updated this task')
+    # created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_tag', on_delete=models.SET_NULL,
+    #                                null=True, )
+
+    # 设立联合主键
+    class Meta:
+        unique_together = ("project_id", "template")
+
+    # def has_permission(self, user):
+    #     return self.project.has_permission(user)
+
+
+# 提示学习结果查询表
+class PromptResult(models.Model):
+
+    # 关联项目 project
+    project = models.ForeignKey(Project, related_name='project_PromptResult_id', on_delete=models.CASCADE, null=False,
+                                help_text='Project ID for this task')
+
+    # 关联任务 task
+    task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE, related_name='task_PromptResult_id', null=False,
+                             help_text='Corresponding task for this annotation')
+
+    # metrics
+    metrics = models.JSONField(verbose_name='模型输出',  max_length=1000, null=True, blank=True)
+
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Time a task was created')
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True, help_text='Last time a task was updated')
+
+    # updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_tag', on_delete=models.SET_NULL,
+    #                                null=True, verbose_name=_('updated by'),
+    #                                help_text='Last annotator or reviewer who updated this task')
+    # created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_tag', on_delete=models.SET_NULL,
+    #                                null=True, )
+
+    # 设立联合主键
+    class Meta:
+        unique_together = ("task_id", "project_id", "metrics")
+
+    # def has_permission(self, user):
+    #     return self.project.has_permission(user)

@@ -1,13 +1,13 @@
-require('dotenv').config();
+require("dotenv").config();
 
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const { EnvironmentPlugin } = require('webpack');
+const path = require("path");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const { EnvironmentPlugin } = require("webpack");
 const TerserPlugin = require("terser-webpack-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
-const SentryWebpackPlugin = require('@sentry/webpack-plugin');
+const SentryWebpackPlugin = require("@sentry/webpack-plugin");
 
-const RELEASE = require('./release').getReleaseName();
+const RELEASE = require("./release").getReleaseName();
 
 const LOCAL_ENV = {
   NODE_ENV: "development",
@@ -20,57 +20,62 @@ const SENTRY = {
   ORG: process.env.SENTRY_ORG,
   PROJECT: process.env.SENTRY_PROJECT,
   RELEASE,
-}
+};
 
-const devtool = process.env.NODE_ENV === 'production' ? "source-map" : "cheap-module-source-map";
+const devtool =
+  process.env.NODE_ENV === "production"
+    ? "source-map"
+    : "cheap-module-source-map";
 
 const output = {
   path: path.resolve(__dirname, "dist", "react-app"),
-  filename: 'index.js',
-  hashFunction: "sha256"
+  filename: "[name].js",
+  hashFunction: "sha256",
 };
 
-const plugins = [
-  new MiniCssExtractPlugin(),
-  new EnvironmentPlugin(LOCAL_ENV),
-];
+const plugins = [new MiniCssExtractPlugin(), new EnvironmentPlugin(LOCAL_ENV)];
 
 const optimizer = {};
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   optimizer.minimize = true;
   optimizer.minimizer = [new TerserPlugin(), new CssMinimizerPlugin()];
-  optimizer.runtimeChunk = false,
-  optimizer.splitChunks = {
-    cacheGroups: {
-      default: false,
-    },
-  };
+  (optimizer.runtimeChunk = false),
+    (optimizer.splitChunks = {
+      cacheGroups: {
+        default: false,
+      },
+    });
 }
 
 if (process.env.BUILD_SENTRY && SENTRY.AUTH_TOKEN && SENTRY.RELEASE) {
-  plugins.push(new SentryWebpackPlugin({
-    authToken: SENTRY.AUTH_TOKEN,
-    org: SENTRY.ORG,
-    project: SENTRY.PROJECT,
-    release: SENTRY.RELEASE,
-    include: "./dist",
-    ignore: ["node_modules", "webpack.config.js"],
-    deploy: {
-      env: process.env.NODE_ENV,
-    }
-  }))
+  plugins.push(
+    new SentryWebpackPlugin({
+      authToken: SENTRY.AUTH_TOKEN,
+      org: SENTRY.ORG,
+      project: SENTRY.PROJECT,
+      release: SENTRY.RELEASE,
+      include: "./dist",
+      ignore: ["node_modules", "webpack.config.js"],
+      deploy: {
+        env: process.env.NODE_ENV,
+      },
+    })
+  );
 }
 
 module.exports = {
-  devtool: devtool,
+  devtool,
   mode: process.env.NODE_ENV || "development",
-  entry: "./src/index.js",
+  entry: {
+    main: "./src/index.js",
+    i18n: "./src/i18n.js",
+  },
   output: output,
   plugins: plugins,
   optimization: optimizer,
   resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: [".tsx", ".ts", ".js"],
   },
   module: {
     rules: [
@@ -78,19 +83,13 @@ module.exports = {
         test: /\.jsx?$/i,
         enforce: "pre",
         exclude: /node_modules/,
-        use: [
-          'babel-loader',
-          'source-map-loader',
-        ],
+        use: ["babel-loader", "source-map-loader"],
       },
       {
         test: /\.tsx?$/i,
         enforce: "pre",
         exclude: /node_modules/,
-        use: [
-          'babel-loader',
-          'source-map-loader',
-        ],
+        use: ["babel-loader", "source-map-loader"],
       },
       {
         test: /\.css$/i,
@@ -115,7 +114,7 @@ module.exports = {
               sourceMap: true,
               stylusOptions: {
                 import: [
-                  path.resolve(__dirname, './src/themes/default/colors.styl'),
+                  path.resolve(__dirname, "./src/themes/default/colors.styl"),
                 ],
               },
             },
@@ -123,18 +122,47 @@ module.exports = {
         ],
       },
       {
-        test: /\.svg$/,
-        use: [{
-          loader: '@svgr/webpack',
-          options: {
-            ref: true,
-            svgoConfig: {
-              plugins: {
-                removeViewBox: false,
+        test: /\.less$/,
+        use: [
+          MiniCssExtractPlugin.loader,
+          "css-loader",
+          {
+            loader: "less-loader",
+            options: {
+              lessOptions: {
+                javascriptEnabled: true,
               },
             },
           },
-        }],
+        ],
+      },
+      {
+        test: /\.(webm|mov|gif)$/i,
+        use: [
+          {
+            loader: require.resolve("url-loader"),
+            options: {
+              limit: 200000,
+              encoding: "base64",
+            },
+          },
+        ],
+      },
+      {
+        test: /\.svg$/,
+        use: [
+          {
+            loader: "@svgr/webpack",
+            options: {
+              ref: true,
+              svgoConfig: {
+                plugins: {
+                  removeViewBox: false,
+                },
+              },
+            },
+          },
+        ],
       },
     ],
   },

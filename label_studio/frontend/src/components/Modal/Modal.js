@@ -13,6 +13,7 @@ const standaloneModal = (props) => {
   const modalRef = createRef();
   const rootDiv = document.createElement("div");
   let renderCount = 0;
+
   rootDiv.className = cn("modal-holder").toClassName();
 
   document.body.appendChild(rootDiv);
@@ -45,10 +46,11 @@ const standaloneModal = (props) => {
 
   return {
     update(newProps) {
-      renderModal({...props, ...(newProps ?? {}), visible: true}, false);
+      renderModal({ ...props, ...(newProps ?? {}), visible: true }, false);
     },
     close() {
       const result = modalRef.current.hide();
+
       unmountComponentAtNode(rootDiv);
       rootDiv.remove();
       return result;
@@ -70,7 +72,7 @@ export const confirm = ({ okText, onOk, cancelText, onCancel, buttonLook, ...pro
           size="compact"
           autoFocus
         >
-          {cancelText ?? "Cancel"}
+          {cancelText ?? t("Cancel")}
         </Button>
 
         <Button
@@ -81,7 +83,7 @@ export const confirm = ({ okText, onOk, cancelText, onCancel, buttonLook, ...pro
           size="compact"
           look={buttonLook ?? 'primary'}
         >
-          {okText ?? "OK"}
+          {okText ?? t("OK")}
         </Button>
       </Space>
     ),
@@ -103,7 +105,7 @@ export const info = ({ okText, onOkPress, ...props }) => {
           look="primary"
           size="compact"
         >
-          {okText ?? "OK"}
+          {okText ?? t("OK")}
         </Button>
       </Space>
     ),

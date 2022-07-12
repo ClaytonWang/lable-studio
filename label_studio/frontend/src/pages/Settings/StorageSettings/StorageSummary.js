@@ -18,7 +18,7 @@ export const StorageSummary = ({storage, className, storageTypes = []}) => {
           <LocalStorage case="localfiles" storage={storage}/>
         </Oneof>
         <DescriptionList.Item term="Last Sync">
-          {storage.last_sync ? format(new Date(storage.last_sync), 'MMMM dd, yyyy ∙ HH:mm:ss') : "Never synced"}
+          {storage.last_sync ? format(new Date(storage.last_sync), 'yyyy-MM-dd HH:mm:ss') : t("Never synced")}
         </DescriptionList.Item>
       </DescriptionList>
     </div>

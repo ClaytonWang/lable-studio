@@ -12,7 +12,7 @@ import { useImportPage } from './Import/useImportPage';
 import { useDraftProject } from './utils/useDraftProject';
 
 // 1期需求：创建项目时，默认的模版
-const DEFAULT_CONFIG = `<View>
+const DEFAULT_CONFIG = `<View className="template-intent-classification-for-dialog">
 <Paragraphs name="dialogue" value="$dialogue" layout="dialogue" />
 <Choices name="intent" toName="dialogue" choice="multiple" showInLine="true">
   <Choice value="升级"/>
@@ -24,16 +24,16 @@ const DEFAULT_CONFIG = `<View>
 const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, setDescription, show = true }) => !show ? null :(
   <form className={cn("project-name")} onSubmit={e => { e.preventDefault(); onSubmit(); }}>
     <div className="field field--wide">
-      <label htmlFor="project_name">Project Name</label>
+      <label htmlFor="project_name">{t("Project Name")}</label>
       <input name="name" id="project_name" value={name} onChange={e => setName(e.target.value)} onBlur={onSaveName} />
       {error && <span className="error">{error}</span>}
     </div>
     <div className="field field--wide">
-      <label htmlFor="project_description">Description</label>
+      <label htmlFor="project_description">{t("Description")}</label>
       <textarea
         name="description"
         id="project_description"
-        placeholder="Optional description of your project"
+        placeholder={t("create_project_desc", "项目描述")}
         rows="4"
         value={description}
         onChange={e => setDescription(e.target.value)}
@@ -62,9 +62,9 @@ export const CreateProject = ({ onClose }) => {
   const rootClass = cn("create-project");
   const tabClass = rootClass.elem("tab");
   const steps = {
-    name: <span className={tabClass.mod({ disabled: !!error })}>Project Name</span>,
-    import: <span className={tabClass.mod({ disabled: uploadDisabled })}>Data Import</span>,
-    config: "Labeling Setup",
+    name: <span className={tabClass.mod({ disabled: !!error })}>{t("Project Name")}</span>,
+    import: <span className={tabClass.mod({ disabled: uploadDisabled })}>{t("Data Import", "数据导入")}</span>,
+    config: t("Labeling Setup", "标注设置"),
   };
 
   // name intentionally skipped from deps:
@@ -130,12 +130,12 @@ export const CreateProject = ({ onClose }) => {
     <Modal onHide={onDelete} fullscreen visible bare closeOnClickOutside={false}>
       <div className={rootClass}>
         <Modal.Header>
-          <h1>Create Project</h1>
+          <h1>{t("Create Project")}</h1>
           <ToggleItems items={steps} active={step} onSelect={setStep} />
 
           <Space>
-            <Button look="danger" size="compact" onClick={onDelete} waiting={waiting}>Delete</Button>
-            <Button look="primary" size="compact" onClick={onCreate} waiting={waiting || uploading} disabled={!project || uploadDisabled || error}>Save</Button>
+            <Button look="danger" size="compact" onClick={onDelete} waiting={waiting}>{t('Delete')}</Button>
+            <Button look="primary" size="compact" onClick={onCreate} waiting={waiting || uploading} disabled={!project || uploadDisabled || error}>{t("Save")}</Button>
           </Space>
         </Modal.Header>
         <ProjectName

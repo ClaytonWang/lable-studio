@@ -3,8 +3,8 @@
 {% block user_content %}
   <form id="login-form" action="{% url 'user-login' %}{% if next %}?next={{ next }}{% endif %}" method="post">
     {% csrf_token %}
-    <p><input type="text" class="ls-input" name="email" id="email" placeholder="Email" value="{{ form.data.email }}"></p>
-    <p><input type="password" class="ls-input" name="password" id="password" placeholder="Password"></p>
+    <p><input type="text" class="ls-input" name="email" id="email" placeholder="邮箱" value="{{ form.data.email }}"></p>
+    <p><input type="password" class="ls-input" name="password" id="password" placeholder="密码"></p>
     {% if form.non_field_errors %}
       {% for error in form.non_field_errors %}
         <p class="error">
@@ -12,7 +12,7 @@
         </p>
       {% endfor %}
     {% endif %}
-    <p><button type="submit" aria-label="Log In" class="ls-button ls-button_look_primary">Log in</button></p>
+    <p><button type="submit" aria-label="Log In" class="ls-button ls-button_look_primary" data-i18n="Log in">登陆</button></p>
   </form>
 
 {% endblock %}

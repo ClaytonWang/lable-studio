@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import React,{ createRef, useCallback, useEffect, useRef,useState } from 'react';
 import { generatePath, useHistory } from 'react-router';
 import { NavLink } from 'react-router-dom';
-import { Spinner } from '../../components';
+import { Loading } from '../../components';
 import { Button } from '../../components/Button/Button';
 import { modal } from '../../components/Modal/Modal';
 import { Space } from '../../components/Space/Space';
@@ -9,21 +9,51 @@ import { useAPI } from '../../providers/ApiProvider';
 import { useLibrary } from '../../providers/LibraryProvider';
 import { useProject } from '../../providers/ProjectProvider';
 import { useContextProps, useFixedLocation, useParams } from '../../providers/RoutesProvider';
-import { addAction, addCrumb, deleteAction, deleteCrumb } from '../../services/breadrumbs';
+import { addAction, deleteAction, deleteCrumb } from '../../services/breadrumbs';
 import { Block, Elem } from '../../utils/bem';
 import { isDefined } from '../../utils/helpers';
 import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
+import CleanData from './CleanData';
+import ProjectStatus from './ProjectStatus';
+import { PromptLearnTemplate } from '../../components';
 import "./DataManager.styl";
 
-const onPreButtonClick = (e) => {
-  const btn = e.target ?? null;
+const refStatus = createRef();
+const refProm = createRef();
+const showStatus = () => {
+  refStatus?.current.status();
+};
 
-  if (btn && !btn.disabled) {
-    btn.disabled = true;
-    btn.textContent='预标注中...';
-  }
+const onPreButtonClick = (e,params) => {
+  // const mlQueryProgress = params.mlQueryProgress;
+  // const setProgress = params.setProgress;
+  const mlPredictProcess = params.mlPredictProcess;
+
+  mlPredictProcess().then(showStatus);
+
+  // let progress = 0,count=0;
+
+  // refModal.current?.show();
+  // let t = setInterval(() => {
+  //   count = count + 1;
+  //   mlQueryProgress().then((rst) => {
+  //     progress = rst.rate * 100;
+  //     setProgress(progress);
+
+  //     if (progress >= 100 || (progress === 0 && count > 11)) {
+  //       clearInterval(t);
+  //       setProgress(0);
+  //       try { refModal.current?.hide(); } catch (e) { console.log(e); }
+  //       return;
+  //     }
+  //   });
+  // },1000);
+};
+
+const onPrePromButtonClick = () => {
+  refProm.current?.show();
 };
 
 const initializeDataManager = async (root, props, params) => {
@@ -33,17 +63,23 @@ const initializeDataManager = async (root, props, params) => {
   root.dataset.dmInitialized = true;
 
   const { ...settings } = root.dataset;
+  const { label_config } = params.project;
+  let isIndentTemplate = label_config?.indexOf('template-intent-classification-for-dialog')!==-1;
 
   const dmConfig = {
     root,
-    toolbar: "actions columns filters ordering pre-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
+    toolbar: "actions columns filters ordering wash-button pre-prom-button pre-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
     apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
+    // apiGateway: `http://124.71.161.146:8080/api/dm`,
     apiVersion: 2,
     project: params.project,
     polling: !window.APP_SETTINGS,
     showPreviews: true,
     apiEndpoints: APIConfig.endpoints,
+    // apiHeaders: {
+    //   Authorization: `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
+    // },
     interfaces: {
       backButton: false,
       labelingHeader: false,
@@ -55,8 +91,14 @@ const initializeDataManager = async (root, props, params) => {
       keymap: window.APP_SETTINGS.editor_keymap,
     },
     instruments: {
+      'wash-button': () => {
+        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={params.handleClickClear} >{t("label_clean", "清洗")}</button>;
+      },
       'pre-button': () => {
-        return () => <button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e);}} >预标注(普通)</button>;
+        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >{t("label_prediction", "预标注(普通)")}</button>;
+      },
+      'pre-prom-button': () => {
+        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >{t('label_prompt', "预标注(0样本)")}</button>;
       },
     },
     ...props,
@@ -80,8 +122,24 @@ export const DataManagerPage = ({ ...props }) => {
   const DataManager = useLibrary('dm');
   const setContextProps = useContextProps();
   const [crashed, setCrashed] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const clearModalRef = useRef();
   const dataManagerRef = useRef();
   const projectId = project?.id;
+
+  const mlPredictProcess = useCallback(async () => {
+    return await api.callApi('mlPredictProcess', {
+      body: {
+        project_id: project.id,
+      },
+    });
+  }, [project]);
+
+  const mlQueryProgress = useCallback(async () => {
+    return await api.callApi('mlPreLabelProgress', {
+      params: { project_id: project.id },
+    });
+  }, [project]);
 
   const init = useCallback(async () => {
     if (!LabelStudio) return;
@@ -93,7 +151,6 @@ export const DataManagerPage = ({ ...props }) => {
     const mlBackends = await api.callApi("mlBackends", {
       params: { project: project.id },
     });
-
     const interactiveBacked = (mlBackends ?? []).find(({ is_interactive }) => is_interactive);
 
     const dataManager = (dataManagerRef.current = dataManagerRef.current ?? await initializeDataManager(
@@ -103,6 +160,10 @@ export const DataManagerPage = ({ ...props }) => {
         ...params,
         project,
         autoAnnotation: isDefined(interactiveBacked),
+        setProgress,
+        mlQueryProgress,
+        mlPredictProcess,
+        handleClickClear: () => clearModalRef.current?.show(),
       },
     ));
 
@@ -166,7 +227,6 @@ export const DataManagerPage = ({ ...props }) => {
     return () => destroyDM();
   }, [root, init]);
 
-
   if (!DataManager || !LabelStudio) {
     return (
       <div style={{
@@ -177,21 +237,35 @@ export const DataManagerPage = ({ ...props }) => {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-        <Spinner size={64}/>
+        <Loading size={64}/>
       </div>
     );
   }
 
   return crashed ? (
     <Block name="crash">
-      <Elem name="info">Project was deleted or not yet created</Elem>
+      <Elem name="info">{t('tip_deleted_not_created', 'Project was deleted or not yet created')}</Elem>
 
       <Button to="/projects">
-        Back to projects
+        {t('Back to projects')}
       </Button>
     </Block>
   ) : (
-    <Block ref={root} name="datamanager"/>
+    <>
+      <PromptLearnTemplate ref={refProm} projectId={projectId} showStatus={showStatus} />
+      <ProjectStatus
+        ref={refStatus}
+        onFinish={{
+          clean: () => clearModalRef.current?.reload(),
+        }}
+      />
+      <CleanData
+        showStatus={showStatus}
+        ref={clearModalRef}
+      />
+      <Block ref={root} name="datamanager"/>
+    </>
+
   );
 };
 
@@ -206,7 +280,7 @@ DataManagerPage.context = ({ dmRef }) => {
   const [mode, setMode] = useState(dmRef?.mode ?? "explorer");
 
   const links = {
-    '/settings': 'Settings',
+    '/settings': t("Settings"),
   };
 
   const updateCrumbs = (currentMode) => {
@@ -222,11 +296,11 @@ DataManagerPage.context = ({ dmRef }) => {
         e.stopPropagation();
         dmRef?.store?.closeLabeling?.();
       });
-      addCrumb({
-        key: "dm-crumb",
-        // title: "Labeling",
-        title:"对话-意图分类",
-      });
+      // addCrumb({
+      //   key: "dm-crumb",
+      //   // title: "Labeling",
+      //   title:"(对话-意图分类)",
+      // });
     }
   };
 
@@ -236,7 +310,7 @@ DataManagerPage.context = ({ dmRef }) => {
 
     if (isLabelStream && show_instruction && expert_instruction) {
       modal({
-        title: "Labeling Instructions",
+        title: t("Labeling Instructions"),
         body: <div dangerouslySetInnerHTML={{ __html: expert_instruction }}/>,
         style: { width: 680 },
       });
@@ -264,11 +338,11 @@ DataManagerPage.context = ({ dmRef }) => {
       {(project.expert_instruction && mode !== 'explorer') && (
         <Button size="compact" onClick={() => {
           modal({
-            title: "Instructions",
+            title: t("Instructions"),
             body: () => <div dangerouslySetInnerHTML={{ __html: project.expert_instruction }}/>,
           });
         }}>
-          Instructions
+          {t("Instructions")}
         </Button>
       )}
 

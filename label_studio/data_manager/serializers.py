@@ -1,6 +1,9 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+import datetime
+
 import os
+import uuid
 import ujson as json
 from django.db.models import Avg
 
@@ -12,6 +15,9 @@ from tasks.models import Task
 from tasks.serializers import TaskSerializer, AnnotationSerializer, PredictionSerializer, AnnotationDraftSerializer
 from projects.models import Project
 from label_studio.core.utils.common import round_floats
+from tasks.models import Annotation, Prediction
+from projects.models import PromptResult
+UTC_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
 class FilterSerializer(serializers.ModelSerializer):
@@ -159,6 +165,61 @@ class ViewSerializer(serializers.ModelSerializer):
             return instance
 
 
+class CustomViewSerializer(ViewSerializer):
+
+    def update(self, instance, validated_data):
+        with transaction.atomic():
+            filter_group_data = validated_data.pop("filter_group", None)
+            if filter_group_data:
+                filters_data = filter_group_data.pop("filters", [])
+                # 修改新加的两个字段 manual_label auto_label
+                for index, item in enumerate(filters_data):
+                    column = item.get('column')
+                    if column and column.endswith(':manual_label'):
+                        column = column.replace(':manual_label', ':annotations_results')
+                        filters_data[index]['column'] = column
+                    elif column and column.endswith(':auto_label'):
+                        column = column.replace(':auto_label', ':predictions_results')
+                        filters_data[index]['column'] = column
+
+                filter_group = instance.filter_group
+                if filter_group is None:
+                    filter_group = FilterGroup.objects.create(**filter_group_data)
+
+                conjunction = filter_group_data.get("conjunction")
+                if conjunction and filter_group.conjunction != conjunction:
+                    filter_group.conjunction = conjunction
+                    filter_group.save()
+
+                filter_group.filters.clear()
+                self._create_filters(filter_group=filter_group, filters_data=filters_data)
+
+            ordering = validated_data.pop("ordering", None)
+            # 修改新加的两个字段
+            # manual_label auto_label
+            if ordering:
+                for index, item in enumerate(ordering):
+                    # tasks: avg_lead_time
+                    if 'manual_label' in item:
+                        ordering[index] = item.replace(
+                            'manual_label', 'annotations_results'
+                        )
+                    elif 'auto_label' in item:
+                        ordering[index] = item.replace(
+                            'auto_label', 'predictions_results'
+                        )
+
+            if ordering and ordering != instance.ordering:
+                instance.ordering = ordering
+                instance.save()
+
+            if validated_data["data"] != instance.data:
+                instance.data = validated_data["data"]
+                instance.save()
+
+            return instance
+
+
 class DataManagerTaskSerializer(TaskSerializer):
     predictions = serializers.SerializerMethodField(required=False, read_only=True)
     annotations = serializers.SerializerMethodField(required=False, read_only=True)
@@ -178,13 +239,123 @@ class DataManagerTaskSerializer(TaskSerializer):
     predictions_model_versions = serializers.SerializerMethodField(required=False)
     avg_lead_time = serializers.FloatField(required=False)
     updated_by = serializers.SerializerMethodField(required=False, read_only=True)
+    predictions_score = serializers.SerializerMethodField(required=False)
+    auto_label = serializers.SerializerMethodField(required=False)
+    manual_label = serializers.SerializerMethodField(required=False)
+    marked_methode = serializers.SerializerMethodField(required=False)
+    auto_label_at = serializers.SerializerMethodField(required=False)
 
     CHAR_LIMITS = 500
-
+    
     class Meta:
         model = Task
         ref_name = 'data_manager_task_serializer'
         fields = '__all__'
+    
+    def __init__(self, *args, **kwargs):
+        super(DataManagerTaskSerializer, self).__init__(*args, **kwargs)
+
+        self.task_ids = [item.id for item in self.instance] if isinstance(
+            self.instance, list) else [self.instance.id]
+
+        self.anno_query = Annotation.objects.filter(task_id__in=self.task_ids)
+        self.pre_query = Prediction.objects.filter(task_id__in=self.task_ids)
+        self.prompt_query = PromptResult.objects.filter(
+            task_id__in=self.task_ids
+        )
+
+        self.anno_data = {
+            str(item['task']): item for item in
+            AnnotationSerializer(
+                self.anno_query, many=True, read_only=True, default=[]
+            ).data
+        }
+        self.pre_data = {
+            str(item['task']): item for item in
+            PredictionSerializer(
+                self.pre_query, many=True, read_only=True, default=[]
+            ).data
+        }
+        self.prompt_data = {
+            str(item['task']): item for item in
+            self.prompt_query.values(
+                'task', 'metrics', 'created_at', 'updated_at'
+            )
+        }
+
+    def check_update_time(self, obj):
+        pre = self.pre_data.get(str(obj.id), {})
+        prompt = self.prompt_data.get(str(obj.id), {})
+        if not pre and not prompt:
+            return None, None
+
+        pre_update_at = pre.get('updated_at', '')
+        pre_update_at = datetime.datetime.strptime(
+            pre_update_at, UTC_FORMAT
+        ).timestamp() if pre_update_at else 0
+        prompt_update_at = prompt.get('updated_at', '')
+        prompt_update_at = prompt_update_at.replace(tzinfo=None).timestamp() \
+            if prompt_update_at else 0
+        if pre_update_at > prompt_update_at:
+            return 'pre', pre
+        else:
+            return 'prompt', prompt
+
+    def get_predictions_score(self, obj):
+        label, rst = self.check_update_time(obj)
+        if label == 'pre':
+            return obj.predictions_score
+        elif label == 'prompt':
+            metrics = rst.get('metrics', {})
+            return metrics.get('confidence')
+        else:
+            return None
+
+    def get_marked_methode(self, obj):
+        label, rst = self.check_update_time(obj)
+        if label == 'pre':
+            return '普通'
+        elif label == 'prompt':
+            return '提示学习'
+        else:
+            return ''
+
+    def get_auto_label_at(self, obj):
+        data = self.pre_data.get(str(obj.id), [])
+        if not len(data):
+            return ''
+
+        updated_at = data.get('updated_at')
+        if updated_at:
+            u_dt = datetime.datetime.strptime(
+                updated_at, UTC_FORMAT
+            )
+            return u_dt.strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            return ''
+
+    def get_auto_label(self, obj):
+        """
+        自动标注字段：预标注（普通）和提示学习取最新的值
+        :param obj:
+        :return:
+        """
+        label, rst = self.check_update_time(obj)
+        if label == 'pre':
+            result = rst.get('result', []) if len(rst) else []
+            pre_choices = self.get_choice_values(result)
+            return ','.join(pre_choices)
+        else:
+            metrics = rst.get('metrics', {})
+            return metrics.get('annotation', '')
+
+    def get_manual_label(self, obj):
+        data = self.anno_data.get(str(obj.id), [])
+        if not len(data):
+            return ''
+        result = data.get('result', []) if len(data) else []
+        choices = self.get_choice_values(result)
+        return ','.join(choices)
 
     def to_representation(self, obj):
         """ Dynamically manage including of some fields in the API result
@@ -224,11 +395,28 @@ class DataManagerTaskSerializer(TaskSerializer):
     def get_predictions_results(self, task):
         return self._pretty_results(task, 'predictions_results')
 
+    @staticmethod
+    def get_choice_values(result):
+        """
+        [{'type': 'choices', 'value': {'end': 1, 'start': 0, 'choices': ['肯定']}, 'to_name': 'dialogue', 'from_name': 'intent'}]
+        :param result:
+        :return:
+        """
+        choices = []
+        for item in result:
+            tmp_choices = item.get('value', {}).get('choices', [])
+            if not tmp_choices:
+                continue
+            choices += tmp_choices
+        return choices
+
     def get_annotations(self, task):
-        return AnnotationSerializer(task.annotations, many=True, default=[], read_only=True).data
+        rst = self.anno_data.get(str(task.id), [])
+        return [rst] if rst else []
 
     def get_predictions(self, task):
-        return PredictionSerializer(task.predictions, many=True, default=[], read_only=True).data
+        rst = self.pre_data.get(str(task.id))
+        return [rst] if rst else []
 
     @staticmethod
     def get_file_upload(task):

@@ -4,11 +4,13 @@ from django.urls import path, include
 from rest_framework import routers
 
 from . import api
+from tasks.tag_api import DbTaskTagCleanViews
 
 app_name = 'tasks'
 
 router = routers.DefaultRouter()
 router.register(r'predictions', api.PredictionAPI, basename='prediction')
+router.register(r'clean_tag', DbTaskTagCleanViews, basename='clean-tag')
 
 _api_urlpatterns = [
     # CRUD

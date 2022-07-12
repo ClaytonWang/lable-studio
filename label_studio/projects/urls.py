@@ -2,9 +2,12 @@
 """
 import data_export.api
 from django.shortcuts import redirect
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.conf.urls import url
 
-from . import api, views
+
+# 增加promt - api.py
+from . import api, views, prompt_api
 
 app_name = 'projects'
 
@@ -55,4 +58,14 @@ urlpatterns = [
     path('projects/', include(_urlpatterns)),
     path('api/projects/', include((_api_urlpatterns, app_name), namespace='api')),
     path('api/templates/', include((_api_urlpatterns_templates, app_name), namespace='api-templates')),
+
+    # 推断学习模版curd
+    path('api/templates/prompt-learning/', prompt_api.PromptAPI.as_view()),
+    path('api/templates/prompt-learning/<int:project>/', prompt_api.PromptAPI.as_view(), name='template-detail-get'),
+    path('api/templates/prompt-learning/<int:id>/', prompt_api.PromptAPI.as_view(), name='template-detail-update'),
+
+    # 增加两个关于推断学习算法的接口
+    path('api/projects/prompt-learning/predict/', prompt_api.PromptLearning.as_view()),
+    # re_path(r'api/projects/prompt-learning/retrieve?project=(\d+)&&taskId=(\d+)', prompt_api.PromptExport.as_view()),
+    path(r'api/projects/prompt-learning/retrieve', prompt_api.PromptExport.as_view()),
 ]

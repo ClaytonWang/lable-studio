@@ -4,7 +4,8 @@
   font-size: 24px;
   font-weight: 400;
   text-align: center;
-  margin-top: 50px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 .login_page {
   font-weight: 400;
@@ -18,8 +19,13 @@
   color: #8C8C8C;
 }
 .login_page img {
-  margin: 32px auto 50px;
+  /* margin: 32px auto 50px; */
   display: block;
+}
+.login_page .divider {
+  height: 50px;
+  margin-left: 20px;
+  border-left: 1px solid #ccc;
 }
 .login_page .link a {
   border-color: #1890FF;

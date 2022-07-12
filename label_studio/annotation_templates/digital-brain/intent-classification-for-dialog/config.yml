@@ -4,7 +4,7 @@ group: Digital Brain
 image: /static/templates/intent-classification-and-slot-filling.png
 details: <h1>Build task-oriented dialogue system by selecting dialogue intents and extracting slot entities</h1>
 config: |
-  <View>
+  <View className="template-intent-classification-for-dialog">
     <Paragraphs name="dialogue" value="$dialogue" layout="dialogue" />
     <Choices name="intent" toName="dialogue" choice="multiple" showInLine="true">
       <Choice value="升级"/>

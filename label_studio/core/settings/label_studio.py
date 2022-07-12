@@ -2,7 +2,7 @@
 """
 from core.settings.base import *
 
-DJANGO_DB = get_env('DJANGO_DB', DJANGO_DB_SQLITE)
+DJANGO_DB = get_env('DJANGO_DB', DJANGO_DB_POSTGRESQL)
 DATABASES = {'default': DATABASES_ALL[DJANGO_DB]}
 
 MIDDLEWARE.append('organizations.middleware.DummyGetSessionMiddleware')
@@ -20,17 +20,38 @@ SESSION_COOKIE_SECURE = False
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
-RQ_QUEUES = {}
+
+RQ_QUEUES = {
+    'default': {
+        'HOST': '127.0.0.1',
+        'PORT': 6379,
+        'DB': 0,
+        'DEFAULT_TIMEOUT': 180,
+    },
+    'pre_tags': {
+        'HOST': '127.0.0.1',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 180,
+    },
+    'algorithm_clean': {
+        'HOST': '127.0.0.1',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 180,
+    },
+
+}
 
 SENTRY_DSN = get_env(
     'SENTRY_DSN',
-    'https://68b045ab408a4d32a910d339be8591a4@o227124.ingest.sentry.io/5820521'
+    'http://88b0a9b1ab8d4d1cad75d981676eacad@124.71.161.146:9000/2'
 )
 SENTRY_ENVIRONMENT = get_env('SENTRY_ENVIRONMENT', 'opensource')
 
 FRONTEND_SENTRY_DSN = get_env(
     'FRONTEND_SENTRY_DSN',
-    'https://5f51920ff82a4675a495870244869c6b@o227124.ingest.sentry.io/5838868')
+    'http://88b0a9b1ab8d4d1cad75d981676eacad@124.71.161.146:9000/2')
 FRONTEND_SENTRY_ENVIRONMENT = get_env('FRONTEND_SENTRY_ENVIRONMENT', 'opensource')
 
 EDITOR_KEYMAP = json.dumps(get_env("EDITOR_KEYMAP"))
@@ -45,3 +66,16 @@ versions = collect_versions()
 
 # in Label Studio Community version, feature flags are always ON
 FEATURE_FLAGS_DEFAULT_VALUE = True
+
+
+# 增加配置文件
+ENV = os.getenv('ENV', '').upper()
+if 'DEV' == ENV:
+    from core.settings.dev_settings import *
+elif 'QA' == ENV:
+    from core.settings.qa_settings import *
+elif 'PROD' == ENV:
+    pass
+    # from core.settings.prod_settings import *
+else:
+    pass

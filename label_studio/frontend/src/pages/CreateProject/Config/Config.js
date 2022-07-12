@@ -45,7 +45,7 @@ const configClass = cn("configure");
 
 const EmptyConfigPlaceholder = () => (
   <div className={configClass.elem("empty-config")}>
-    <p>Your labeling configuration is empty. It is required to label your data.</p>
+    <p>{t("label_config_empty_tip")}</p>
   </div>
 );
 
@@ -95,12 +95,12 @@ const ConfigureControl = ({ control, template }) => {
   return (
     <div className={configClass.elem("labels")}>
       <form className={configClass.elem("add-labels")} action="">
-        <h4>{tagname === "Choices" ? "Add choices" : "Add label names"}</h4>
+        <h4>{tagname === "Choices" ? t("Add choices") : t("Add label names")}</h4>
         <textarea name="labels" id="" cols="30" rows="5" ref={refLabels} onKeyPress={onKeyPress}></textarea>
-        <input type="button" value="Add" onClick={onAddLabels} />
+        <input type="button" value={t("Add")} onClick={onAddLabels} />
       </form>
       <div className={configClass.elem("current-labels")}>
-        <h3>{tagname === "Choices" ? "Choices" : "Labels"} ({control.children.length})</h3>
+        <h3>{tagname === "Choices" ? t("Choices") : t("Labels")} ({control.children.length})</h3>
         <ul>
           {Array.from(control.children).map(label => (
             <Label
@@ -210,33 +210,38 @@ const ConfigureColumns = ({ columns, template }) => {
 
   return (
     <div className={configClass.elem("object")}>
-      <h4>Configure data</h4>
+      <h4>{t("Configure data")}</h4>
       {template.objects.length > 1 && columns?.length > 0 && columns.length < template.objects.length && (
         <p className={configClass.elem("object-error")}>This template requires more data then you have for now</p>
       )}
       {columns?.length === 0 && (
         <p className={configClass.elem("object-error")}>
-          To select which field(s) to label you need to upload the data. Alternatively, you can provide it using Code mode.
+          {t("select_field_tip", "请选择需要上传的字段。可以使用代码模式编辑")}
+          {/* To select which field(s) to label you need to upload the data. Alternatively, you can provide it using Code mode. */}
         </p>
       )}
-      {template.objects.map(obj => (
-        <p key={obj.getAttribute("name")}>
-          Use {obj.tagName.toLowerCase()}
-          {template.objects > 1 && ` for ${obj.getAttribute("name")}`}
-          {" from "}
-          {columns?.length > 0 && columns[0] !== DEFAULT_COLUMN && "field "}
-          <select onChange={updateValue(obj)} value={obj.getAttribute("value")?.replace(/^\$/, "")}>
-            {columns?.map(column => (
-              <option key={column} value={column}>
-                {column === DEFAULT_COLUMN ? "<imported file>" : `$${column}`}
-              </option>
-            ))}
-            {!columns?.length && (
-              <option value={obj.getAttribute("value")?.replace(/^\$/, "")}>{"<imported file>"}</option>
-            )}
-          </select>
-        </p>
-      ))}
+      {template.objects.map(obj => {
+        const tagName = obj.tagName.toLowerCase();
+        const _field = columns?.length > 0 && columns[0] !== DEFAULT_COLUMN && "field ";
+
+        return (
+          <p key={obj.getAttribute("name")}>
+            {t("Use")} {t(tagName, tagName)}
+            {template.objects > 1 && ` ${'for'} ${obj.getAttribute("name")}`}
+            {` ${t('from')} `}
+            {t(_field, '字段')}
+            <select onChange={updateValue(obj)} value={obj.getAttribute("value")?.replace(/^\$/, "")}>
+              {columns?.map(column => (
+                <option key={column} value={column}>
+                  {column === DEFAULT_COLUMN ? t("<imported file>") : `$${column}`}
+                </option>
+              ))}
+              {!columns?.length && (
+                <option value={obj.getAttribute("value")?.replace(/^\$/, "")}>{t("<imported file>")}</option>
+              )}
+            </select>
+          </p>
+        );})}
     </div>
   );
 };
@@ -323,8 +328,8 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
     <div className={configClass}>
       <div className={configClass.elem("container")}>
         <header>
-          <button onClick={onBrowse}>Browse Templates</button>
-          <ToggleItems items={{ code: "Code", visual: "Visual" }} active={configure} onSelect={onSelect} />
+          {/* <button onClick={onBrowse}>{t("Browse Templates")}</button> */}
+          <ToggleItems items={{ code: t("Code"), visual: t("Visual") }} active={configure} onSelect={onSelect} />
         </header>
         <div className={configClass.elem('editor')}>
           {configure === "code" && (
@@ -351,7 +356,7 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
         {disableSaveButton !== true && onSaveClick && (
           <Form.Actions size="small" extra={configure === "code" && extra} valid>
             <Button look="primary" size="compact" style={{ width: 120 }} onClick={onSave} waiting={waiting}>
-              Save
+              {t("Save")}
             </Button>
           </Form.Actions>
         )}

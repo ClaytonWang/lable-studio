@@ -6,7 +6,7 @@
 {% block head %}
 <link rel="stylesheet" href="{{ settings.HOSTNAME }}{% static 'css/login.css' %}"/>
 
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-129877673-1"></script>
+<!-- <script async src="https://www.googletagmanager.com/gtag/js?id=UA-129877673-1"></script> -->
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
@@ -17,16 +17,23 @@ gtag('config', 'UA-129877673-1');
 
 {% block content %}
 <div class="login_page">
-  <h1>数字大脑数据标注平台</h1>
+  
   <!-- <h1>Welcome to Label Studio Community Edition {{versions.package.short_version}}</h1> -->
   <!-- <h2>A full-fledged open source solution for data labeling</h2> -->
 
-  <!-- <img src="{{ settings.HOSTNAME }}{% static 'images/opossum_hanging.svg' %}" height="128px" /> -->
+  <div style="display:flex;align-items: center;justify-content: center;">
+    <img src="{{ settings.HOSTNAME }}{% static 'images/nine-day-logo.svg' %}" height="60px" />
+    <b class="divider" style="margin-right:20px;"></b>
+    <img src="{{ settings.HOSTNAME }}{% static 'images/yidong.jpeg' %}" height="50px" />
+    <b class="divider"></b>
+    <img src="{{ settings.HOSTNAME }}{% static 'images/cmc.png' %}" height="60px" />
+  </div>
 
+  <h1>人在环路自动化平台</h1>
   <div class="toggle">
     {% if not settings.DISABLE_SIGNUP_WITHOUT_LINK %}
-        <a href="{{ settings.HOSTNAME }}/user/signup" class="{% if 'signup' in request.path %}active{% endif %}">Sign up</a>
-        <a href="{{ settings.HOSTNAME }}/user/login" class="{% if 'login' in request.path %}active{% endif %}">Log in</a>
+        <a href="{{ settings.HOSTNAME }}/user/signup" class="{% if 'signup' in request.path %}active{% endif %}" data-i18n="Sign up">注册</a>
+        <a href="{{ settings.HOSTNAME }}/user/login" class="{% if 'login' in request.path %}active{% endif %}" data-i18n="Log in">登陆</a>
     {% endif %}
   </div>
 

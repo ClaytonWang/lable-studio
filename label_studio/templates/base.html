@@ -7,7 +7,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="author" content="数字大脑自动标注平台"/>
+  <meta name="author" content="人在环路自动化平台"/>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=0.9, shrink-to-fit=no">
 
@@ -20,10 +20,14 @@
   <link href="{{settings.HOSTNAME}}{% static 'css/uikit.css' %}" rel="stylesheet">
   <link href="{{settings.HOSTNAME}}{% static 'css/main.css' %}" rel="stylesheet">
   <link href="{{settings.HOSTNAME}}/static/fonts/roboto/roboto.css" rel="stylesheet">
+
   <link href="{{settings.HOSTNAME}}/react-app/main.css?v={{ versions.backend.commit }}" rel="stylesheet">
 
   <script src="{{settings.HOSTNAME}}{% static 'js/jquery.min.js' %}"></script>
   <script src="{{settings.HOSTNAME}}{% static 'js/helpers.js' %}"></script>
+
+  <!-- 多语言 -->
+  <script src="{{settings.HOSTNAME}}/react-app/i18n.js?v={{ versions.backend.commit }}"></script>
 
   <script>
     EDITOR_JS = "{{settings.HOSTNAME}}/label-studio-frontend/js/main.js?v={{ versions.lsf.commit }}";
@@ -42,7 +46,7 @@
   </script>
 
   {% block head %}
-    <title>数字大脑自动标注平台</title>
+    <title>人在环路自动化平台</title>
   {% endblock %}
 
   {% get_current_language as LANGUAGE_CODE %}
@@ -113,7 +117,7 @@
   }, {% block frontend_settings %}{}{% endblock %});
 </script>
 
-<script src="{{settings.HOSTNAME}}/react-app/index.js?v={{ versions.backend.commit }}"></script>
+<script src="{{settings.HOSTNAME}}/react-app/main.js?v={{ versions.backend.commit }}"></script>
 
 <div id="dynamic-content">
   <script>

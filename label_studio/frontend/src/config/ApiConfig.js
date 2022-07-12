@@ -1,6 +1,6 @@
-
 export const API_CONFIG = {
   gateway: `${window.APP_SETTINGS.hostname}/api`,
+  // gateway: `http://124.71.161.146:8080/api`,
   endpoints: {
     // Users
     users: "/users",
@@ -29,7 +29,7 @@ export const API_CONFIG = {
     dataSummary: "/projects/:pk/summary",
 
     // DM
-    deleteTabs: 'DELETE:/dm/views/reset',
+    deleteTabs: "DELETE:/dm/views/reset",
 
     // Storages
     listStorages: "/storages/:target?",
@@ -51,6 +51,24 @@ export const API_CONFIG = {
     predictWithML: "POST:/ml/:pk/predict",
     modelVersions: "/projects/:pk/model-versions",
     mlInteractive: "POST:/ml/:pk/interactive-annotating",
+    mlPreLabelProgress: "GET:/dbml/query_task",
+    mlPredictProcess: "POST:/dbml/predict",
+
+    // Prompt Learning
+    mlPromptPredict: 'POST:/projects/prompt-learning/predict',
+    mlPromptTemplateCreate: 'POST:/templates/prompt-learning',
+    mlPromptTemplateDelete: 'DELETE:/templates/prompt-learning',
+    mlPromptTemplateUpdate:'PATCH:/templates/prompt-learning',
+    mlPromptTemplateQuery:'GET:/templates/prompt-learning/:project',
+
+
+    // Clean
+    clExec: "POST:/dbml/clean",
+    clReplace: "PATCH:/dbml/replace",
+    clList: "GET:/clean_tag",
+    clQueryStatus: "GET:/dbml/clean/query_task",
+    clLabelManually: "PATCH:/clean_tag/:id",
+    cancelJob: "GET:/dbml/cancel_job",
 
     // Export
     export: "/projects/:pk/export",
@@ -58,7 +76,7 @@ export const API_CONFIG = {
     exportFormats: "/projects/:pk/export/formats",
 
     // Version
-    version: '/version',
+    version: "/version",
 
     // Webhook
     webhooks: "/webhooks",

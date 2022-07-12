@@ -9,7 +9,7 @@ import { MachineLearningSettings } from './MachineLearningSettings/MachineLearni
 import { StorageSettings } from './StorageSettings/StorageSettings';
 
 
-export const MenuLayout = ({children, ...routeProps}) => {
+export const MenuLayout = ({ children, ...routeProps }) => {
   return (
     <SidebarMenu
       menuItems={[
@@ -28,7 +28,7 @@ export const MenuLayout = ({children, ...routeProps}) => {
 };
 
 export const SettingsPage = {
-  title: "Settings",
+  title: t("Settings"),
   path: "/settings",
   exact: true,
   layout: MenuLayout,
