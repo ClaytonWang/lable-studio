@@ -14,6 +14,7 @@ from .models import PromptResult, PromptTemplates
 from tasks.models import Task
 from core.redis import start_job_async_or_sync
 from db_ml.predict import job_predict
+from db_ml.prompt import job_prompt
 
 
 class PromptLearning(APIView):
@@ -64,16 +65,17 @@ class PromptLearning(APIView):
                     # TODO 多对话判断
                     # result = patch_prompt(template, task['data']['dialogue'])
                     text = task.get('data', {}).get('dialogue')[0].get('text')
+                    text = text + template
                     data = dict(
                         text=text,
                         project_id=project_id,
                         task_id=task.get('id'),
                         task_tag_id=task.get('id'),
                         user_id=request.user.id,
-                        queue_name='pre_tags',
+                        queue_name='prompt',
                         type='prompt',
                     )
-                    start_job_async_or_sync(job_predict, **data)
+                    start_job_async_or_sync(job_prompt, **data)
             return Response(
                 data=dict(msg='Submit success', project_id=project_id)
             )
