@@ -28,3 +28,4 @@ export { default as LsPencil } from './pencil.svg';
 export { default as IconI18n } from './i18n.svg';
 export { default as CircleLoading } from "./loading.gif";
 export { default as LabelLogo } from "./label_logo.svg";
+export { default as NineCMC } from "./nine-cmc.svg";
