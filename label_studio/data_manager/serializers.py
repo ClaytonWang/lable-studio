@@ -428,9 +428,18 @@ class DataManagerTaskSerializer(TaskSerializer):
             if old_rst and enw_val:
                 try:
                     old_rst['result'][0]['value']['choices'] = [enw_val]
+                    return [old_rst]
                 except Exception as e:
                     print(e)
-            return [old_rst]
+            elif enw_val and not old_rst:
+                return [dict(result=[
+                    {
+                        "type": "choices",
+                        "value": {"end": 1, "start": 0, "choices": [enw_val]},
+                        "to_name": "dialogue", "from_name": "intent"
+                    }
+                ])]
+
         return []
 
     @staticmethod
