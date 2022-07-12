@@ -38,10 +38,11 @@ services:
     environment:
       - DJANGO_DB=default
       - POSTGRE_NAME=postgres
-      - POSTGRE_USER=root
-      - POSTGRE_PASSWORD=linshimima2!
+      - POSTGRE_USER=postgres
+      - POSTGRE_PASSWORD=Dbtest
       - POSTGRE_PORT=5432
-      - POSTGRE_HOST=192.168.0.92
+      #- POSTGRE_HOST=192.168.0.92
+      - POSTGRE_HOST=124.71.161.146
       - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
       - LABEL_STUDIO_COPY_STATIC_DATA=true
     volumes:
