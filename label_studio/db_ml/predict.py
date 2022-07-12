@@ -64,7 +64,7 @@ def job_predict(*args, **kwargs):
         pass
 
     _type = kwargs.get('type', 'pre')
-    if _type:
+    if _type == 'pre':
         # label-studio数据结构
         pre_result = {
             'from_name': 'intent',
@@ -86,29 +86,29 @@ def job_predict(*args, **kwargs):
             defaults=tag_data, task=task
         )
         print('obj:', obj.id, ' auto: ', res_text, ' is_ created:', is_created)
-    elif _type == 'prompt':
-        result = {
-            "task": "我是对话",
-            "annotation": res_text,
-            "confidence": confidence,
-            "average": {"正面标签": np.random.rand(), "负面标签": np.random.rand()},
-            "output":
-                [{"template": "你好，我是模版A1",
-                  "label": "正面",
-                  "score": "烂片%f" % np.random.rand(),
-                  "wgtedAvg": np.random.rand()},
-                 {"template": "你好，我是模版B",
-                  "label": "负面",
-                  "score": "精品%f" % np.random.rand(),
-                  "wgtedAvg": np.random.rand()}
-                 ]
-        }
-        c = PromptResult(
-            project_id=kwargs['project_id'],
-            task_id=task_id,
-            metrics=result
-        )
-        c.save()
+    # elif _type == 'prompt':
+    #     result = {
+    #         "task": "我是对话",
+    #         "annotation": res_text,
+    #         "confidence": confidence,
+    #         "average": {"正面标签": np.random.rand(), "负面标签": np.random.rand()},
+    #         "output":
+    #             [{"template": "你好，我是模版A1",
+    #               "label": "正面",
+    #               "score": "烂片%f" % np.random.rand(),
+    #               "wgtedAvg": np.random.rand()},
+    #              {"template": "你好，我是模版B",
+    #               "label": "负面",
+    #               "score": "精品%f" % np.random.rand(),
+    #               "wgtedAvg": np.random.rand()}
+    #              ]
+    #     }
+    #     c = PromptResult(
+    #         project_id=kwargs['project_id'],
+    #         task_id=task_id,
+    #         metrics=result
+    #     )
+    #     c.save()
     else:
         pass
 

@@ -40,4 +40,10 @@ RQ_QUEUES = {
         'DB': 1,
         'DEFAULT_TIMEOUT': 18000,
     },
+    'prompt': {
+        'HOST': '127.0.0.1',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 18000,
+    },
 }
