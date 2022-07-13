@@ -52,7 +52,11 @@ class PromptLearning(APIView):
             # 获取tasks
             tasks = Task.objects.filter(project_id=params['project']).values()
             # print('tasks', tasks)
-            if template and templates:
+            # 清空project_id对应的PromtResult表
+            c = PromptResult.objects.filter(project_id=project_id)
+            c.delete()
+
+            for template in templates:
                 aggregate = []
                 for task in tasks:
                     result = patch_prompt(template, task['data']['dialogue'])
@@ -60,9 +64,6 @@ class PromptLearning(APIView):
                     # c.save()
                     aggregate.append(c)
                 print('aggregate', len(aggregate))
-                # 清空project_id对应的PromtResult表
-                c = PromptResult.objects.filter(project_id=project_id)
-                c.delete()
                 # 批量入库
                 PromptResult.objects.bulk_create(aggregate)
 

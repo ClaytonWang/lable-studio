@@ -72,5 +72,10 @@ FEATURE_FLAGS_DEFAULT_VALUE = True
 ENV = os.getenv('ENV', '').upper()
 if 'DEV' == ENV:
     from core.settings.dev_settings import *
+elif 'QA' == ENV:
+    from core.settings.qa_settings import *
+elif 'PROD' == ENV:
+    pass
+    # from core.settings.prod_settings import *
 else:
     pass
