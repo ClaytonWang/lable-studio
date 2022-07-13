@@ -7,6 +7,7 @@
   > FileName   : services.py
   > CreateTime : 2022/7/7 08:44
 """
+from enum import Enum
 from tasks.models import Task
 from django.db.transaction import atomic
 from tasks.models import Prediction, PredictionDraft
@@ -18,6 +19,19 @@ CLEAN_ALGORITHM_BACKUP_FIELDS = [
     'source', 'algorithm', 'manual', 'state', 'task', 'project',
     'created_at', 'updated_at', 'updated_by', 'created_by',
 ]
+
+
+DB_ALGORITHM_EXPIRE_TIME = 5  # 5秒
+DB_ALGORITHM_CANCELED_EXPIRE_TIME = 60 * 2  # 2分钟
+
+
+class AlgorithmState(str, Enum):
+    STARTED = 'started'
+    ONGOING = 'ongoing'
+    FINISHED = 'finished'
+    CANCELED = 'canceled'
+    STOPPED = 'stopped'
+    FAILED = 'failed'
 
 
 def rollback_clean(project_id):
@@ -63,3 +77,7 @@ def save_raw_data(queryset, draft_model, fields):
             data[field] = getattr(item, field)
         draft.append(draft_model(**data))
     draft_model.objects.bulk_create(draft)
+
+
+def generate_redis_key(algorithm_name: str, project_id: str) -> str:
+    return f'DB_ALGORITHM_{algorithm_name}_{project_id}'
