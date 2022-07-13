@@ -84,7 +84,7 @@ jobs:
         run: echo 'publishing'
 
       - name: start docker compose
-        rurn: echo 'docker compose'
+        run: echo 'docker compose'
 
   deploy_qa:
     needs: [docker_build_and_push]
