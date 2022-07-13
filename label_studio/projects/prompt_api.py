@@ -65,9 +65,9 @@ class PromptLearning(APIView):
                     # TODO 多对话判断
                     # result = patch_prompt(template, task['data']['dialogue'])
                     text = task.get('data', {}).get('dialogue')[0].get('text')
-                    text = text + template
                     data = dict(
                         text=text,
+                        template=template,
                         project_id=project_id,
                         task_id=task.get('id'),
                         task_tag_id=task.get('id'),
