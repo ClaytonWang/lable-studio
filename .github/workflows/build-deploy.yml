@@ -1,8 +1,8 @@
-name: "Docker build & push"
+name: " Build & Deploy"
 
 on:
   push:
-    branches: [ "master" , "development"]
+    branches: [ "master" , "development", "MARK-53"]
     paths:
      - deploy/**
      - label_studio/**
@@ -27,7 +27,7 @@ jobs:
         run: |
           echo "DOCKER_TAG=$(echo ${GITHUB_REF#refs/tags/})" >> $GITHUB_ENV
 
-      - name: Override registry
+      - name: Override registry 🛎️
         if: github.repository == 'Shanghai-Digital-Brain-Laboratory/label-studio'
         run: |
           echo "REGISTRY=ghcr.io" >> $GITHUB_ENV
@@ -35,7 +35,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Set up Docker Buildx
+      - name: Set up Docker Buildx 🏗️
         id: buildx
         uses: docker/setup-buildx-action@v2
 
@@ -46,8 +46,8 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v3
+      - name: Set up Python 🔧
+        uses: actions/setup-python@v4
         with:
           python-version: '3.8'
 
@@ -62,7 +62,7 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build and push
+      - name: Build and push 🚀
         uses: docker/build-push-action@v3
         id: docker_build_and_push
         with:
@@ -72,5 +72,36 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          #cache-from: type=registry,ref=${{ steps.meta.outputs.tags }}
-          #cache-to: type=registry,ref=${{ steps.meta.outputs.tags }},mode=max
+
+  deploy_dev:
+    needs: [docker_build_and_push]
+    runs-on: ubuntu-latest
+    environment: 
+      name: deveopment
+      url: http://124.71.161.146/dev
+    steps:
+      - name: pull docker image
+        run: echo 'publishing'
+
+      - name: start docker compose
+        rurn: echo 'docker compose'
+
+  deploy_qa:
+    needs: [docker_build_and_push]
+    runs-on: ubuntu-latest
+    environment: 
+      name: qa
+      url: http://124.71.161.146/qa
+    steps:
+      - name: publish
+        run: echo 'publishing'
+
+  deploy_prod:
+    needs: [deploy_qa]
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+      url: http://124.71.161.146/
+    steps:
+      - name: publish
+        run: echo 'publishing'
