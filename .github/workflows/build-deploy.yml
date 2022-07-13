@@ -82,7 +82,15 @@ jobs:
       url: http://124.71.161.146/dev
     steps:
       - name: pull docker image
-        run: echo 'publishing'
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSHKEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            whoami
+            ls -al
 
       - name: start docker compose
         run: echo 'docker compose'
