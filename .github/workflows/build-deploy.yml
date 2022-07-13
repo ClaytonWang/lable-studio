@@ -3,11 +3,11 @@ name: " Build & Deploy"
 on:
   push:
     branches: [ "master" , "development", "MARK-53"]
-    paths:
-     - deploy/**
-     - label_studio/**
-     - setup.py
-     - .github/workflows/docker-build.yml
+    # paths:
+    #  - deploy/**
+    #  - label_studio/**
+    #  - setup.py
+    #  - .github/workflows/docker-build.yml
     tags: [ '*' ]
 
 env:
