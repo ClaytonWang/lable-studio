@@ -14,13 +14,33 @@ from projects.models import PromptResult
 
 
 class Predictor:
-    def __init__(self, model_path, device='cpu'):
-        self.model = BartForSequenceClassification.from_pretrained(
-                    model_path, num_labels=3,  problem_type='single_label_classification').to(device)
-        self.model.eval()
-        self.tokenizer = BertTokenizer.from_pretrained(model_path)
-        self.device = device
-        self.id2class = {0: '负面', 1: '中性', 2: '正面'}
+
+    _cache = {}
+
+    def __new__(cls, model_path, device='cpu'):
+        args = (model_path, 'prompt', device)
+        if args not in cls._cache:
+            instance = super().__new__(cls)
+            model = BartForSequenceClassification.from_pretrained(
+                model_path, num_labels=3,
+                problem_type='single_label_classification').to(device)
+            model.eval()
+            # setattr
+            tokenizer = BertTokenizer.from_pretrained(model_path)
+            instance.model = model
+            instance.tokenizer = tokenizer
+            instance.device = device
+            instance.id2class = {0: '负面', 1: '中性', 2: '正面'}
+            cls._cache[args] = instance
+        return cls._cache[args]
+
+    # def __init__(self, model_path, device='cpu'):
+    #     self.model = BartForSequenceClassification.from_pretrained(
+    #                 model_path, num_labels=3,  problem_type='single_label_classification').to(device)
+    #     self.model.eval()
+    #     self.tokenizer = BertTokenizer.from_pretrained(model_path)
+    #     self.device = device
+    #     self.id2class = {0: '负面', 1: '中性', 2: '正面'}
 
     def process(self, text):
         # text = (server, client)
