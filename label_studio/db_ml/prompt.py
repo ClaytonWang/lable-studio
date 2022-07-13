@@ -46,7 +46,7 @@ def job_prompt(**kwargs):
     res_text, confidence = predictor.predict(text)
     print('prompt : ', res_text, 'confidence:', confidence)
     result = {
-        "task": text,
+        "task": text + kwargs.get('template', ''),
         "annotation": res_text,
         "confidence": confidence,
         # "average": {"正面标签": np.random.rand(), "负面标签": np.random.rand()},
