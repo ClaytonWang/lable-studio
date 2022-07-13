@@ -86,14 +86,12 @@ jobs:
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.SSHKEY }}
+          password: ${{ secrets.PASSWORD }}
+          # key: ${{ secrets.SSHKEY }}
           port: ${{ secrets.PORT }}
           script: |
             whoami
             ls -al
-
-      - name: start docker compose
-        run: echo 'docker compose'
 
   deploy_qa:
     needs: [docker_build_and_push]
