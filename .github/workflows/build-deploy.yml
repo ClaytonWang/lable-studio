@@ -29,7 +29,7 @@ jobs:
     steps:
       - name: Create docker tag
         run: |
-          echo "DOCKER_TAG=111" >> $GITHUB_ENV
+          echo "DOCKER_TAG=$(date +'%Y-%m-%d').${{ github.run_number }}" >> $GITHUB_ENV
 
       - name: Override image tag on 'tag'
         if: startsWith(github.ref, 'refs/tags/')
@@ -100,7 +100,6 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           port: ${{ secrets.PORT }}
           script: |
-            echo ${{env.DOCKER_TAG}}
             rm -rf dev
             mkdir dev && cd dev
             echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
