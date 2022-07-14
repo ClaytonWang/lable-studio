@@ -99,7 +99,8 @@ jobs:
             mkdir dev && cd dev
             echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
             gh release download ${{ env.RELEASEART }} -p '${{ env.ARTFILENAME }}*' -R ${{env.GITHOST}}/${{ github.repository }}
-            tar -xzvf ${{ env.ARTFILENAME }}.tar.gz && cd ${{ env.ARTFILENAME }}
+            tar -xzvf ${{ env.ARTFILENAME }}.tar.gz
+            mv ${{ env.ARTFILENAME }} dev-env && cd dev-env
             docker-compose pull
             docker-compose down
             LABEL_STUDIO_HOST=http://${{env.DEVHOST}}:8082/dev docker-compose up -d
@@ -124,7 +125,8 @@ jobs:
             mkdir qa && cd qa
             echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
             gh release download ${{ env.RELEASEART }} -p '${{ env.ARTFILENAME }}*' -R ${{env.GITHOST}}/${{ github.repository }}
-            tar -xzvf ${{ env.ARTFILENAME }}.tar.gz && cd ${{ env.ARTFILENAME }}
+            tar -xzvf ${{ env.ARTFILENAME }}.tar.gz
+            mv ${{ env.ARTFILENAME }} qa-env && cd qa-env
             docker-compose pull
             docker-compose down
             LABEL_STUDIO_HOST=http://${{env.QAHOST}}:8082/qa docker-compose up -d
