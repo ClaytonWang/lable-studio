@@ -54,5 +54,10 @@ services:
         volume:
           nocopy: true
 
+  redis:
+    image: redis:alpine
+    networks:
+      - default
+
 volumes:
   static: {}
