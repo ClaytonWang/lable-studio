@@ -33,11 +33,11 @@ from db_ml.services import PREDICTION_BACKUP_FIELDS
 from db_ml.services import CLEAN_ALGORITHM_BACKUP_FIELDS
 from db_ml.services import rollback_prediction
 from db_ml.services import rollback_clean
+from db_ml.services import rollback_prompt
 from db_ml.services import save_raw_data
 from db_ml.services import generate_redis_key
 from db_ml.services import AlgorithmState
-from db_ml.services import DB_ALGORITHM_EXPIRE_TIME
-from db_ml.services import DB_ALGORITHM_CANCELED_EXPIRE_TIME
+from db_ml.services import redis_set_json, redis_get_json
 
 
 """
@@ -71,8 +71,8 @@ def clean(request):
         return Response(data=dict(msg='Invalid project id'))
 
     redis_key = generate_redis_key('clean', str(project_id))
-    project_state = redis_get(redis_key)
-    if project_state and bytes.decode(project_state) == AlgorithmState.ONGOING:
+    p_state = redis_get_json(redis_key)
+    if p_state and p_state.get('state') == AlgorithmState.ONGOING:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
             data=dict(msg='Project is running clean.')
@@ -82,7 +82,13 @@ def clean(request):
     if TaskDbAlgorithmDraft.objects.filter(project_id=project_id).exists():
         TaskDbAlgorithmDraft.objects.filter(project_id=project_id).delete()
 
-    redis_set(redis_key, AlgorithmState.ONGOING, DB_ALGORITHM_EXPIRE_TIME)
+    redis_state = dict(
+        state=AlgorithmState.ONGOING,
+        total=query.count(),
+        project_id=project_id,
+        username=request.user.username,
+    )
+    redis_set_json(redis_key, redis_state)
     with atomic():
         query_alg = TaskDbAlgorithm.objects.filter(project_id=project_id).all()
         if len(query_alg):
@@ -177,16 +183,15 @@ def prediction(request):
     """
     data = request.data
     project_id = data.get('project_id')
-    redis_key = generate_redis_key('pre_tags', str(project_id))
+    redis_key = generate_redis_key('prediction', str(project_id))
     query = Task.objects.filter(project_id=project_id)
     if not query:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
             data=dict(msg='Invalid project id')
         )
-
-    project_state = redis_get(redis_key)
-    if project_state and bytes.decode(project_state) == AlgorithmState.ONGOING:
+    p_state = redis_get_json(redis_key)
+    if p_state and p_state.get('state') == AlgorithmState.ONGOING:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
             data=dict(msg='Project is running prediction.')
@@ -196,7 +201,13 @@ def prediction(request):
     if PredictionDraft.objects.filter(task_id__in=task_ids).exists():
         PredictionDraft.objects.filter(task_id__in=task_ids).delete()
 
-    redis_set(redis_key, AlgorithmState.ONGOING, DB_ALGORITHM_EXPIRE_TIME)
+    redis_state = dict(
+        state=AlgorithmState.ONGOING,
+        total=query.count(),
+        project_id=project_id,
+        username=request.user.username,
+    )
+    redis_set_json(redis_key, redis_state)
     # 备份一份原数据后删除原记录
     with atomic():
         query_pre = Prediction.objects.filter(task_id__in=task_ids).all()
@@ -214,7 +225,7 @@ def prediction(request):
                 task_id=item.id,
                 task_tag_id=item.id,
                 user_id=request.user.id,
-                queue_name='pre_tags',
+                queue_name='prediction',
             )
             job = start_job_async_or_sync(job_predict, **data)
     return Response(data=dict(msg='Submit success', project_id=project_id))
@@ -233,14 +244,25 @@ def query_task(request):
     state = False
 
     redis_key = generate_redis_key(algorithm_type, str(project_id))
-    project_state = redis_get(redis_key)
-    if project_state and bytes.decode(project_state) != AlgorithmState.ONGOING:
+    p_state = redis_get_json(redis_key)
+    if p_state and p_state.get('state') == AlgorithmState.ONGOING:
         state = True
+        finish = p_state.get('finish', 0)
+        total = p_state.get('total', 0)
+        return Response(data=dict(
+            total=total,
+            finish=finish,
+            # true 是进行中  false是结束或未开始
+            state=state if finish != total or \
+                           state == AlgorithmState.ONGOING else False,
+            rate=round(finish / total, 2) if total > 0 else 0
+        ))
 
     if algorithm_type == 'prediction':
         finish_task = Prediction.objects.filter(
             task_id__in=task_ids
         ).count()
+        print('count:', finish_task)
         if 0 < finish_task < total_task:
             state = True
     elif algorithm_type == 'clean':
@@ -286,21 +308,24 @@ def cancel_job(request):
         return Response(status=400, data=dict(error='Type/Project Error.'))
 
     queue_mapping = dict(
-        prediction='pre_tags',
+        prediction='prediction',
         clean='algorithm_clean',
         prompt='prompt',
     )
 
     queue_name = queue_mapping[algorithm_type]
-    redis_key = generate_redis_key(queue_name, str(project_id))
-    redis_set(
-        redis_key, AlgorithmState.CANCELED, DB_ALGORITHM_CANCELED_EXPIRE_TIME
-    )
+    redis_key = generate_redis_key(algorithm_type, str(project_id))
+
+    p_state = redis_get_json(redis_key)
+    p_state['state'] = AlgorithmState.FAILED
+    redis_set_json(redis_key, p_state)
 
     if algorithm_type == 'prediction':
         rollback_prediction(project_id)
     elif algorithm_type == 'clean':
         rollback_clean(project_id)
+    elif algorithm_type == 'prompt':
+        rollback_prompt(project_id)
 
     count = 0
     for job in get_queue(queue_name).jobs:

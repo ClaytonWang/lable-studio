@@ -15,6 +15,9 @@ from db_ml.clean_intelligent import intelligent
 from db_ml.clean_bart_for_turn import bart_for_turn
 from db_ml.services import generate_redis_key
 from db_ml.services import AlgorithmState
+from db_ml.services import redis_get_json
+from db_ml.services import redis_update_finish_state
+
 logger = logging.getLogger('console')
 
 
@@ -68,13 +71,12 @@ def job_clean(*args, **kwargs):
         redis_key = generate_redis_key(
             'clean', str(kwargs.get('project_id', ''))
         )
-        project_state = redis_get(redis_key)
-        if not project_state or \
-                bytes.decode(project_state) != AlgorithmState.CANCELED:
-            # 数据写回数据库
+        p_state = redis_get_json(redis_key)
+        if p_state and p_state.get('state') == AlgorithmState.ONGOING:
             TaskDbAlgorithm.objects.filter(id=algorithm_id).update(
                 algorithm=result, state=2, remarks=''
             )
+            redis_update_finish_state(redis_key, p_state)
     except Exception as e:
         TaskDbAlgorithm.objects.filter(id=algorithm_id).update(
             state=3, remarks=str(e)

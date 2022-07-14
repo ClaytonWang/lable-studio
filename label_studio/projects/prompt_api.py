@@ -10,11 +10,16 @@ from rest_framework.views import APIView
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
-from .models import PromptResult, PromptTemplates
+from .models import PromptResult, PromptTemplates, PromptResultDraft
 from tasks.models import Task
 from core.redis import start_job_async_or_sync
-from db_ml.predict import job_predict
 from db_ml.prompt import job_prompt
+from db_ml.services import save_raw_data
+from db_ml.services import PROMPT_BACKUP_FIELDS
+from db_ml.services import generate_redis_key
+from core.redis import redis_set, redis_get
+from db_ml.services import AlgorithmState
+from db_ml.services import redis_set_json, redis_get_json
 
 
 class PromptLearning(APIView):
@@ -54,10 +59,37 @@ class PromptLearning(APIView):
             templates = [item['template'] for item in template_list]
             # 获取tasks
             tasks = Task.objects.filter(project_id=params['project']).values()
+            redis_key = generate_redis_key('prompt', str(project_id))
+            if not tasks:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data=dict(msg='Invalid project id')
+                )
+
+            if PromptResultDraft.objects.filter(project_id=project_id).exists():
+                PromptResultDraft.objects.filter(project_id=project_id).delete()
+
+            p_state = redis_get_json(redis_key)
+            if p_state and p_state.get('state') == AlgorithmState.ONGOING:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data=dict(msg='Project is running prompt.')
+                )
+
             # print('tasks', tasks)
             # 清空project_id对应的PromtResult表
-            c = PromptResult.objects.filter(project_id=project_id)
-            c.delete()
+            c = PromptResult.objects.filter(project_id=project_id).all()
+            if len(c):
+                save_raw_data(c, PromptResultDraft, PROMPT_BACKUP_FIELDS)
+                PromptResult.objects.filter(project_id=project_id).delete()
+
+            redis_state = dict(
+                state=AlgorithmState.ONGOING,
+                total=len(templates) * len(tasks),
+                project_id=project_id,
+                username=request.user.username,
+            )
+            redis_set_json(redis_key, redis_state)
 
             for template in templates:
                 aggregate = []
@@ -76,9 +108,6 @@ class PromptLearning(APIView):
                         type='prompt',
                     )
                     start_job_async_or_sync(job_prompt, **data)
-            return Response(
-                data=dict(msg='Submit success', project_id=project_id)
-            )
                     # c = PromptResult(project_id=project_id, task_id=task['id'], metrics=result)
                     # c.save()
                     # aggregate.append(c)

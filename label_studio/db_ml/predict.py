@@ -12,6 +12,8 @@ from transformers import BartForSequenceClassification, BertTokenizer
 from tasks.models import Prediction, Task
 from db_ml.services import generate_redis_key
 from db_ml.services import AlgorithmState
+from db_ml.services import redis_get_json
+from db_ml.services import redis_update_finish_state
 
 # import torch.nn as nn
 # from tasks.models import PredictionDraft
@@ -88,14 +90,14 @@ def job_predict(*args, **kwargs):
         )
         print(f"results: ....{str(tag_data)}")
         redis_key = generate_redis_key(
-        'pre_tags', str(kwargs.get('project_id', ''))
+            'prediction', str(kwargs.get('project_id', ''))
         )
-        project_state = redis_get(redis_key)
-        if not project_state or \
-                bytes.decode(project_state) != AlgorithmState.CANCELED:
+        p_state = redis_get_json(redis_key)
+        if p_state and p_state.get('state') == AlgorithmState.ONGOING:
             obj, is_created = Prediction.objects.update_or_create(
                 defaults=tag_data, task=task
             )
+            redis_update_finish_state(redis_key, p_state)
             print('obj:', obj.id, ' auto: ', res_text, ' is_ created:', is_created)
     else:
         print('kwargs:', kwargs, ' cancel')
