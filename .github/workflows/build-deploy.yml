@@ -19,6 +19,7 @@ env:
   RELEASEART: v1
   ARTFILENAME: deploy_art
   DEVHOST: 124.71.161.146
+  QAHOST: 124.71.161.146
 
 jobs:
   docker_build_and_push:
@@ -83,9 +84,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: 
       name: deveopment
-      url: http://124.71.161.146/dev
+      url: http://${{env.DEVHOST}}/dev
     steps:
-      - name: deploy with docker compose
+      - name: publish with docker compose
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -101,17 +102,32 @@ jobs:
             tar -xzvf ${{ env.ARTFILENAME }}.tar.gz && cd ${{ env.ARTFILENAME }}
             docker-compose pull
             docker-compose down
-            LABEL_STUDIO_HOST=http://124.71.161.146:8082/dev docker-compose up -d
+            LABEL_STUDIO_HOST=http://${{env.DEVHOST}}:8082/dev docker-compose up -d
 
   deploy_qa:
     needs: [docker_build_and_push]
     runs-on: ubuntu-latest
     environment: 
       name: qa
-      #url: http://${{ secrets.DEV_HOST }}/qa
+      url: http://${{env.QAHOST}}/qa
     steps:
-      - name: publish
-        run: echo 'publishing'
+      - name: publish with docker compose
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          # key: ${{ secrets.SSHKEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            rm -rf qa
+            mkdir qa && cd qa
+            echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
+            gh release download ${{ env.RELEASEART }} -p '${{ env.ARTFILENAME }}*' -R ${{env.GITHOST}}/${{ github.repository }}
+            tar -xzvf ${{ env.ARTFILENAME }}.tar.gz && cd ${{ env.ARTFILENAME }}
+            docker-compose pull
+            docker-compose down
+            LABEL_STUDIO_HOST=http://${{env.QAHOST}}:8082/qa docker-compose up -d
 
   deploy_prod:
     needs: [deploy_qa]
