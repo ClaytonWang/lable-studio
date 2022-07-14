@@ -136,7 +136,7 @@ export default forwardRef((props, ref) => {
               <h2>{t(`label_${task.type}`, task.type)}...</h2>
               <Progress type="circle" percent={progress} />
               <Space style={{ marginTop: 8 }}>
-                {/* <Button onClick={handleCancel}>{t('Cancel')}</Button> */}
+                <Button onClick={handleCancel}>{t('Cancel')}</Button>
                 <Button onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</Button>
               </Space>
             </Space>
