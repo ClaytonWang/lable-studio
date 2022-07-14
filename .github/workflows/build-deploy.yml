@@ -105,7 +105,9 @@ jobs:
             echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u USERNAME --password-stdin
             docker-compose pull
             docker-compose down
-            LABEL_STUDIO_HOST=http://${{env.DEVHOST}}:8080/dev;NGINX_PORT=8080 docker-compose up -d
+            export LABEL_STUDIO_HOST=http://${{env.DEVHOST}}:8080/dev
+            export NGINX_PORT=8080
+            docker-compose up -d
 
   deploy_qa:
     needs: [docker_build_and_push]
@@ -132,7 +134,9 @@ jobs:
             echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u USERNAME --password-stdin
             docker-compose pull
             docker-compose down
-            LABEL_STUDIO_HOST=http://${{env.QAHOST}}/qa;ENV=qa docker-compose up -d
+            export LABEL_STUDIO_HOST=http://${{env.QAHOST}}/qa
+            export ENV=qa
+            docker-compose up -d
 
   deploy_prod:
     needs: [deploy_qa]
