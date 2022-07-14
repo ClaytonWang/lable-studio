@@ -6,9 +6,11 @@
 import os
 import torch
 import pandas as pd
+import numpy as np
 import torch.nn as nn
 from transformers import BartForSequenceClassification, BertTokenizer
 from tasks.models import Prediction, Task
+from projects.models import PromptResult
 # from tasks.models import PredictionDraft
 # from db_ml.services import PREDICTION_BACKUP_FIELDS
 # from django.db import transaction
@@ -60,38 +62,58 @@ def job_predict(*args, **kwargs):
         res_text, confidence = predictor.predict(text)
     else:
         pass
-    # label-studio数据结构
-    pre_result = {
-        'from_name': 'intent',
-        'to_name': 'dialogue',
-        'type': 'choices',
-        'value': {
-            'choices': [res_text], 'start': 0, 'end': 1
-        },
-    }
-    tag_data = dict(
-        # project_id=kwargs.get('project_id'),
-        task=task,
-        result=[pre_result],
-        score=round(confidence, 4),
 
-    )
-    print('results: ....', tag_data)
-    obj, is_created = Prediction.objects.update_or_create(
-        defaults=tag_data, task=task
-    )
-    # if not PredictionDraft.objects.filter(task=task).exists():
-    #     data = dict()
-    #     for field in PREDICTION_BACKUP_FIELDS:
-    #         data[field] = getattr(obj, field)
-    #     PredictionDraft.objects.update_or_create(
-    #         defaults=data, task=task
+    _type = kwargs.get('type', 'pre')
+    if _type == 'pre':
+        # label-studio数据结构
+        pre_result = {
+            'from_name': 'intent',
+            'to_name': 'dialogue',
+            'type': 'choices',
+            'value': {
+                'choices': [res_text], 'start': 0, 'end': 1
+            },
+        }
+        tag_data = dict(
+            # project_id=kwargs.get('project_id'),
+            task=task,
+            result=[pre_result],
+            score=round(confidence, 4),
+
+        )
+        print('results: ....', tag_data)
+        obj, is_created = Prediction.objects.update_or_create(
+            defaults=tag_data, task=task
+        )
+        print('obj:', obj.id, ' auto: ', res_text, ' is_ created:', is_created)
+    # elif _type == 'prompt':
+    #     result = {
+    #         "task": "我是对话",
+    #         "annotation": res_text,
+    #         "confidence": confidence,
+    #         "average": {"正面标签": np.random.rand(), "负面标签": np.random.rand()},
+    #         "output":
+    #             [{"template": "你好，我是模版A1",
+    #               "label": "正面",
+    #               "score": "烂片%f" % np.random.rand(),
+    #               "wgtedAvg": np.random.rand()},
+    #              {"template": "你好，我是模版B",
+    #               "label": "负面",
+    #               "score": "精品%f" % np.random.rand(),
+    #               "wgtedAvg": np.random.rand()}
+    #              ]
+    #     }
+    #     c = PromptResult(
+    #         project_id=kwargs['project_id'],
+    #         task_id=task_id,
+    #         metrics=result
     #     )
-    print('obj:', obj.id, ' auto: ', res_text, ' is_ created:', is_created)
+    #     c.save()
+    else:
+        pass
 
 
 if __name__ == '__main__':
-
     _predictor = Predictor('db/model_path', device='cpu')
     sens = [('好的，请问您还有其他业务需要办理吗？您可以跟我说查套餐.查语音.查流量等\u3000[SEP]我不要', '否定'),
      ('好的，正在为您办理XXX业务，业务套餐为XXX元xxx分钟包含XX兆流量，请稍候[SEP]没听见', '默认'), ('您的XXX业务办理成功，请问您还有其他业务需要办理查询吗？\u3000[SEP]嗯', '肯定'),

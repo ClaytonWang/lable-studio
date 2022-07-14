@@ -239,6 +239,7 @@ class DataManagerTaskSerializer(TaskSerializer):
     predictions_model_versions = serializers.SerializerMethodField(required=False)
     avg_lead_time = serializers.FloatField(required=False)
     updated_by = serializers.SerializerMethodField(required=False, read_only=True)
+    predictions_score = serializers.SerializerMethodField(required=False)
     auto_label = serializers.SerializerMethodField(required=False)
     manual_label = serializers.SerializerMethodField(required=False)
     marked_methode = serializers.SerializerMethodField(required=False)
@@ -282,16 +283,12 @@ class DataManagerTaskSerializer(TaskSerializer):
             )
         }
 
-    def get_marked_methode(self, obj):
-        ann = self.anno_data.get(str(obj.id), {})
+    def check_update_time(self, obj):
         pre = self.pre_data.get(str(obj.id), {})
         prompt = self.prompt_data.get(str(obj.id), {})
-        if not ann and not pre and not prompt:
-            return ''
-        ann_update_at = ann.get('updated_at', '')
-        ann_update_at = datetime.datetime.strptime(
-            ann_update_at, UTC_FORMAT
-        ).timestamp() if ann_update_at else 0
+        if not pre and not prompt:
+            return None, None
+
         pre_update_at = pre.get('updated_at', '')
         pre_update_at = datetime.datetime.strptime(
             pre_update_at, UTC_FORMAT
@@ -299,13 +296,26 @@ class DataManagerTaskSerializer(TaskSerializer):
         prompt_update_at = prompt.get('updated_at', '')
         prompt_update_at = prompt_update_at.replace(tzinfo=None).timestamp() \
             if prompt_update_at else 0
-        compare_dt = [pre_update_at, ann_update_at, prompt_update_at]
-        rst_index = compare_dt.index(max(compare_dt))
-        if rst_index == 0:
+        if pre_update_at > prompt_update_at:
+            return 'pre', pre
+        else:
+            return 'prompt', prompt
+
+    def get_predictions_score(self, obj):
+        label, rst = self.check_update_time(obj)
+        if label == 'pre':
+            return obj.predictions_score
+        elif label == 'prompt' and rst:
+            metrics = rst.get('metrics', {})
+            return metrics.get('confidence')
+        else:
+            return None
+
+    def get_marked_methode(self, obj):
+        label, rst = self.check_update_time(obj)
+        if label == 'pre':
             return '普通'
-        elif rst_index == 1:
-            return '普通'
-        elif rst_index == 2:
+        elif label == 'prompt':
             return '提示学习'
         else:
             return ''
@@ -330,25 +340,15 @@ class DataManagerTaskSerializer(TaskSerializer):
         :param obj:
         :return:
         """
-        pre = self.pre_data.get(str(obj.id), {})
-        prompt = self.prompt_data.get(str(obj.id), {})
-        if not pre and not prompt:
-            return ''
-
-        pre_update_at = pre.get('updated_at', '')
-        pre_update_at = datetime.datetime.strptime(
-            pre_update_at, UTC_FORMAT
-        ).timestamp() if pre_update_at else 0
-        prompt_update_at = prompt.get('updated_at', '')
-        prompt_update_at = prompt_update_at.replace(tzinfo=None).timestamp() \
-            if prompt_update_at else 0
-
-        if pre_update_at > prompt_update_at:
-            result = pre.get('result', []) if len(pre) else []
+        label, rst = self.check_update_time(obj)
+        if label == 'pre':
+            result = rst.get('result', []) if len(rst) else []
             pre_choices = self.get_choice_values(result)
             return ','.join(pre_choices)
         else:
-            metrics = prompt.get('metrics', {})
+            if not rst:
+                return None
+            metrics = rst.get('metrics', {})
             return metrics.get('annotation', '')
 
     def get_manual_label(self, obj):
@@ -417,8 +417,30 @@ class DataManagerTaskSerializer(TaskSerializer):
         return [rst] if rst else []
 
     def get_predictions(self, task):
-        rst = self.pre_data.get(str(task.id))
-        return [rst] if rst else []
+        label, rst = self.check_update_time(task)
+        if label == 'pre':
+            return [rst] if rst else []
+        elif label == 'prompt' and rst:
+            metrics = rst.get('metrics', {})
+            enw_val = metrics.get('annotation', '')
+
+            old_rst = self.pre_data.get(str(task.id))
+            if old_rst and enw_val:
+                try:
+                    old_rst['result'][0]['value']['choices'] = [enw_val]
+                    return [old_rst]
+                except Exception as e:
+                    print(e)
+            elif enw_val and not old_rst:
+                return [dict(result=[
+                    {
+                        "type": "choices",
+                        "value": {"end": 1, "start": 0, "choices": [enw_val]},
+                        "to_name": "dialogue", "from_name": "intent"
+                    }
+                ])]
+
+        return []
 
     @staticmethod
     def get_file_upload(task):

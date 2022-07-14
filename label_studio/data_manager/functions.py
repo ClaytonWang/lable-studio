@@ -146,7 +146,7 @@ def get_all_columns(project, *_):
             'target': 'tasks',
             'help': 'Average prediction score over all task predictions',
             'visibility_defaults': {
-                'explore': True,
+                'explore': False,
                 'labeling': False
             }
         },
@@ -157,7 +157,7 @@ def get_all_columns(project, *_):
             'target': 'tasks',
             'help': 'Task update time',
             'visibility_defaults': {
-                'explore': True,
+                'explore': False,
                 'labeling': False
             }
         },
