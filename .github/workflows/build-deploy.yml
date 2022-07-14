@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: 
       name: deveopment
-      url: http://${{ secrets.DEV_HOST }}/dev
+      #url: http://${{ secrets.DEV_HOST }}/dev
     steps:
       - name: pull docker image
         uses: appleboy/ssh-action@master
@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: 
       name: qa
-      url: http://${{ secrets.DEV_HOST }}/qa
+      #url: http://${{ secrets.DEV_HOST }}/qa
     steps:
       - name: publish
         run: echo 'publishing'
@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: 
       name: production
-      url: http://${{ secrets.DEV_HOST }}/
+      #url: http://${{ secrets.DEV_HOST }}/
     steps:
       - name: publish
         run: echo 'publishing'
