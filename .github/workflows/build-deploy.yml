@@ -95,6 +95,7 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           port: ${{ secrets.PORT }}
           script: |
+            echo '${{env.DOCKER_TAG}}'
             rm -rf dev
             mkdir dev && cd dev
             echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
@@ -104,7 +105,7 @@ jobs:
             echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u USERNAME --password-stdin
             docker-compose pull
             docker-compose down
-            LABEL_STUDIO_HOST=http://${{env.DEVHOST}}:8080/dev;NGINX_PORT=8082 docker-compose up -d
+            LABEL_STUDIO_HOST=http://${{env.DEVHOST}}:8080/dev;NGINX_PORT=8080 docker-compose up -d
 
   deploy_qa:
     needs: [docker_build_and_push]
@@ -131,7 +132,7 @@ jobs:
             echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u USERNAME --password-stdin
             docker-compose pull
             docker-compose down
-            LABEL_STUDIO_HOST=http://${{env.QAHOST}}/qa; docker-compose up -d
+            LABEL_STUDIO_HOST=http://${{env.QAHOST}}/qa;ENV=qa docker-compose up -d
 
   deploy_prod:
     needs: [deploy_qa]
