@@ -99,7 +99,7 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           port: ${{ secrets.PORT }}
           script: |
-            echo '${{env.DOCKER_TAG}}'
+            echo '${{github}}'
             rm -rf dev
             mkdir dev && cd dev
             echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
@@ -107,7 +107,13 @@ jobs:
             tar -xzvf ${{ env.ARTFILENAME }}.tar.gz
             mv ${{ env.ARTFILENAME }} dev-env && cd dev-env
             echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+            
             export ENV=dev
+            export NGINX_PORT=8080
+            export DJANGO_DB=default
+            export POSTGRE_NAME=label_studio_dev
+            export DB_HOST=192.168.0.92
+
             docker-compose pull
             docker-compose down
             docker-compose up -d
@@ -135,7 +141,14 @@ jobs:
             tar -xzvf ${{ env.ARTFILENAME }}.tar.gz
             mv ${{ env.ARTFILENAME }} qa-env && cd qa-env
             echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+            
             export ENV=qa
+            export NGINX_PORT=80
+            export DJANGO_DB=default
+            export POSTGRE_NAME=label_studio_qa
+            export DB_HOST=192.168.0.92
+            export LABEL_STUDIO_HOST=http://124.71.161.146/qa
+            
             docker-compose pull
             docker-compose down
             docker-compose up -d
