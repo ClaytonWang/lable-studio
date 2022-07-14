@@ -97,7 +97,7 @@ jobs:
             rm -rf dev
             mkdir dev && cd dev
             echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
-            gh release download ${{ env.RELEASEART }} -p '${{ env.ARTFILENAME }}' -R ${{env.GITHOST}}/${{ github.repository }}
+            gh release download ${{ env.RELEASEART }} -p '${{ env.ARTFILENAME }}*' -R ${{env.GITHOST}}/${{ github.repository }}
             tar -xzvf ${{ env.ARTFILENAME }}.tar.gz && cd ${{ env.ARTFILENAME }}
             docker-compose pull
             docker-compose down
