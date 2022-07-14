@@ -13,7 +13,7 @@ on:
 env:
   DOCKER_CLI_EXPERIMENTAL: enabled
   IMAGE_NAME: ${{ github.repository }}
-  DOCKER_TAG: $(date '+%Y-%m-%d').${{ github.run_number }}
+  DOCKER_TAG: ${{$(date '+%Y-%m-%d')}}.${{ github.run_number }}
   REGISTRY: containers.git.digitalbrain.cn
   GITHOST: git.digitalbrain.cn
   RELEASEART: v1
@@ -102,7 +102,7 @@ jobs:
             gh release download ${{ env.RELEASEART }} -p '${{ env.ARTFILENAME }}*' -R ${{env.GITHOST}}/${{ github.repository }}
             tar -xzvf ${{ env.ARTFILENAME }}.tar.gz
             mv ${{ env.ARTFILENAME }} dev-env && cd dev-env
-            echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u USERNAME --password-stdin
+            echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
             export ENV=dev
             docker-compose pull
             docker-compose down
@@ -130,7 +130,7 @@ jobs:
             gh release download ${{ env.RELEASEART }} -p '${{ env.ARTFILENAME }}*' -R ${{env.GITHOST}}/${{ github.repository }}
             tar -xzvf ${{ env.ARTFILENAME }}.tar.gz
             mv ${{ env.ARTFILENAME }} qa-env && cd qa-env
-            echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u USERNAME --password-stdin
+            echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
             export ENV=qa
             docker-compose pull
             docker-compose down
