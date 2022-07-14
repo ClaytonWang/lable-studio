@@ -14,6 +14,10 @@ import random
 import numpy as np
 from transformers import BartForSequenceClassification, BertTokenizer
 from projects.models import PromptResult
+from db_ml.services import AlgorithmState
+from db_ml.services import generate_redis_key
+from db_ml.services import redis_get_json
+from db_ml.services import redis_update_finish_state
 
 
 class Predictor:
@@ -90,12 +94,18 @@ def job_prompt(**kwargs):
         #       "wgtedAvg": np.random.rand()}
         #      ]
     }
-    c = PromptResult(
-        project_id=project_id,
-        task_id=task_id,
-        metrics=result
+    redis_key = generate_redis_key(
+        'prompt', str(kwargs.get('project_id', ''))
     )
-    c.save()
+    p_state = redis_get_json(redis_key)
+    if p_state and p_state.get('state') == AlgorithmState.ONGOING:
+        c = PromptResult(
+            project_id=project_id,
+            task_id=task_id,
+            metrics=result
+        )
+        c.save()
+        redis_update_finish_state(redis_key, p_state)
 
 
 TEMPLATE_PROMPT = {

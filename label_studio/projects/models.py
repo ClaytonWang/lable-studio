@@ -1053,3 +1053,31 @@ class PromptResult(models.Model):
 
     # def has_permission(self, user):
     #     return self.project.has_permission(user)
+
+
+# 提示学习结果查询表 临时
+class PromptResultDraft(models.Model):
+
+    # 关联项目 project
+    project = models.ForeignKey(
+        Project, related_name='project_PromptResultDraft_id',
+        on_delete=models.CASCADE, null=False,
+        help_text='Project ID for this task')
+
+    # 关联任务 task
+    task = models.ForeignKey(
+        'tasks.Task', on_delete=models.CASCADE,
+        related_name='task_PromptResultDraft_id', null=False,
+        help_text='Corresponding task for this annotation')
+
+    # metrics
+    metrics = models.JSONField(verbose_name='模型输出',  max_length=1000, null=True, blank=True)
+
+    created_at = models.DateTimeField(
+        _('created at'), help_text='Time a task was created',
+        null=True, blank=True,
+    )
+    updated_at = models.DateTimeField(
+        _('updated at'), null=True, blank=True,
+        help_text='Last time a task was updated'
+    )
