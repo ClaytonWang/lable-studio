@@ -83,9 +83,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: 
       name: deveopment
-      #url: http://${{ secrets.DEV_HOST }}/dev
+      url: http://124.71.161.146/dev
     steps:
-      - name: pull docker image
+      - name: deploy with docker compose
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -98,7 +98,7 @@ jobs:
             echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
             gh release download ${{ env.RELEASEART }} -R ${{env.GITHOST}}/${{ github.repository }}
             tar -xzvf ${{ env.ARTFILENAME }}.tar.gz && cd ${{ env.ARTFILENAME }}
-            LABEL_STUDIO_HOST=http://124.71.161.146:8082/dev 
+            LABEL_STUDIO_HOST=http://0.0.0.0:8082/dev 
             docker-compose pull
             docker-compose down
             docker-compose up -d
