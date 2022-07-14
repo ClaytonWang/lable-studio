@@ -96,7 +96,7 @@ jobs:
             rm -rf ${{ env.ARTFILENAME }}*
             echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
             gh release download ${{ env.RELEASEART }} -R ${{env.GITHOST}}/${{ github.repository }}
-            tar –xvf ${{ env.ARTFILENAME }}.tar && cd ${{ env.ARTFILENAME }}
+            tar –xzvf ${{ env.ARTFILENAME }}.tar.gz && cd ${{ env.ARTFILENAME }}
             LABEL_STUDIO_HOST=http://${{ secrets.HOST }}:8082/dev 
             docker-compose pull
             docker-compose down
