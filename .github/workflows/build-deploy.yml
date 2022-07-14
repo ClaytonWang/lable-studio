@@ -13,8 +13,11 @@ on:
 env:
   DOCKER_CLI_EXPERIMENTAL: enabled
   IMAGE_NAME: ${{ github.repository }}
-  DOCKER_TAG: 'latest'
+  DOCKER_TAG: $(date '+%Y-%m-%d').${{ github.run_number }}
   REGISTRY: containers.git.digitalbrain.cn
+  GITHOST: git.digitalbrain.cn
+  RELEASEART: v1
+  ARTFILENAME: deploy_art
 
 jobs:
   docker_build_and_push:
@@ -48,14 +51,14 @@ jobs:
 
       - name: Set up Python 🔧
         # uses: actions/setup-python@v4.1.0
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@master
         with:
           python-version: '3.8'
 
-      # - name: Create version_.py
-      #   run: |
-      #     python3 $(pwd)/label_studio/core/version.py
-      #     cat $(pwd)/label_studio/core/version_.py
+      - name: Create version_.py
+        run: |
+          python3 $(pwd)/label_studio/core/version.py
+          cat $(pwd)/label_studio/core/version_.py
 
       # - name: Extract metadata (tags, labels) for Docker
       #   id: meta
@@ -70,7 +73,7 @@ jobs:
       #     context: .
       #     push: true
       #     tags: ${{ steps.meta.outputs.tags }}
-      #     labels: ${{ steps.meta.outputs.labels }}
+      #     labels: ${{ steps.meta.outputs.labels }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{env.DOCKER_TAG}}
       #     cache-from: type=gha
       #     cache-to: type=gha,mode=max
 
@@ -79,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: 
       name: deveopment
-      url: http://124.71.161.146/dev
+      url: http://${{ secrets.HOST }}/dev
     steps:
       - name: pull docker image
         uses: appleboy/ssh-action@master
@@ -90,15 +93,21 @@ jobs:
           # key: ${{ secrets.SSHKEY }}
           port: ${{ secrets.PORT }}
           script: |
-            whoami
-            ls -al
+            rm -rf ${{ env.ARTFILENAME }}*
+            echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
+            gh release download ${{ env.RELEASEART }} -R ${{env.GITHOST}}/${{ github.repository }}
+            tar –xvf ${{ env.ARTFILENAME }}.tar && cd ${{ env.ARTFILENAME }}
+            LABEL_STUDIO_HOST=http://${{ secrets.HOST }}:8082/dev 
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d
 
   deploy_qa:
     needs: [docker_build_and_push]
     runs-on: ubuntu-latest
     environment: 
       name: qa
-      url: http://124.71.161.146/qa
+      url: http://${{ secrets.HOST }}/qa
     steps:
       - name: publish
         run: echo 'publishing'
@@ -108,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: 
       name: production
-      url: http://124.71.161.146/
+      url: http://${{ secrets.HOST }}/
     steps:
       - name: publish
         run: echo 'publishing'

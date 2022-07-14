@@ -22,7 +22,7 @@ services:
         type: volume
         volume:
           nocopy: true
-      - ./label-data:/label-studio/data:rw
+      - /label-data:/label-studio/data:rw
       - ./deploy/nginx/${NGINX_FILE:-default.conf}:/etc/nginx/templates/${NGINX_FILE:-default.conf}.template
       - ./deploy/nginx/scripts:/docker-entrypoint.d/label-studio
       - ./deploy/nginx/certs:/certs:ro
@@ -46,7 +46,7 @@ services:
       - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
       - LABEL_STUDIO_COPY_STATIC_DATA=true
     volumes:
-      - ./label-data:/label-studio/data:rw
+      - /label-data:/label-studio/data:rw
       # keep in sync with deploy/docker-entrypoint.d/30-copy-static-data.sh
       - source: static
         target: /label-studio/static_volume
