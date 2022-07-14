@@ -185,6 +185,7 @@ INSTALLED_APPS = [
     'data_manager',
     'io_storages',
     'ml',
+    "db_ml",
     'webhooks',
     'labels_manager',
 ]

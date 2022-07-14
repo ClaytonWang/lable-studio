@@ -67,40 +67,41 @@ def job_predict(*args, **kwargs):
         res_text, confidence = predictor.predict(text)
     else:
         pass
-    # label-studio数据结构
-    pre_result = {
-        'from_name': 'intent',
-        'to_name': 'dialogue',
-        'type': 'choices',
-        'value': {
-            'choices': [res_text], 'start': 0, 'end': 1
-        },
-    }
-    tag_data = dict(
-        # project_id=kwargs.get('project_id'),
-        task=task,
-        result=[pre_result],
-        score=round(confidence, 4),
 
-    )
-    print(f"results: ....{str(tag_data)}")
-    redis_key = generate_redis_key(
-        'pre_tags', str(kwargs.get('project_id', ''))
-    )
-    project_state = redis_get(redis_key)
-    if not project_state or \
-            bytes.decode(project_state) != AlgorithmState.CANCELED:
+    _type = kwargs.get('type', 'pre')
+    if _type == 'pre':
+        # label-studio数据结构
+        pre_result = {
+            'from_name': 'intent',
+            'to_name': 'dialogue',
+            'type': 'choices',
+            'value': {
+                'choices': [res_text], 'start': 0, 'end': 1
+            },
+        }
+        tag_data = dict(
+            # project_id=kwargs.get('project_id'),
+            task=task,
+            result=[pre_result],
+            score=round(confidence, 4),
 
-        obj, is_created = Prediction.objects.update_or_create(
-            defaults=tag_data, task=task
         )
-        print('obj:', obj.id, ' auto: ', res_text, ' is_ created:', is_created)
+        print(f"results: ....{str(tag_data)}")
+        redis_key = generate_redis_key(
+        'pre_tags', str(kwargs.get('project_id', ''))
+        )
+        project_state = redis_get(redis_key)
+        if not project_state or \
+                bytes.decode(project_state) != AlgorithmState.CANCELED:
+            obj, is_created = Prediction.objects.update_or_create(
+                defaults=tag_data, task=task
+            )
+            print('obj:', obj.id, ' auto: ', res_text, ' is_ created:', is_created)
     else:
         print('kwargs:', kwargs, ' cancel')
 
 
 if __name__ == '__main__':
-
     _predictor = Predictor('db/model_path', device='cpu')
     sens = [('好的，请问您还有其他业务需要办理吗？您可以跟我说查套餐.查语音.查流量等\u3000[SEP]我不要', '否定'),
             ('好的，正在为您办理XXX业务，业务套餐为XXX元xxx分钟包含XX兆流量，请稍候[SEP]没听见', '默认'),

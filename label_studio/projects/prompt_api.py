@@ -12,6 +12,9 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from .models import PromptResult, PromptTemplates
 from tasks.models import Task
+from core.redis import start_job_async_or_sync
+from db_ml.predict import job_predict
+from db_ml.prompt import job_prompt
 
 
 class PromptLearning(APIView):
@@ -52,19 +55,36 @@ class PromptLearning(APIView):
             # 获取tasks
             tasks = Task.objects.filter(project_id=params['project']).values()
             # print('tasks', tasks)
-            if template and templates:
+            # 清空project_id对应的PromtResult表
+            c = PromptResult.objects.filter(project_id=project_id)
+            c.delete()
+
+            for template in templates:
                 aggregate = []
                 for task in tasks:
-                    result = patch_prompt(template, task['data']['dialogue'])
-                    c = PromptResult(project_id=project_id, task_id=task['id'], metrics=result)
+                    # TODO 多对话判断
+                    # result = patch_prompt(template, task['data']['dialogue'])
+                    text = task.get('data', {}).get('dialogue')[0].get('text')
+                    data = dict(
+                        text=text,
+                        template=template,
+                        project_id=project_id,
+                        task_id=task.get('id'),
+                        task_tag_id=task.get('id'),
+                        user_id=request.user.id,
+                        queue_name='prompt',
+                        type='prompt',
+                    )
+                    start_job_async_or_sync(job_prompt, **data)
+            return Response(
+                data=dict(msg='Submit success', project_id=project_id)
+            )
+                    # c = PromptResult(project_id=project_id, task_id=task['id'], metrics=result)
                     # c.save()
-                    aggregate.append(c)
-                print('aggregate', len(aggregate))
-                # 清空project_id对应的PromtResult表
-                c = PromptResult.objects.filter(project_id=project_id)
-                c.delete()
+                    # aggregate.append(c)
+                # print('aggregate', len(aggregate))
                 # 批量入库
-                PromptResult.objects.bulk_create(aggregate)
+                # PromptResult.objects.bulk_create(aggregate)
 
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK

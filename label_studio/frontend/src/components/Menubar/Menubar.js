@@ -1,6 +1,6 @@
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StaticContent } from '../../app/StaticContent/StaticContent';
-import { IconFolder, IconPersonInCircle, IconPin, LabelLogo, LsDoor, LsSettings } from '../../assets/icons';
+import { IconFolder, IconPersonInCircle, IconPin, LsDoor, LsSettings, NineDays } from '../../assets/icons';
 import { useConfig } from '../../providers/ConfigProvider';
 import { useContextComponent, useFixedLocation } from '../../providers/RoutesProvider';
 import { cn } from '../../utils/bem';
@@ -124,8 +124,8 @@ export const Menubar = ({
             closeOnClickOutside={!sidebarPinned}
           >
             <div className={`${menubarClass.elem('trigger')} main-menu-trigger`}>
-              <LabelLogo />
-              <b style={{ height:35,border:'1px solid #ccc' }}></b>
+              <NineDays />
+              {/* <b style={{ height:35,borderLeft:'1px solid #ccc' }}></b> */}
               <span style={{ color: '#000',fontWeight: 'bold',fontSize:13 }}>
               人在环路自动化平台
               </span>
