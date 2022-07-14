@@ -62,6 +62,7 @@ export default forwardRef((props, ref) => {
         } else {
           setTask(null);
         }
+        return running;
       },
     };
   }, [project.id]);
@@ -95,11 +96,16 @@ export default forwardRef((props, ref) => {
   }, []);
 
   useImperativeHandle(ref, () => ({
-    status: () => {
-      request.sync();
-      setTimeout(request.sync, 1000);
-      setTimeout(request.sync, 2000);
-      setTimeout(request.sync, 3000);
+    status: (taskType) => {
+      request.sync().then(res => {
+        if (TASK_TYPE.includes(taskType) && res?.state !== true) {
+          if (props.onFinish?.[taskType]) {
+            props.onFinish?.[taskType]();
+          } else {
+            window.location.reload();
+          }
+        }
+      });
     },
   }));
 
