@@ -27,7 +27,7 @@ RQ_QUEUES = {
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,
     },
-    'pre_tags': {
+    'prediction': {
         'HOST': '124.71.161.146',
         'PORT': 6379,
         'DB': 1,
