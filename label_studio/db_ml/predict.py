@@ -42,7 +42,7 @@ class Predictor:
 
 def job_predict(*args, **kwargs):
     db_ml_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(db_ml_dir, 'model_path')
+    model_path = os.path.join(db_ml_dir, 'models', 'model_path')
     label_file = 'data/营业厅数字人项目事项v1.0-人工匹配规则枚举.xlsx'
     label_file_path = os.path.join(db_ml_dir, label_file)
     predictor = Predictor(

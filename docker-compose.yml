@@ -50,7 +50,7 @@ services:
       - LABEL_STUDIO_COPY_STATIC_DATA=true
     volumes:
       - /label-data-${ENV:-dev}:/label-studio/data:rw
-      - /label-model-${ENV:-dev}:/label-studio/label_studio/db_ml:rw
+      - /label-model-${ENV:-dev}:/label-studio/label_studio/db_ml/models:rw
       # keep in sync with deploy/docker-entrypoint.d/30-copy-static-data.sh
       - source: static
         target: /label-studio/static_volume
