@@ -3,8 +3,9 @@ version: "3.3"
 services:
   nginx:
     image: nginx:1.21
+    container_name: nginx-${ENV:-dev}
     ports:
-      - "8082:80"
+      - "${NGINX_PORT:-80}:80"
       #- "8081:443"
     depends_on:
       - app
@@ -22,7 +23,7 @@ services:
         type: volume
         volume:
           nocopy: true
-      - ./label-data:/label-studio/data:rw
+      - /label-data-${ENV:-dev}:/label-studio/data:rw
       - ./deploy/nginx/${NGINX_FILE:-default.conf}:/etc/nginx/templates/${NGINX_FILE:-default.conf}.template
       - ./deploy/nginx/scripts:/docker-entrypoint.d/label-studio
       - ./deploy/nginx/certs:/certs:ro
@@ -32,27 +33,34 @@ services:
     stdin_open: true
     tty: true
     build: .
-    image: containers.git.digitalbrain.cn/engineering-group/label-studio:development
+    image: containers.git.digitalbrain.cn/engineering-group/label-studio:${TAG:-development}
+    container_name: app-${ENV:-dev}
+    links:
+      - "redis:redis-${ENV:-dev}"
     expose:
       - "8080"
     environment:
-      - DJANGO_DB=default
-      - POSTGRE_NAME=postgres
-      - POSTGRE_USER=postgres
-      - POSTGRE_PASSWORD=Dbtest
+      - DJANGO_DB=${DJANGO_DB:-default}
+      - POSTGRE_NAME=${POSTGRE_NAME:-label_studio_dev}
+      - POSTGRE_USER=root
+      - POSTGRE_PASSWORD=linshimima2!
       - POSTGRE_PORT=5432
-      #- POSTGRE_HOST=192.168.0.92
-      - POSTGRE_HOST=124.71.161.146
+      - POSTGRE_HOST=${DB_HOST:-192.168.0.92}
       - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
       - LABEL_STUDIO_COPY_STATIC_DATA=true
     volumes:
-      - ./label-data:/label-studio/data:rw
+      - /label-data-${ENV:-dev}:/label-studio/data:rw
+      - /label-model-${ENV:-dev}:/label-studio/label_studio/db_ml/models:rw
       # keep in sync with deploy/docker-entrypoint.d/30-copy-static-data.sh
       - source: static
         target: /label-studio/static_volume
         type: volume
         volume:
           nocopy: true
+
+  redis:
+    image: redis:alpine
+    container_name: redis-${ENV:-dev}
 
 volumes:
   static: {}

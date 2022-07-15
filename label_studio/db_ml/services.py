@@ -7,10 +7,14 @@
   > FileName   : services.py
   > CreateTime : 2022/7/7 08:44
 """
+from enum import Enum
+import json
 from tasks.models import Task
+from core.redis import redis_set, redis_get
 from django.db.transaction import atomic
 from tasks.models import Prediction, PredictionDraft
 from tasks.models import TaskDbAlgorithm, TaskDbAlgorithmDraft
+from projects.models import PromptResultDraft, PromptResult
 PREDICTION_BACKUP_FIELDS = [
     'result', 'score', 'model_version', 'task', 'created_at', 'updated_at'
 ]
@@ -18,6 +22,23 @@ CLEAN_ALGORITHM_BACKUP_FIELDS = [
     'source', 'algorithm', 'manual', 'state', 'task', 'project',
     'created_at', 'updated_at', 'updated_by', 'created_by',
 ]
+PROMPT_BACKUP_FIELDS = [
+    'project', 'task', 'metrics', 'created_at', 'updated_at'
+]
+
+
+DB_ALGORITHM_EXPIRE_TIME = 5  # 5秒
+DB_ALGORITHM_CANCELED_EXPIRE_TIME = 60 * 2  # 2分钟
+DB_TASK_RUNNING_TIME = 60 * 60 * 12
+
+
+class AlgorithmState(str, Enum):
+    STARTED = 'started'
+    ONGOING = 'ongoing'
+    FINISHED = 'finished'
+    CANCELED = 'canceled'
+    STOPPED = 'stopped'
+    FAILED = 'failed'
 
 
 def rollback_clean(project_id):
@@ -25,7 +46,7 @@ def rollback_clean(project_id):
     with atomic():
         update_objs = []
         # query = TaskDbAlgorithm.objects.filter(project_id=project_id).all()
-        # 查询上费时，后续优化吧
+        # 查询上 费时，后续优化吧
         for item in queryset:
             query = TaskDbAlgorithm.objects.filter(task=item.task).first()
             if not query:
@@ -55,6 +76,20 @@ def rollback_prediction(project_id):
         PredictionDraft.objects.filter(task__in=query_task).delete()
 
 
+def rollback_prompt(project_id):
+    queryset = PromptResultDraft.objects.filter(project_id=project_id).all()
+    with atomic():
+        PromptResult.objects.filter(project_id=project_id).delete()
+        objs = []
+        for item in queryset:
+            data = dict()
+            for field in PREDICTION_BACKUP_FIELDS:
+                data[field] = getattr(item, field)
+            objs.append(PromptResult(**data))
+        PromptResult.objects.bulk_create(objs)
+        PromptResultDraft.objects.filter(project_id=project_id).delete()
+
+
 def save_raw_data(queryset, draft_model, fields):
     draft = []
     for item in queryset:
@@ -63,3 +98,24 @@ def save_raw_data(queryset, draft_model, fields):
             data[field] = getattr(item, field)
         draft.append(draft_model(**data))
     draft_model.objects.bulk_create(draft)
+
+
+def generate_redis_key(algorithm_name: str, project_id: str) -> str:
+    return f'DB_ALGORITHM_{algorithm_name}_{project_id}'
+
+
+def redis_set_json(key, data, expire=DB_TASK_RUNNING_TIME):
+    redis_set(key, json.dumps(data, ensure_ascii=False), expire)
+
+
+def redis_get_json(key):
+    data = redis_get(key)
+    return json.loads(bytes.decode(data)) if data else {}
+
+
+def redis_update_finish_state(redis_key, redis_data):
+    finish = int(redis_data.get('finish', 0)) + 1
+    redis_data['finish'] = finish
+    if finish == int(redis_data.get('total', 0)):
+        redis_data['state'] = AlgorithmState.FAILED
+    redis_set_json(redis_key, redis_data)

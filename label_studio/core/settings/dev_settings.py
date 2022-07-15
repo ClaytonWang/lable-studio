@@ -11,10 +11,10 @@
 DATABASES = {
     'default':  {
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': 'postgres',
-        'PASSWORD': 'Dbtest',
-        'NAME': 'postgres',
-        'HOST': '124.71.161.146',
+        'USER': 'root',
+        'PASSWORD': 'linshimima2!',
+        'NAME': 'label_studio_dev',
+        'HOST': '192.168.0.92',
         'PORT': '5432',
     }
 }
@@ -22,21 +22,27 @@ DATABASES = {
 
 RQ_QUEUES = {
     'default': {
-        'HOST': '124.71.161.146',
+        'HOST': 'redis-dev',
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,
     },
-    'pre_tags': {
-        'HOST': '124.71.161.146',
+    'prediction': {
+        'HOST': 'redis-dev',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
     'algorithm_clean': {
-        'HOST': '124.71.161.146',
+        'HOST': 'redis-dev',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+    },
+    'prompt': {
+        'HOST': 'redis-dev',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 18000,
     },
 }

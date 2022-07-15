@@ -8,10 +8,16 @@
   > CreateTime : 2022/6/15 14:03
 """
 import logging
+from core.redis import redis_get
 from tasks.models import TaskDbAlgorithm
 from db_ml.clean_rule import RuleClean
 from db_ml.clean_intelligent import intelligent
 from db_ml.clean_bart_for_turn import bart_for_turn
+from db_ml.services import generate_redis_key
+from db_ml.services import AlgorithmState
+from db_ml.services import redis_get_json
+from db_ml.services import redis_update_finish_state
+
 logger = logging.getLogger('console')
 
 
@@ -62,10 +68,15 @@ def job_clean(*args, **kwargs):
                 result.append(dict(author=str(k), text=v))
                 break
 
-        # 数据写回数据库
-        TaskDbAlgorithm.objects.filter(id=algorithm_id).update(
-            algorithm=result, state=2, remarks=''
+        redis_key = generate_redis_key(
+            'clean', str(kwargs.get('project_id', ''))
         )
+        p_state = redis_get_json(redis_key)
+        if p_state and p_state.get('state') == AlgorithmState.ONGOING:
+            TaskDbAlgorithm.objects.filter(id=algorithm_id).update(
+                algorithm=result, state=2, remarks=''
+            )
+            redis_update_finish_state(redis_key, p_state)
     except Exception as e:
         TaskDbAlgorithm.objects.filter(id=algorithm_id).update(
             state=3, remarks=str(e)
