@@ -33,7 +33,7 @@ services:
     stdin_open: true
     tty: true
     build: .
-    image: containers.git.digitalbrain.cn/engineering-group/label-studio:development
+    image: containers.git.digitalbrain.cn/engineering-group/label-studio:${TAG:-development}
     container_name: app-${ENV:-dev}
     links:
       - "redis:redis-${ENV:-dev}"
