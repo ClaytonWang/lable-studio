@@ -20,7 +20,6 @@ DATABASES = {
     }
 }
 
-
 RQ_QUEUES = {
     'default': {
         'HOST': 'redis-qa',
@@ -28,13 +27,19 @@ RQ_QUEUES = {
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,
     },
-    'pre_tags': {
+    'prediction': {
         'HOST': 'redis-qa',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 18000,
     },
     'algorithm_clean': {
+        'HOST': 'redis-qa',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 18000,
+    },
+    'prompt': {
         'HOST': 'redis-qa',
         'PORT': 6379,
         'DB': 1,

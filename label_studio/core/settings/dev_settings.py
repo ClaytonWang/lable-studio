@@ -27,7 +27,7 @@ RQ_QUEUES = {
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,
     },
-    'pre_tags': {
+    'prediction': {
         'HOST': 'redis-dev',
         'PORT': 6379,
         'DB': 1,
@@ -38,5 +38,11 @@ RQ_QUEUES = {
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+    },
+    'prompt': {
+        'HOST': 'redis-dev',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 18000,
     },
 }

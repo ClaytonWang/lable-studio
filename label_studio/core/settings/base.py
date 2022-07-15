@@ -185,6 +185,7 @@ INSTALLED_APPS = [
     'data_manager',
     'io_storages',
     'ml',
+    "db_ml",
     'webhooks',
     'labels_manager',
 ]
@@ -194,8 +195,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'core.middleware.DisableCSRF',
-    # 'core.middleware.DisableAllCSRF',
+    # 'core.middleware.DisableCSRF',
+    'core.middleware.DisableAllCSRF',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',

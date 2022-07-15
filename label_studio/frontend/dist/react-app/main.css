@@ -1016,8 +1016,7 @@
   border-bottom: 1px solid rgba(0,0,0,0.1);
 }
 .ls-menu-header svg {
-  width: 55px;
-  height: 50px;
+  width: 40px;
 }
 .ls-menu-header__context {
   flex: 1;
@@ -1035,7 +1034,6 @@
 .ls-menu-header__trigger {
   display: flex;
   padding: 0 20px;
-  padding-right: 5px;
   cursor: pointer;
   align-items: center;
   justify-content: space-between;

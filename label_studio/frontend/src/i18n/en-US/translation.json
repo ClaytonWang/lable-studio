@@ -340,5 +340,8 @@
   "Create Account": "Create Account",
   "Rename": "Rename",
   "Duplicate": "Duplicate",
-  "Close": "Close"
+  "Close": "Close",
+  "error_label_still_in": "These labels still exist in annotations",
+  "annotations": "annotations",
+  "Validation error": "Validation error"
 }
