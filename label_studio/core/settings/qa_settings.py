@@ -14,7 +14,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'root',
         'PASSWORD': 'linshimima2!',
-        'NAME': 'label_studio',
+        'NAME': 'label_studio_qa',
         'HOST': '192.168.0.92',
         'PORT': '5432',
     }
@@ -23,19 +23,19 @@ DATABASES = {
 
 RQ_QUEUES = {
     'default': {
-        'HOST': '127.0.0.1',
+        'HOST': 'redis-qa',
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,
     },
     'pre_tags': {
-        'HOST': '127.0.0.1',
+        'HOST': 'redis-qa',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 18000,
     },
     'algorithm_clean': {
-        'HOST': '127.0.0.1',
+        'HOST': 'redis-qa',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 18000,
