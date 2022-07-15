@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.3
+# syntax=docker/dockerfile:1.4
 FROM node:16.16.0-slim AS frontend-builder
 
 ENV NPM_CACHE_LOCATION=/root/.npm \
@@ -10,10 +10,10 @@ COPY label_studio/frontend .
 COPY label_studio/__init__.py /label-studio/label_studio/__init__.py
 
 RUN --mount=type=cache,target=$NPM_CACHE_LOCATION \
-    npm install -g -s --no-progress yarn
-    #yarn && \
-    #yarn run build:production && \
-    #yarn cache clean
+#    npm install -g -s --no-progress yarn
+    yarn && \
+    yarn run build:production && \
+    yarn cache clean
 
 
 FROM ubuntu:20.04
