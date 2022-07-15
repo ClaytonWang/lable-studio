@@ -2,12 +2,12 @@ name: " Build & Deploy"
 
 on:
   push:
-    branches: [ "master" , "development", "MARK-53"]
-    # paths:
-    #  - deploy/**
-    #  - label_studio/**
-    #  - setup.py
-    #  - .github/workflows/docker-build.yml
+    branches: [ "master" , "development", "release/*"]
+    paths:
+     - deploy/**
+     - label_studio/**
+     - setup.py
+     - .github/workflows/docker-build.yml
     tags: [ '*' ]
 
 env:
