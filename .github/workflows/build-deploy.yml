@@ -88,6 +88,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy_dev:
+    name: "Deploy DEV"
     needs: docker_build_and_push
     runs-on: ubuntu-latest
     environment: 
@@ -124,6 +125,7 @@ jobs:
             docker-compose up -d
 
   deploy_qa:
+    name: "Deploy QA"
     needs: [docker_build_and_push]
     runs-on: ubuntu-latest
     environment: 
