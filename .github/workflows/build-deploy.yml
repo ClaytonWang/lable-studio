@@ -162,6 +162,7 @@ jobs:
             docker-compose up -d
 
   deploy_prod:
+  name: "Deploy PROD"
     needs: deploy_qa
     runs-on: ubuntu-latest
     environment: 
