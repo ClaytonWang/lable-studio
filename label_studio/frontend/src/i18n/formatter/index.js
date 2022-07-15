@@ -1,4 +1,4 @@
-import { forEach, isArray, map } from 'lodash';
+import { each, isArray, map } from 'lodash';
 
 const Formatter = {
   trans: window.t,
@@ -14,17 +14,48 @@ const Formatter = {
 
 const format = (key, data, ...options) => {
   try {
-    if (key === 'dm_columns') {
-      return formatDMColumns(data, ...options);
-    } else if (key === 'ls_export_formats') {
-      return formatExportFormats(data, ...options);
-    } else if (key === 'dm_actions') {
-      return formatDMActions(data, ...options);
+    switch (key) {
+      case 'dm_columns':
+        return formatDMColumns(data, ...options);
+      case 'ls_export_formats':
+        return formatExportFormats(data, ...options);
+      case 'dm_actions':
+        return formatDMActions(data, ...options);
+      case 'ls_validate_config':
+        return formatValidateConfig(data, ...options);
+      default:
+        return data;
     }
-    return data;
   } catch (error) {
+    console.log('i18n.format.error', error);
     return data;
   }
+};
+
+const validatei18n = {
+  non_field_errors: [
+    ['These labels still exist in annotations','error_label_still_in'],
+    ['annotations', 'annotations'],
+  ],
+};
+const formatValidateConfig = (data) => {
+  if (data.error) {
+    const response = data.response;
+
+    response.detail = Formatter.trans(response.detail);
+    each(response.validation_errors, (list, key) => {
+      if (validatei18n[key]) {
+        response.validation_errors[key] = list.map(item => {
+          each(validatei18n[key], cfg => {
+            item = item.replace(cfg[0], Formatter.trans(cfg[1]));
+          });
+          return item;
+        });
+      }
+    });
+  }
+
+  return data;
 };
 
 const formatDMActions = (data) => {
@@ -51,7 +82,7 @@ const formatExportFormats = (data) => {
 
 const formatDMColumns = (data) => {
   if (isArray(data?.columns)) {
-    forEach(data.columns, item => {
+    each(data.columns, item => {
       if (item.id) {
         item.title = Formatter.trans(item.id, item.title);
         item.help = Formatter.trans(`${item.id}_help`, '');

@@ -340,5 +340,8 @@
   "Create Account": "创建账号",
   "Rename": "重命名",
   "Duplicate": "复制",
-  "Close": "关闭"
+  "Close": "关闭",
+  "error_label_still_in": "这些标签仍然存在于注释中",
+  "annotations": "注释",
+  "Validation error": "验证错误"
 }

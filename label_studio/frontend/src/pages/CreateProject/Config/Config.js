@@ -269,7 +269,7 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
       params: { pk: project.id },
       body: { label_config: configToCheck },
       errorFilter: () => true,
-    });
+    }).then(res => t.format('ls_validate_config', res));
 
     if (validation?.error) {
       setError(validation.response);
