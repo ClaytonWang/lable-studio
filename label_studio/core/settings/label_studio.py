@@ -23,24 +23,29 @@ SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
 RQ_QUEUES = {
     'default': {
-        'HOST': '127.0.0.1',
+        'HOST': 'redis',
         'PORT': 6379,
         'DB': 0,
-        'DEFAULT_TIMEOUT': 180,
+        'DEFAULT_TIMEOUT': 18000,
     },
-    'pre_tags': {
-        'HOST': '127.0.0.1',
+    'prediction': {
+        'HOST': 'redis',
         'PORT': 6379,
         'DB': 1,
-        'DEFAULT_TIMEOUT': 180,
+        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
     'algorithm_clean': {
-        'HOST': '127.0.0.1',
+        'HOST': 'redis',
         'PORT': 6379,
         'DB': 1,
-        'DEFAULT_TIMEOUT': 180,
+        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
-
+    'prompt': {
+        'HOST': 'redis',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 18000,
+    },
 }
 
 SENTRY_DSN = get_env(
@@ -74,8 +79,5 @@ if 'DEV' == ENV:
     from core.settings.dev_settings import *
 elif 'QA' == ENV:
     from core.settings.qa_settings import *
-elif 'PROD' == ENV:
-    pass
-    # from core.settings.prod_settings import *
 else:
     pass
