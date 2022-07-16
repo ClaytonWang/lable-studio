@@ -7,7 +7,7 @@ on:
      - deploy/**
      - label_studio/**
      - setup.py
-     - .github/workflows/docker-build.yml
+     - .github/workflows/build-deploy.yml
     tags: [ '*' ]
 
 env:
