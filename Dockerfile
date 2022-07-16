@@ -2,16 +2,16 @@
 FROM node:16.16.0-slim AS frontend-builder
 
 ENV NPM_CACHE_LOCATION=/root/.npm \
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    YARN_CACHE_FOLDER=/root/.yarn
 
 WORKDIR /label-studio/label_studio/frontend
 
 COPY label_studio/frontend .
 COPY label_studio/__init__.py /label-studio/label_studio/__init__.py
 
-RUN --mount=type=cache,target=$NPM_CACHE_LOCATION \
-    yarn && \
-    yarn run build:production
+RUN --mount=type=cache,target=$YARN_CACHE_FOLDER \
+    yarn && yarn run build:production
 
 
 FROM ubuntu:20.04

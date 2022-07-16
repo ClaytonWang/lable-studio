@@ -58,6 +58,19 @@ services:
         volume:
           nocopy: true
 
+  rqworker:
+    image: containers.git.digitalbrain.cn/engineering-group/label-studio:${TAG:-development}
+    container_name: rqworker-${ENV:-dev}
+    environment:
+      - ENV=${ENV:-dev}
+    depends_on:
+      - app
+    volumes:
+      - /label-data-${ENV:-dev}:/label-studio/data:rw
+      - /label-model-${ENV:-dev}:/label-studio/label_studio/db_ml/models:rw
+    command: [ "python3", "/label-studio/label_studio/manage.py", "rqworker", "prediction" ,"algorithm_clean","prompt"]
+
+
   redis:
     image: redis:alpine
     container_name: redis-${ENV:-dev}
