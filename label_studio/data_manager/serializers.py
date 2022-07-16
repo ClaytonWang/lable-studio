@@ -233,7 +233,6 @@ class DataManagerTaskSerializer(TaskSerializer):
     completed_at = serializers.DateTimeField(required=False)
     annotations_results = serializers.SerializerMethodField(required=False)
     predictions_results = serializers.SerializerMethodField(required=False)
-    predictions_score = serializers.FloatField(required=False)
     file_upload = serializers.SerializerMethodField(required=False)
     annotations_ids = serializers.SerializerMethodField(required=False)
     predictions_model_versions = serializers.SerializerMethodField(required=False)
@@ -304,7 +303,8 @@ class DataManagerTaskSerializer(TaskSerializer):
     def get_predictions_score(self, obj):
         label, rst = self.check_update_time(obj)
         if label == 'pre':
-            return obj.predictions_score
+            return obj.predictions_score \
+                if hasattr(obj, 'predictions_score')else None
         elif label == 'prompt' and rst:
             metrics = rst.get('metrics', {})
             return metrics.get('confidence')
