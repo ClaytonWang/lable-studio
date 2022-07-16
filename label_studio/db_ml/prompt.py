@@ -68,7 +68,7 @@ def job_prompt(**kwargs):
     task_id = kwargs.get('task_id')
     project_id = kwargs.get('project_id')
     # db_ml_dir = os.path.dirname(os.path.abspath(__file__))
-    # model_path = os.path.join(db_ml_dir, 'model_prompt')
+    # model_path = os.path.join(db_ml_dir, 'models', 'model_prompt')
     # predictor = Predictor(model_path=model_path, device='cpu')
     # res_text, confidence = predictor.predict(text)
     text = text.strip()
@@ -169,7 +169,7 @@ TEMPLATE_PROMPT = {
 
 if __name__ == '__main__':
     db_ml_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(db_ml_dir, 'model_prompt')
+    model_path = os.path.join(db_ml_dir, 'models', 'model_prompt')
 
     predictor = Predictor(model_path=model_path, device='cpu')
     sens = ['等着做活动[捂脸]',

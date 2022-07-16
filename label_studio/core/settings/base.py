@@ -283,7 +283,7 @@ TEMPLATES = [
 # RQ
 RQ_QUEUES = {
     'default': {
-        'HOST': '124.71.161.146',
+        'HOST': 'redis',
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,
