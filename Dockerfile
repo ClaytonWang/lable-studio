@@ -11,8 +11,7 @@ COPY label_studio/__init__.py /label-studio/label_studio/__init__.py
 
 RUN --mount=type=cache,target=$NPM_CACHE_LOCATION \
     yarn && \
-    yarn run build:production && \
-    yarn cache clean
+    yarn run build:production
 
 
 FROM ubuntu:20.04
