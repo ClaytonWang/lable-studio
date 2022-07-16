@@ -14,7 +14,7 @@ DATABASES = {
         'USER': 'root',
         'PASSWORD': 'linshimima2!',
         'NAME': 'label_studio_dev',
-        'HOST': '192.168.0.92',
+        'HOST': '124.71.161.146',
         'PORT': '5432',
     }
 }
