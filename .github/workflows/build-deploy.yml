@@ -72,6 +72,7 @@ jobs:
           export replace=VERSIONREPLACE
           export filename=$(pwd)/label_studio/__init__.py
           sed -i -e "s/$replace/${{env.DOCKER_TAG}}/g" $filename
+          cat $filename
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
