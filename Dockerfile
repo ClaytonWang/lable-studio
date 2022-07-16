@@ -51,13 +51,6 @@ COPY --from=frontend-builder /label-studio/label_studio/frontend/dist ./label_st
 
 RUN python3 label_studio/manage.py collectstatic --no-input
 
-#3 worker
-RUN python3 label_studio/manage.py rqworker pre_tags
-
-RUN python3 label_studio/manage.py rqworker algorithm_clean
-
-RUN python3 label_studio/manage.py rqworker prompt
-
 EXPOSE 8080
 
 ENTRYPOINT ["./deploy/docker-entrypoint.sh"]
