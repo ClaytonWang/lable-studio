@@ -29,6 +29,10 @@ jobs:
     outputs:
       out_docker_tag: ${{ steps.get_docker_tag.outputs.out_docker_tag }}
     steps:
+      - name: Lowercase image name
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+          
       - name: Create docker tag
         id: get_docker_tag
         run: |
