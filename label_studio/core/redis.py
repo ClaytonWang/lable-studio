@@ -11,9 +11,9 @@ logger = logging.getLogger(__name__)
 try:
     _redis = get_connection()
     _redis.ping()
-    logger.debug('=> Redis is connected successfully.')
+    logger.info('=> Redis is connected successfully.')
 except:
-    logger.debug('=> Redis is not connected.')
+    logger.info('=> Redis is not connected.')
     _redis = None
 
 
@@ -32,7 +32,7 @@ def redis_healthcheck():
         logger.error(f'Redis healthcheck failed: {exc}', exc_info=True)
         return False
     else:
-        logger.debug('Redis client is alive!')
+        logger.info('Redis client is alive!')
         return True
 
 
