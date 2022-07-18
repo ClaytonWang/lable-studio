@@ -184,7 +184,8 @@ class User(UserMixin, AbstractBaseUser, PermissionsMixin, UserLastActivityMixin)
         elif self.last_name and not self.first_name:
             initials = self.last_name[0:1]
         elif self.first_name and self.last_name:
-            initials = self.first_name[0:1] + self.last_name[0:1]
+            #initials = self.first_name[0:1] + self.last_name[0:1]
+            initials = self.first_name[0:2] if len(self.first_name)>1 else self.first_name[0:1]
         return initials
 
 
