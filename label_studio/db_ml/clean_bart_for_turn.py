@@ -22,7 +22,7 @@ class Inference:
 
     def __init__(self, model_path):
         self.model_path = model_path
-        yaml_dir = os.path.join(self.model_path, 'models', 'special_tokens.yaml')
+        yaml_dir = os.path.join(self.model_path, 'special_tokens.yaml')
         special_tokens = open(yaml_dir)
         self.special_tokens = yaml.load(special_tokens, Loader=yaml.FullLoader)[
             'special_tokens']

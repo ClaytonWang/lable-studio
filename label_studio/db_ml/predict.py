@@ -57,7 +57,7 @@ def job_predict(*args, **kwargs):
     predictor = Predictor(
         model_path, label_file=label_file_path, device='cpu'
     )
-    text = kwargs.get('text')
+    text = str(kwargs.get('text', []))
     task_id = kwargs.get('task_id')
     task = Task.objects.filter(id=task_id).first()
 

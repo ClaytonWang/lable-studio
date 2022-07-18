@@ -79,5 +79,7 @@ if 'DEV' == ENV:
     from core.settings.dev_settings import *
 elif 'QA' == ENV:
     from core.settings.qa_settings import *
+elif 'YJD' == ENV:
+    from core.settings.yjd_settings import *
 else:
     pass

@@ -213,12 +213,14 @@ def prediction(request):
         query_pre = Prediction.objects.filter(task_id__in=task_ids).all()
         if len(query_pre):
             save_raw_data(query_pre, PredictionDraft, PREDICTION_BACKUP_FIELDS)
-            Prediction.objects.filter(task_id__in=task_ids).delete()
+            query_pre.delete()
+            # Prediction.objects.filter(task_id__in=task_ids).delete()
 
         # TODO 多对话判断
         # 异常的信息回滚
         for item in query:
-            text = item.data.get('dialogue')[0].get('text')
+            # text = item.data.get('dialogue')[0].get('text')
+            text = item.data.get('dialogue', [])
             data = dict(
                 text=text,
                 project_id=project_id,
