@@ -71,7 +71,7 @@ def job_prompt(**kwargs):
     # model_path = os.path.join(db_ml_dir, 'models', 'model_prompt')
     # predictor = Predictor(model_path=model_path, device='cpu')
     # res_text, confidence = predictor.predict(text)
-    text = text.strip()
+    text = str(text).strip()
     res_text = TEMPLATE_PROMPT.get(text, random.choice(['负面', '中性', '正面']))
     confidence = np.random.rand()
     print('prompt : ', res_text, 'confidence:', confidence)

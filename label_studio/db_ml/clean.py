@@ -44,6 +44,7 @@ def job_clean(*args, **kwargs):
         dialog_text = ''.join([
             item.get('author', '') + item.get('text', '') for item in dialog
         ])
+        # dialog_text = str(dialog)
         turn = bart_for_turn([{'段落-1': dialog_text}])
         intell_text = []
         # 规则
@@ -59,14 +60,14 @@ def job_clean(*args, **kwargs):
             for k, v in item.items():
                 if index <= len(intell) - 1:
                     turn[index][k] = intell[index].get('generated_text', '')
-                break
+                # break
 
         # 拼接回对话模式
         result = []
         for item in turn:
             for k, v in item.items():
                 result.append(dict(author=str(k), text=v))
-                break
+                # break
 
         redis_key = generate_redis_key(
             'clean', str(kwargs.get('project_id', ''))
