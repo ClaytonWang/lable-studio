@@ -106,7 +106,7 @@ def job_prompt(**kwargs):
         )
         c.save()
         redis_update_finish_state(redis_key, p_state)
-     time.sleep(0.1)
+    time.sleep(0.1)
 
 
 TEMPLATE_PROMPT = {
