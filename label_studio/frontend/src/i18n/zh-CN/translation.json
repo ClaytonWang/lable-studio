@@ -308,6 +308,8 @@
   "tip_fetchdata": "示例获取项目数据：",
   "Add Meta Information": "添加元信息",
   "predictions": "预测",
+  "Manual_Annotations": "手动标注",
+  "Auto_Predictions": "自动标注",
   "model": "模型",
   "is_interactive": "用于交互式预测",
   "Model Version": "模型版本",
