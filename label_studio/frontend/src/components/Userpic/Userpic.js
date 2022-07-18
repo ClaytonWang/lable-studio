@@ -27,14 +27,14 @@ export const Userpic = forwardRef(({
 
   useEffect(() => {
     if (user) {
-      const {first_name, last_name, email, initials, username} = user;
+      const { first_name, last_name, email, initials, username } = user;
 
       if (initials) {
         setFinalUsername(initials);
       } else if (username) {
         setFinalUsername(username);
       } else if (first_name && last_name) {
-        setFinalUsername(`${first_name[0]}${last_name[0]}`);
+        setFinalUsername(`${last_name[0]}${first_name[0]}`);
       } else if (email) {
         setFinalUsername(email.substring(0, 2));
       }
@@ -59,7 +59,7 @@ export const Userpic = forwardRef(({
         ref={imgRef}
         src={finalSrc}
         alt={(finalUsername ?? "").toUpperCase()}
-        style={{opacity: imgVisible ? 1 : 0}}
+        style={{ opacity: imgVisible ? 1 : 0 }}
         onLoad={onImageLoaded}
         onError={() => setFinalSrc(FALLBACK_IMAGE) }
       />
@@ -73,7 +73,7 @@ export const Userpic = forwardRef(({
 
   const userFullName = useMemo(() => {
     if (user?.first_name || user?.last_name) {
-      return `${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim();
+      return `${user?.last_name ?? ''}${user?.first_name ?? ''}`.trim();
     } else if (user?.email) {
       return user.email;
     } else {

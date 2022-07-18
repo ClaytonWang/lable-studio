@@ -110,7 +110,7 @@
               .then(data => data.json())
               .then(data => data.map(u => Object.assign(u.user, {
                 member_id: u.id,
-                name: (u.user.first_name + " " + u.user.last_name).trim(),
+                name: (u.user.last_name + u.user.first_name).trim(),
               })))
           },
           getOne(id) {
@@ -206,7 +206,7 @@
             return t(interval ? interval[1] : 'just now');
           },
           field_name_render(user) {
-            return user.first_name + " " + user.last_name
+            return  user.last_name+user.first_name
           },
           field_userpic_render(user) {
             let content = "<div class=\"userpic\">";
