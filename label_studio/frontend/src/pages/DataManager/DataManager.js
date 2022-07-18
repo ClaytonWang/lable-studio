@@ -22,8 +22,8 @@ import "./DataManager.styl";
 
 const refStatus = createRef();
 const refProm = createRef();
-const showStatus = () => {
-  refStatus?.current.status();
+const showStatus = (type) => {
+  refStatus?.current.status(type);
 };
 
 const onPreButtonClick = (e,params) => {
@@ -31,7 +31,7 @@ const onPreButtonClick = (e,params) => {
   // const setProgress = params.setProgress;
   const mlPredictProcess = params.mlPredictProcess;
 
-  mlPredictProcess().then(showStatus);
+  mlPredictProcess().then(() => showStatus('prediction'));
 
   // let progress = 0,count=0;
 
@@ -252,7 +252,7 @@ export const DataManagerPage = ({ ...props }) => {
     </Block>
   ) : (
     <>
-      <PromptLearnTemplate ref={refProm} projectId={projectId} showStatus={showStatus} />
+      <PromptLearnTemplate ref={refProm} projectId={projectId} showStatus={() => showStatus('prompt')} />
       <ProjectStatus
         ref={refStatus}
         onFinish={{
@@ -260,7 +260,7 @@ export const DataManagerPage = ({ ...props }) => {
         }}
       />
       <CleanData
-        showStatus={showStatus}
+        showStatus={() => showStatus('clean')}
         ref={clearModalRef}
       />
       <Block ref={root} name="datamanager"/>

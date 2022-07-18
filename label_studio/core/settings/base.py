@@ -195,8 +195,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.locale.LocaleMiddleware',
-    'core.middleware.DisableCSRF',
-    # 'core.middleware.DisableAllCSRF',
+    # 'core.middleware.DisableCSRF',
+    'core.middleware.DisableAllCSRF',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -283,9 +283,27 @@ TEMPLATES = [
 # RQ
 RQ_QUEUES = {
     'default': {
-        'HOST': '124.71.161.146',
+        'HOST': 'redis',
         'PORT': 6379,
         'DB': 0,
+        'DEFAULT_TIMEOUT': 18000,
+    },
+    'prediction': {
+        'HOST': 'redis',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+    },
+    'algorithm_clean': {
+        'HOST': 'redis',
+        'PORT': 6379,
+        'DB': 1,
+        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+    },
+    'prompt': {
+        'HOST': 'redis',
+        'PORT': 6379,
+        'DB': 1,
         'DEFAULT_TIMEOUT': 18000,
     },
 }

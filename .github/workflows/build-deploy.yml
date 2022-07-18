@@ -1,0 +1,181 @@
+name: " Build & Deploy"
+
+on:
+  push:
+    branches: [ "master" , "development", "release/*"]
+    paths:
+     - deploy/**
+     - label_studio/**
+     - setup.py
+     - .github/workflows/build-deploy.yml
+    tags: [ '*' ]
+
+env:
+  DOCKER_CLI_EXPERIMENTAL: enabled
+  IMAGE_NAME: ${{ github.repository }}
+  DOCKER_TAG: latest
+  REGISTRY: containers.git.digitalbrain.cn
+  GITHOST: git.digitalbrain.cn
+  RELEASEART: v1
+  ARTFILENAME: deploy_art
+  DEVHOST: 124.71.161.146
+  QAHOST: 124.71.161.146
+
+jobs:
+  docker_build_and_push:
+    name: "Docker build and push"
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    outputs:
+      out_docker_tag: ${{ steps.get_docker_tag.outputs.out_docker_tag }}
+    steps:
+      - name: Lowercase image name
+        run: |
+          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+          
+      - name: Create docker tag
+        id: get_docker_tag
+        run: |
+          export strDate=$(date +'%Y-%m-%d').${{ github.run_number }}
+          echo "DOCKER_TAG=$strDate" >> $GITHUB_ENV
+          echo "::set-output name=out_docker_tag::$strDate"
+
+      - name: Override image tag on 'tag'
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "DOCKER_TAG=$(echo ${GITHUB_REF#refs/tags/})" >> $GITHUB_ENV
+
+      - name: Override registry 🛎️
+        if: github.repository == 'Shanghai-Digital-Brain-Laboratory/label-studio'
+        run: |
+          echo "REGISTRY=ghcr.io" >> $GITHUB_ENV
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx 🏗️
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python 🔧
+        uses: actions/setup-python@master
+        with:
+          python-version: '3.8'
+
+      - name: Create version_.py
+        run: |
+          python3 $(pwd)/label_studio/core/version.py
+          cat $(pwd)/label_studio/core/version_.py
+          export replace=VERSIONREPLACE
+          export filename=$(pwd)/label_studio/__init__.py
+          sed -i -e "s/$replace/${{env.DOCKER_TAG}}/g" $filename
+          cat $filename
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      - name: Build and push 🚀
+        uses: docker/build-push-action@v3
+        id: build_and_push
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{env.DOCKER_TAG}}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy_dev:
+    name: "Deploy DEV"
+    needs: docker_build_and_push
+    runs-on: ubuntu-latest
+    environment: 
+      name: deveopment
+      url: http://${{env.DEVHOST}}/dev
+    steps:
+      - name: publish with docker compose
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          # password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.SSHKEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            rm -rf dev
+            mkdir dev && cd dev
+            echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
+            gh release download ${{ env.RELEASEART }} -p '${{ env.ARTFILENAME }}*' -R ${{env.GITHOST}}/${{ github.repository }}
+            tar -xzvf ${{ env.ARTFILENAME }}.tar.gz
+            mv ${{ env.ARTFILENAME }} dev-env && cd dev-env
+            echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+            
+            export ENV=dev
+            export NGINX_PORT=8080
+            export DJANGO_DB=default
+            export POSTGRE_NAME=label_studio_dev
+            export DB_HOST=192.168.0.92
+            export LABEL_STUDIO_HOST=http://124.71.161.146:8080
+            export TAG=${{ needs.docker_build_and_push.outputs.out_docker_tag }}
+
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d
+
+  deploy_qa:
+    name: "Deploy QA"
+    needs: [docker_build_and_push]
+    runs-on: ubuntu-latest
+    environment: 
+      name: qa
+      url: http://${{env.QAHOST}}/qa
+    steps:
+      - name: publish with docker compose
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          # password: ${{ secrets.PASSWORD }}
+          key: ${{ secrets.SSHKEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            rm -rf qa
+            mkdir qa && cd qa
+            echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
+            gh release download ${{ env.RELEASEART }} -p '${{ env.ARTFILENAME }}*' -R ${{env.GITHOST}}/${{ github.repository }}
+            tar -xzvf ${{ env.ARTFILENAME }}.tar.gz
+            mv ${{ env.ARTFILENAME }} qa-env && cd qa-env
+            echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+            
+            export ENV=qa
+            export NGINX_PORT=80
+            export DJANGO_DB=default
+            export POSTGRE_NAME=label_studio_qa
+            export DB_HOST=192.168.0.92
+            export LABEL_STUDIO_HOST=http://124.71.161.146/qa
+            export TAG=${{ needs.docker_build_and_push.outputs.out_docker_tag }}
+            
+            docker-compose pull
+            docker-compose down
+            docker-compose up -d
+
+  deploy_prod:
+    name: "Deploy PROD"
+    needs: deploy_qa
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+      #url: http://${{ secrets.DEV_HOST }}/
+    steps:
+      - name: publish
+        run: echo 'publishing'

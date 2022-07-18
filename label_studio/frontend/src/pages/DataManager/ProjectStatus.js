@@ -62,6 +62,7 @@ export default forwardRef((props, ref) => {
         } else {
           setTask(null);
         }
+        return running;
       },
     };
   }, [project.id]);
@@ -95,11 +96,16 @@ export default forwardRef((props, ref) => {
   }, []);
 
   useImperativeHandle(ref, () => ({
-    status: () => {
-      request.sync();
-      setTimeout(request.sync, 1000);
-      setTimeout(request.sync, 2000);
-      setTimeout(request.sync, 3000);
+    status: (taskType) => {
+      request.sync().then(res => {
+        if (TASK_TYPE.includes(taskType) && res?.state !== true) {
+          if (props.onFinish?.[taskType]) {
+            props.onFinish?.[taskType]();
+          } else {
+            window.location.reload();
+          }
+        }
+      });
     },
   }));
 
@@ -136,7 +142,7 @@ export default forwardRef((props, ref) => {
               <h2>{t(`label_${task.type}`, task.type)}...</h2>
               <Progress type="circle" percent={progress} />
               <Space style={{ marginTop: 8 }}>
-                {/* <Button onClick={handleCancel}>{t('Cancel')}</Button> */}
+                <Button onClick={handleCancel}>{t('Cancel')}</Button>
                 <Button onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</Button>
               </Space>
             </Space>

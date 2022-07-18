@@ -14,6 +14,10 @@ import random
 import numpy as np
 from transformers import BartForSequenceClassification, BertTokenizer
 from projects.models import PromptResult
+from db_ml.services import AlgorithmState
+from db_ml.services import generate_redis_key
+from db_ml.services import redis_get_json
+from db_ml.services import redis_update_finish_state
 
 
 class Predictor:
@@ -64,7 +68,7 @@ def job_prompt(**kwargs):
     task_id = kwargs.get('task_id')
     project_id = kwargs.get('project_id')
     # db_ml_dir = os.path.dirname(os.path.abspath(__file__))
-    # model_path = os.path.join(db_ml_dir, 'model_prompt')
+    # model_path = os.path.join(db_ml_dir, 'models', 'model_prompt')
     # predictor = Predictor(model_path=model_path, device='cpu')
     # res_text, confidence = predictor.predict(text)
     text = text.strip()
@@ -90,13 +94,19 @@ def job_prompt(**kwargs):
         #       "wgtedAvg": np.random.rand()}
         #      ]
     }
-    c = PromptResult(
-        project_id=project_id,
-        task_id=task_id,
-        metrics=result
+    redis_key = generate_redis_key(
+        'prompt', str(kwargs.get('project_id', ''))
     )
-    c.save()
-    time.sleep(0.1)
+    p_state = redis_get_json(redis_key)
+    if p_state and p_state.get('state') == AlgorithmState.ONGOING:
+        c = PromptResult(
+            project_id=project_id,
+            task_id=task_id,
+            metrics=result
+        )
+        c.save()
+        redis_update_finish_state(redis_key, p_state)
+     time.sleep(0.1)
 
 
 TEMPLATE_PROMPT = {
@@ -160,7 +170,7 @@ TEMPLATE_PROMPT = {
 
 if __name__ == '__main__':
     db_ml_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(db_ml_dir, 'model_prompt')
+    model_path = os.path.join(db_ml_dir, 'models', 'model_prompt')
 
     predictor = Predictor(model_path=model_path, device='cpu')
     sens = ['等着做活动[捂脸]',

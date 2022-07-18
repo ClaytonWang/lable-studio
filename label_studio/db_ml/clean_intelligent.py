@@ -42,13 +42,13 @@ class IntelligentModel:
 
 def intelligent(text):
     db_ml_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(db_ml_dir, 'model_intelligent_path')
+    model_path = os.path.join(db_ml_dir, 'models', 'model_intelligent_path')
     return IntelligentModel(model_path=model_path)(text)
 
 
 if __name__ == '__main__':
     _db_ml_dir = os.path.dirname(os.path.abspath(__file__))
-    _intell_model_path = os.path.join(_db_ml_dir, 'model_intelligent_path')
+    _intell_model_path = os.path.join(_db_ml_dir, 'models', 'model_intelligent_path')
 
     _src = ['你这个不不是9点下班了吗？', '嗯昨天可能是月底，她那边应该可能电话量比较多，吧所以说你可能没有及时接通。']
     print(IntelligentModel(model_path=_intell_model_path)(_src))

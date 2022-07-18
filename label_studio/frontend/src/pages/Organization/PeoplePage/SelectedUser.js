@@ -18,7 +18,7 @@ const UserProjectsLinks = ({ projects }) => {
 };
 
 export const SelectedUser = ({ user, onClose }) => {
-  const fullName = [user.first_name, user.last_name].filter(n => !!n).join(" ").trim();
+  const fullName = [user.last_name, user.first_name].filter(n => !!n).join("").trim();
 
   return (
     <Block name="user-info">

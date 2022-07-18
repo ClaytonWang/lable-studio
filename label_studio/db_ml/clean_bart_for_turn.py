@@ -22,7 +22,7 @@ class Inference:
 
     def __init__(self, model_path):
         self.model_path = model_path
-        yaml_dir = os.path.join(self.model_path, 'special_tokens.yaml')
+        yaml_dir = os.path.join(self.model_path, 'models', 'special_tokens.yaml')
         special_tokens = open(yaml_dir)
         self.special_tokens = yaml.load(special_tokens, Loader=yaml.FullLoader)[
             'special_tokens']
@@ -101,7 +101,7 @@ class Inference:
 
 def bart_for_turn(dialog):
     db_ml_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(db_ml_dir, 'model_bart_for_turn_path')
+    model_path = os.path.join(db_ml_dir, 'models', 'model_bart_for_turn_path')
     return Inference(model_path=model_path)(dialog)
 
 
