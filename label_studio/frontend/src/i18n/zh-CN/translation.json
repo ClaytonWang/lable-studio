@@ -345,5 +345,7 @@
   "Close": "关闭",
   "error_label_still_in": "这些标签仍然存在于注释中",
   "annotations": "注释",
-  "Validation error": "验证错误"
+  "Validation error": "验证错误",
+  "Import Model":"导入模型",
+  "Models Management":"模型管理"
 }

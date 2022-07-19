@@ -343,5 +343,7 @@
   "Close": "Close",
   "error_label_still_in": "These labels still exist in annotations",
   "annotations": "annotations",
-  "Validation error": "Validation error"
+  "Validation error": "Validation error",
+  "Import Model":"Import Model",
+  "Models Management":"Models Management"
 }
