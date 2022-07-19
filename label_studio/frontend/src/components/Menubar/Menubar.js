@@ -124,7 +124,7 @@ export const Menubar = ({
             closeOnClickOutside={!sidebarPinned}
           >
             <div className={`${menubarClass.elem('trigger')} main-menu-trigger`}>
-              <NineDays />
+              {/* <NineDays /> */}
               {/* <b style={{ height:35,borderLeft:'1px solid #ccc' }}></b> */}
               <span style={{ color: '#000',fontWeight: 'bold',fontSize:13 }}>
               人在环路自动化平台
