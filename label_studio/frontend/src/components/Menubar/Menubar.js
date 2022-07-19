@@ -1,6 +1,6 @@
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StaticContent } from '../../app/StaticContent/StaticContent';
-import { IconFolder, IconPersonInCircle, IconPin, LsDoor, LsSettings, NineDays } from '../../assets/icons';
+import { IconFolder, IconPersonInCircle, IconPin, LsDoor, LsSettings } from '../../assets/icons';
 import { useConfig } from '../../providers/ConfigProvider';
 import { useContextComponent, useFixedLocation } from '../../providers/RoutesProvider';
 import { cn } from '../../utils/bem';
@@ -193,6 +193,13 @@ export const Menubar = ({
                   label={t("Organization")}
                   to="/organization"
                   icon={<IconPersonInCircle/>}
+                  data-external
+                  exact
+                />
+                <Menu.Item
+                  label={t("Models Management")}
+                  to="/model-configer"
+                  icon={<LsSettings/>}
                   data-external
                   exact
                 />
