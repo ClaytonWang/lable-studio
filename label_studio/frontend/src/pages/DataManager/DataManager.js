@@ -12,6 +12,7 @@ import { useContextProps, useFixedLocation, useParams } from '../../providers/Ro
 import { addAction, deleteAction, deleteCrumb } from '../../services/breadrumbs';
 import { Block, Elem } from '../../utils/bem';
 import { isDefined } from '../../utils/helpers';
+import { template } from '../../utils/util';
 import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
@@ -63,8 +64,7 @@ const initializeDataManager = async (root, props, params) => {
   root.dataset.dmInitialized = true;
 
   const { ...settings } = root.dataset;
-  const { label_config } = params.project;
-  let isIndentTemplate = label_config?.indexOf('template-intent-classification-for-dialog')!==-1;
+  let isIndentTemplate = template.class(params.project) === 'intent-classification-for-dialog';
 
   const dmConfig = {
     root,
