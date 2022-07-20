@@ -7,7 +7,7 @@ from django.conf.urls import url
 
 
 # 增加promt - api.py
-from . import api, views, prompt_api
+from . import api, views
 
 app_name = 'model_configer'
 
