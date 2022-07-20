@@ -3,11 +3,13 @@
 import data_export.api
 from django.shortcuts import redirect
 from django.urls import include, path, re_path
+from rest_framework.routers import DefaultRouter
 from django.conf.urls import url
 
 
 # 增加promt - api.py
 from . import api, views
+from .api import ModelConfigerViews
 
 app_name = 'model_configer'
 
@@ -17,8 +19,10 @@ _urlpatterns = [
 ]
 
 # reverse for projects:api:name
+router = DefaultRouter(trailing_slash=False)
+router.register(r'', ModelConfigerViews, basename='model configer')
 _api_urlpatterns = [
-
+    path('', include(router.urls)),
 ]
 
 _api_urlpatterns_templates = [
@@ -27,5 +31,6 @@ _api_urlpatterns_templates = [
 
 urlpatterns = [
     path('model-configer/', include(_urlpatterns)),
+    path('api/model-configer', include(_api_urlpatterns)),
 
 ]
