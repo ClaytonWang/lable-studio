@@ -198,7 +198,7 @@ export const Menubar = ({
                 />
                 <Menu.Item
                   label={t("Models Management")}
-                  to="/model-configer"
+                  to="/model-manager"
                   icon={<LsSettings/>}
                   data-external
                   exact
