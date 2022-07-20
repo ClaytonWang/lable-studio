@@ -87,50 +87,59 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         :return: dict
         """
         data = request.GET.dict()
-        name = data.get('name')
-        search = data.get('search')
-        self.queryset = ModelManager.objects.all()
-        if name:
-            self.queryset = self.queryset.filter(name=name)
-        elif search:
-            self.queryset = self.queryset.filter(name__icontains=search)
+        _type = data.get('type')
+        version = data.get('version')
+        model = data.get('model')
+        project = data.get('project')
+        self.queryset = ModelManager.objects.for_user_organization(request.user)
+        filter_params = dict()
+        if _type:
+            filter_params['type'] = _type
+        if version:
+            filter_params['version'] = version
+        if model:
+            filter_params['model'] = model
+        if project:
+            filter_params['project'] = project
+        if filter_params:
+            self.queryset = self.queryset.filter(**filter_params)
         return super(ModelManagerViews, self).list(request, *args, **kwargs)
 
-    # def retrieve(self, request, *args, **kwargs):
-    #     """
-    #     :param request:
-    #     :param args:
-    #     :param kwargs:
-    #     :return:
-    #     """
-    #     self.queryset = User.objects.filter(pk=kwargs.get('pk'))
-    #     return super(UserViews, self).retrieve(request, *args, **kwargs)
-    #
+    def retrieve(self, request, *args, **kwargs):
+        """
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self.queryset = ModelManager.objects.filter(pk=kwargs.get('pk'))
+        return super(ModelManagerViews, self).retrieve(request, *args, **kwargs)
+
     def create(self, request, *args, **kwargs):
-        import copy
-        data = copy.deepcopy(request.data)
+        data = request.POST.dict()
+        if not data:
+            data = request.data
         params = parse.parse_qs(parse.urlparse(data.get('url', '')).query)
         version = params.get('version', [])
         data['version'] = version[0] if len(version) else ''
-        data['created_by'] = request.user
-        data['organization'] = request.user.active_organization
+        data['created_by_id'] = request.user.id
+        data['organization_id'] = request.user.active_organization.id
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED,
                         headers=headers)
-    #
-    # def update(self, request, *args, **kwargs):
-    #     self.queryset = User.objects.filter(pk=kwargs.get('pk'))
-    #     return super(UserViews, self).update(request, *args, **kwargs)
-    #
-    # def partial_update(self, request, *args, **kwargs):
-    #     self.update(request, args, kwargs)
-    #
-    # def destroy(self, request, *args, **kwargs):
-    #     self.queryset = User.objects.filter(pk=kwargs.get('pk'))
-    #     super(UserViews, self).destroy(request, *args, **kwargs)
-    #     return Response(status=200, data=dict(msg='删除成功'))
 
+    def update(self, request, *args, **kwargs):
+        self.queryset = ModelManager.objects.filter(pk=kwargs.get('pk'))
+        return super(ModelManagerViews, self).update(request, *args, **kwargs)
+
+    def partial_update(self, request, *args, **kwargs):
+        return self.update(request, args, kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        self.queryset = ModelManager.objects.filter(pk=kwargs.get('pk'))
+        super(ModelManagerViews, self).destroy(request, *args, **kwargs)
+        return Response(status=200, data=dict(msg='删除成功'))
