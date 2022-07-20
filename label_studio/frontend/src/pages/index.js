@@ -1,9 +1,9 @@
 import { ProjectsPage } from './Projects/Projects';
 import { OrganizationPage } from './Organization';
-import { ModelConfigerPage } from './ModelConfiger';
+import { ModelManagerPage } from './ModelManager';
 
 export const Pages = [
   ProjectsPage,
   OrganizationPage,
-  ModelConfigerPage,
+  ModelManagerPage,
 ];
