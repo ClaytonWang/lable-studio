@@ -34,11 +34,11 @@ from webhooks.models import WebhookAction
 
 from data_manager.models import View
 from core.permissions import all_permissions, ViewClassPermission
-from model_configer.serializers import ModelConfigerListSerializer
-from model_configer.serializers import ModelConfigerDetailSerializer
-from model_configer.serializers import ModelConfigerCreateSerializer
-from model_configer.serializers import ModelConfigerUpdateSerializer
-from model_configer.models import ModelConfiger
+from model_manager.serializers import ModelManagerListSerializer
+from model_manager.serializers import ModelManagerDetailSerializer
+from model_manager.serializers import ModelManagerCreateSerializer
+from model_manager.serializers import ModelManagerUpdateSerializer
+from model_manager.models import ModelManager
 
 logger = logging.getLogger(__name__)
 
@@ -69,15 +69,14 @@ class MultiSerializerViewSetMixin(object):
         return class_item
 
 
-class ModelConfigerViews(MultiSerializerViewSetMixin, ModelViewSet):
+class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
     serializer_action_classes = {
-        'list': ModelConfigerListSerializer,
-        'retrieve': ModelConfigerDetailSerializer,
-        'create': ModelConfigerCreateSerializer,
-        'update': ModelConfigerUpdateSerializer,
-        'partial_update': ModelConfigerUpdateSerializer,
+        'list': ModelManagerListSerializer,
+        'retrieve': ModelManagerDetailSerializer,
+        'create': ModelManagerCreateSerializer,
+        'update': ModelManagerUpdateSerializer,
+        'partial_update': ModelManagerUpdateSerializer,
     }
-    # permission_classes = [IsAdminOrSuperAdminCreatedUpdated]
     pagination_class = ProjectListPagination
 
     def list(self, request, *args, **kwargs):
@@ -90,12 +89,12 @@ class ModelConfigerViews(MultiSerializerViewSetMixin, ModelViewSet):
         data = request.GET.dict()
         name = data.get('name')
         search = data.get('search')
-        self.queryset = ModelConfiger.objects.all()
+        self.queryset = ModelManager.objects.all()
         if name:
             self.queryset = self.queryset.filter(name=name)
         elif search:
             self.queryset = self.queryset.filter(name__icontains=search)
-        return super(ModelConfigerViews, self).list(request, *args, **kwargs)
+        return super(ModelManagerViews, self).list(request, *args, **kwargs)
 
     # def retrieve(self, request, *args, **kwargs):
     #     """
@@ -108,7 +107,8 @@ class ModelConfigerViews(MultiSerializerViewSetMixin, ModelViewSet):
     #     return super(UserViews, self).retrieve(request, *args, **kwargs)
     #
     def create(self, request, *args, **kwargs):
-        data = request.data
+        import copy
+        data = copy.deepcopy(request.data)
         params = parse.parse_qs(parse.urlparse(data.get('url', '')).query)
         version = params.get('version', [])
         data['version'] = version[0] if len(version) else ''

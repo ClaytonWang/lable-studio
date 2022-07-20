@@ -9,7 +9,7 @@ from django.conf.urls import url
 
 # 增加promt - api.py
 from . import api, views
-from .api import ModelConfigerViews
+from .api import ModelManagerViews
 
 app_name = 'model_manager'
 
@@ -20,7 +20,7 @@ _urlpatterns = [
 
 # reverse for projects:api:name
 router = DefaultRouter(trailing_slash=False)
-router.register(r'', ModelConfigerViews, basename='model configer')
+router.register(r'', ModelManagerViews, basename='model configer')
 _api_urlpatterns = [
     path('', include(router.urls)),
 ]

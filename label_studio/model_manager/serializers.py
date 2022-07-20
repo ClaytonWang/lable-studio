@@ -4,44 +4,44 @@ from rest_framework import serializers
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework.serializers import SerializerMethodField
 from users.serializers import UserSimpleSerializer
-from model_configer.models import ModelConfiger
+from model_manager.models import ModelManager
 
 
-class ModelConfigerListSerializer(serializers.ModelSerializer):
+class ModelManagerListSerializer(serializers.ModelSerializer):
     """
     模型导入名称，对应数据表的模型集
     实际模型名字通过【模型集】+ 【版本输出】
 
     """
     class Meta:
-        model = ModelConfiger
+        model = ModelManager
         fields = '__all__'
 
 
-class ModelConfigerDetailSerializer(ModelConfigerListSerializer):
+class ModelManagerDetailSerializer(ModelManagerListSerializer):
     pass
 
 
-class ModelConfigerCreateSerializer(serializers.ModelSerializer):
+class ModelManagerCreateSerializer(serializers.ModelSerializer):
 
     """
     """
 
     class Meta:
-        model = ModelConfiger
+        model = ModelManager
         fields = (
             'title', 'model', 'organization', 'version', 'project', 'url',
             'type', 'created_by', 'description',
         )
 
 
-class ModelConfigerUpdateSerializer(serializers.ModelSerializer):
+class ModelManagerUpdateSerializer(serializers.ModelSerializer):
 
     """
     """
 
     class Meta:
-        model = ModelConfiger
+        model = ModelManager
         fields = (
             'model_set', 'organization', 'version',
             'type', 'created_by', 'description',

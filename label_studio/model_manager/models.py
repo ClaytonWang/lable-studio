@@ -42,13 +42,13 @@ MODEL_TYPE = (
 )
 
 
-class ModelConfigerManager(models.Manager):
+class ModelBaseManager(models.Manager):
     def for_user_organization(self, user):
         return self.filter(organization=user.active_organization)
 
 
-class ModelConfiger(DummyModelMixin, models.Model):
-    objects = ModelConfigerManager()
+class ModelManager(DummyModelMixin, models.Model):
+    objects = ModelBaseManager()
 
     title = models.CharField(_('title'), null=True, blank=True, default='', max_length=200, help_text='Model name.')
     url = models.TextField(_('url'), unique=True, help_text='URL for the machine learning model server')
