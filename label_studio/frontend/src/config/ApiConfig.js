@@ -18,6 +18,9 @@ export const API_CONFIG = {
     createProject: "POST:/projects",
     deleteProject: "DELETE:/projects/:pk",
 
+    //Model configer
+    models: "/models",
+
     // Config and Import
     configTemplates: "/templates",
     validateConfig: "POST:/projects/:pk/validate",
