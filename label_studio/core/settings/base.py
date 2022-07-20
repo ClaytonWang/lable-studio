@@ -188,6 +188,7 @@ INSTALLED_APPS = [
     "db_ml",
     'webhooks',
     'labels_manager',
+    'model_configer',
 ]
 
 MIDDLEWARE = [

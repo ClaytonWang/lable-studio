@@ -9,7 +9,6 @@ from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from projects.models import Project
 
 
 logger = logging.getLogger(__name__)
@@ -17,6 +16,6 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def model_list(request):
-    return render(request, 'list.html')
+    return render(request, 'model_configer/list.html')
 
 
