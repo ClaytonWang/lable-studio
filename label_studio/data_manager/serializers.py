@@ -233,12 +233,13 @@ class DataManagerTaskSerializer(TaskSerializer):
     completed_at = serializers.DateTimeField(required=False)
     annotations_results = serializers.SerializerMethodField(required=False)
     predictions_results = serializers.SerializerMethodField(required=False)
+    predictions_score = serializers.FloatField(required=False)
     file_upload = serializers.SerializerMethodField(required=False)
     annotations_ids = serializers.SerializerMethodField(required=False)
     predictions_model_versions = serializers.SerializerMethodField(required=False)
     avg_lead_time = serializers.FloatField(required=False)
     updated_by = serializers.SerializerMethodField(required=False, read_only=True)
-    predictions_score = serializers.SerializerMethodField(required=False)
+    # predictions_score = serializers.SerializerMethodField(required=False)
     auto_label = serializers.SerializerMethodField(required=False)
     manual_label = serializers.SerializerMethodField(required=False)
     marked_methode = serializers.SerializerMethodField(required=False)
@@ -300,25 +301,37 @@ class DataManagerTaskSerializer(TaskSerializer):
         else:
             return 'prompt', prompt
 
-    def get_predictions_score(self, obj):
-        label, rst = self.check_update_time(obj)
-        if label == 'pre':
-            return obj.predictions_score \
-                if hasattr(obj, 'predictions_score')else None
-        elif label == 'prompt' and rst:
-            metrics = rst.get('metrics', {})
-            return metrics.get('confidence')
-        else:
-            return None
+    # def get_predictions_score(self, obj):
+    #     label, rst = self.check_update_time(obj)
+    #     if label == 'pre':
+    #         return obj.predictions_score \
+    #             if hasattr(obj, 'predictions_score')else None
+    #     elif label == 'prompt' and rst:
+    #         metrics = rst.get('metrics', {})
+    #         return metrics.get('confidence')
+    #     else:
+    #         return None
 
     def get_marked_methode(self, obj):
-        label, rst = self.check_update_time(obj)
-        if label == 'pre':
-            return '普通'
-        elif label == 'prompt':
-            return '提示学习'
-        else:
+        data = self.pre_data.get(str(obj.id), [])
+        if not data or not data.get('result'):
             return ''
+        result = data.get('result', [])
+        if len(result) >= 1:
+            origin = result[0].get('origin', '')
+            if origin == 'prompt':
+                return '提示学习'
+            elif origin == 'prediction':
+                return '普通'
+        return ''
+
+        # label, rst = self.check_update_time(obj)
+        # if label == 'pre':
+        #     return '普通'
+        # elif label == 'prompt':
+        #     return '提示学习'
+        # else:
+        #     return ''
 
     def get_auto_label_at(self, obj):
         data = self.pre_data.get(str(obj.id), [])
@@ -340,16 +353,21 @@ class DataManagerTaskSerializer(TaskSerializer):
         :param obj:
         :return:
         """
-        label, rst = self.check_update_time(obj)
-        if label == 'pre':
-            result = rst.get('result', []) if len(rst) else []
-            pre_choices = self.get_choice_values(result)
-            return ','.join(pre_choices)
-        else:
-            if not rst:
-                return None
-            metrics = rst.get('metrics', {})
-            return metrics.get('annotation', '')
+        data = self.pre_data.get(str(obj.id), [])
+        result = data.get('result', []) if len(data) else []
+        pre_choices = self.get_choice_values(result)
+        return ','.join(pre_choices)
+
+        # label, rst = self.check_update_time(obj)
+        # if label == 'pre':
+        #     result = rst.get('result', []) if len(rst) else []
+        #     pre_choices = self.get_choice_values(result)
+        #     return ','.join(pre_choices)
+        # else:
+        #     if not rst:
+        #         return None
+        #     metrics = rst.get('metrics', {})
+        #     return metrics.get('annotation', '')
 
     def get_manual_label(self, obj):
         data = self.anno_data.get(str(obj.id), [])
@@ -417,30 +435,33 @@ class DataManagerTaskSerializer(TaskSerializer):
         return [rst] if rst else []
 
     def get_predictions(self, task):
-        label, rst = self.check_update_time(task)
-        if label == 'pre':
-            return [rst] if rst else []
-        elif label == 'prompt' and rst:
-            metrics = rst.get('metrics', {})
-            enw_val = metrics.get('annotation', '')
+        rst = self.pre_data.get(str(task.id))
+        return [rst] if rst else []
 
-            old_rst = self.pre_data.get(str(task.id))
-            if old_rst and enw_val:
-                try:
-                    old_rst['result'][0]['value']['choices'] = [enw_val]
-                    return [old_rst]
-                except Exception as e:
-                    print(e)
-            elif enw_val and not old_rst:
-                return [dict(result=[
-                    {
-                        "type": "choices",
-                        "value": {"end": 1, "start": 0, "choices": [enw_val]},
-                        "to_name": "dialogue", "from_name": "intent"
-                    }
-                ])]
-
-        return []
+        # label, rst = self.check_update_time(task)
+        # if label == 'pre':
+        #     return [rst] if rst else []
+        # elif label == 'prompt' and rst:
+        #     metrics = rst.get('metrics', {})
+        #     enw_val = metrics.get('annotation', '')
+        #
+        #     old_rst = self.pre_data.get(str(task.id))
+        #     if old_rst and enw_val:
+        #         try:
+        #             old_rst['result'][0]['value']['choices'] = [enw_val]
+        #             return [old_rst]
+        #         except Exception as e:
+        #             print(e)
+        #     elif enw_val and not old_rst:
+        #         return [dict(result=[
+        #             {
+        #                 "type": "choices",
+        #                 "value": {"end": 1, "start": 0, "choices": [enw_val]},
+        #                 "to_name": "dialogue", "from_name": "intent"
+        #             }
+        #         ])]
+        #
+        # return []
 
     @staticmethod
     def get_file_upload(task):
