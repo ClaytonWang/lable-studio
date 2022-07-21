@@ -30,21 +30,16 @@ export const ModelManagerPage = () => {
   const fetchModelList = async (page  = currentPage, pageSize = defaultPageSize) => {
     setNetworkState('loading');
 
-    //need change
-    // const data = await api.callApi("models", {
-    //   params: { page, page_size: pageSize },
-    // });
-
-    const data = {
-      count: 7,
-      next: null,
-      previous: null,
-      results: [
-        {},
-      ],
-    };
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    const data = await api.callApi("modelManager", {
+      params: {
+        page,
+        page_size: pageSize,
+        type: 'intention',
+        version: 'v1.0',
+        mdoel_group: '',
+        project_group:'',
+      },
+    });
 
     setTotalItems(data?.count ?? 1);
     setmodelList(data.results ?? []);
