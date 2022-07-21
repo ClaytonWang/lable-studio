@@ -172,3 +172,19 @@ def update_prediction_data(task_id, prompt_data=None):
     )
     print('prompt write prediction table msg: ', is_created, str(tag_data))
     pass
+
+
+def get_choice_values(result):
+    """
+    解析result 的choices
+    [{'type': 'choices', 'value': {'end': 1, 'start': 0, 'choices': ['肯定']}, 'to_name': 'dialogue', 'from_name': 'intent'}]
+    :param result:
+    :return:
+    """
+    choices = []
+    for item in result:
+        tmp_choices = item.get('value', {}).get('choices', [])
+        if not tmp_choices:
+            continue
+        choices += tmp_choices
+    return choices

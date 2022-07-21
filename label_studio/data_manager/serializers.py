@@ -17,6 +17,7 @@ from projects.models import Project
 from label_studio.core.utils.common import round_floats
 from tasks.models import Annotation, Prediction
 from projects.models import PromptResult
+from db_ml.services import get_choice_values
 UTC_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 
@@ -355,13 +356,13 @@ class DataManagerTaskSerializer(TaskSerializer):
         """
         data = self.pre_data.get(str(obj.id), [])
         result = data.get('result', []) if len(data) else []
-        pre_choices = self.get_choice_values(result)
+        pre_choices = get_choice_values(result)
         return ','.join(pre_choices)
 
         # label, rst = self.check_update_time(obj)
         # if label == 'pre':
         #     result = rst.get('result', []) if len(rst) else []
-        #     pre_choices = self.get_choice_values(result)
+        #     pre_choices = get_choice_values(result)
         #     return ','.join(pre_choices)
         # else:
         #     if not rst:
@@ -374,7 +375,7 @@ class DataManagerTaskSerializer(TaskSerializer):
         if not len(data):
             return ''
         result = data.get('result', []) if len(data) else []
-        choices = self.get_choice_values(result)
+        choices = get_choice_values(result)
         return ','.join(choices)
 
     def to_representation(self, obj):
@@ -414,21 +415,6 @@ class DataManagerTaskSerializer(TaskSerializer):
 
     def get_predictions_results(self, task):
         return self._pretty_results(task, 'predictions_results')
-
-    @staticmethod
-    def get_choice_values(result):
-        """
-        [{'type': 'choices', 'value': {'end': 1, 'start': 0, 'choices': ['肯定']}, 'to_name': 'dialogue', 'from_name': 'intent'}]
-        :param result:
-        :return:
-        """
-        choices = []
-        for item in result:
-            tmp_choices = item.get('value', {}).get('choices', [])
-            if not tmp_choices:
-                continue
-            choices += tmp_choices
-        return choices
 
     def get_annotations(self, task):
         rst = self.anno_data.get(str(task.id), [])
