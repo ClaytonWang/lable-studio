@@ -18,6 +18,7 @@ from db_ml.services import AlgorithmState
 from db_ml.services import generate_redis_key
 from db_ml.services import redis_get_json
 from db_ml.services import redis_update_finish_state
+from db_ml.services import update_prediction_data
 
 
 class Predictor:
@@ -72,7 +73,7 @@ def job_prompt(**kwargs):
     # predictor = Predictor(model_path=model_path, device='cpu')
     # res_text, confidence = predictor.predict(text)
     text = str(text).strip()
-    res_text = TEMPLATE_PROMPT.get(text, random.choice(['负面', '中性', '正面']))
+    res_text = TEMPLATE_PROMPT.get(text, random.choice(['升级', '不知情', '外呼']))
     confidence = np.random.rand()
     print('prompt : ', res_text, 'confidence:', confidence)
     result = {
@@ -99,6 +100,7 @@ def job_prompt(**kwargs):
     )
     p_state = redis_get_json(redis_key)
     if p_state and p_state.get('state') == AlgorithmState.ONGOING:
+        update_prediction_data(task_id, result)
         c = PromptResult(
             project_id=project_id,
             task_id=task_id,
