@@ -3,6 +3,7 @@ import { shallowEqualObjects } from 'shallow-equal';
 import { useAPI, WrappedResponse } from './ApiProvider';
 import { useAppStore } from './AppStoreProvider';
 import { useParams } from './RoutesProvider';
+import { template } from '../utils/util';
 
 type Empty = Record<string, never>
 
@@ -41,9 +42,9 @@ export const ProjectProvider: React.FunctionComponent = ({ children }) => {
 
     const projectInfo = result as unknown as APIProject;
 
-    const isIndentTemplate = projectInfo?.label_config?.indexOf('template-intent-classification-for-dialog') !== -1;
-
-    projectInfo.bread_crumbs_title = isIndentTemplate ? projectInfo?.title + window.t('intent_type_dlg',' (对话-意图分类)') : projectInfo?.title;
+    // const isIndentTemplate = projectInfo?.label_config?.indexOf('template-intent-classification-for-dialog') !== -1;
+    // projectInfo.bread_crumbs_title = isIndentTemplate ? projectInfo?.title + window.t('intent_type_dlg',' (对话-意图分类)') : projectInfo?.title;
+    projectInfo.bread_crumbs_title = `${projectInfo?.title} ${template.label(projectInfo, true)}`;
 
     if (shallowEqualObjects(projectData, projectInfo) === false) {
       setProjectData(projectInfo);

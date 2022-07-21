@@ -98,7 +98,8 @@ const assembleClass = (block: string, elem?: string, mix?: CNMix | CNMix[], mod?
   }
 
   const attachNamespace = (cls: string) => {
-    if (new RegExp(CSS_PREFIX).test(cls)) return cls;
+    //match prefix
+    if (new RegExp('^'+CSS_PREFIX).test(cls)) return cls;
     else return `${CSS_PREFIX}${cls}`;
   };
 

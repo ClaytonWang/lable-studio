@@ -191,7 +191,6 @@
   "label_clean": "Clean",
   "label_prediction": "Prediction",
   "label_prompt": "Prompt",
-  "intent_type_dlg": "Dialog - Intent type",
   "Nothing found": "Nothing found",
   "Try adjusting the filter": "Try adjusting the filter",
   "tip_nodata_yet": "Looks like you have not imported any data yet",
@@ -344,6 +343,12 @@
   "error_label_still_in": "These labels still exist in annotations",
   "annotations": "annotations",
   "Validation error": "Validation error",
+  "Intent Classification for Dialog": "Intent Classification for Dialog",
+  "Conversational AI - Response Generation": "Conversational AI - Response Generation",
   "Import Model":"Import Model",
-  "Models Management":"Models Management"
+  "Models Management":"Models Management",
+  "intention":"intention",
+  "clean":"clean",
+  "generation":"generation",
+  "other":"other"
 }

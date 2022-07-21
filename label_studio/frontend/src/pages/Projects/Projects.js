@@ -26,7 +26,7 @@ export const ProjectsPage = () => {
   const [currentPage, setCurrentPage] = useState(getCurrentPage());
   const [totalItems, setTotalItems] = useState(1);
   const setContextProps = useContextProps();
-  const defaultPageSize = parseInt(localStorage.getItem('pages:projects-list') ?? 30);
+  const defaultPageSize = parseInt(localStorage.getItem('pages:projects-list') ?? 10);
 
   const [modal, setModal] = React.useState(false);
   const openModal = setModal.bind(null, true);
