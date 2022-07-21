@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
 import { message } from 'antd';
 import { EditableProTable } from "@ant-design/pro-components";
 import { compact, trim } from "lodash";
@@ -64,8 +64,6 @@ const formatResponse = (response) => {
 export default forwardRef(({ showStatus }, ref) => {
   const api = useAPI();
   const { project } = useProject();
-  const [status, setStatus] = useState({});
-  const [modalVisible, setModalVisible] = useState(false);
   const tableRef = useRef();
   const modalRef = useRef();
 
@@ -131,21 +129,6 @@ export default forwardRef(({ showStatus }, ref) => {
     },
   }));
 
-  // useEffect(() => {
-  //   if (modalVisible && project.id) {
-  //     const sync = () => {
-  //       request.clQueryStatus().then((res) => {
-  //         setStatus(res);
-  //       });
-  //     };
-
-  //     sync();
-  //     const timer = setInterval(sync, 3000);
-
-  //     return () => clearInterval(timer);
-  //   }
-  // }, [request.clQueryStatus, project.id, modalVisible]);
-
   const handleExec = () => {
     request.clExec().then(showStatus);
   };
@@ -163,8 +146,6 @@ export default forwardRef(({ showStatus }, ref) => {
       <Modal
         bare
         ref={modalRef}
-        onShow={() => setModalVisible(true)}
-        onHide={() => setModalVisible(false)}
         style={{
           width: "calc(100vw - 96px)",
           minWidth: 1000,
@@ -176,9 +157,6 @@ export default forwardRef(({ showStatus }, ref) => {
           <Elem name="header">
             <Space>
               <Elem name="title">{t("clean_data_title", "数据清洗")}</Elem>
-              {/* <span>
-                {status ? `${status.finish} / ${status.total}` : null}
-              </span> */}
             </Space>
             <Space>
               <Elem name="buttons">
