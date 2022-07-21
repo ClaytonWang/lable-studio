@@ -12,50 +12,38 @@ import { useContextProps, useFixedLocation, useParams } from '../../providers/Ro
 import { addAction, deleteAction, deleteCrumb } from '../../services/breadrumbs';
 import { Block, Elem } from '../../utils/bem';
 import { isDefined } from '../../utils/helpers';
-import { template } from '../../utils/util';
 import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
 import CleanData from './CleanData';
 import ProjectStatus from './ProjectStatus';
+import DataOperate from './DataOperate';
 import { PromptLearnTemplate } from '../../components';
 import "./DataManager.styl";
 
-const refStatus = createRef();
-const refProm = createRef();
-const showStatus = (type) => {
-  refStatus?.current.status(type);
-};
+// 按钮相关操作
+const { refs, showStatus, actions } = (() => {
+  const refs = {
+    status: createRef(), 
+    clean: createRef(),
+    prompt: createRef(),
+    prediction: createRef(),
+  };
+  const showStatus = (type) => refs.status.current?.status(type);
+  const actions = {
+    clean: () => refs.clean.current?.show(),
+    prompt: () => refs.prompt.current?.show(),
+    prediction: (api, projectId) => () => {
+      api.callApi('mlPredictProcess', {
+        body: {
+          project_id: projectId,
+        },
+      }).then(() => showStatus('prediction'));
+    },
+  };
 
-const onPreButtonClick = (e,params) => {
-  // const mlQueryProgress = params.mlQueryProgress;
-  // const setProgress = params.setProgress;
-  const mlPredictProcess = params.mlPredictProcess;
-
-  mlPredictProcess().then(() => showStatus('prediction'));
-
-  // let progress = 0,count=0;
-
-  // refModal.current?.show();
-  // let t = setInterval(() => {
-  //   count = count + 1;
-  //   mlQueryProgress().then((rst) => {
-  //     progress = rst.rate * 100;
-  //     setProgress(progress);
-
-  //     if (progress >= 100 || (progress === 0 && count > 11)) {
-  //       clearInterval(t);
-  //       setProgress(0);
-  //       try { refModal.current?.hide(); } catch (e) { console.log(e); }
-  //       return;
-  //     }
-  //   });
-  // },1000);
-};
-
-const onPrePromButtonClick = () => {
-  refProm.current?.show();
-};
+  return { refs, actions, showStatus };
+})();
 
 const initializeDataManager = async (root, props, params) => {
   if (!window.LabelStudio) throw Error("Label Studio Frontend doesn't exist on the page");
@@ -64,11 +52,10 @@ const initializeDataManager = async (root, props, params) => {
   root.dataset.dmInitialized = true;
 
   const { ...settings } = root.dataset;
-  let isIndentTemplate = template.class(params.project) === 'intent-classification-for-dialog';
 
   const dmConfig = {
     root,
-    toolbar: "actions columns filters ordering wash-button pre-prom-button pre-button label-button loading-possum error-box  | refresh import-button export-button view-toggle",
+    toolbar: "actions columns filters ordering operate label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
     apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
     // apiGateway: `http://124.71.161.146:8080/api/dm`,
@@ -91,15 +78,13 @@ const initializeDataManager = async (root, props, params) => {
       keymap: window.APP_SETTINGS.editor_keymap,
     },
     instruments: {
-      'wash-button': () => {
-        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={params.handleClickClear} >{t("label_clean", "清洗")}</button>;
-      },
-      'pre-button': () => {
-        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPreButtonClick(e,params);}} >{t("label_prediction", "预标注(普通)")}</button>;
-      },
-      'pre-prom-button': () => {
-        return () => !isIndentTemplate?'':<button className="dm-button dm-button_size_medium dm-button_look_primary" onClick={(e) => { onPrePromButtonClick(e,params);}} >{t('label_prompt', "预标注(0样本)")}</button>;
-      },
+      // 自定义按钮
+      'operate': () => () => (
+        <DataOperate
+          project={params.project}
+          actions={params.actions}
+        />
+      ),
     },
     ...props,
     ...settings,
@@ -122,8 +107,6 @@ export const DataManagerPage = ({ ...props }) => {
   const DataManager = useLibrary('dm');
   const setContextProps = useContextProps();
   const [crashed, setCrashed] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const clearModalRef = useRef();
   const dataManagerRef = useRef();
   const projectId = project?.id;
 
@@ -132,12 +115,6 @@ export const DataManagerPage = ({ ...props }) => {
       body: {
         project_id: project.id,
       },
-    });
-  }, [project]);
-
-  const mlQueryProgress = useCallback(async () => {
-    return await api.callApi('mlPreLabelProgress', {
-      params: { project_id: project.id },
     });
   }, [project]);
 
@@ -159,11 +136,12 @@ export const DataManagerPage = ({ ...props }) => {
       {
         ...params,
         project,
+        actions: {
+          ...actions,
+          prediction: actions.prediction(api, project.id),
+        },
         autoAnnotation: isDefined(interactiveBacked),
-        setProgress,
-        mlQueryProgress,
         mlPredictProcess,
-        handleClickClear: () => clearModalRef.current?.show(),
       },
     ));
 
@@ -252,16 +230,16 @@ export const DataManagerPage = ({ ...props }) => {
     </Block>
   ) : (
     <>
-      <PromptLearnTemplate ref={refProm} projectId={projectId} showStatus={() => showStatus('prompt')} />
-      <ProjectStatus
-        ref={refStatus}
-        onFinish={{
-          clean: () => clearModalRef.current?.reload(),
-        }}
-      />
+      <PromptLearnTemplate ref={refs.prompt} projectId={projectId} showStatus={() => showStatus('prompt')} />
       <CleanData
         showStatus={() => showStatus('clean')}
-        ref={clearModalRef}
+        ref={refs.clean}
+      />
+      <ProjectStatus
+        ref={refs.status}
+        onFinish={{
+          clean: () => refs.clean.current?.reload(),
+        }}
       />
       <Block ref={root} name="datamanager"/>
     </>
