@@ -30,6 +30,6 @@ _api_urlpatterns_templates = [
 
 
 urlpatterns = [
-    path('api/model-manager', include(_api_urlpatterns)),
+    path('api/model-manager/', include(_api_urlpatterns)),
     path('model-manager/', include(_urlpatterns)),
 ]
