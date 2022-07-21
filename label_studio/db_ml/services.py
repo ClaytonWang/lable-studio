@@ -119,3 +119,72 @@ def redis_update_finish_state(redis_key, redis_data):
     if finish == int(redis_data.get('total', 0)):
         redis_data['state'] = AlgorithmState.FAILED
     redis_set_json(redis_key, redis_data)
+
+
+def update_prediction_data(task_id, prompt_data=None):
+    """
+    prompt 生成的数据写回 prediction 表
+     result = {
+        "task": text + kwargs.get('template', ''),
+        "annotation": res_text,
+        "confidence": confidence,
+        "average": {"正面标签": np.random.rand(), "负面标签": np.random.rand()},
+        "output":
+            [
+                {"template": "你好，我是模版A1",
+              "label": "正面",
+              # "score": "烂片%f" % np.random.rand(),
+              # "wgtedAvg": np.random.rand()
+                 },
+             {
+                 "template": "你好，我是模版B",
+              "label": "负面",
+              "score": "精品%f" % np.random.rand(),
+              "wgtedAvg": np.random.rand()}
+             ]
+    }
+    :param task_id:
+    :param prompt_data:
+    :return:
+    """
+    task = Task.objects.filter(id=task_id).first()
+    if not task:
+        return
+    annotation = prompt_data.get('annotation')
+    confidence = prompt_data.get('confidence')
+    pre_result = {
+        'origin': 'prompt',
+        'from_name': 'intent',
+        'to_name': 'dialogue',
+        'type': 'choices',
+        'value': {
+            'choices': [annotation], 'start': 0, 'end': 1
+        },
+    }
+    tag_data = dict(
+        task=task,
+        result=[pre_result],
+        score=round(confidence, 4),
+
+    )
+    obj, is_created = Prediction.objects.update_or_create(
+        defaults=tag_data, task=task
+    )
+    print('prompt write prediction table msg: ', is_created, str(tag_data))
+    pass
+
+
+def get_choice_values(result):
+    """
+    解析result 的choices
+    [{'type': 'choices', 'value': {'end': 1, 'start': 0, 'choices': ['肯定']}, 'to_name': 'dialogue', 'from_name': 'intent'}]
+    :param result:
+    :return:
+    """
+    choices = []
+    for item in result:
+        tmp_choices = item.get('value', {}).get('choices', [])
+        if not tmp_choices:
+            continue
+        choices += tmp_choices
+    return choices
