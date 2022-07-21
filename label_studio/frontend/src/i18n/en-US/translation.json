@@ -345,5 +345,9 @@
   "annotations": "annotations",
   "Validation error": "Validation error",
   "Import Model":"Import Model",
-  "Models Management":"Models Management"
+  "Models Management":"Models Management",
+  "intention":"intention",
+  "clean":"clean",
+  "generation":"generation",
+  "other":"other"
 }

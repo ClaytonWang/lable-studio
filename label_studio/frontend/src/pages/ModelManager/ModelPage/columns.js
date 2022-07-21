@@ -37,12 +37,26 @@ export const columns = [
   {
     title: '版本号',
     dataIndex: 'version',
-    key:'version',
+    key: 'version',
+    render: (_, record) => {
+      return (
+        <Elem name="version">
+          { record.version }
+        </Elem>
+      );
+    },
   },
   {
     title: '模型类型',
     dataIndex: 'type',
-    key:'type',
+    key: 'type',
+    render: (_, record) => {
+      return (
+        <Elem name="type">
+          { t(record.type) }
+        </Elem>
+      );
+    },
   },
   {
     title: '模型集',
