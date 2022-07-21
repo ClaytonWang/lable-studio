@@ -1,38 +1,76 @@
+import { Space } from '../../../components/Space/Space';
+import { Elem } from '../../../utils/bem';
+import { Userpic } from '../../../components';
+import { format } from 'date-fns';
+
 export const columns = [
   {
     title: '模型名称',
-    dataIndex: 'name',
-    key: 'name',
+    dataIndex: 'title',
+    key: 'title',
     render: (text) => <a>{text}</a>,
   },
   {
     title: '创建时间',
-    dataIndex: 'create_time',
-    key: 'create_time',
+    dataIndex: 'created_at',
+    key: 'created_at',
+    render: (_, record) => {
+      return (
+        <Elem name="created-date">
+          {format(new Date(record.created_at), "yyyy-MM-dd HH:mm")}
+        </Elem>
+      );
+    },
   },
   {
     title: '创建人',
-    dataIndex: 'create_by',
-    key:'',
+    dataIndex: 'created_by',
+    key: 'created_by',
+    render: (_, record) => {
+      return (
+        <Elem name="created-by">
+          <Userpic src="#" user={record.created_by} showUsername/>
+        </Elem>
+      );
+    },
   },
   {
-    title: '',
-    dataIndex: '',
-    key:'',
+    title: '版本号',
+    dataIndex: 'version',
+    key:'version',
   },
   {
-    title: '',
-    dataIndex: '',
-    key:'',
+    title: '模型类型',
+    dataIndex: 'type',
+    key:'type',
   },
   {
-    title: '',
-    dataIndex: '',
-    key:'',
+    title: '模型集',
+    dataIndex: 'model',
+    key: 'model',
+    render: (_,record) => {
+      if (!record.model) return '/';
+      return record.model;
+    },
   },
   {
-    title: '',
-    dataIndex: '',
-    key:'',
+    title: '项目集',
+    dataIndex: 'project',
+    key: 'project',
+    render: (_,record) => {
+      if (!record.project) return '/';
+      return record.project;
+    },
+  },
+  {
+    title: '操作',
+    dataIndex: 'action',
+    key: 'action',
+    render: (_, record) => (
+      <Space size="middle">
+        <a>编辑</a>
+        <a>导出</a>
+      </Space>
+    ),
   },
 ];

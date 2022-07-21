@@ -8,6 +8,7 @@ import { Block, Elem } from '../../utils/bem';
 import { Oneof } from '../../components/Oneof/Oneof';
 import { Loading } from '../../components';
 import { ApiContext } from '../../providers/ApiProvider';
+import "./index.styl";
 
 const getCurrentPage = () => {
   const pageNumberFromURL = new URLSearchParams(location.search).get("page");
@@ -60,21 +61,21 @@ export const ModelManagerPage = () => {
   }, []);
 
   return (
-    <Block name="projects-page">
+    <Block name="models-page">
       <Oneof value={networkState}>
         <Elem name="loading" case="loading">
           <Loading size={64}/>
         </Elem>
+        <Elem name="content" case="loaded">
+          <ModelList
+            modelList={modelList}
+            currentPage={currentPage}
+            totalItems={totalItems}
+            loadNextPage={loadNextPage}
+            pageSize={defaultPageSize} />
+          { modal && <ModelImport onClose={closeModal} /> }
+        </Elem>
       </Oneof>
-      <Elem name="content" case="loaded">
-        <ModelList
-          modelList={modelList}
-          currentPage={currentPage}
-          totalItems={totalItems}
-          loadNextPage={loadNextPage}
-          pageSize={defaultPageSize} />
-        { modal && <ModelImport onClose={closeModal} /> }
-      </Elem>
     </Block>
   );
 };
