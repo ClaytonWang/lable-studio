@@ -32,7 +32,7 @@ const EditableCell = ({
             },
           ]}
         >
-          <TextArea placeholder='请输入提示学习模板' allowClear />
+          <TextArea placeholder='请输入提示学习模板,例:[dlg]你的心情很[mask]' allowClear />
         </Form.Item>
       ) : (
         <span style={{ width:540, wordWrap: 'break-word', wordBreak: 'break-word' }}>{children}</span>

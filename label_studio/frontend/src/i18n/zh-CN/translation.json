@@ -346,5 +346,7 @@
   "annotations": "注释",
   "Validation error": "验证错误",
   "Intent Classification for Dialog": "对话-意图分类",
-  "Conversational AI - Response Generation": "对话生成"
+  "Conversational AI - Response Generation": "对话生成",
+  "Import Model":"导入模型",
+  "Models Management":"模型管理"
 }

@@ -344,5 +344,7 @@
   "annotations": "annotations",
   "Validation error": "Validation error",
   "Intent Classification for Dialog": "Intent Classification for Dialog",
-  "Conversational AI - Response Generation": "Conversational AI - Response Generation"
+  "Conversational AI - Response Generation": "Conversational AI - Response Generation",
+  "Import Model":"Import Model",
+  "Models Management":"Models Management"
 }

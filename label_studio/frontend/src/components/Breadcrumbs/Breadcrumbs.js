@@ -16,6 +16,7 @@ export const Breadcrumbs = () => {
   const findComponent = useFindRouteComponent();
   const [breadcrumbs, setBreadcrumbs] = useState(reactBreadcrumbs);
 
+  console.log(reactBreadcrumbs);
   useEffect(() => {
     if (reactBreadcrumbs.length) {
       setBreadcrumbs(reactBreadcrumbs);
