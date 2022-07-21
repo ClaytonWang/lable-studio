@@ -19,7 +19,7 @@ export const API_CONFIG = {
     deleteProject: "DELETE:/projects/:pk",
 
     //Model configer
-    models: "/models",
+    modelManager: "GET:/model-manager",
 
     // Config and Import
     configTemplates: "/templates",

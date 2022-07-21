@@ -346,5 +346,9 @@
   "Intent Classification for Dialog": "Intent Classification for Dialog",
   "Conversational AI - Response Generation": "Conversational AI - Response Generation",
   "Import Model":"Import Model",
-  "Models Management":"Models Management"
+  "Models Management":"Models Management",
+  "intention":"intention",
+  "clean":"clean",
+  "generation":"generation",
+  "other":"other"
 }
