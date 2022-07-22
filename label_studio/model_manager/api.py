@@ -131,6 +131,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         result = dict(
             type=dict(MODEL_TYPE),
             version=[item['version'] for item in query],
+            mdoel_set=[],
+            project_set=[],
         )
 
         return Response(status=status.HTTP_201_CREATED, data=result)
