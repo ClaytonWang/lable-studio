@@ -1,9 +1,9 @@
 import React, { useCallback ,useState } from 'react';
 import { Select } from '../../../components/Form/Elements';
 import { Col, Form, Row } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import { Button } from '../../../components';
 import "./SearchBar.less";
-import { Search } from '../../../assets/icons';
 
 const columns = [
   {
@@ -123,7 +123,7 @@ export const SearchBar = (props) => {
       const obj = {};
 
       fields.map((v) => {
-        obj[v.key]=v.value;
+        obj[v.key]=v.value==='none'?'':v.value;
       });
       await props.onSearch(props.pageSize, { type:obj['type'], version:obj['version'], mdoel_group:obj['model_set'], project_group:obj['project_set'] });
     }
@@ -147,11 +147,11 @@ export const SearchBar = (props) => {
         key={ 'action'}
         span={4}
         style={{
-          textAlign: 'right',
+          textAlign: 'left',
         }}
       >
-        <Button look="primary" size="compact" onClick={handleSearch} >搜索</Button>
-        <Button
+        <Button look="primary" size="compact" onClick={handleSearch} icon={<SearchOutlined style={{ width:20,height:20 }}/>}>搜索</Button>
+        {/* <Button
           size="compact"
           style={{
             margin: '0 8px',
@@ -161,7 +161,7 @@ export const SearchBar = (props) => {
           }}
         >
           清除
-        </Button>
+        </Button> */}
       </Col>,
     );
     return children;
@@ -171,7 +171,6 @@ export const SearchBar = (props) => {
     <Form
       fields={fields}
       form={form}
-      name="advanced_search"
       className="ant-advanced-search-form"
     >
       <Row gutter={20}>{getFields()}</Row>

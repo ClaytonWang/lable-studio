@@ -8,7 +8,16 @@ export const columns = [
     title: '模型名称',
     dataIndex: 'title',
     key: 'title',
-    render: (text) => <a>{text}</a>,
+    render: (_, record) => {
+      if (record.type === 'clean')
+        return (
+          <Elem name="title">
+            { _ }
+          </Elem>
+        );
+      else
+        return (<a>{record.title}</a>);
+    },
   },
   {
     title: '创建时间',

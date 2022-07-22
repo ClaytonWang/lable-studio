@@ -20,6 +20,7 @@ export const API_CONFIG = {
 
     //Model configer
     modelManager: "GET:/model-manager",
+    importModel:"POST:/model-manager",
 
     // Config and Import
     configTemplates: "/templates",
