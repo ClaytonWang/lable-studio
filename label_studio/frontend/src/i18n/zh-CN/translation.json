@@ -348,5 +348,9 @@
   "Intent Classification for Dialog": "对话-意图分类",
   "Conversational AI - Response Generation": "对话生成",
   "Import Model":"导入模型",
-  "Models Management":"模型管理"
+  "Models Management":"模型管理",
+  "intention":"对话意图",
+  "clean":"清洗模型",
+  "generation":"对话生成",
+  "other":"其他"
 }

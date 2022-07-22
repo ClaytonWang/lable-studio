@@ -74,6 +74,7 @@ def job_predict(*args, **kwargs):
     if _type == 'pre':
         # label-studio数据结构
         pre_result = {
+            'origin': 'prediction',
             'from_name': 'intent',
             'to_name': 'dialogue',
             'type': 'choices',

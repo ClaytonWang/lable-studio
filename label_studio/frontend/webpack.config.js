@@ -41,11 +41,11 @@ if (process.env.NODE_ENV === "production") {
   optimizer.minimize = true;
   optimizer.minimizer = [new TerserPlugin(), new CssMinimizerPlugin()];
   (optimizer.runtimeChunk = false),
-    (optimizer.splitChunks = {
-      cacheGroups: {
-        default: false,
-      },
-    });
+  (optimizer.splitChunks = {
+    cacheGroups: {
+      default: false,
+    },
+  });
 }
 
 if (process.env.BUILD_SENTRY && SENTRY.AUTH_TOKEN && SENTRY.RELEASE) {
@@ -60,7 +60,7 @@ if (process.env.BUILD_SENTRY && SENTRY.AUTH_TOKEN && SENTRY.RELEASE) {
       deploy: {
         env: process.env.NODE_ENV,
       },
-    })
+    }),
   );
 }
 
@@ -71,8 +71,8 @@ module.exports = {
     main: "./src/index.js",
     i18n: "./src/i18n.js",
   },
-  output: output,
-  plugins: plugins,
+  output,
+  plugins,
   optimization: optimizer,
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
