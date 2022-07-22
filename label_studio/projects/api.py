@@ -41,6 +41,7 @@ from core.utils.io import find_dir, find_file, read_yaml
 
 from data_manager.functions import get_prepared_queryset, filters_ordering_selected_items_exist
 from data_manager.models import View
+from core.utils.exceptions import LabelStudioValidationErrorSentryIgnored
 
 logger = logging.getLogger(__name__)
 
@@ -323,6 +324,60 @@ class ProjectLabelConfigValidateAPI(generics.RetrieveAPIView):
         # check new config includes meaningful changes
         has_changed = config_essential_data_has_changed(label_config, project.label_config)
         project.validate_config(label_config, strict=True)
+
+        old_label_config = project.label_config
+        from tasks.models import Annotation, Prediction
+        if has_changed and \
+                'template-intent-classification-for-dialog' in label_config:
+
+            from core.label_config import parse_config
+            from db_ml.services import get_choice_values
+            new_config = parse_config(label_config)
+            old_config = parse_config(old_label_config)
+
+            if not ((new_config and 'intent' in new_config)
+                    or (old_config and 'intent' in old_config)):
+                return
+
+            new_labels, old_labels = [], []
+            if new_config and 'intent' in new_config:
+                new_labels = new_config.get('intent', {}).get('labels', [])
+            if old_config and 'intent' in old_config:
+                old_labels = old_config.get('intent', []).get('labels', [])
+
+            # diff_label = list(set(new_labels) ^ set(old_labels))
+            # if not diff_label:
+            #     return
+
+            # 删除做这个判断，旧的label有，新的label没有，定义为删除
+            diff_label = list(set(old_labels).difference(set(new_labels)))
+            if not diff_label:
+                return
+
+            # 已存在和不存在
+            task_query = Task.objects.filter(project=project).values("id")
+            task_ids = [item['id'] for item in task_query]
+            ann_query = Annotation.objects.filter(task_id__in=task_ids).values('task_id')
+            ann_task_id = [item['task_id'] for item in ann_query]
+            pre_task_id = [
+                item['id'] for item in task_query
+                if item['id'] not in ann_task_id
+            ]
+            pre_query = Prediction.objects.filter(
+                task_id__in=pre_task_id).values('result')
+            for query in pre_query:
+                result = query.get('result', [])
+                check_result = get_choice_values(result)
+
+                for diff in diff_label:
+                    if diff not in check_result:
+                        continue
+                    if diff:
+                        raise LabelStudioValidationErrorSentryIgnored(
+                            f'These labels still exist in annotations:\n'
+                            f'{str(diff)}'
+                        )
+
         return Response({'config_essential_data_has_changed': has_changed}, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(auto_schema=None)

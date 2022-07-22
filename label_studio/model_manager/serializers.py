@@ -11,41 +11,40 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
     """
     模型导入名称，对应数据表的模型集
     实际模型名字通过【模型集】+ 【版本输出】
-
     """
     class Meta:
         model = ModelManager
-        fields = '__all__'
+        exclude = ['token']
+        # fields = '__all__'
 
 
 class ModelManagerDetailSerializer(ModelManagerListSerializer):
-    pass
+    class Meta:
+        model = ModelManager
+        fields = '__all__'
 
 
 class ModelManagerCreateSerializer(serializers.ModelSerializer):
 
     """
     """
+    created_by_id = serializers.IntegerField(required=True)
+    organization_id = serializers.IntegerField(required=True)
 
     class Meta:
         model = ModelManager
         fields = (
-            'title', 'model', 'organization', 'version', 'project', 'url',
-            'type', 'created_by', 'description',
+            'title', 'model', 'organization_id', 'created_by_id',
+            'version', 'project', 'url', 'type', 'description',
         )
 
 
-class ModelManagerUpdateSerializer(serializers.ModelSerializer):
+class ModelManagerUpdateSerializer(ModelManagerCreateSerializer):
 
     """
     """
-
-    class Meta:
-        model = ModelManager
-        fields = (
-            'model_set', 'organization', 'version',
-            'type', 'created_by', 'description',
-        )
+    created_by_id = serializers.IntegerField(required=False)
+    organization_id = serializers.IntegerField(required=False)
 
 
 # def validate_label_config(self, config):
