@@ -6,30 +6,72 @@ import { ModelImport } from "./ModelPage/ModelImport";
 import { ModelExport } from "./ModelPage/ModelExport";
 import { Block, Elem } from '../../utils/bem';
 import { CloudUploadOutlined } from '@ant-design/icons';
-import { Oneof } from '../../components/Oneof/Oneof';
-import { Loading } from '../../components';
-
+import { ApiContext } from '../../providers/ApiProvider';
 import "./index.styl";
 
+const getCurrentPage = () => {
+  const pageNumberFromURL = new URLSearchParams(location.search).get("page");
+
+  return pageNumberFromURL ? parseInt(pageNumberFromURL) : 1;
+};
 
 export const ModelManagerPage = () => {
-
+  const api = useContext(ApiContext);
   const setContextProps = useContextProps();
-
+  const [totalItems, setTotalItems] = useState(1);
+  const [modelList, setmodelList] = React.useState([]);
+  const [networkState, setNetworkState] = useState(null);
   const [modal, setModal] = useState(false);
   const openModal = setModal.bind(null, true);
   const closeModal = setModal.bind(null, false);
+  const defaultPageSize = parseInt(localStorage.getItem('pages:projects-list') ?? 10);
+  const [currentPage, setCurrentPage] = useState(getCurrentPage());
 
+  const fetchModelList = async (
+    page = currentPage,
+    pageSize = defaultPageSize,
+    searchFields,
+  ) => {
+    setNetworkState(true);
+    const data = await api.callApi("modelManager", {
+      params: {
+        page,
+        page_size: pageSize,
+        ...searchFields,
+      },
+    });
+
+    setTotalItems(data?.count ?? 1);
+    setmodelList(data.results ?? []);
+    setNetworkState(false);
+  };
+
+  const loadNextPage = async (page, pageSize,searchFields) => {
+    setCurrentPage(page);
+    await fetchModelList(page, pageSize,searchFields);
+  };
 
   useEffect(() => {
+    fetchModelList();
     setContextProps({ openModal });
   }, []);
 
   return (
     <Block name="models-page">
       <Elem name="content" case="loaded">
-        <ModelList />
-        { modal && <ModelImport onClose={closeModal} /> }
+        <ModelList
+          loading={ networkState}
+          data={modelList}
+          currentPage={currentPage}
+          totalItems={totalItems}
+          loadNextPage={loadNextPage}
+          pageSize={defaultPageSize} />
+        {modal && (
+          <ModelImport onClose={() => {
+            fetchModelList();
+            closeModal();
+          }} />
+        ) }
       </Elem>
     </Block>
   );

@@ -1,27 +1,28 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useContext,useState } from 'react';
 import { useHistory } from "react-router";
 import { Modal } from '../../../components/Modal/Modal';
-import { cn } from '../../../utils/bem';
 import { Form } from 'antd';
 import { Button } from '../../../components';
-import { Input,Select } from '../../../components/Form';
+import { Input, Select } from '../../../components/Form';
+import { ApiContext } from '../../../providers/ApiProvider';
 
 export const ModelImport = ({ onClose }) => {
-  const rootClass = cn("create-project");
+  const api = useContext(ApiContext);
   const [form] = Form.useForm();
   const history = useHistory();
+  const [waiting,setWaiting] = useState(false);
 
   const onHide = useCallback(async () => {
-    history.replace("/model-configer");
+    history.replace("/model-manager");
     onClose?.();
   }, []);
 
   const layout = {
     labelCol: {
-      span: 6,
+      span: 5,
     },
     wrapperCol: {
-      span: 18,
+      span: 19,
     },
   };
   const tailLayout = {
@@ -29,6 +30,21 @@ export const ModelImport = ({ onClose }) => {
       offset: 8,
       span: 16,
     },
+  };
+
+  const importModel = async (values) => {
+    setWaiting(true);
+    try {
+      await api.callApi("importModel", {
+        body: values,
+        errorFilter: () => true,
+      });
+      onHide();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setWaiting(false);
+    }
   };
 
   return (
@@ -40,11 +56,13 @@ export const ModelImport = ({ onClose }) => {
       title={t("Import Model")}
     >
       <Form
-        className={rootClass}
+        style={{ marginTop:20 }}
+        initialValues={{ title: '', type: '', url: '' }}
         {...layout}
         form={form}
         layout="horizontal"
         name="form_in_modal"
+        onFinish={ importModel}
       >
         <Form.Item
           name="title"
@@ -56,28 +74,30 @@ export const ModelImport = ({ onClose }) => {
             },
           ]}
         >
-          <Input placeholder="模型名称"/>
+          <Input style={{ width:300 }} placeholder="模型名称"/>
         </Form.Item>
         <Form.Item
-          name="model_type"
+          name="type"
           label="类型"
           rules={[{
             required: true,
             message: '请选择模型类型。',
           }]}>
-          <Select
-            defaultValue={null}
-            options={[
-              { label: '对话意图分类', value: 'intention' },
-              { label: '对话生成', value: 'generation' },
-              { label: '清洗模型', value: 'clean' },
-              { label: '其他', value: 'other' },
-            ]}
-            placeholder={t("Please select Model type")}
-          />
+          <div style={{ width: 300 }} >
+            <Select
+              options={[
+                { label: '请选择模型类型', value: '' },
+                { label: '对话意图分类', value: 'intention' },
+                { label: '对话生成', value: 'generation' },
+                { label: '清洗模型', value: 'clean' },
+                { label: '其他', value: 'other' },
+              ]}
+              placeholder={t("Please select Model type")}
+            />
+          </div>
         </Form.Item>
         <Form.Item
-          name="title"
+          name="url"
           label="URL"
           rules={[
             {
@@ -86,13 +106,20 @@ export const ModelImport = ({ onClose }) => {
             },
           ]}
         >
-          <Input placeholder="模型URL"/>
+          <Input style={{ width:300 }} placeholder="模型URL"/>
         </Form.Item>
         <Form.Item {...tailLayout}>
-          <Button type="primary" >
+          <Button
+            size="compact"
+            style={{
+              margin: '0 8px',
+            }}
+            onClick={onHide}
+            waiting={waiting}
+          >
               取消
           </Button>
-          <Button htmlType="button">
+          <Button size="compact" look="primary" type="submit" waiting={waiting}>
               立即导入
           </Button>
         </Form.Item>
