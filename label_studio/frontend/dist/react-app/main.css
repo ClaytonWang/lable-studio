@@ -1740,21 +1740,6 @@ input.ls-input[type=radio] {
   line-height: 0;
 }
 
-
-.dlg-root{
-  margin: 0;
-  padding: 0;
-}
-.ls-modal__header{
-  padding: 10px 20px;
-}
-.ls-modal__footer{
-  padding: 20px 0px;
-}
-.dlg-content{
-  margin: 0 20px;
-}
-
 /* BASICS */
 
 .CodeMirror {
@@ -27645,6 +27630,21 @@ div.ant-typography-edit-content.ant-typography-rtl {
 }
 .ant-result-rtl .ant-result-extra > *:last-child {
   margin-left: 0;
+}
+
+
+.dlg-root{
+  margin: 0;
+  padding: 0;
+}
+.ls-modal__header{
+  padding: 10px 20px;
+}
+.ls-modal__footer{
+  padding: 20px 0px;
+}
+.dlg-content{
+  margin: 0 20px;
 }
 
 .ls-datamanager {
