@@ -76,6 +76,9 @@ module.exports = {
   optimization: optimizer,
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    alias: {
+      '@': path.resolve(__dirname, 'src'),
+    },
   },
   module: {
     rules: [

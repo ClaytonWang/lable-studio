@@ -15,10 +15,8 @@ import { isDefined } from '../../utils/helpers';
 import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
-import CleanData from './CleanData';
 import ProjectStatus from './ProjectStatus';
-import DataOperate from './DataOperate';
-import { PromptLearnTemplate } from '../../components';
+import DataOperate, { Clean, Prediction, Prompt } from './DataOperate';
 import "./DataManager.styl";
 
 // 按钮相关操作
@@ -33,13 +31,7 @@ const { refs, showStatus, actions } = (() => {
   const actions = {
     clean: () => refs.clean.current?.show(),
     prompt: () => refs.prompt.current?.show(),
-    prediction: (api, projectId) => () => {
-      api.callApi('mlPredictProcess', {
-        body: {
-          project_id: projectId,
-        },
-      }).then(() => showStatus('prediction'));
-    },
+    prediction: () => refs.prediction.current?.show(),
   };
 
   return { refs, actions, showStatus };
@@ -136,10 +128,7 @@ export const DataManagerPage = ({ ...props }) => {
       {
         ...params,
         project,
-        actions: {
-          ...actions,
-          prediction: actions.prediction(api, project.id),
-        },
+        actions,
         autoAnnotation: isDefined(interactiveBacked),
         mlPredictProcess,
       },
@@ -230,8 +219,9 @@ export const DataManagerPage = ({ ...props }) => {
     </Block>
   ) : (
     <>
-      <PromptLearnTemplate ref={refs.prompt} projectId={projectId} showStatus={() => showStatus('prompt')} />
-      <CleanData
+      <Prediction ref={refs.prediction} project={project} showStatus={showStatus} />
+      <Prompt ref={refs.prompt} project={project} showStatus={showStatus} />
+      <Clean
         showStatus={() => showStatus('clean')}
         ref={refs.clean}
       />
