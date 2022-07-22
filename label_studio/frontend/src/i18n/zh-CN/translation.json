@@ -352,5 +352,7 @@
   "intention":"对话意图",
   "clean":"清洗模型",
   "generation":"对话生成",
-  "other":"其他"
+  "other":"其他",
+  "Please select Model type":"请选择模型类型",
+  "ImportNow":"立即导入"
 }

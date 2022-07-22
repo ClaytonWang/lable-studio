@@ -350,5 +350,7 @@
   "intention":"intention",
   "clean":"clean",
   "generation":"generation",
-  "other":"other"
+  "other":"other",
+  "Please select Model type":"Please select Model type",
+  "ImportNow":"Import now"
 }
