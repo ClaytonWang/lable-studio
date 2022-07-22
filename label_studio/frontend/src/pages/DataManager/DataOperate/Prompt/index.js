@@ -12,7 +12,7 @@ const Prompt = forwardRef(({ project, showStatus }, ref) => {
   const request = useCallback(() => {
     return api.callApi('mlPromptPredict', {
       body: {
-        project_id: project.id,
+        project: project.id,
       },
     }).then(() => showStatus('prompt'));
   }, [project]);
