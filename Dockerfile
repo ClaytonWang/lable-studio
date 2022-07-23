@@ -10,8 +10,8 @@ WORKDIR /label-studio/label_studio/frontend
 COPY label_studio/frontend .
 COPY label_studio/__init__.py /label-studio/label_studio/__init__.py
 
-RUN --mount=type=cache,target=$YARN_CACHE_FOLDER \
-    yarn && yarn run build:production
+#RUN --mount=type=cache,target=$YARN_CACHE_FOLDER \
+ RUN yarn && yarn run build:production
 
 
 FROM ubuntu:20.04
