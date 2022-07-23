@@ -53,8 +53,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
+      #- name: Set up QEMU
+      #  uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx 🏗️
         id: buildx
@@ -92,7 +92,7 @@ jobs:
         id: build_and_push
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
+          #platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{env.DOCKER_TAG}}
           labels: ${{ steps.meta.outputs.labels }}
