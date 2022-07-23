@@ -37,7 +37,6 @@ export const ModelImport = ({ onClose }) => {
     try {
       await api.callApi("importModel", {
         body: values,
-        errorFilter: () => true,
       });
       onHide();
     } catch (e) {
