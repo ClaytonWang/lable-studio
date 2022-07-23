@@ -1,6 +1,5 @@
 name: " Build & Deploy"
 
-
 on:
   push:
     branches: [ "master" , "development", "release/*"]
