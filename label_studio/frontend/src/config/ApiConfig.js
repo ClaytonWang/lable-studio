@@ -18,9 +18,12 @@ export const API_CONFIG = {
     createProject: "POST:/projects",
     deleteProject: "DELETE:/projects/:pk",
 
-    //Model configer
+    //Model manager
     modelManager: "GET:/model-manager",
-    importModel:"POST:/model-manager",
+    importModel: "POST:/model-manager",
+    editModel: "PATCH:/model-manager/:pk",
+    exportModel: "GET:/model-manager/export",
+    filtersModel:"GET:/model-manager/select",
 
     // Config and Import
     configTemplates: "/templates",

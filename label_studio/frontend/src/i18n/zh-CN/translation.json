@@ -354,5 +354,6 @@
   "generation":"对话生成",
   "other":"其他",
   "Please select Model type":"请选择模型类型",
-  "ImportNow":"立即导入"
+  "ImportNow":"立即导入",
+  "Export Model":"导出模型"
 }
