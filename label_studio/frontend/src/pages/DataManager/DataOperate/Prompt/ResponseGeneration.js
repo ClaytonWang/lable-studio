@@ -2,7 +2,7 @@ import { Form, InputNumber } from 'antd';
 import { Modal } from "@/components/Modal/Modal";
 import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";
-import { Tags } from "@/components/Tags/Tags";
+import { TagList } from "@/components/TagList/TagList";
 import { PromptTemplate } from "@/components/PromptTemplate/PromptTemplate";
 
 const formItemLayout = {
@@ -33,7 +33,7 @@ const ResponseGeneration = ({ close }) => {
           name="tags"
           label="标签"
         >
-          <Tags />
+          <TagList />
         </Form.Item>
       </Form>
       <Modal.Footer>
