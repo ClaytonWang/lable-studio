@@ -7,7 +7,6 @@ import { Button } from "@/components/Button/Button";
 import { Icon } from "@/components/Icon/Icon";
 import { Space } from "@/components/Space/Space";
 import { useAPI } from "@/providers/ApiProvider";
-import "./DialogIntent.css";
 
 const { TextArea } = Input;
 
@@ -302,7 +301,7 @@ const PromptLearnTemplate = ({ project, request, close }) => {
   return (
     <div className={"dlg-root"}>
       <Modal.Header>
-        <span style={{ fontSize: 16, fontWeight: 700 }}>预标注(提示学习)</span>
+        <span>预标注(提示学习)</span>
       </Modal.Header>
       <div className={"dlg-content"}>
         <Form form={form} component={false}>
@@ -341,7 +340,7 @@ const PromptLearnTemplate = ({ project, request, close }) => {
         </Form>
       </div>
       <Modal.Footer>
-        <div style={{ marginRight: 20 }}>
+        <div>
           <Space align="end">
             <Button
               onClick={() => {

@@ -4,6 +4,7 @@ import { useAPI } from "@/providers/ApiProvider";
 import { template } from '@/utils/util';
 import ResponseGeneration from './ResponseGeneration';
 import DialogIntent from './DialogIntent';
+import './index.less';
 
 const Prompt = forwardRef(({ project, showStatus }, ref) => {
   const modalRef = useRef();
@@ -39,7 +40,7 @@ const Prompt = forwardRef(({ project, showStatus }, ref) => {
   }));
 
   return (
-    <Modal bare ref={modalRef} style={{ width:800 }}>
+    <Modal className="prompt-zone" bare ref={modalRef} style={{ width:800 }}>
       {
         Comp ? <Comp close={close} request={request} project={project} /> : null
       }

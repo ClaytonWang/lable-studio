@@ -3,6 +3,7 @@ import { Modal } from "@/components/Modal/Modal";
 import { useAPI } from "@/providers/ApiProvider";
 import { template } from '@/utils/util';
 import ResponseGeneration from './ResponseGeneration';
+import './index.less';
 
 const Prediction = forwardRef(({ project, showStatus }, ref) => {
   const modalRef = useRef();
@@ -38,7 +39,7 @@ const Prediction = forwardRef(({ project, showStatus }, ref) => {
   }));
 
   return (
-    <Modal bare ref={modalRef}>
+    <Modal className="prediction-zone" bare ref={modalRef} style={{ width:800 }}>
       <ResponseGeneration close={close} request={request} project={project} />
     </Modal>
   );
