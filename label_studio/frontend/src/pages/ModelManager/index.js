@@ -3,7 +3,6 @@ import { ModelList } from "./ModelPage/ModelList";
 import { Button } from '../../components';
 import { useContextProps } from '../../providers/RoutesProvider';
 import { ModelImport } from "./ModelPage/ModelImport";
-import { ModelExport } from "./ModelPage/ModelExport";
 import { Block, Elem } from '../../utils/bem';
 import { CloudUploadOutlined } from '@ant-design/icons';
 import { ApiContext } from '../../providers/ApiProvider';
@@ -67,8 +66,10 @@ export const ModelManagerPage = () => {
           loadNextPage={loadNextPage}
           pageSize={defaultPageSize} />
         {modal && (
-          <ModelImport onClose={() => {
-            fetchModelList();
+          <ModelImport onClose={(force) => {
+            if (force) {
+              fetchModelList();
+            }
             closeModal();
           }} />
         ) }
