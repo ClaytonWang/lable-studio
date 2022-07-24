@@ -66,35 +66,10 @@ export const ModelExport = ({ onClose }) => {
         <Form.Item
           name="title"
           label="模型名称"
-          rules={[
-            {
-              required: true,
-              message: '请输入模型名称,且不能超过20个字符。',
-            },
-          ]}
         >
-          <Input style={{ width:300 }} placeholder="模型名称"/>
+          <Input disabled style={{ width:300 }} placeholder="模型名称"/>
         </Form.Item>
-        <Form.Item
-          name="type"
-          label="类型"
-          rules={[{
-            required: true,
-            message: '请选择模型类型。',
-          }]}>
-          <div style={{ width: 300 }} >
-            <Select
-              options={[
-                { label: '请选择模型类型', value: '' },
-                { label: '对话意图分类', value: 'intention' },
-                { label: '对话生成', value: 'generation' },
-                { label: '清洗模型', value: 'clean' },
-                { label: '其他', value: 'other' },
-              ]}
-              placeholder={t("Please select Model type")}
-            />
-          </div>
-        </Form.Item>
+
         <Form.Item
           name="url"
           label="URL"
@@ -119,7 +94,7 @@ export const ModelExport = ({ onClose }) => {
               取消
           </Button>
           <Button size="compact" look="primary" type="submit" waiting={waiting}>
-              立即导入
+              立即导出
           </Button>
         </Form.Item>
       </Form>
