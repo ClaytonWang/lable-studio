@@ -32,13 +32,17 @@ export const ModelExport = ({ data,onClose }) => {
     },
   };
 
-  const onFinish = async (values) => {
+  const onFinish = async () => {
     setWaiting(true);
     try {
-      await api.callApi("importModel", {
-        body: values,
+      const values = form.getFieldsValue(Object.keys(data));
+
+      await api.callApi("exportModel", {
+        params: values,
       });
+
       onHide(true);
+
     } catch (e) {
       console.error(e);
     } finally {
