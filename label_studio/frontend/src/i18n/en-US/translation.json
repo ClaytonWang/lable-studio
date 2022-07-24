@@ -352,5 +352,6 @@
   "generation":"generation",
   "other":"other",
   "Please select Model type":"Please select Model type",
-  "ImportNow":"Import now"
+  "ImportNow":"Import now",
+  "Export Model":"Export Model"
 }

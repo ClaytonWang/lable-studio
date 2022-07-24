@@ -104,7 +104,9 @@
     "truncate-middle": "^1.0.6",
     "typescript": "^4.2.2",
     "webpack": "^5.21.2",
-    "webpack-cli": "^4.5.0"
+    "webpack-cli": "^4.5.0",
+    "@ant-design/icons": "4.7.0",
+    "@ant-design/pro-components": "^1.1.5"
   },
   "babel": {
     "presets": [
@@ -168,7 +170,6 @@
     "browserContext": "default"
   },
   "dependencies": {
-    "@ant-design/pro-components": "^1.1.5",
     "diff": "^5.1.0",
     "i18next": "^21.8.9",
     "jquery-i18next": "^1.2.1",

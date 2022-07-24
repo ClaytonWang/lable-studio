@@ -3,18 +3,18 @@ import { useHistory } from "react-router";
 import { Modal } from '../../../components/Modal/Modal';
 import { Form } from 'antd';
 import { Button } from '../../../components';
-import { Input, Select } from '../../../components/Form';
+import { Input } from '../../../components/Form';
 import { ApiContext } from '../../../providers/ApiProvider';
 
-export const ModelExport = ({ onClose }) => {
+export const ModelExport = ({ data,onClose }) => {
   const api = useContext(ApiContext);
   const [form] = Form.useForm();
   const history = useHistory();
   const [waiting,setWaiting] = useState(false);
 
-  const onHide = useCallback(async () => {
+  const onHide = useCallback(async (force) => {
     history.replace("/model-manager");
-    onClose?.();
+    onClose?.(force);
   }, []);
 
   const layout = {
@@ -32,13 +32,17 @@ export const ModelExport = ({ onClose }) => {
     },
   };
 
-  const importModel = async (values) => {
+  const onFinish = async () => {
     setWaiting(true);
     try {
-      await api.callApi("importModel", {
-        body: values,
+      const values = form.getFieldsValue(Object.keys(data));
+
+      await api.callApi("exportModel", {
+        params: values,
       });
-      onHide();
+
+      onHide(true);
+
     } catch (e) {
       console.error(e);
     } finally {
@@ -48,20 +52,20 @@ export const ModelExport = ({ onClose }) => {
 
   return (
     <Modal style={{ width: 500 }}
-      onHide={onHide}
+      onHide={()=>onHide()}
       visible
       closeOnClickOutside={false}
       allowClose={true}
-      title={t("Import Model")}
+      title={t("Export Model")}
     >
       <Form
         style={{ marginTop:20 }}
-        initialValues={{ title: '', type: '', url: '' }}
         {...layout}
         form={form}
         layout="horizontal"
         name="form_in_modal"
-        onFinish={ importModel}
+        onFinish={onFinish}
+        initialValues={data}
       >
         <Form.Item
           name="title"
@@ -76,11 +80,11 @@ export const ModelExport = ({ onClose }) => {
           rules={[
             {
               required: true,
-              message: '请输入模型对应的URL。',
+              message: '请输入导出模型地址。',
             },
           ]}
         >
-          <Input style={{ width:300 }} placeholder="模型URL"/>
+          <Input disabled style={{ width:300 }} placeholder="模型URL"/>
         </Form.Item>
         <Form.Item {...tailLayout}>
           <Button
@@ -88,7 +92,7 @@ export const ModelExport = ({ onClose }) => {
             style={{
               margin: '0 8px',
             }}
-            onClick={onHide}
+            onClick={()=>onHide()}
             waiting={waiting}
           >
               取消

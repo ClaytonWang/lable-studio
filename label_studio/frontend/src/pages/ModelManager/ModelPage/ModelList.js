@@ -1,23 +1,44 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Table } from 'antd';
-import { columns } from './Columns';
+import { useColumns } from './useColumns';
 import { Elem } from '../../../utils/bem';
 import { Pagination } from '../../../components';
 import { SearchBar } from "./SearchBar";
+import { ModelExport } from './ModelExport';
+import { ModelEdit } from "./ModelEdit";
 
 
 export const ModelList = (props) => {
   const [searchFields,setSearhFields] = useState();
   const { data,currentPage,totalItems,pageSize,loadNextPage,loading } = props;
+  const col = useColumns();
+
+  const reload = useCallback((pageSize,fields) => {
+    loadNextPage(1, pageSize,fields);
+  }, []);
+
+  const onSearch = useCallback((pageSize, fields) => {
+    setSearhFields(fields);
+    reload(pageSize,fields);
+  },[]);
 
   return (
     <>
       <Elem name="list">
-        <SearchBar pageSize={pageSize} onSearch={(pageSize,fields) => {
-          setSearhFields(fields);
-          loadNextPage(1, pageSize,fields);
-        }} />
-        <Table rowKey="id" columns={columns} dataSource={data} pagination={false} loading={ loading} />
+        <SearchBar pageSize={pageSize} onSearch={onSearch} />
+        <Table rowKey="id" columns={col.columns} dataSource={data} pagination={false} loading={loading} />
+        {col.modalExp ? (
+          <ModelExport data={col.modalExp} onClose={(force) => {
+            if(force) reload();
+            col.setModalExp(null);
+          }} />
+        ) : null}
+        {col.modalEdt ? (
+          <ModelEdit data={col.modalEdt} onClose={(force) => {
+            if(force) reload();
+            col.setModaEdt(null);
+          }} />
+        ) : null}
       </Elem>
       <Elem name="pages">
         <Pagination
