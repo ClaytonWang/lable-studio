@@ -20,34 +20,11 @@ from model_manager.serializers import ModelManagerCreateSerializer
 from model_manager.serializers import ModelManagerUpdateSerializer
 from model_manager.models import ModelManager
 from model_manager.models import MODEL_TYPE
+from model_manager.services import ml_backend_request
+from db_ml.common import DbPageNumberPagination
+from db_ml.common import MultiSerializerViewSetMixin
 
 logger = logging.getLogger(__name__)
-
-
-class ProjectListPagination(PageNumberPagination):
-    page_size = 30
-    page_size_query_param = 'page_size'
-
-
-class MultiSerializerViewSetMixin(object):
-    def get_serializer_class(self):
-        assert type(self.serializer_action_classes) is dict
-
-        default_action = 'retrieve'
-        actions = self.serializer_action_classes.keys()
-        if not actions:
-            raise ValueError('serializer_action_classes is not defined.')
-        if default_action not in actions:
-            default_action = list(actions)[0]
-
-        default_class_item = self.serializer_action_classes.get(default_action)
-        class_item = self.serializer_action_classes.get(self.action)
-        if not class_item:
-            if not default_class_item:
-                raise ValueError('{} serializer is not defined'.format(self.action))
-            else:
-                return default_class_item
-        return class_item
 
 
 class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
@@ -58,7 +35,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         'update': ModelManagerUpdateSerializer,
         'partial_update': ModelManagerUpdateSerializer,
     }
-    pagination_class = ProjectListPagination
+    pagination_class = DbPageNumberPagination
 
     def list(self, request, *args, **kwargs):
         """
@@ -118,12 +95,14 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         return super(ModelManagerViews, self).update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
-        return self.update(request, args, kwargs)
+        self.queryset = ModelManager.objects.filter(pk=kwargs.get('pk'))
+        return super(ModelManagerViews, self).partial_update(
+            request, *args,**kwargs)
 
     def destroy(self, request, *args, **kwargs):
         self.queryset = ModelManager.objects.filter(pk=kwargs.get('pk'))
         super(ModelManagerViews, self).destroy(request, *args, **kwargs)
-        return Response(status=200, data=dict(msg='删除成功'))
+        return Response(status=200, data=dict(message='删除成功'))
 
     @action(methods=['GET'], detail=False)
     def select(self, request, *args, **kwargs):
@@ -131,8 +110,28 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         result = dict(
             type=dict(MODEL_TYPE),
             version=[item['version'] for item in query],
-            mdoel_set=[],
+            model_set=[],
             project_set=[],
         )
 
         return Response(status=status.HTTP_201_CREATED, data=result)
+
+    @action(methods=['GET'], detail=False)
+    def export(self, request, *args, **kwargs):
+        url = request.GET.dict('url')
+        if not url:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=dict(error="Invalid URL")
+            )
+        state, rsp = ml_backend_request(
+            opt='export', method='get', params=dict(url=url)
+        )
+        if state:
+            return Response(data=rsp)
+        else:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=dict(error='ML Backend request error.')
+            )
+
