@@ -12,9 +12,9 @@ export const ModelImport = ({ onClose }) => {
   const history = useHistory();
   const [waiting,setWaiting] = useState(false);
 
-  const onHide = useCallback(async () => {
+  const onHide = useCallback(async (force) => {
     history.replace("/model-manager");
-    onClose?.();
+    onClose?.(force);
   }, []);
 
   const layout = {
@@ -32,13 +32,13 @@ export const ModelImport = ({ onClose }) => {
     },
   };
 
-  const importModel = async (values) => {
+  const onFinish = async (values) => {
     setWaiting(true);
     try {
       await api.callApi("importModel", {
         body: values,
       });
-      onHide();
+      onHide(true);
     } catch (e) {
       console.error(e);
     } finally {
@@ -48,7 +48,7 @@ export const ModelImport = ({ onClose }) => {
 
   return (
     <Modal style={{ width: 500 }}
-      onHide={onHide}
+      onHide={() => onHide(false)}
       visible
       closeOnClickOutside={false}
       allowClose={true}
@@ -61,7 +61,7 @@ export const ModelImport = ({ onClose }) => {
         form={form}
         layout="horizontal"
         name="form_in_modal"
-        onFinish={ importModel}
+        onFinish={ onFinish}
       >
         <Form.Item
           name="title"
@@ -86,7 +86,7 @@ export const ModelImport = ({ onClose }) => {
             <Select
               options={[
                 { label: '请选择模型类型', value: '' },
-                { label: '对话意图分类', value: 'intention' },
+                { label: '对话意图', value: 'intention' },
                 { label: '对话生成', value: 'generation' },
                 { label: '清洗模型', value: 'clean' },
                 { label: '其他', value: 'other' },
@@ -113,7 +113,7 @@ export const ModelImport = ({ onClose }) => {
             style={{
               margin: '0 8px',
             }}
-            onClick={onHide}
+            onClick={() => onHide(false)}
             waiting={waiting}
           >
               取消
