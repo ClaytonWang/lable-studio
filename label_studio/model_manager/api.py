@@ -20,6 +20,7 @@ from model_manager.serializers import ModelManagerCreateSerializer
 from model_manager.serializers import ModelManagerUpdateSerializer
 from model_manager.models import ModelManager
 from model_manager.models import MODEL_TYPE
+from model_manager.services import ml_backend_request
 
 logger = logging.getLogger(__name__)
 
@@ -123,7 +124,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         self.queryset = ModelManager.objects.filter(pk=kwargs.get('pk'))
         super(ModelManagerViews, self).destroy(request, *args, **kwargs)
-        return Response(status=200, data=dict(msg='删除成功'))
+        return Response(status=200, data=dict(error='删除成功'))
 
     @action(methods=['GET'], detail=False)
     def select(self, request, *args, **kwargs):
@@ -136,3 +137,23 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         )
 
         return Response(status=status.HTTP_201_CREATED, data=result)
+
+    @action(methods=['GET'], detail=False)
+    def export(self, request, *args, **kwargs):
+        url = request.GET.dict('url')
+        if not url:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=dict(error="Invalid URL")
+            )
+        state, rsp = ml_backend_request(
+            opt='export', method='get', params=dict(url=url)
+        )
+        if state:
+            return Response(data=rsp)
+        else:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=dict(error='ML Backend request error.')
+            )
+
