@@ -29,6 +29,7 @@ from core.label_config import (
 from core.bulk_update_utils import bulk_update
 from label_studio_tools.core.label_config import parse_config
 from core.mixins import DummyModelMixin
+from db_ml.common import DbOrganizationManager
 
 
 logger = logging.getLogger(__name__)
@@ -42,13 +43,8 @@ MODEL_TYPE = (
 )
 
 
-class ModelBaseManager(models.Manager):
-    def for_user_organization(self, user):
-        return self.filter(organization=user.active_organization)
-
-
 class ModelManager(DummyModelMixin, models.Model):
-    objects = ModelBaseManager()
+    objects = DbOrganizationManager()
 
     title = models.CharField(_('title'), null=True, blank=True, default='', max_length=200, help_text='Model name.')
     url = models.TextField(_('url'), unique=True, help_text='URL for the machine learning model server')
@@ -66,3 +62,6 @@ class ModelManager(DummyModelMixin, models.Model):
     #  录入模型的模型名字 训练用的项目名称
     model = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, help_text='训练用的基础模型', related_name='model_config')
     project = models.ForeignKey('projects.Project', on_delete=models.SET_NULL, null=True, blank=True, help_text='训练用的项目', related_name='model_config_project')
+
+    class Meta:
+        unique_together = ("organization_id", "title")

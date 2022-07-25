@@ -4,11 +4,12 @@ import data_export.api
 from django.shortcuts import redirect
 from django.urls import include, path, re_path
 from django.conf.urls import url
+from rest_framework.routers import DefaultRouter
 
 
 # 增加promt - api.py
 from . import api, views, prompt_api
-
+from .api_set import ProjectSetViews
 app_name = 'projects'
 
 # reverse for projects:name
@@ -49,14 +50,21 @@ _api_urlpatterns = [
 
 ]
 
+
 _api_urlpatterns_templates = [
     path('', api.TemplateListAPI.as_view(), name='template-list'),
 ]
 
+router = DefaultRouter(trailing_slash=False)
+router.register(r'', ProjectSetViews, basename='project set')
+_api_url_set_patterns = [
+    path('', include(router.urls)),
+]
 
 urlpatterns = [
     path('projects/', include(_urlpatterns)),
     path('api/projects/', include((_api_urlpatterns, app_name), namespace='api')),
+    path('api/project-set/', include((_api_url_set_patterns, app_name), namespace='api-set')),
     path('api/templates/', include((_api_urlpatterns_templates, app_name), namespace='api-templates')),
 
     # 推断学习模版curd
