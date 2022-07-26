@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
-import { useParams as useRouterParams } from 'react-router';
+import React, { useEffect, useState, useCallback } from 'react';
+import { useParams as useRouterParams, useHistory } from 'react-router';
 import { Redirect } from 'react-router-dom';
 import { Button } from '../../components';
 import { Oneof } from '../../components/Oneof/Oneof';
 import { Loading } from '../../components';
+import { Space } from '@/components/Space/Space';
 import { ApiContext } from '../../providers/ApiProvider';
 import { useContextProps } from '../../providers/RoutesProvider';
 import { Block, Elem } from '../../utils/bem';
@@ -27,10 +28,15 @@ export const ProjectsPage = () => {
   const [totalItems, setTotalItems] = useState(1);
   const setContextProps = useContextProps();
   const defaultPageSize = parseInt(localStorage.getItem('pages:projects-list') ?? 10);
+  const history = useHistory();
 
   const [modal, setModal] = React.useState(false);
   const openModal = setModal.bind(null, true);
   const closeModal = setModal.bind(null, false);
+
+  const gotoCollection = () => {
+    history.push('/collections');
+  };
 
   const fetchProjects = async (page  = currentPage, pageSize = defaultPageSize) => {
     setNetworkState('loading');
@@ -55,7 +61,7 @@ export const ProjectsPage = () => {
   React.useEffect(() => {
     // there is a nice page with Create button when list is empty
     // so don't show the context button in that case
-    setContextProps({ openModal, showButton: projectsList.length > 0 });
+    setContextProps({ openModal, showButton: projectsList.length > 0, gotoCollection });
   }, [projectsList.length]);
 
   return (
@@ -103,7 +109,10 @@ ProjectsPage.routes = ({ store }) => [
     },
   },
 ];
-ProjectsPage.context = ({ openModal, showButton }) => {
+ProjectsPage.context = ({ openModal, showButton, gotoCollection }) => {
   if (!showButton) return null;
-  return <Button onClick={openModal} look="primary" size="compact">{t("Create")}</Button>;
+  return <Space>
+    <Button onClick={gotoCollection} look="primary" size="compact">{t("Project collection", "项目集合设置")}</Button>
+    <Button onClick={openModal} look="primary" size="compact">{t("Create")}</Button>
+  </Space>;
 };

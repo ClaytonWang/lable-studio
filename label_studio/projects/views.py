@@ -19,6 +19,9 @@ from organizations.models import Organization
 
 logger = logging.getLogger(__name__)
 
+@login_required
+def project_collection(request):
+    return render(request, 'projects/collection.html')
 
 @login_required
 def project_list(request):
