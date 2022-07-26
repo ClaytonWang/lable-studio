@@ -1,13 +1,15 @@
-import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from "react";
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef,useState } from "react";
 import { Modal } from "@/components/Modal/Modal";
 import { useAPI } from "@/providers/ApiProvider";
 import { template } from '@/utils/util';
 import ResponseGeneration from './ResponseGeneration';
+import IntentResponse from './IntentResponse';
 import './index.less';
 
 const Prediction = forwardRef(({ project, showStatus }, ref) => {
   const modalRef = useRef();
   const api = useAPI();
+  const [projectType,setProjectType] = useState(null);
 
   const request = useCallback(() => {
     return api.callApi('mlPredictProcess', {
@@ -22,10 +24,13 @@ const Prediction = forwardRef(({ project, showStatus }, ref) => {
 
     switch (projectClass) {
       case 'intent-classification-for-dialog':
-        return request;
+        setProjectType('intent');
+        break;
       case 'conversational-ai-response-generation':
-        return () => modalRef.current?.show();
+        setProjectType('response-generation');
+        break;
     }
+    return () => modalRef.current?.show();
   }, [project]);
 
   const close = useCallback(() => {
@@ -39,8 +44,18 @@ const Prediction = forwardRef(({ project, showStatus }, ref) => {
   }));
 
   return (
-    <Modal className="prediction-zone" bare ref={modalRef} style={{ width:800 }}>
-      <ResponseGeneration close={close} request={request} project={project} />
+    <Modal
+      className="prediction-zone"
+      bare
+      ref={modalRef}
+      style={{ width: 800 }}
+      closeOnClickOutside={false}
+      allowClose={true}
+    >
+      {
+        projectType === 'intent' ? <IntentResponse close={close} request={request} project={project} /> :
+          (projectType === 'response-generation' ?
+            <ResponseGeneration close={close} request={request} project={project} /> : null)}
     </Modal>
   );
 });
