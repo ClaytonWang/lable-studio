@@ -2,7 +2,7 @@ import React, { createElement } from 'react';
 import { cn } from '../../../../utils/bem';
 import './Label.styl';
 
-const Label = ({text, children, required, placement, description, size, large, style, simple, flat}) => {
+const Label = ({ text, children, required, placement, description, size, large, style, simple, flat }) => {
   const rootClass = cn('label');
   const classList = [rootClass];
   const tagName = simple ? 'div' : 'label';
@@ -20,7 +20,7 @@ const Label = ({text, children, required, placement, description, size, large, s
   return createElement(tagName, {
     'className': classList.join(" "),
     'data-required': required,
-    'style': style,
+    style,
   }, (
     <>
       <div className={rootClass.elem('text')}>

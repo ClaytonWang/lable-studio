@@ -3,7 +3,7 @@ import { shallowEqualObjects } from 'shallow-equal';
 import { useAPI, WrappedResponse } from './ApiProvider';
 import { useAppStore } from './AppStoreProvider';
 import { useParams } from './RoutesProvider';
-import { template } from '../utils/util';
+import { template } from '@/utils/util';
 
 type Empty = Record<string, never>
 

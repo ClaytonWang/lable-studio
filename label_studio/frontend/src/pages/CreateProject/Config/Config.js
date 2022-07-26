@@ -73,7 +73,7 @@ const Label = ({ label, template, color }) => {
   );
 };
 
-const ConfigureControl = ({ control, template }) => {
+export const ConfigureControl = ({ control, template }) => {
   const refLabels = React.useRef();
   const tagname = control.tagName;
 
