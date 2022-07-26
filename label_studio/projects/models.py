@@ -28,9 +28,15 @@ from core.label_config import (
 )
 from core.bulk_update_utils import bulk_update
 from label_studio_tools.core.label_config import parse_config
+from db_ml.common import DbOrganizationManager
 
 
 logger = logging.getLogger(__name__)
+TEMPLATE_TYPE = (
+    ('intent-dialog', '对话-意图分类'),
+    ('conversational-generation', '对话生成'),
+    ('', '其他'),
+)
 
 
 class ProjectManager(models.Manager):
@@ -228,6 +234,11 @@ class Project(ProjectMixin, models.Model):
     )
     task_data_password = models.CharField(
         _('task_data_password'), max_length=256, blank=True, null=True, help_text='Task data credentials: password'
+    )
+    set = models.ForeignKey("ProjectSet", on_delete=models.SET_DEFAULT, related_name="project_set", default='', null=True)
+    template_type = models.CharField(
+        _('template_type'), max_length=50, blank=True, null=True, default='',
+        # choices=TEMPLATE_TYPE
     )
 
     def __init__(self, *args, **kwargs):
@@ -996,6 +1007,23 @@ class ProjectSummary(models.Model):
         self.created_annotations = created_annotations
         self.created_labels = labels
         self.save(update_fields=['created_annotations', 'created_labels'])
+
+
+class ProjectSet(models.Model):
+    """
+    项目集合
+    """
+    objects = DbOrganizationManager()
+
+    title = models.CharField(_('title'), unique=True, max_length=200, help_text='Project Set name.')
+    organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE, related_name='project_set', null=True)
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_project_set', on_delete=models.SET_NULL, null=True, verbose_name=_('created by'))
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_project_set', on_delete=models.SET_NULL, null=True, verbose_name=_('updated by'))
+
+    def has_permission(self, user):
+        return self.organization == user.active_organization
 
 
 # 提示学习表

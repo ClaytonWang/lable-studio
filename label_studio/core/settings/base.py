@@ -131,6 +131,13 @@ LOGGING = {
             'formatter': 'rq_console',
             'exclude': ['%(asctime)s'],
         },
+        'db': {
+            'level': "DEBUG",
+            # 'class': 'logging.handlers.TimedRotatingFileHandler',
+            # 'when': 'W',
+            'formatter': 'standard',
+            'class': 'logging.StreamHandler',
+        }
     },
     'root': {
         'handlers': ['console'],
