@@ -16,8 +16,8 @@ const formItemLayout = {
   wrapperCol: { span: 19 },
 };
 
-const IntentResponse = ({ close ,request }) => {
-  const { project,fetchProject } = useProject();
+const IntentResponse = ({ close ,execLabel }) => {
+  const { project } = useProject();
   const [template, setCurrentTemplate] = useState(null);
   const [config, _setConfig] = React.useState("");
   const api = useAPI();
@@ -51,8 +51,8 @@ const IntentResponse = ({ close ,request }) => {
     });
 
     if (res.ok) {
-      request();
-      fetchProject();
+      execLabel();
+      close();
       return true;
     }
 
@@ -61,7 +61,7 @@ const IntentResponse = ({ close ,request }) => {
     return error;
   }, [project, config]);
 
-  const execLabel = () => {
+  const exec = () => {
     const changedLabels = [];
     const labels =[];
 
@@ -152,7 +152,7 @@ const IntentResponse = ({ close ,request }) => {
           <Button
             size="compact"
             look="primary"
-            onClick={ execLabel}
+            onClick={ exec}
           >
             立即标注
           </Button>
