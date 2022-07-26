@@ -50,8 +50,9 @@ class ProjectSerializer(FlexFieldsModelSerializer):
     config_has_control_tags = SerializerMethodField(default=None, read_only=True,
                                                     help_text='Flag to detect is project ready for labeling')
 
-    set_id = serializers.IntegerField(required=False)
+    set_id = serializers.IntegerField(required=False, default=None)
     set_title = SerializerMethodField(default='', read_only=True)
+    template_type = serializers.CharField(required=False)
 
     @staticmethod
     def get_set_title(obj):
@@ -89,8 +90,9 @@ class ProjectSerializer(FlexFieldsModelSerializer):
                   'total_annotations_number', 'total_predictions_number', 'sampling', 'show_ground_truth_first',
                   'show_overlap_first', 'overlap_cohort_percentage', 'task_data_login', 'task_data_password',
                   'control_weights', 'parsed_label_config', 'evaluate_predictions_automatically',
-                  'config_has_control_tags', 'skip_queue',
-                  'reveal_preannotations_interactively', 'set_id', 'set_title']
+                  'config_has_control_tags', 'skip_queue', 'reveal_preannotations_interactively',
+                  'set_id', 'set_title', 'template_type'
+                  ]
 
     def validate_label_config(self, value):
         if self.instance is None:

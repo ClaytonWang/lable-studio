@@ -1,14 +1,15 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
-import drf_yasg.openapi as openapi
-import logging
-import numpy as np
-import pathlib
 import os
-
-from django.db import IntegrityError
+import re
+import logging
+import pathlib
 from django.conf import settings
+import drf_yasg.openapi as openapi
+from django.db import IntegrityError
 from drf_yasg.utils import swagger_auto_schema
+
+from django.http import Http404
 from django.utils.decorators import method_decorator
 from rest_framework import generics, status, filters
 from rest_framework.exceptions import NotFound, ValidationError as RestValidationError
@@ -17,7 +18,6 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.views import exception_handler
-from django.http import Http404
 
 from core.utils.common import temporary_disconnect_all_signals
 from core.label_config import config_essential_data_has_changed
@@ -212,7 +212,30 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
                 if has_changes:
                     View.objects.filter(project=project).all().delete()
 
-        return super(ProjectAPI, self).patch(request, *args, **kwargs)
+        # 修改编辑带入的参数
+        req_data = request.POST.dict()
+        if not req_data:
+            req_data = request.data
+        if label_config:
+            match = re.match('.*template-([^"\s]+)', label_config)
+            if match:
+                template_name = match.group(1)
+                if template_name == 'intent-classification-for-dialog':
+                    req_data['template_type'] = 'intent-dialog'
+                elif template_name == 'conversational-ai-response-generation':
+                    req_data['template_type'] = 'conversational-generation'
+                else:
+                    pass
+            pass
+        instance = self.get_object()
+        serializer = self.get_serializer(
+            instance, data=req_data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+        return Response(serializer.data)
 
     def perform_destroy(self, instance):
         # we don't need to relaculate counters if we delete whole project
