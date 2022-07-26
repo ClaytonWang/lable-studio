@@ -358,5 +358,13 @@
   "Export Model": "导出模型",
   "Back": "返回",
   "Create Project Collection": "新增集合",
-  "Project collection": "项目集合设置"
+  "Project collection": "项目集合设置",
+  "Edit Collection": "编辑集合",
+  "Delete Collection": "删除集合",
+  "collection_name": "集合名称",
+  "Delete Right Now": "立即删除",
+  "Confirm": "确定",
+  "tip_please_complete": "请完整填写表单",
+  "created_by": "创建人",
+  "Operate": "操作"
 }

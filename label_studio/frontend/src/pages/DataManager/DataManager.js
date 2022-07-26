@@ -211,7 +211,7 @@ export const DataManagerPage = ({ ...props }) => {
 
   return crashed ? (
     <Block name="crash">
-      <Elem name="info">{t('tip_deleted_not_created', 'Project was deleted or not yet created')}</Elem>
+      <Elem name="info">{t('tip_deleted_not_created')}</Elem>
 
       <Button to="/projects">
         {t('Back to projects')}

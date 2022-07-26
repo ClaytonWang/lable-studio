@@ -18,6 +18,13 @@ export const API_CONFIG = {
     createProject: "POST:/projects",
     deleteProject: "DELETE:/projects/:pk",
 
+    // Project Collection
+    collections: "/project-set",
+    collection: "/project-set/:id",
+    createCollections: "POST:/project-set",
+    deleteCollections: "DELETE:/project-set/:id",
+    updateCollections: "PATCH:/project-set/:id",
+
     //Model manager
     modelManager: "GET:/model-manager",
     importModel: "POST:/model-manager",
@@ -67,7 +74,6 @@ export const API_CONFIG = {
     mlPromptTemplateDelete: 'DELETE:/templates/prompt-learning',
     mlPromptTemplateUpdate:'PATCH:/templates/prompt-learning',
     mlPromptTemplateQuery:'GET:/templates/prompt-learning/:project',
-
 
     // Clean
     clExec: "POST:/dbml/clean",

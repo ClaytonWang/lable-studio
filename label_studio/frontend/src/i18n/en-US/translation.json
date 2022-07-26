@@ -358,5 +358,13 @@
   "Auto_Predictions": "Auto_Predictions",
   "Back": "Back",
   "Create Project Collection": "Create Project Collection",
-  "Project collection": "Project collection"
+  "Project collection": "Project collection",
+  "Edit Collection": "Edit Collection",
+  "Delete Collection": "Delete Collection",
+  "collection_name": "collection_name",
+  "Delete Right Now": "Delete Right Now",
+  "Confirm": "Confirm",
+  "tip_please_complete": "Please Complete Input Form",
+  "created_by": "Created By",
+  "Operate": "Operate"
 }
