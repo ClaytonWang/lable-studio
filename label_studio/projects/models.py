@@ -230,6 +230,7 @@ class Project(ProjectMixin, models.Model):
     task_data_password = models.CharField(
         _('task_data_password'), max_length=256, blank=True, null=True, help_text='Task data credentials: password'
     )
+    set = models.ForeignKey("ProjectSet", on_delete=models.SET_DEFAULT, related_name="project_set", default='', null=True)
 
     def __init__(self, *args, **kwargs):
         super(Project, self).__init__(*args, **kwargs)

@@ -50,6 +50,13 @@ class ProjectSerializer(FlexFieldsModelSerializer):
     config_has_control_tags = SerializerMethodField(default=None, read_only=True,
                                                     help_text='Flag to detect is project ready for labeling')
 
+    set_id = serializers.IntegerField(required=False)
+    set_title = SerializerMethodField(default='', read_only=True)
+
+    @staticmethod
+    def get_set_title(obj):
+        return obj.set.title if obj.set else ''
+
     @staticmethod
     def get_config_has_control_tags(project):
         return len(project.get_parsed_config()) > 0
@@ -72,7 +79,7 @@ class ProjectSerializer(FlexFieldsModelSerializer):
 
     class Meta:
         model = Project
-        extra_kwargs = {'memberships': {'required': False}, 'title': {'required': False}, 'created_by': {'required': False}}
+        extra_kwargs = {'memberships': {'required': False}, 'title': {'required': False}, 'created_by': {'required': False}, 'set_id': {'required': False}}
         fields = ['id', 'title', 'description', 'label_config', 'expert_instruction', 'show_instruction', 'show_skip_button',
                   'enable_empty_annotation', 'show_annotation_history', 'organization', 'color',
                   'maximum_annotations', 'is_published', 'model_version', 'is_draft', 'created_by', 'created_at',
@@ -82,7 +89,8 @@ class ProjectSerializer(FlexFieldsModelSerializer):
                   'total_annotations_number', 'total_predictions_number', 'sampling', 'show_ground_truth_first',
                   'show_overlap_first', 'overlap_cohort_percentage', 'task_data_login', 'task_data_password',
                   'control_weights', 'parsed_label_config', 'evaluate_predictions_automatically',
-                  'config_has_control_tags', 'skip_queue', 'reveal_preannotations_interactively']
+                  'config_has_control_tags', 'skip_queue',
+                  'reveal_preannotations_interactively', 'set_id', 'set_title']
 
     def validate_label_config(self, value):
         if self.instance is None:

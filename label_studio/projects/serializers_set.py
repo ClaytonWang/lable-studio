@@ -12,11 +12,14 @@ from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework.serializers import SerializerMethodField
 from users.serializers import UserSimpleSerializer
 from projects.models import ProjectSet
+from users.serializers import UserSimpleSerializer
 
 
 class ProjectSetListSerializer(serializers.ModelSerializer):
     """
     """
+    created_by = UserSimpleSerializer(default={}, help_text='created owner')
+
     class Meta:
         model = ProjectSet
         fields = '__all__'
