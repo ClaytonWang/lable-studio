@@ -57,7 +57,7 @@ export const ModelEdit = ({ data,onClose }) => {
       visible
       closeOnClickOutside={false}
       allowClose={true}
-      title={t("Export Model")}
+      title={t("Edit Model")}
     >
       <Form
         style={{ marginTop:20 }}

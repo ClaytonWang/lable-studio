@@ -38,7 +38,7 @@ export const ModelExport = ({ data,onClose }) => {
       const values = form.getFieldsValue(Object.keys(data));
 
       await api.callApi("exportModel", {
-        params: values,
+        params: { url:values.url },
       });
 
       onHide(true);
