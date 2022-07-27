@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Table } from 'antd';
 import { useColumns } from './useColumns';
 import { Elem } from '../../../utils/bem';
@@ -20,6 +20,14 @@ export const ModelList = (props) => {
   const onSearch = useCallback((pageSize, fields) => {
     setSearhFields(fields);
     reload(pageSize,fields);
+  }, []);
+
+  const onClose = useCallback((force,type) => {
+    if (force) reload();
+    if(type==='export')
+      col.setModalExp(null);
+    else if (type === 'edit')
+      col.setModaEdt(null);
   },[]);
 
   return (
@@ -28,16 +36,10 @@ export const ModelList = (props) => {
         <SearchBar pageSize={pageSize} onSearch={onSearch} />
         <Table rowKey="id" columns={col.columns} dataSource={data} pagination={false} loading={loading} />
         {col.modalExp ? (
-          <ModelExport data={col.modalExp} onClose={(force) => {
-            if(force) reload();
-            col.setModalExp(null);
-          }} />
+          <ModelExport data={col.modalExp} onClose={onClose} />
         ) : null}
         {col.modalEdt ? (
-          <ModelEdit data={col.modalEdt} onClose={(force) => {
-            if(force) reload();
-            col.setModaEdt(null);
-          }} />
+          <ModelEdit data={col.modalEdt} onClose={onClose} />
         ) : null}
       </Elem>
       <Elem name="pages">

@@ -14,7 +14,7 @@ export const ModelExport = ({ data,onClose }) => {
 
   const onHide = useCallback(async (force) => {
     history.replace("/model-manager");
-    onClose?.(force);
+    onClose?.(force,'export');
   }, []);
 
   const layout = {
