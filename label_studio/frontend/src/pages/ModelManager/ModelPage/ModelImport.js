@@ -86,8 +86,7 @@ export const ModelImport = ({ onClose }) => {
           <div style={{ width: 300 }} >
             <Select
               options={[
-                { label: '请选择模型类型', value: '' },
-                { label: '对话意图', value: 'intention' },
+                { label: '对话意图分类', value: 'intention' },
                 { label: '对话生成', value: 'generation' },
                 { label: '清洗模型', value: 'clean' },
                 { label: '其他', value: 'other' },

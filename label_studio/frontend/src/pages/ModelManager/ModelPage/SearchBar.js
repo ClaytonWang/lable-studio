@@ -84,7 +84,7 @@ const getFilters = (filters) => {
     },
     {
       key: "project_set",
-      label: "项目集",
+      label: "项目集合",
       value:'none',
       data: project_set,
       render: (col) => {
