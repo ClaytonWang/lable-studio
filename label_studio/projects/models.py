@@ -32,6 +32,11 @@ from db_ml.common import DbOrganizationManager
 
 
 logger = logging.getLogger(__name__)
+TEMPLATE_TYPE = (
+    ('intent-dialog', '对话-意图分类'),
+    ('conversational-generation', '对话生成'),
+    ('', '其他'),
+)
 
 
 class ProjectManager(models.Manager):
@@ -229,6 +234,11 @@ class Project(ProjectMixin, models.Model):
     )
     task_data_password = models.CharField(
         _('task_data_password'), max_length=256, blank=True, null=True, help_text='Task data credentials: password'
+    )
+    set = models.ForeignKey("ProjectSet", on_delete=models.SET_DEFAULT, related_name="project_set", default='', null=True)
+    template_type = models.CharField(
+        _('template_type'), max_length=50, blank=True, null=True, default='',
+        # choices=TEMPLATE_TYPE
     )
 
     def __init__(self, *args, **kwargs):

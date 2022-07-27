@@ -4,3 +4,4 @@ report.*.json
 !*.lock
 translation.csv
 src/i18n/label_studio*.csv
+dist/react-app
