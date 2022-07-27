@@ -235,7 +235,7 @@ class Project(ProjectMixin, models.Model):
     task_data_password = models.CharField(
         _('task_data_password'), max_length=256, blank=True, null=True, help_text='Task data credentials: password'
     )
-    set = models.ForeignKey("ProjectSet", on_delete=models.SET_DEFAULT, related_name="project_set", default='', null=True)
+    set = models.ForeignKey("ProjectSet", on_delete=models.SET_DEFAULT, related_name="project_set", default='', null=True, blank=True)
     template_type = models.CharField(
         _('template_type'), max_length=50, blank=True, null=True, default='',
         # choices=TEMPLATE_TYPE

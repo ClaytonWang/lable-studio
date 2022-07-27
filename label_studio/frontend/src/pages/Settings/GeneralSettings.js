@@ -1,6 +1,6 @@
-import React, { useCallback, useState, useContext, useEffect } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Button } from "../../components";
-import { Form, Input, TextArea, Select } from "../../components/Form";
+import { Form, Input, Select, TextArea } from "../../components/Form";
 import { RadioGroup } from "../../components/Form/Elements/RadioGroup/RadioGroup";
 import { ProjectContext } from "../../providers/ProjectProvider";
 import { Block } from "../../utils/bem";
@@ -8,7 +8,7 @@ import { useAPI } from "@/providers/ApiProvider";
 
 export const GeneralSettings = () => {
   const { project, fetchProject } = useContext(ProjectContext);
-  const [ collections, setCollections ] = useState();
+  const [collections, setCollections] = useState([]);
   const api = useAPI();
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export const GeneralSettings = () => {
           />
 
           <Select
-            name="collection"
+            name="set_id"
             label={t("choose_project_collection")}
             labelProps={{ large: true }}
             options={collections.map((item) => ({
