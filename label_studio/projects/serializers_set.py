@@ -29,7 +29,7 @@ class ProjectSetListSerializer(serializers.ModelSerializer):
 class ProjectSetDetailSerializer(ProjectSetListSerializer):
     class Meta:
         model = ProjectSet
-        fields = '__all_-'
+        fields = '__all__'
 
 
 class ProjectSetCreateSerializer(serializers.ModelSerializer):
