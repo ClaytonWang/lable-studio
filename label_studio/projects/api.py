@@ -130,8 +130,15 @@ class ProjectListAPI(generics.ListCreateAPIView):
     pagination_class = ProjectListPagination
 
     def get_queryset(self):
-        set=self.request.query_params.get('set_id')
-        projects = Project.objects.filter(organization=self.request.user.active_organization, set_id=set if set==-1 else None)
+        set_id=self.request.query_params.get('set_id')
+        query_params = dict(organization=self.request.user.active_organization)
+        if set_id in [-1, "-1"]:
+            query_params['set_id__isnull'] = True
+        elif set_id:
+            query_params['set_id'] = set_id
+        else:
+            pass
+        projects = Project.objects.filter(**query_params)
         return ProjectManager.with_counts_annotate(projects).prefetch_related('members', 'created_by')
 
     def get_serializer_context(self):
@@ -202,6 +209,7 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
     def patch(self, request, *args, **kwargs):
         project = self.get_object()
         label_config = self.request.data.get('label_config')
+        set_id = self.request.data.get('set_id')
 
         # config changes can break view, so we need to reset them
         if label_config:
@@ -228,6 +236,9 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
                 else:
                     pass
             pass
+        if set_id in [-1, "-1"]:
+            req_data['set_id'] = None
+
         instance = self.get_object()
         serializer = self.get_serializer(
             instance, data=req_data, partial=True

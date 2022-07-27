@@ -1,30 +1,50 @@
-import React, { useCallback, useContext } from 'react';
-import { Button } from '../../components';
-import { Form, Input, TextArea } from '../../components/Form';
-import { RadioGroup } from '../../components/Form/Elements/RadioGroup/RadioGroup';
-import { ProjectContext } from '../../providers/ProjectProvider';
-import { Block } from '../../utils/bem';
+import React, { useCallback, useState, useContext, useEffect } from "react";
+import { Button } from "../../components";
+import { Form, Input, TextArea, Select } from "../../components/Form";
+import { RadioGroup } from "../../components/Form/Elements/RadioGroup/RadioGroup";
+import { ProjectContext } from "../../providers/ProjectProvider";
+import { Block } from "../../utils/bem";
+import { useAPI } from "@/providers/ApiProvider";
 
 export const GeneralSettings = () => {
   const { project, fetchProject } = useContext(ProjectContext);
+  const [ collections, setCollections ] = useState();
+  const api = useAPI();
+
+  useEffect(() => {
+    api
+      .callApi("collections", {
+        params: { page_size: 999 },
+      })
+      .then((res) => {
+        setCollections([
+          { id: "-1", title: t("project_without_collection", "无集合项目") },
+          ...res.results,
+        ]);
+      });
+  }, []);
 
   const updateProject = useCallback(() => {
     if (project.id) fetchProject(project.id, true);
   }, [project]);
 
   const colors = [
-    '#FFFFFF',
-    '#F52B4F',
-    '#FA8C16',
-    '#F6C549',
-    '#9ACA4F',
-    '#51AAFD',
-    '#7F64FF',
-    '#D55C9D',
+    "#FFFFFF",
+    "#F52B4F",
+    "#FA8C16",
+    "#F6C549",
+    "#9ACA4F",
+    "#51AAFD",
+    "#7F64FF",
+    "#D55C9D",
   ];
 
   const samplings = [
-    { value: "Sequential", label: t("Sequential"), description: t("sequential_desc") },
+    {
+      value: "Sequential",
+      label: t("Sequential"),
+      description: t("sequential_desc"),
+    },
     { value: "Uniform", label: t("Random"), description: t("random_desc") },
   ];
 
@@ -50,15 +70,35 @@ export const GeneralSettings = () => {
             style={{ minHeight: 128 }}
           />
 
-          <RadioGroup name="color" label={t("Color")} size="large" labelProps={{ size: "large" }}>
-            {colors.map(color => (
+          <Select
+            name="collection"
+            label={t("choose_project_collection")}
+            labelProps={{ large: true }}
+            options={collections.map((item) => ({
+              label: item.title,
+              value: item.id,
+            }))}
+          />
+
+          <RadioGroup
+            name="color"
+            label={t("Color")}
+            size="large"
+            labelProps={{ size: "large" }}
+          >
+            {colors.map((color) => (
               <RadioGroup.Button key={color} value={color}>
-                <Block name="color" style={{ '--background': color }}/>
+                <Block name="color" style={{ "--background": color }} />
               </RadioGroup.Button>
             ))}
           </RadioGroup>
 
-          <RadioGroup label={t("Task Sampling")} labelProps={{ size: "large" }} name="sampling" simple>
+          <RadioGroup
+            label={t("Task Sampling")}
+            labelProps={{ size: "large" }}
+            name="sampling"
+            simple
+          >
             {samplings.map(({ value, label, description }) => (
               <RadioGroup.Button
                 key={value}
@@ -74,7 +114,9 @@ export const GeneralSettings = () => {
           <Form.Indicator>
             <span case="success">{t("Saved!", "已保存")}</span>
           </Form.Indicator>
-          <Button type="submit" look="primary" style={{ width: 120 }}>{t("Save")}</Button>
+          <Button type="submit" look="primary" style={{ width: 120 }}>
+            {t("Save")}
+          </Button>
         </Form.Actions>
       </Form>
     </div>

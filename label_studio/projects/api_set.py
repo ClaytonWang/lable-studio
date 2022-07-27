@@ -102,5 +102,5 @@ class ProjectSetViews(MultiSerializerViewSetMixin, ModelViewSet):
 
     @action(methods=['GET'], detail=False)
     def project(self, request, *args, **kwargs):
-        query = ProjectSet.objects.values('id', 'title')
+        query = ProjectSet.objects.for_user_organization(request.user).values('id', 'title')
         return Response(status=status.HTTP_201_CREATED, data=list(query))

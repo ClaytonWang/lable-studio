@@ -4,6 +4,7 @@ import { Button, ToggleItems } from '../../components';
 import { Modal } from '../../components/Modal/Modal';
 import { Space } from '../../components/Space/Space';
 import { useAPI } from '../../providers/ApiProvider';
+import { Select } from '@/components/Form';
 import { cn } from '../../utils/bem';
 import { ConfigPage } from './Config/Config';
 import "./CreateProject.styl";
@@ -21,7 +22,7 @@ const DEFAULT_CONFIG = `<View className="template-intent-classification-for-dial
 </Choices>
 </View>`;
 
-const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, setDescription, show = true }) => !show ? null :(
+const ProjectName = ({ collection, setCollection, collections, name, setName, onSaveName, onSubmit, error, description, setDescription, show = true }) => !show ? null :(
   <form className={cn("project-name")} onSubmit={e => { e.preventDefault(); onSubmit(); }}>
     <div className="field field--wide">
       <label htmlFor="project_name">{t("Project Name")}</label>
@@ -39,6 +40,19 @@ const ProjectName = ({ name, setName, onSaveName, onSubmit, error, description, 
         onChange={e => setDescription(e.target.value)}
       />
     </div>
+    <div className="field field--wide">
+      <label htmlFor="project_collection">{t("choose_project_collection", "选择项目集合")}</label>
+      <Select
+        name="collection"
+        id="project_collection"
+        value={collection}
+        onChange={e => setCollection(e.target.value)}
+        options={collections.map(item => ({
+          label: item.title,
+          value: item.id,
+        }))}
+      />
+    </div>
   </form>
 );
 
@@ -50,12 +64,27 @@ export const CreateProject = ({ onClose }) => {
   const history = useHistory();
   const api = useAPI();
 
+  const [collections, setCollections] = React.useState([]);
+  const [collection, setCollection] = React.useState("-1");
   const [name, setName] = React.useState("");
   const [error, setError] = React.useState();
   const [description, setDescription] = React.useState("");
   const [config, setConfig] = React.useState("<View></View>");
 
   React.useEffect(() => { setError(null); }, [name]);
+
+  React.useEffect(() => {
+    api
+      .callApi("collections", {
+        params: { page_size: 999 },
+      })
+      .then((res) => {
+        setCollections([
+          { id: "-1", title: t("project_without_collection", "无集合项目") },
+          ...res.results,
+        ]);
+      });
+  }, []);
 
   const { columns, uploading, uploadDisabled, finishUpload, pageProps } = useImportPage(project);
 
@@ -75,7 +104,8 @@ export const CreateProject = ({ onClose }) => {
     title: name,
     description,
     label_config: config,
-  }), [name, description, config]);
+    set_id: collection,
+  }), [name, description, config, collection]);
 
   const onCreate = React.useCallback(async () => {
     const imported = await finishUpload();
@@ -141,6 +171,9 @@ export const CreateProject = ({ onClose }) => {
         <ProjectName
           name={name}
           setName={setName}
+          collections={collections}
+          collection={collection}
+          setCollection={setCollection}
           error={error}
           onSaveName={onSaveName}
           onSubmit={onCreate}

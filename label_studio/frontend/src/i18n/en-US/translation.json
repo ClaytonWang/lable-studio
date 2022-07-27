@@ -366,5 +366,9 @@
   "Confirm": "Confirm",
   "tip_please_complete": "Please Complete Input Form",
   "created_by": "Created By",
-  "Operate": "Operate"
+  "Operate": "Operate",
+  "all_project": "All Projects",
+  "project_without_collection": "Projects Without Collection",
+  "collection": "Collection",
+  "choose_project_collection": "Choose Project Collection"
 }
