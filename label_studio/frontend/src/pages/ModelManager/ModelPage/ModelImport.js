@@ -71,6 +71,7 @@ export const ModelImport = ({ onClose }) => {
               required: true,
               message: '请输入模型名称,且不能超过20个字符。',
             },
+            { type: 'string', max: 20,min:2 },
           ]}
         >
           <Input style={{ width:300 }} placeholder="模型名称"/>

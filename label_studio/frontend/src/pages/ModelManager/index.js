@@ -40,8 +40,14 @@ export const ModelManagerPage = () => {
       },
     });
 
+    const results = data.results.map(v => {
+      v.model = v.model ?? '';
+      v.project = v.project ?? '';
+      return v;
+    });
+
     setTotalItems(data?.count ?? 1);
-    setmodelList(data.results ?? []);
+    setmodelList(results ?? []);
     setNetworkState(false);
   };
 
