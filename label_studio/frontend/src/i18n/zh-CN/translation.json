@@ -367,5 +367,6 @@
   "Confirm": "确定",
   "tip_please_complete": "请完整填写表单",
   "created_by": "创建人",
-  "Operate": "操作"
+  "Operate": "操作",
+  "Change Organization":"切换组织"
 }
