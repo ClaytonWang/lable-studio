@@ -26,7 +26,7 @@ export const ProjectCollection = () => {
   }, []);
   const request = useMemo(() => {
     return {
-      list: () => api.callApi("collections"),
+      list: (params) => api.callApi("collections", { params }),
       create: (body) =>
         api.callApi("createCollections", {
           body,
@@ -47,7 +47,10 @@ export const ProjectCollection = () => {
     };
   }, [current]);
   useEffect(() => {
-    setContextProps({ back, create: () => setStatus("create") });
+    setContextProps({ back, create: () => {
+      setStatus("create");
+      setCurrent({});
+    } });
   }, []);
   useEffect(() => {
     if (status) {
@@ -88,6 +91,14 @@ export const ProjectCollection = () => {
     };
   }, [status]);
 
+  useEffect(() => {
+    if (status === 'create') {
+      form.resetFields();
+    } else if (status) {
+      form.setFieldsValue(current);
+    }
+  }, [current, status]);
+
   return (
     <div className="page-collections">
       <div style={{ padding: 20 }}>
@@ -106,6 +117,7 @@ export const ProjectCollection = () => {
             {
               title: t("created_by"),
               dataIndex: "created_by",
+              render: v => v.email,
             },
             {
               title: t("Operate", "操作"),
@@ -135,11 +147,18 @@ export const ProjectCollection = () => {
               },
             },
           ]}
-          request={() =>
-            request.list().then((res) => {
+          pagination={{
+            defaultPageSize: 30,
+          }}
+          request={({ pageSize, current }) =>
+            request.list({
+              page: current,
+              page_size: pageSize,
+            }).then((res) => {
               return {
                 data: res.results,
                 success: true,
+                total: res.count,
               };
             })
           }
@@ -162,7 +181,6 @@ export const ProjectCollection = () => {
           form={form}
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 20 }}
-          initialValues={current}
         >
           <Modal.Header>{text.header}</Modal.Header>
           <Form.Item

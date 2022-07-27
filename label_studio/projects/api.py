@@ -130,7 +130,8 @@ class ProjectListAPI(generics.ListCreateAPIView):
     pagination_class = ProjectListPagination
 
     def get_queryset(self):
-        projects = Project.objects.filter(organization=self.request.user.active_organization)
+        set=self.request.query_params.get('set_id')
+        projects = Project.objects.filter(organization=self.request.user.active_organization, set_id=set if set==-1 else None)
         return ProjectManager.with_counts_annotate(projects).prefetch_related('members', 'created_by')
 
     def get_serializer_context(self):
