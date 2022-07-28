@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework.serializers import SerializerMethodField
 from users.serializers import UserSimpleSerializer
+from projects.serializers_set import ProjectSetDetailSerializer
 from model_manager.models import ModelManager
 
 
@@ -12,9 +13,19 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
     模型导入名称，对应数据表的模型集
     实际模型名字通过【模型集】+ 【版本输出】
     """
+
+    title_version = SerializerMethodField()
+    created_by = UserSimpleSerializer(default={}, help_text='created owner')
+    project_set = ProjectSetDetailSerializer(default={})
+
+    @staticmethod
+    def get_title_version(obj):
+        return obj.title + obj.version
+
     class Meta:
         model = ModelManager
         exclude = ['token']
+        ordering = ['-created_at']
         # fields = '__all__'
 
 
