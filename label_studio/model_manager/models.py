@@ -39,29 +39,44 @@ MODEL_TYPE = (
     ('intention', '对话意图分类'),
     ('generation', '对话生成'),
     ('clean', '清洗模型'),
-    ('other', '其他'),
+    # ('other', '其他'),
+)
+
+MODEL_STATE = (
+    (1, '初始'),
+    (2, '训练'),
+    (3, '训练'),
+    (4, '完成'),
+    (5, '异常'),
 )
 
 
 class ModelManager(DummyModelMixin, models.Model):
+
     objects = DbOrganizationManager()
 
-    title = models.CharField(_('title'), null=True, blank=True, default='', max_length=200, help_text='Model name.')
+    # title 模型集名称，模型名称是模型集名称 + 版本
+    title = models.CharField(_('title'), max_length=20, help_text='Model set name. ')
     url = models.TextField(_('url'), unique=True, help_text='URL for the machine learning model server')
     description = models.TextField(_('description'), blank=True, null=True, default='', help_text='model configer description')
     token = models.CharField(_('token'), max_length=65, default=create_hash, unique=True, null=True, blank=True)
 
     organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE, related_name='model_configer', null=True)
-    version = models.TextField(_('model version'), blank=True, null=True, default='', help_text='Machine learning model version')
-    type = models.CharField(_('model type'), choices=MODEL_TYPE, default='other', null=True, max_length=50)
+    version = models.TextField(_('model version'), blank=True, null=True, default='1.0', help_text='Machine learning model version')
+    type = models.CharField(_('model type'), choices=MODEL_TYPE, default=None, null=True, max_length=50)
+    state = models.IntegerField(_('model state'), choices=MODEL_STATE, default=1, null=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_model', on_delete=models.SET_NULL, null=True, verbose_name=_('created by'))
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
 
-    # 项目集合先保留 项目集合在添加外键
-    #  录入模型的模型名字 训练用的项目名称
-    model = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, help_text='训练用的基础模型', related_name='model_config')
+    # 项目预留外建，追溯模型训练的项目信息
     project = models.ForeignKey('projects.Project', on_delete=models.SET_NULL, null=True, blank=True, help_text='训练用的项目', related_name='model_config_project')
+    # 项目集
+    project_set = models.ForeignKey('projects.ProjectSet', on_delete=models.SET_NULL, null=True, blank=True, help_text='项目集合', related_name='model_config_project_set')
+
+    # 模型参数 模型调用参数和标签都放在这里
+    model_parameter = JSONField(_('run model parameter'), null=True, default=dict, help_text='模型入参数')
+    model_result = models.CharField(_('run model result url'), null=True, default='', max_length=140, help_text='模型入参数')
 
     class Meta:
-        unique_together = ("organization_id", "title")
+        unique_together = ("organization_id", "title", "version")
