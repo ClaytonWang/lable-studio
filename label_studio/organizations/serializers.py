@@ -8,12 +8,27 @@ from drf_dynamic_fields import DynamicFieldsMixin
 from organizations.models import Organization, OrganizationMember
 from users.serializers import UserSerializer
 from collections import OrderedDict
+from users.serializers import UserSimpleSerializer
+
+
+class OrganizationCreatedSerializer(
+    DynamicFieldsMixin, serializers.ModelSerializer
+):
+    # created_by_id = serializers.IntegerField()
+
+    class Meta:
+        model = Organization
+        fields = ['title', 'created_by']
 
 
 class OrganizationIdSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
+
+    created_by = UserSimpleSerializer(default={}, help_text='created owner',
+                                      read_only=True)
+
     class Meta:
         model = Organization
-        fields = ['id', 'title']
+        fields = ['id', 'title', 'created_at', 'created_by']
 
 
 class OrganizationSerializer(DynamicFieldsMixin, serializers.ModelSerializer):

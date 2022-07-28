@@ -49,13 +49,13 @@ OrganizationMixin = load_func(settings.ORGANIZATION_MIXIN)
 class Organization(OrganizationMixin, models.Model):
     """
     """
-    title = models.CharField(_('organization title'), max_length=1000, null=False)
+    title = models.CharField(_('organization title'), unique=True, max_length=20, null=False)
 
     token = models.CharField(_('token'), max_length=256, default=create_hash, unique=True, null=True, blank=True)
 
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name="organizations", through=OrganizationMember)
         
-    created_by = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL,
                                       null=True, related_name="organization", verbose_name=_('created_by'))
 
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
@@ -99,9 +99,17 @@ class Organization(OrganizationMixin, models.Model):
         return self.projects.filter(members__user=user).exists()
 
     def has_permission(self, user):
-        if self in user.organizations.all():
+        from django.contrib.auth.models import Group
+        from django.conf import settings
+        if Group.objects.filter(name=settings.MANAGER_GROUP).first() in \
+                user.groups.all():
             return True
-        return False
+        else:
+            return False
+
+        # if self in user.organizations.all():
+        #     return True
+        # return False
 
     def add_user(self, user):
         if self.users.filter(pk=user.pk).exists():
