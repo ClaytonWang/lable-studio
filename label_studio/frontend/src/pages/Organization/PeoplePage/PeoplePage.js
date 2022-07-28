@@ -112,7 +112,7 @@ export const PeoplePage = () => {
   }, [link]);
 
   const changeOrganization = () => {
-    history.push('org-manage');
+    history.push('organization/list');
   };
 
   return (

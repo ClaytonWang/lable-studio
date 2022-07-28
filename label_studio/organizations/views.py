@@ -11,3 +11,7 @@ def organization_people_list(request):
 @login_required
 def simple_view(request):
     return render(request, 'organizations/people_list.html')
+
+@login_required
+def org_list_view(request):
+    return render(request, 'organizations/list.html')

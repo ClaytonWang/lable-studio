@@ -372,5 +372,6 @@
   "all_project": "全部项目",
   "project_without_collection": "无集合项目",
   "collection": "项目集合",
-  "choose_project_collection": "选择项目集合"
+  "choose_project_collection": "选择项目集合",
+  "org-list":"组织列表"
 }

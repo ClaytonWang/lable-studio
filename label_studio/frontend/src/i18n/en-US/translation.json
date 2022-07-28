@@ -372,5 +372,6 @@
   "all_project": "All Projects",
   "project_without_collection": "Projects Without Collection",
   "collection": "Collection",
-  "choose_project_collection": "Choose Project Collection"
+  "choose_project_collection": "Choose Project Collection",
+  "org-list":"Organization List"
 }
