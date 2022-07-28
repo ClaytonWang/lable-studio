@@ -41,7 +41,8 @@ class ProjectSetViews(MultiSerializerViewSetMixin, ModelViewSet):
         :return: dict
         """
         data = request.GET.dict()
-        self.queryset = ProjectSet.objects.for_user_organization(request.user)
+        self.queryset = ProjectSet.objects.for_user_organization(
+            request.user).order_by('-created_at')
         return super(ProjectSetViews, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
