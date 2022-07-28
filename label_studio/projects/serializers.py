@@ -50,7 +50,7 @@ class ProjectSerializer(FlexFieldsModelSerializer):
     config_has_control_tags = SerializerMethodField(default=None, read_only=True,
                                                     help_text='Flag to detect is project ready for labeling')
 
-    set_id = serializers.IntegerField(required=False, default=None)
+    set_id = serializers.IntegerField(required=False, default=None, allow_null=True)
     set_title = SerializerMethodField(default='', read_only=True)
     template_type = serializers.CharField(required=False)
 
