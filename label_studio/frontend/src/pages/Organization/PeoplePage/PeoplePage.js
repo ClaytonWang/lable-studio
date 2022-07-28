@@ -14,6 +14,7 @@ import { PeopleList } from "./PeopleList";
 import "./PeoplePage.styl";
 import { SelectedUser } from "./SelectedUser";
 import { useHistory } from 'react-router';
+import { SwapOutlined } from '@ant-design/icons';
 
 const InvitationModal = ({ link }) => {
   return (
@@ -112,7 +113,7 @@ export const PeoplePage = () => {
   }, [link]);
 
   const changeOrganization = () => {
-    history.push('org-manage');
+    history.push('organization/list');
   };
 
   return (
@@ -125,7 +126,7 @@ export const PeoplePage = () => {
             <Button icon={<LsPlus/>} primary onClick={showInvitationModal}>
               {t("Add People", "添加用户")}
             </Button>
-            <Button icon={<LsPlus/>} primary onClick={changeOrganization}>
+            <Button icon={<SwapOutlined rotate={ 90} />} primary onClick={changeOrganization}>
               {t("Change Organization", "切换组织")}
             </Button>
           </Space>

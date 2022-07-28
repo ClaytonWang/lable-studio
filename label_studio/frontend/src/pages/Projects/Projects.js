@@ -65,7 +65,7 @@ export const ProjectsPage = () => {
     fetchProjects(currentPage);
   }, [collection, currentPage]);
 
-  const loadNextPage = async (page, pageSize) => {
+  const loadNextPage = async (page) => {
     setCurrentPage(page);
   };
 

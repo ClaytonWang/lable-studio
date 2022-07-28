@@ -12,7 +12,7 @@ app_name = 'organizations'
 # Page URLs
 _urlpatterns = [
     # get organization page
-    path('', views.organization_people_list, name='organization-index'),
+    path('', views.organization_people_list, name='organization-index')
 ]
 
 # API URLs
@@ -31,7 +31,8 @@ _api_urlpattens = [
 urlpatterns = [
     path('organization/', views.simple_view, name='organization-simple'),
     path('organization/webhooks', views.simple_view, name='organization-simple'),
-
+    path('organization/list',views.org_list_view,name="organization-list"),
+    
     path('people/', include(_urlpatterns)),
     path('api/organizations/', include((_api_urlpattens, app_name), namespace='api')),
 

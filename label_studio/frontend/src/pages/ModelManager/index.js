@@ -23,7 +23,7 @@ export const ModelManagerPage = () => {
   const [modal, setModal] = useState(false);
   const openModal = setModal.bind(null, true);
   const closeModal = setModal.bind(null, false);
-  const defaultPageSize = parseInt(localStorage.getItem('pages:projects-list') ?? 10);
+  const defaultPageSize = parseInt(localStorage.getItem('pages:models-list') ?? 10);
   const [currentPage, setCurrentPage] = useState(getCurrentPage());
 
   const fetchModelList = async (
