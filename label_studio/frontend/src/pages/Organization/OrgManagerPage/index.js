@@ -7,6 +7,7 @@ import { Space } from "@/components/Space/Space";
 import { AddEditOrganization } from './AddEditOrganization';
 import { OrganizationList } from './OrganizationList';
 import { useHistory } from "react-router";
+import { LsPlus } from "@/assets/icons";
 
 const getCurrentPage = () => {
   const pageNumberFromURL = new URLSearchParams(location.search).get("page");
@@ -25,7 +26,7 @@ const OrgManager = () => {
   const [dataList, setDataList] = React.useState([]);
   const [networkState, setNetworkState] = useState(null);
   const [currentPage, setCurrentPage] = useState(getCurrentPage());
-  const defaultPageSize = parseInt(localStorage.getItem('pages:projects-list') ?? 10);
+  const defaultPageSize = parseInt(localStorage.getItem('pages:org-list') ?? 10);
 
   const fetchList = async (
     page = currentPage,
@@ -40,7 +41,7 @@ const OrgManager = () => {
     });
 
     setTotalItems(data?.count ?? 1);
-    setDataList(data.results ?? []);
+    setDataList(data ?? []);
     setNetworkState(false);
   };
 
@@ -67,7 +68,8 @@ const OrgManager = () => {
   return (
     <Block name="organization-page">
       <Elem name="content" case="loaded">
-        <OrganizationList loading={ networkState}
+        <OrganizationList
+          loading={networkState}
           data={dataList}
           currentPage={currentPage}
           totalItems={totalItems}
@@ -85,7 +87,7 @@ OrgManager.context = ({ openModal,gotoOrg }) => {
       <Button onClick={gotoOrg} size="compact">
         返回
       </Button>
-      <Button onClick={openModal} look="primary" size="compact">
+      <Button icon={<LsPlus/>} onClick={openModal} look="primary" size="compact">
         新增组织
       </Button>
     </Space>

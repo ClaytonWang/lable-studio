@@ -26,7 +26,7 @@ export const OrganizationList = (props) => {
       </Elem>
       <Elem name="pages">
         <Pagination
-          name="models-list"
+          name="org-list"
           label="Models"
           page={currentPage}
           totalItems={totalItems}

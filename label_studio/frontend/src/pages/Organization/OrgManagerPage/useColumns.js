@@ -3,6 +3,8 @@ import { Elem } from '@/utils/bem';
 import { Userpic } from '@/components';
 import { format } from 'date-fns';
 import { useMemo, useState } from 'react';
+import { Popconfirm } from 'antd';
+import { ExclamationCircleOutlined,InfoCircleOutlined } from "@ant-design/icons";
 
 
 export const useColumns = () => {
@@ -16,14 +18,7 @@ export const useColumns = () => {
         dataIndex: 'title',
         key: 'title',
         render: (_, record) => {
-          if (record.type === 'clean')
-            return (
-              <Elem name="title">
-                { _ }
-              </Elem>
-            );
-          else
-            return (<a>{record.title}</a>);
+          return record.title;
         },
       },
       {
@@ -45,7 +40,7 @@ export const useColumns = () => {
         render: (_, record) => {
           return (
             <Elem name="created-by">
-              <Userpic src="#" user={record.created_by} showUsername/>
+              <Userpic src="#" user={record.created_by} showUsername />
             </Elem>
           );
         },
@@ -56,7 +51,17 @@ export const useColumns = () => {
         key: 'action',
         render: (_, record) => (
           <Space size="middle">
-            <a onClick={() => { setModaEdt(record);}}>删除</a>
+            <Popconfirm
+              title={(record.project_count || record.user_count) ? "是否确定删除该组织?":"该组织包含有效用户或项目,无法删除."}
+              onConfirm={() => { }}
+              icon={(record.project_count || record.user_count)?<InfoCircleOutlined />:<ExclamationCircleOutlined style={{ color: 'red' }} /> }
+              okText="确定"
+              cancelText="取消"
+              showCancel={!!(record.project_count || record.user_count) }
+            >
+              <a onClick={() => { setModaEdt(record);}}>删除</a>
+            </Popconfirm>
+
             <a onClick={() => { setModalAddEdit(record); }}>编辑</a>
             <a onClick={() => { }}>切换</a>
           </Space>
