@@ -1,7 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
 import logging
-
+from rest_framework import status
 from django.urls import reverse
 from django.conf import settings
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
@@ -13,6 +13,7 @@ from rest_framework.pagination import PageNumberPagination
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.utils.decorators import method_decorator
+from django.conf import settings
 
 from label_studio.core.permissions import all_permissions, ViewClassPermission
 from label_studio.core.utils.common import get_object_with_check_and_log, bool_from_request
@@ -21,6 +22,10 @@ from organizations.models import Organization
 from organizations.serializers import (
     OrganizationSerializer, OrganizationIdSerializer, OrganizationMemberUserSerializer, OrganizationInviteSerializer
 )
+from organizations.serializers import OrganizationCreatedSerializer
+from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 
 logger = logging.getLogger(__name__)
@@ -34,7 +39,7 @@ logger = logging.getLogger(__name__)
         """
     ))
 class OrganizationListAPI(generics.ListCreateAPIView):
-    queryset = Organization.objects.all()
+    queryset = Organization.objects.all().order_by('-created_at')
     parser_classes = (JSONParser, FormParser, MultiPartParser)
     permission_required = ViewClassPermission(
         GET=all_permissions.organizations_view,
@@ -50,15 +55,27 @@ class OrganizationListAPI(generics.ListCreateAPIView):
         self.check_object_permissions(self.request, org)
         return org
 
-    def filter_queryset(self, queryset):
-        return queryset.filter(users=self.request.user).distinct()
+    # 获取已经关联用户的组织
+    # def filter_queryset(self, queryset):
+        # return queryset.filter(users=self.request.user).distinct()
 
     def get(self, request, *args, **kwargs):
         return super(OrganizationListAPI, self).get(request, *args, **kwargs)
 
     @swagger_auto_schema(auto_schema=None)
     def post(self, request, *args, **kwargs):
-        return super(OrganizationListAPI, self).post(request, *args, **kwargs)
+        data = request.POST.dict()
+        if not data:
+            data = request.data
+        data['created_by'] = request.user.id
+        serializer = OrganizationCreatedSerializer(data=data)
+        # serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(
+            serializer.data, status=status.HTTP_201_CREATED, headers=headers
+        )
 
 
 class OrganizationMemberPagination(PageNumberPagination):
@@ -116,7 +133,7 @@ class OrganizationMemberListAPI(generics.ListAPIView):
         operation_summary='Update organization settings',
         operation_description='Update the settings for a specific organization by ID.'
     ))
-class OrganizationAPI(generics.RetrieveUpdateAPIView):
+class OrganizationAPI(generics.RetrieveUpdateAPIView, generics.DestroyAPIView):
 
     parser_classes = (JSONParser, FormParser, MultiPartParser)
     queryset = Organization.objects.all()
@@ -127,7 +144,8 @@ class OrganizationAPI(generics.RetrieveUpdateAPIView):
     redirect_kwarg = 'pk'
 
     def get_object(self):
-        org = generics.get_object_or_404(self.request.user.organizations, pk=self.kwargs[self.lookup_field])
+        org = generics.get_object_or_404(self.queryset, pk=self.kwargs[
+            self.lookup_field])
         self.check_object_permissions(self.request, org)
         return org
 
@@ -135,11 +153,21 @@ class OrganizationAPI(generics.RetrieveUpdateAPIView):
         return super(OrganizationAPI, self).get(request, *args, **kwargs)
 
     def patch(self, request, *args, **kwargs):
+        # self.queryset = Organization.objects.filter(pk=kwargs.get('pk'))
         return super(OrganizationAPI, self).patch(request, *args, **kwargs)
 
     @swagger_auto_schema(auto_schema=None)
     def put(self, request, *args, **kwargs):
         return super(OrganizationAPI, self).put(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.users.count() or instance.projects.count():
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=dict(error='组织有关联的用户或项目。')
+            )
+        return super(OrganizationListAPI, self).delete(request, *args, **kwargs)
 
 
 @method_decorator(name='get', decorator=swagger_auto_schema(
@@ -181,3 +209,46 @@ class OrganizationResetTokenAPI(APIView):
         serializer = OrganizationInviteSerializer(data={'invite_url': invite_url, 'token': org.token})
         serializer.is_valid()
         return Response(serializer.data, status=201)
+
+
+"""
+"""
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def organization_all(request):
+    """
+    :param request:
+    :return:
+    """
+    data = request.data
+    queryset = Organization.objects.values('id', 'title')
+    return Response(data=list(queryset))
+
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def organization_change(request):
+    """
+    :param request:
+    :return:
+    """
+    data = request.POST.dict()
+    o_id = data.get('organization_id')
+    if not o_id:
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST, data=dict(error='必须传组织参数')
+        )
+    try:
+        o_id = int(o_id)
+    except Exception as e:
+        logger.warning('organization_id: ', o_id, ' message:', str(e))
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST, data=dict(error='组织参数是整型')
+        )
+
+    query = Organization.objects.filter(id=o_id).first()
+    request.user.active_organization = query
+    request.user.save()
+    return Response(data=dict(message=f"更新成{query.title}"))

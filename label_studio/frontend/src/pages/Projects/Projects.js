@@ -1,8 +1,7 @@
-import React, { useMemo, useState, useCallback } from "react";
-import { useParams as useRouterParams, useHistory } from "react-router";
+import React, { useCallback, useMemo, useState } from "react";
+import { useHistory, useParams as useRouterParams } from "react-router";
 import { Redirect } from "react-router-dom";
-import { Select } from "antd";
-import { map, omitBy } from "lodash";
+import { Select } from "../../components/Form";
 import { Button } from "../../components";
 import { Oneof } from "../../components/Oneof/Oneof";
 import { Loading } from "../../components";
@@ -27,12 +26,12 @@ export const ProjectsPage = () => {
   const [projectsList, setProjectsList] = React.useState([]);
   const [networkState, setNetworkState] = React.useState(null);
   const [currentPage, setCurrentPage] = useState(getCurrentPage());
-  const [collections, setCollections] = useState();
+  const [collections, setCollections] = useState([]);
   const [collection, setCollection] = useState("__all__");
   const [totalItems, setTotalItems] = useState(1);
   const setContextProps = useContextProps();
   const defaultPageSize = parseInt(
-    localStorage.getItem("pages:projects-list") ?? 10
+    localStorage.getItem("pages:projects-list") ?? 10,
   );
   const history = useHistory();
 
@@ -101,18 +100,13 @@ export const ProjectsPage = () => {
           <Elem name="title">{t("collection", "项目集合")}</Elem>
           <Elem name="select">
             <Select
-              style={{ minWidth: 250 }}
               value={collection}
-              onChange={(v) => setCollection(v)}
-            >
-              {map(collections, (item) => {
-                return (
-                  <Select.Option value={item.id} key={item.id}>
-                    {item.title}
-                  </Select.Option>
-                );
-              })}
-            </Select>
+              onChange={(e) => setCollection(e.target.value)}
+              options={collections.map((item) => ({
+                label: item.title,
+                value: item.id,
+              }))}
+            />
           </Elem>
         </Space>
       </Elem>
@@ -129,6 +123,7 @@ export const ProjectsPage = () => {
                 totalItems={totalItems}
                 loadNextPage={loadNextPage}
                 pageSize={defaultPageSize}
+                fetchProjects={fetchProjects}
               />
             ) : (
               <EmptyProjectsList openModal={openModal} />
