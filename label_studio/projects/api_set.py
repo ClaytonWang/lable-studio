@@ -97,6 +97,14 @@ class ProjectSetViews(MultiSerializerViewSetMixin, ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         self.queryset = ProjectSet.objects.filter(pk=kwargs.get('pk'))
+        if self.queryset:
+            instance = self.queryset.first()
+            count = instance.project_set.count()
+            if count:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data=dict(error=f'项目集关联还{count}项目')
+                )
         super(ProjectSetViews, self).destroy(request, *args, **kwargs)
         return Response(status=200, data=dict(message='删除成功'))
 
