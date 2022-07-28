@@ -49,7 +49,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         version = data.get('version')
         model = data.get('model')
         project = data.get('project')
-        self.queryset = ModelManager.objects.for_user_organization(request.user)
+        self.queryset = ModelManager.objects.\
+            for_user_organization(request.user).order_by('-created_at')
         filter_params = dict()
         if _type:
             filter_params['type'] = _type

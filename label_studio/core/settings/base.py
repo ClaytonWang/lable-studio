@@ -253,6 +253,7 @@ CORS_ALLOW_METHODS = [
 ALLOWED_HOSTS = ['*']
 
 # Auth modules
+MANAGER_GROUP = 'admin'
 AUTH_USER_MODEL = 'users.User'
 AUTHENTICATION_BACKENDS = ['rules.permissions.ObjectPermissionBackend', 'django.contrib.auth.backends.ModelBackend',]
 USE_USERNAME_FOR_LOGIN = False
