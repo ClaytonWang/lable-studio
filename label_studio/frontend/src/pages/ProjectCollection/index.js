@@ -15,7 +15,7 @@ export const ProjectCollection = () => {
   const setContextProps = useContextProps();
   const history = useHistory();
   const modalRef = useRef();
-  const tableRef= useRef();
+  const tableRef = useRef();
   const [form] = Form.useForm();
   const [status, setStatus] = useState();
   const [current, setCurrent] = useState();
@@ -48,30 +48,30 @@ export const ProjectCollection = () => {
   }, [current]);
 
   useEffect(() => {
-    setContextProps({ back, create: () => {
-      setStatus("create");
-      setCurrent({});
-    } });
+    setContextProps({
+      back,
+      create: () => {
+        setStatus("create");
+        setCurrent({});
+      },
+    });
   }, []);
   useEffect(() => {
     if (status) {
       modalRef.current?.show();
     }
   }, [status]);
-  const onFinish = useCallback(
-    () => {
-      if (!status) {
-        return;
-      }
-      form.validateFields().then(values => {
-        request[status]?.(values).then(() => {
-          modalRef.current?.hide();
-          tableRef.current?.reload();
-        });
+  const onFinish = useCallback(() => {
+    if (!status) {
+      return;
+    }
+    form.validateFields().then((values) => {
+      request[status]?.(values).then(() => {
+        modalRef.current?.hide();
+        tableRef.current?.reload();
       });
-    },
-    [status, request],
-  );
+    });
+  }, [status, request]);
   const text = useMemo(() => {
     return {
       header: get(
@@ -93,12 +93,16 @@ export const ProjectCollection = () => {
   }, [status]);
 
   useEffect(() => {
-    if (status === 'create') {
+    if (status === "create") {
       form.resetFields();
     } else if (status) {
       form.setFieldsValue(current);
     }
   }, [current, status]);
+
+  const unDeleteAble = useMemo(() => {
+    return status === "delete" && current.project_count > 0;
+  }, [status, current]);
 
   return (
     <div className="page-collections">
@@ -118,7 +122,7 @@ export const ProjectCollection = () => {
             {
               title: t("created_by"),
               dataIndex: "created_by",
-              render: v => v.email,
+              render: (v) => v.email,
             },
             {
               title: t("Operate", "操作"),
@@ -152,16 +156,18 @@ export const ProjectCollection = () => {
             defaultPageSize: 30,
           }}
           request={({ pageSize, current }) =>
-            request.list({
-              page: current,
-              page_size: pageSize,
-            }).then((res) => {
-              return {
-                data: res.results,
-                success: true,
-                total: res.count,
-              };
-            })
+            request
+              .list({
+                page: current,
+                page_size: pageSize,
+              })
+              .then((res) => {
+                return {
+                  data: res.results,
+                  success: true,
+                  total: res.count,
+                };
+              })
           }
           toolBarRender={false}
           search={false}
@@ -178,35 +184,56 @@ export const ProjectCollection = () => {
           setCurrent(null);
         }}
       >
-        <Form
-          form={form}
-          labelCol={{ span: 4 }}
-          wrapperCol={{ span: 20 }}
-        >
-          <Modal.Header>{text.header}</Modal.Header>
-          <Form.Item
-            label={t("collection_name", "集合名称")}
-            name="title"
-            rules={[
-              {
-                required: true,
-                message: t("tip_please_complete", "请完整填写表单"),
-              },
-            ]}
-          >
-            <Input disabled={status === 'delete'} />
-          </Form.Item>
-          <Modal.Footer>
-            <Space align="end">
-              <Button onClick={() => modalRef.current?.hide()} size="compact">
-                {t("Cancel")}
-              </Button>
-              <Button onClick={onFinish} size="compact" look="primary" type="submit">
-                {text.okButton}
-              </Button>
-            </Space>
-          </Modal.Footer>
-        </Form>
+        <Modal.Header>{text.header}</Modal.Header>
+        {unDeleteAble ? (
+          <span className="ls-title">{t("collection_undeleteable", "该集合包含有效的项目，无法删除")}</span>
+        ) : (
+          <Form form={form} labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+            <Form.Item
+              label={t("collection_name", "集合名称")}
+              name="title"
+              rules={[
+                {
+                  required: true,
+                  message: t("tip_please_complete", "请完整填写表单"),
+                },
+              ]}
+            >
+              <Input disabled={status === "delete"} />
+            </Form.Item>
+          </Form>
+        )}
+        <Modal.Footer>
+          <Space align="end">
+            {
+              unDeleteAble ? (
+                <Button
+                  onClick={() => modalRef.current?.hide()}
+                  size="compact"
+                  look="primary"
+                  type="submit"
+                >
+                  {t("Confirm")}
+                </Button>
+              ) : (
+                <>
+                  <Button onClick={() => modalRef.current?.hide()} size="compact">
+                    {t("Cancel")}
+                  </Button>
+                  <Button
+                    onClick={onFinish}
+                    size="compact"
+                    look="primary"
+                    type="submit"
+                  >
+                    {text.okButton}
+                  </Button>
+                </>
+              )
+            }
+            
+          </Space>
+        </Modal.Footer>
       </Modal>
     </div>
   );
