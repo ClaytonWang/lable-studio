@@ -103,7 +103,7 @@ class ProjectSetViews(MultiSerializerViewSetMixin, ModelViewSet):
             if count:
                 return Response(
                     status=status.HTTP_400_BAD_REQUEST,
-                    data=dict(error=f'项目集关联还{count}项目')
+                    data=dict(error=f'项目集【{instance.title}】还有{count}个关联项目')
                 )
         super(ProjectSetViews, self).destroy(request, *args, **kwargs)
         return Response(status=200, data=dict(message='删除成功'))
