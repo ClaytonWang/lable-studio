@@ -19,11 +19,15 @@ class ProjectSetListSerializer(serializers.ModelSerializer):
     """
     """
     created_by = UserSimpleSerializer(default={}, help_text='created owner')
+    project_count = serializers.SerializerMethodField(read_only=True)
+
+    @staticmethod
+    def get_project_count(obj):
+        return obj.project_set.count()
 
     class Meta:
         model = ProjectSet
         fields = '__all__'
-        ordering = ['-created_at']
 
 
 class ProjectSetDetailSerializer(ProjectSetListSerializer):
