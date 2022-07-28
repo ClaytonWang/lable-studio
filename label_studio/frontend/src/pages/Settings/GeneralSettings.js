@@ -18,7 +18,7 @@ export const GeneralSettings = () => {
       })
       .then((res) => {
         setCollections([
-          { id: "-1", title: t("project_without_collection", "无集合项目") },
+          { id: "-1", title: t("project_without_collection", t("project_without_collection")) },
           ...res.results,
         ]);
       });

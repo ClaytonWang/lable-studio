@@ -354,7 +354,7 @@
   "Please select Model type": "Please select Model type",
   "ImportNow": "Import now",
   "Export Model": "Export Model",
-  "Edit Model":"Edit Model",
+  "Edit Model": "Edit Model",
   "Manual_Annotations": "Manual_Annotations",
   "Auto_Predictions": "Auto_Predictions",
   "Back": "Back",
@@ -368,9 +368,13 @@
   "tip_please_complete": "Please Complete Input Form",
   "created_by": "Created By",
   "Operate": "Operate",
-  "Change Organization":"Change Organization",
+  "Change Organization": "Change Organization",
   "all_project": "All Projects",
   "project_without_collection": "Projects Without Collection",
   "collection": "Collection",
-  "choose_project_collection": "Choose Project Collection"
+  "choose_project_collection": "Choose Project Collection",
+  "change_collection": "Change Collection",
+  "current_collection": "Current Collection",
+  "changed_collection": "Changed Collection",
+  "placeholder_select_collection": "Please Select Collection"
 }

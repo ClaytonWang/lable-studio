@@ -356,7 +356,7 @@
   "Please select Model type": "请选择模型类型",
   "ImportNow": "立即导入",
   "Export Model": "导出模型",
-  "Edit Model":"编辑模型",
+  "Edit Model": "编辑模型",
   "Back": "返回",
   "Create Project Collection": "新增集合",
   "Project collection": "项目集合设置",
@@ -368,9 +368,13 @@
   "tip_please_complete": "请完整填写表单",
   "created_by": "创建人",
   "Operate": "操作",
-  "Change Organization":"切换组织",
+  "Change Organization": "切换组织",
   "all_project": "全部项目",
   "project_without_collection": "无集合项目",
   "collection": "项目集合",
-  "choose_project_collection": "选择项目集合"
+  "choose_project_collection": "选择项目集合",
+  "change_collection": "变更集合",
+  "current_collection": "当前集合",
+  "changed_collection": "变更后集合",
+  "placeholder_select_collection": "请选择集合"
 }

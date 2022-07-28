@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHistory } from "react-router";
-import { Form, Input, Button as AntButton } from "antd";
+import { Button as AntButton, Form, Input } from "antd";
 import { format } from "date-fns";
 import { ProTable } from "@ant-design/pro-components";
-import { get, values } from "lodash";
+import { get } from "lodash";
 import { useContextProps } from "@/providers/RoutesProvider";
 import { useAPI } from "@/providers/ApiProvider";
 import { Button } from "@/components";
@@ -46,6 +46,7 @@ export const ProjectCollection = () => {
         }),
     };
   }, [current]);
+
   useEffect(() => {
     setContextProps({ back, create: () => {
       setStatus("create");
@@ -69,7 +70,7 @@ export const ProjectCollection = () => {
         });
       });
     },
-    [status, request]
+    [status, request],
   );
   const text = useMemo(() => {
     return {
@@ -79,14 +80,14 @@ export const ProjectCollection = () => {
           update: t("Edit Collection", "编辑集合"),
           delete: t("Delete Collection", "删除集合"),
         },
-        status
+        status,
       ),
       okButton: get(
         {
           delete: t("Delete Right Now", "立即删除"),
         },
         status,
-        t("Confirm", "确定")
+        t("Confirm", "确定"),
       ),
     };
   }, [status]);
