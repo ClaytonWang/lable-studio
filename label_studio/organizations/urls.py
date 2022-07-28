@@ -3,6 +3,8 @@
 from django.urls import include, path
 
 from organizations import api, views
+from organizations.api import organization_all
+from organizations.api import organization_change
 
 app_name = 'organizations'
 
@@ -17,6 +19,8 @@ _urlpatterns = [
 _api_urlpattens = [
     # organization list viewset
     path('', api.OrganizationListAPI.as_view(), name='organization-index'),
+    path('all', organization_all, name='organization_all'),
+    path('change', organization_change, name='organization_change'),
     # organization detail viewset
     path('<int:pk>', api.OrganizationAPI.as_view(), name='organization-detail'),
     # organization memberships list viewset

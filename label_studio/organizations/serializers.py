@@ -25,10 +25,21 @@ class OrganizationIdSerializer(DynamicFieldsMixin, serializers.ModelSerializer):
 
     created_by = UserSimpleSerializer(default={}, help_text='created owner',
                                       read_only=True)
+    user_count = serializers.SerializerMethodField(read_only=True)
+    project_count = serializers.SerializerMethodField(read_only=True)
+
+    @staticmethod
+    def get_user_count(obj):
+        return obj.users.count()
+
+    @staticmethod
+    def get_project_count(obj):
+        return obj.projects.count()
 
     class Meta:
         model = Organization
-        fields = ['id', 'title', 'created_at', 'created_by']
+        fields = ['id', 'title', 'created_at', 'created_by',
+                  'user_count', 'project_count']
 
 
 class OrganizationSerializer(DynamicFieldsMixin, serializers.ModelSerializer):

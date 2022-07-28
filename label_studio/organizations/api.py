@@ -23,6 +23,9 @@ from organizations.serializers import (
     OrganizationSerializer, OrganizationIdSerializer, OrganizationMemberUserSerializer, OrganizationInviteSerializer
 )
 from organizations.serializers import OrganizationCreatedSerializer
+from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 
 logger = logging.getLogger(__name__)
@@ -206,3 +209,46 @@ class OrganizationResetTokenAPI(APIView):
         serializer = OrganizationInviteSerializer(data={'invite_url': invite_url, 'token': org.token})
         serializer.is_valid()
         return Response(serializer.data, status=201)
+
+
+"""
+"""
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def organization_all(request):
+    """
+    :param request:
+    :return:
+    """
+    data = request.data
+    queryset = Organization.objects.values('id', 'title')
+    return Response(data=list(queryset))
+
+
+@api_view(['PUT', 'PATCH'])
+@permission_classes([IsAuthenticated])
+def organization_change(request):
+    """
+    :param request:
+    :return:
+    """
+    data = request.POST.dict()
+    o_id = data.get('organization_id')
+    if not o_id:
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST, data=dict(error='必须传组织参数')
+        )
+    try:
+        o_id = int(o_id)
+    except Exception as e:
+        logger.warning('organization_id: ', o_id, ' message:', str(e))
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST, data=dict(error='组织参数是整型')
+        )
+
+    query = Organization.objects.filter(id=o_id).first()
+    request.user.active_organization = query
+    request.user.save()
+    return Response(data=dict(message=f"更新成{query.title}"))
