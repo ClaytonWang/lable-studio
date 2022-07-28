@@ -2,6 +2,7 @@ import React from "react";
 import { SidebarMenu } from "../../components/SidebarMenu/SidebarMenu";
 import { PeoplePage } from "./PeoplePage/PeoplePage";
 import { WebhookPage } from "../WebhookPage/WebhookPage";
+import { OrgManagerPage } from './OrgManagerPage';
 
 const ALLOW_ORGANIZATION_WEBHOOKS =
   window.APP_SETTINGS.flags?.allow_organization_webhooks;
@@ -24,8 +25,10 @@ const MenuLayout = ({ children, ...routeProps }) => {
 const organizationPages = {};
 
 if (ALLOW_ORGANIZATION_WEBHOOKS) {
-  organizationPages[WebhookPage] = WebhookPage;
+  organizationPages['WebhookPage'] = WebhookPage;
 }
+
+organizationPages["OrgManager"] = OrgManagerPage;
 
 export const OrganizationPage = {
   title: t("Organization"),

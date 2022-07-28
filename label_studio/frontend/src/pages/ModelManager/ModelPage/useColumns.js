@@ -84,7 +84,7 @@ export const useColumns = () => {
         },
       },
       {
-        title: '项目集',
+        title: '项目集合',
         dataIndex: 'project',
         key: 'project',
         render: (_,record) => {

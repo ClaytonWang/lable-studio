@@ -13,6 +13,7 @@ import "./PeopleInvitation.styl";
 import { PeopleList } from "./PeopleList";
 import "./PeoplePage.styl";
 import { SelectedUser } from "./SelectedUser";
+import { useHistory } from 'react-router';
 
 const InvitationModal = ({ link }) => {
   return (
@@ -34,6 +35,7 @@ const InvitationModal = ({ link }) => {
 
 export const PeoplePage = () => {
   const api = useAPI();
+  const history = useHistory();
   const inviteModal = useRef();
   const config = useConfig();
   const [selectedUser, setSelectedUser] = useState(null);
@@ -109,6 +111,10 @@ export const PeoplePage = () => {
     inviteModal.current?.update(inviteModalProps(link));
   }, [link]);
 
+  const changeOrganization = () => {
+    history.push('org-manage');
+  };
+
   return (
     <Block name="people">
       <Elem name="controls">
@@ -118,6 +124,9 @@ export const PeoplePage = () => {
           <Space>
             <Button icon={<LsPlus/>} primary onClick={showInvitationModal}>
               {t("Add People", "添加用户")}
+            </Button>
+            <Button icon={<LsPlus/>} primary onClick={changeOrganization}>
+              {t("Change Organization", "切换组织")}
             </Button>
           </Space>
         </Space>
