@@ -41,7 +41,8 @@ class ProjectSetViews(MultiSerializerViewSetMixin, ModelViewSet):
         :return: dict
         """
         data = request.GET.dict()
-        self.queryset = ProjectSet.objects.for_user_organization(request.user)
+        self.queryset = ProjectSet.objects.for_user_organization(
+            request.user).order_by('-created_at')
         return super(ProjectSetViews, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
@@ -97,6 +98,14 @@ class ProjectSetViews(MultiSerializerViewSetMixin, ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         self.queryset = ProjectSet.objects.filter(pk=kwargs.get('pk'))
+        if self.queryset:
+            instance = self.queryset.first()
+            count = instance.project_set.count()
+            if count:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data=dict(error=f'项目集【{instance.title}】还有{count}个关联项目')
+                )
         super(ProjectSetViews, self).destroy(request, *args, **kwargs)
         return Response(status=200, data=dict(message='删除成功'))
 

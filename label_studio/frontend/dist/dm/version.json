@@ -1,6 +1,6 @@
 {
-  "message": "Merge pull request #12 from engineering-group/MARK-91",
-  "commit": "fa5ec23ec483d4c08d98a1b99c4dc514929b052e",
-  "branch": "xizheng",
-  "date": "2022-07-19 14:50:59 +0800"
+  "message": "chore: 修复中文名展示问题",
+  "commit": "84062e89c890a9f0233e2bf15faccef7278ebbc8",
+  "branch": "development",
+  "date": "2022-07-29 16:31:49 +0800"
 }

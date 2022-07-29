@@ -373,12 +373,18 @@
   "project_without_collection": "Projects Without Collection",
   "collection": "Collection",
   "choose_project_collection": "Choose Project Collection",
-  "org-list":"Organization List",
+  "org-list": "Organization List",
   "change_collection": "Change Collection",
   "current_collection": "Current Collection",
   "changed_collection": "Changed Collection",
   "placeholder_select_collection": "Please Select Collection",
   "edit org":"Edit Organization",
-  "add org":"Add Organization"
-
+  "add org":"Add Organization",
+  "collection_undeleteable": "Collection canot be deleted",
+  "Insert": "Add",
+  "Undo": "Undo",
+  "Redo": "Redo",
+  "Reset Prelabeling": "Reset Prelabeling",
+  "Hide Instructions": "Hide Instructions",
+  "Comment to Reviewer": "Comment to Reviewer"
 }

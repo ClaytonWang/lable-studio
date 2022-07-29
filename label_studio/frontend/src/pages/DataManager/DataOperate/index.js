@@ -12,8 +12,8 @@ const DialogIntentOperate = ({ actions }) => {
   return (
     <>
       <Button onClick={actions.clean}>{t("label_clean")}</Button>
-      <Button onClick={actions.prediction}>{t("label_prediction")}</Button>
       <Button onClick={actions.prompt}>{t("label_prompt")}</Button>
+      <Button onClick={actions.prediction}>{t("label_prediction")}</Button>
     </>
   );
 };
@@ -21,8 +21,8 @@ const DialogIntentOperate = ({ actions }) => {
 const ResponseGenerateOperate = ({ actions }) => {
   return (
     <>
-      <Button onClick={actions.prediction}>{t("label_prediction")}</Button>
       <Button onClick={actions.prompt}>{t("label_prompt")}</Button>
+      <Button onClick={actions.prediction}>{t("label_prediction")}</Button>
     </>
   );
 };

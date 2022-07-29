@@ -29,7 +29,9 @@ export const Userpic = forwardRef(({
     if (user) {
       const { first_name, last_name, email, initials, username } = user;
 
-      if (initials) {
+      if (window.APP_SETTINGS?.user?.displayName) {
+        setFinalUsername(window.APP_SETTINGS?.user?.displayName);
+      } else if (initials) {
         setFinalUsername(initials);
       } else if (username) {
         setFinalUsername(username);
