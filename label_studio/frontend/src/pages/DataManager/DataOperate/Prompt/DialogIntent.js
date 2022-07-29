@@ -223,7 +223,7 @@ const PromptLearnTemplate = ({ project, request, close }) => {
       title: () => {
         return (
           <>
-            提示学习模板
+            0样本模板
             <Tooltip title={strTip} overlayInnerStyle={{ borderRadius: 5 }}>
               <Icon
                 icon={FaQuestionCircle}
@@ -301,7 +301,7 @@ const PromptLearnTemplate = ({ project, request, close }) => {
   return (
     <div className={"dlg-root"}>
       <Modal.Header>
-        <span>预标注(提示学习)</span>
+        <span>{t("label_prompt")}</span>
       </Modal.Header>
       <div className={"dlg-content"}>
         <Form form={form} component={false}>
