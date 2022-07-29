@@ -122,7 +122,11 @@ export const ProjectCollection = () => {
             {
               title: t("created_by"),
               dataIndex: "created_by",
-              render: (v) => v.email,
+              render: (v) => {
+                const name = `${v.last_name}${v.first_name}`;
+
+                return name || v.email;
+              },
             },
             {
               title: t("Operate", "操作"),

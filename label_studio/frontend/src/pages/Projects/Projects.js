@@ -167,7 +167,7 @@ ProjectsPage.context = ({ openModal, showButton, gotoCollection }) => {
         {t("Project collection", "项目集合设置")}
       </Button>
       <Button onClick={openModal} look="primary" size="compact">
-        {t("Create")}
+        {t("Insert", "新增")}
       </Button>
     </Space>
   );

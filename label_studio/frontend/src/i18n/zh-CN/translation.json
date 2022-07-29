@@ -373,9 +373,11 @@
   "project_without_collection": "无集合项目",
   "collection": "项目集合",
   "choose_project_collection": "选择项目集合",
-  "org-list":"组织列表",
+  "org-list": "组织列表",
   "change_collection": "变更集合",
   "current_collection": "当前集合",
   "changed_collection": "变更后集合",
-  "placeholder_select_collection": "请选择集合"
+  "placeholder_select_collection": "请选择集合",
+  "collection_undeleteable": "该集合包含有效的项目，无法删除",
+  "Insert": "新增"
 }
