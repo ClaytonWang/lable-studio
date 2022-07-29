@@ -94,6 +94,7 @@
       lastName: "{{user.last_name}}",
       initials: "{{user.get_initials}}",
       email: "{{user.email}}",
+      orgnazition:"{{user.active_organization.title}}",
       {% if user.avatar %}
       avatar: "{{user.avatar_url|safe}}",
       {% endif %}

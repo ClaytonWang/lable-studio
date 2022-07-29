@@ -75,7 +75,7 @@ const OrgManager = () => {
           totalItems={totalItems}
           loadNextPage={loadNextPage}
           pageSize={defaultPageSize} />
-        {modal && <AddEditOrganization onClose={ onClose} />}
+        {modal && <AddEditOrganization onClose={onClose} type={"add"} data={{ title:'' }} />}
       </Elem>
     </Block>
   );

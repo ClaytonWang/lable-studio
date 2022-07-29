@@ -378,6 +378,8 @@
   "current_collection": "Current Collection",
   "changed_collection": "Changed Collection",
   "placeholder_select_collection": "Please Select Collection",
+  "edit org":"Edit Organization",
+  "add org":"Add Organization",
   "collection_undeleteable": "Collection canot be deleted",
   "Insert": "Add",
   "Undo": "Undo",

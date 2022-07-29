@@ -31,7 +31,7 @@ if (ALLOW_ORGANIZATION_WEBHOOKS) {
 organizationPages["OrgManager"] = OrgManagerPage;
 
 export const OrganizationPage = {
-  title: t("Organization"),
+  title: t("Organization")+" (" + window.APP_SETTINGS.user.orgnazition+")",
   path: "/organization",
   exact: true,
   layout: MenuLayout,

@@ -378,6 +378,8 @@
   "current_collection": "当前集合",
   "changed_collection": "变更后集合",
   "placeholder_select_collection": "请选择集合",
+  "edit org":"编辑组织",
+  "add org":"添加组织",
   "collection_undeleteable": "该集合包含有效的项目，无法删除",
   "Insert": "新增",
   "Undo": "撤消",

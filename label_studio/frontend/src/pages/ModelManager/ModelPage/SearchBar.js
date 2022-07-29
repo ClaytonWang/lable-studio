@@ -1,30 +1,30 @@
-import React from 'react';
-import { Col, Form, Row } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
-import { Button } from '../../../components';
-import { Select } from '../../../components/Form/Elements';
+import React from "react";
+import { Col, Form, Row } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import { Button } from "../../../components";
+import { Select } from "../../../components/Form/Elements";
 import "./SearchBar.less";
-import { useFilter } from './useFilter';
+import { useFilter } from "./useFilter";
 
 const getFilters = (filters) => {
-  const model_types = ["none"].concat(Object.keys(filters?.type??[]));
-  const model_versions = ["none"].concat(filters.version??[]);
-  const model_set = ["none"].concat(filters?.model_set??[]);
-  const project_set = ["none"].concat(filters?.project_set??[]);
+  const model_types = ["none"].concat(Object.keys(filters?.type ?? []));
+  const model_versions = ["none"].concat(filters.version ?? []);
+  const model_set = ["none"].concat(filters?.model_set ?? []);
+  const project_set = ["none"].concat(filters?.project_set ?? []);
 
   return [
     {
       key: "type",
       label: "模型类型",
-      value:'none',
+      value: "none",
       data: model_types,
       render: (col) => {
         return (
           <Select
             value={col.value}
-            options={col.data.map(v => {
-              if (v === 'none') {
-                return { label: '不限', value: v };
+            options={col.data.map((v) => {
+              if (v === "none") {
+                return { label: "不限", value: v };
               } else {
                 return { label: t(v), value: v };
               }
@@ -39,15 +39,15 @@ const getFilters = (filters) => {
     {
       key: "version",
       label: "版本号",
-      value:'none',
+      value: "none",
       data: model_versions,
       render: (col) => {
         return (
           <Select
             value={col.value}
-            options={col.data.map(v => {
-              if (v === 'none') {
-                return { label: '不限', value: v };
+            options={col.data.map((v) => {
+              if (v === "none") {
+                return { label: "不限", value: v };
               } else {
                 return { label: t(v), value: v };
               }
@@ -62,15 +62,15 @@ const getFilters = (filters) => {
     {
       key: "model_set",
       label: "模型集",
-      value:'none',
+      value: "none",
       data: model_set,
       render: (col) => {
         return (
           <Select
             value={col.value}
-            options={col.data.map(v => {
-              if (v === 'none') {
-                return { label: '不限', value: v };
+            options={col.data.map((v) => {
+              if (v === "none") {
+                return { label: "不限", value: v };
               } else {
                 return { label: t(v), value: v };
               }
@@ -85,15 +85,15 @@ const getFilters = (filters) => {
     {
       key: "project_set",
       label: "项目集合",
-      value:'none',
+      value: "none",
       data: project_set,
       render: (col) => {
         return (
           <Select
             value={col.value}
-            options={col.data.map(v => {
-              if (v === 'none') {
-                return { label: '不限', value: v };
+            options={col.data.map((v) => {
+              if (v === "none") {
+                return { label: "不限", value: v };
               } else {
                 return { label: t(v), value: v };
               }
@@ -118,9 +118,14 @@ export const SearchBar = React.memo((props) => {
       const obj = {};
 
       fields.map((v) => {
-        obj[v.key]=v.value==='none'?'':v.value;
+        obj[v.key] = v.value === "none" ? "" : v.value;
       });
-      await props.onSearch(props.pageSize, { type:obj['type'], version:obj['version'], mdoel_group:obj['model_set'], project_group:obj['project_set'] });
+      await props.onSearch(props.pageSize, {
+        type: obj["type"],
+        version: obj["version"],
+        mdoel_group: obj["model_set"],
+        project_group: obj["project_set"],
+      });
     }
   };
 
@@ -139,24 +144,20 @@ export const SearchBar = React.memo((props) => {
 
     children?.push(
       <Col
-        key={ 'action'}
+        key={"action"}
         span={4}
         style={{
-          textAlign: 'left',
+          textAlign: "left",
         }}
       >
-        <Button look="primary" size="compact" onClick={handleSearch} icon={<SearchOutlined style={{ width:20,height:20 }}/>}>搜索</Button>
-        {/* <Button
+        <Button
+          look="primary"
           size="compact"
-          style={{
-            margin: '0 8px',
-          }}
-          onClick={() => {
-            form.resetFields();
-          }}
+          onClick={handleSearch}
+          icon={<SearchOutlined style={{ width: 20, height: 20 }} />}
         >
-          清除
-        </Button> */}
+          搜索
+        </Button>
       </Col>,
     );
     return children;
@@ -167,6 +168,7 @@ export const SearchBar = React.memo((props) => {
       fields={fields}
       form={form}
       className="ant-advanced-search-form"
+      colon={false}
     >
       <Row gutter={20}>{getFields()}</Row>
     </Form>
