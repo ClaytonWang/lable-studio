@@ -115,6 +115,25 @@
     {% endblock %}
 
   }, {% block frontend_settings %}{}{% endblock %});
+
+  // 用户名处理
+  (() => {
+    const user = window.APP_SETTINGS.user;
+    try {
+      let name = '';
+      if (user.initials) {
+        name = user.initials;
+      } else if (user.firstName.length === 2) {
+        name = user.firstName;
+      } else {
+        name = (`${user.lastName}${user.firstName}`).trim();
+      }
+      name = (name || user.username || user.email).toUpperCase();
+      window.APP_SETTINGS.user.displayName = name;
+    } catch (error) {
+      window.APP_SETTINGS.user.displayName = user.initials;
+    }
+  })();
 </script>
 
 <script src="{{settings.HOSTNAME}}/react-app/main.js?v={{ versions.backend.commit }}"></script>
