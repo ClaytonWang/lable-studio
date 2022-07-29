@@ -377,5 +377,8 @@
   "change_collection": "Change Collection",
   "current_collection": "Current Collection",
   "changed_collection": "Changed Collection",
-  "placeholder_select_collection": "Please Select Collection"
+  "placeholder_select_collection": "Please Select Collection",
+  "edit org":"Edit Organization",
+  "add org":"Add Organization"
+
 }

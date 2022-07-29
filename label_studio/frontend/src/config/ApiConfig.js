@@ -14,7 +14,8 @@ export const API_CONFIG = {
     addOrg: "POST:/organizations",
     updateOrg: "PATCH:/organizations/:pk",
     deleteOrg: "DELETE:/organizations/:pk",
-    orgDetail:"GET:/organizations/:pk",
+    orgDetail: "GET:/organizations/:pk",
+    changeOrg: "PATCH:/organizations/change",
 
     // Project
     projects: "/projects",
@@ -35,7 +36,7 @@ export const API_CONFIG = {
     importModel: "POST:/model-manager",
     editModel: "PATCH:/model-manager/:pk",
     exportModel: "GET:/model-manager/export",
-    filtersModel:"GET:/model-manager/select",
+    filtersModel: "GET:/model-manager/select",
 
     // Config and Import
     configTemplates: "/templates",
@@ -77,8 +78,8 @@ export const API_CONFIG = {
     mlPromptPredict: 'POST:/projects/prompt-learning/predict',
     mlPromptTemplateCreate: 'POST:/templates/prompt-learning',
     mlPromptTemplateDelete: 'DELETE:/templates/prompt-learning',
-    mlPromptTemplateUpdate:'PATCH:/templates/prompt-learning',
-    mlPromptTemplateQuery:'GET:/templates/prompt-learning/:project',
+    mlPromptTemplateUpdate: 'PATCH:/templates/prompt-learning',
+    mlPromptTemplateQuery: 'GET:/templates/prompt-learning/:project',
 
     // Clean
     clExec: "POST:/dbml/clean",

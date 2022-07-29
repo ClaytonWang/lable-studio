@@ -9,26 +9,26 @@ import { ModelEdit } from "./ModelEdit";
 
 
 export const ModelList = (props) => {
-  const [searchFields,setSearhFields] = useState();
-  const { data,currentPage,totalItems,pageSize,loadNextPage,loading } = props;
+  const [searchFields, setSearhFields] = useState();
+  const { data, currentPage, totalItems, pageSize, loadNextPage, loading } = props;
   const col = useColumns();
 
-  const reload = useCallback((pageSize,fields) => {
-    loadNextPage(1, pageSize,fields);
+  const reload = useCallback((pageSize, fields) => {
+    loadNextPage(1, pageSize, fields);
   }, []);
 
   const onSearch = useCallback((pageSize, fields) => {
     setSearhFields(fields);
-    reload(pageSize,fields);
+    reload(pageSize, fields);
   }, []);
 
-  const onClose = useCallback((force,type) => {
+  const onClose = useCallback((force, type) => {
     if (force) reload();
-    if(type==='export')
+    if (type === 'export')
       col.setModalExp(null);
     else if (type === 'edit')
       col.setModaEdt(null);
-  },[]);
+  }, []);
 
   return (
     <>
@@ -51,7 +51,7 @@ export const ModelList = (props) => {
           urlParamName="page"
           pageSize={pageSize}
           pageSizeOptions={[10, 30, 50, 100]}
-          onPageLoad={(page, pageSize) => loadNextPage(page, pageSize,searchFields)}
+          onPageLoad={(page, pageSize) => loadNextPage(page, pageSize, searchFields)}
         />
       </Elem>
     </>

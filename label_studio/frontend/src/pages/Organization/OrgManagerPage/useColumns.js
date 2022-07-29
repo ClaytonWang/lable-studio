@@ -2,14 +2,34 @@ import { Space } from '@/components/Space/Space';
 import { Elem } from '@/utils/bem';
 import { Userpic } from '@/components';
 import { format } from 'date-fns';
-import { useMemo, useState } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Popconfirm } from 'antd';
-import { ExclamationCircleOutlined,InfoCircleOutlined } from "@ant-design/icons";
+import { ExclamationCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { ApiContext } from '../../../providers/ApiProvider';
+import { useHistory } from "react-router";
 
 
-export const useColumns = () => {
+export const useColumns = (reload) => {
+  const api = useContext(ApiContext);
+  const history = useHistory();
   const [modalAddEdit, setModalAddEdit] = useState(null);
   const [modalEdt, setModaEdt] = useState(null);
+
+  const changeOrg = useCallback(
+    async (record) => {
+      await api.callApi("changeOrg", {
+        body: { organization_id: record.id },
+      });
+      history.replace("/organization");
+    },[]);
+
+  const deleteOrg = useCallback(
+    async (record) => {
+      await api.callApi("deleteOrg", {
+        body: { organization_id: record.id },
+      });
+      reload();
+    },[]);
 
   const columns = useMemo(() => {
     return [
@@ -52,23 +72,31 @@ export const useColumns = () => {
         render: (_, record) => (
           <Space size="middle">
             <Popconfirm
-              title={(record.project_count || record.user_count) ? "是否确定删除该组织?":"该组织包含有效用户或项目,无法删除."}
-              onConfirm={() => { }}
-              icon={(record.project_count || record.user_count)?<InfoCircleOutlined />:<ExclamationCircleOutlined style={{ color: 'red' }} /> }
+              title={(record.project_count || record.user_count) ? "是否确定删除该组织?" : "该组织包含有效用户或项目,无法删除."}
+              onConfirm={() => { deleteOrg(record); }}
+              icon={(record.project_count || record.user_count) ? <InfoCircleOutlined /> : <ExclamationCircleOutlined style={{ color: 'red' }} />}
               okText="确定"
               cancelText="取消"
-              showCancel={!!(record.project_count || record.user_count) }
+              showCancel={!!(record.project_count || record.user_count)}
             >
-              <a onClick={() => { setModaEdt(record);}}>删除</a>
+              <a onClick={() => { setModaEdt(record); }}>删除</a>
             </Popconfirm>
 
             <a onClick={() => { setModalAddEdit(record); }}>编辑</a>
-            <a onClick={() => { }}>切换</a>
+
+            <Popconfirm
+              title="确定要切换当前组织吗?"
+              onConfirm={() => { changeOrg(record); }}
+              icon={<InfoCircleOutlined />}
+              okText="确定"
+              cancelText="取消">
+              <a>切换</a>
+            </Popconfirm>
           </Space>
         ),
       },
     ];
-  },[]);
+  }, []);
 
   return {
     columns,

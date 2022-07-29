@@ -22,7 +22,7 @@ export const OrganizationList = (props) => {
     <>
       <Elem name="list">
         <Table rowKey="id" columns={col.columns} dataSource={data} pagination={false} loading={loading} />
-        {col.modalAddEdit && <AddEditOrganization onClose={ onClose} />}
+        {col.modalAddEdit && <AddEditOrganization onClose={onClose} type={"edit"} data={ col.modalAddEdit } />}
       </Elem>
       <Elem name="pages">
         <Pagination
