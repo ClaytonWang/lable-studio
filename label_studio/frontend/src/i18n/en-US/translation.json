@@ -379,5 +379,10 @@
   "changed_collection": "Changed Collection",
   "placeholder_select_collection": "Please Select Collection",
   "collection_undeleteable": "Collection canot be deleted",
-  "Insert": "Add"
+  "Insert": "Add",
+  "Undo": "Undo",
+  "Redo": "Redo",
+  "Reset Prelabeling": "Reset Prelabeling",
+  "Hide Instructions": "Hide Instructions",
+  "Comment to Reviewer": "Comment to Reviewer"
 }

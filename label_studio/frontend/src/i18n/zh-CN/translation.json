@@ -379,5 +379,10 @@
   "changed_collection": "变更后集合",
   "placeholder_select_collection": "请选择集合",
   "collection_undeleteable": "该集合包含有效的项目，无法删除",
-  "Insert": "新增"
+  "Insert": "新增",
+  "Undo": "撤消",
+  "Redo": "重做",
+  "Reset Prelabeling": "重置预标",
+  "Hide Instructions": "隐藏说明",
+  "Comment to Reviewer": "对审稿人的评论"
 }
