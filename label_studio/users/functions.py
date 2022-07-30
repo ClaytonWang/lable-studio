@@ -75,3 +75,26 @@ def proceed_registration(request, user_form, organization_form, next_page):
     response = save_user(request, next_page, user_form)
 
     return response
+
+
+def proceed_code_registration(
+         request, user_form, organization, next_page, group
+    ):
+    """
+
+    """
+    user = user_form.save()
+    user.username = user.email.split('@')[0]
+    user.active_organization = organization
+    user.save()
+
+    # 添加关联 组织和角色
+    organization.add_user(user)
+    user.groups.add(group)
+
+    redirect_url = next_page if next_page else reverse(
+     'projects:project-index')
+    auth.login(
+        request, user, backend='django.contrib.auth.backends.ModelBackend'
+    )
+    return redirect(redirect_url)
