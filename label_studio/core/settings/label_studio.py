@@ -72,7 +72,8 @@ versions = collect_versions()
 # in Label Studio Community version, feature flags are always ON
 FEATURE_FLAGS_DEFAULT_VALUE = True
 
-
+# 注册有效时间是2天
+SIGNUP_INVITE_EXPIRE_TIME = 60 * 60 * 24 * 2
 # 增加配置文件
 ENV = os.getenv('ENV', '').upper()
 if 'DEV' == ENV:

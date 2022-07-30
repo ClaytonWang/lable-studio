@@ -11,6 +11,7 @@ from django.utils.translation import gettext_lazy as _
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import Group
 
 from organizations.models import OrganizationMember, Organization
 from users.functions import hash_upload
@@ -194,3 +195,18 @@ def init_user(sender, instance=None, created=False, **kwargs):
     if created:
         # create token for user
         Token.objects.create(user=instance)
+
+
+class SignUpInvite(models.Model):
+    code = models.CharField('Verification Code', unique=True, max_length=10)
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
+    organization = models.ForeignKey('organizations.Organization', on_delete=models.SET_NULL, null=True)
+
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, verbose_name=_('created by'))
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+    state = models.BooleanField(_('status'), default=False)
+    signup_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True, related_name='to_invite',verbose_name='sign up user')
+
+    def has_permission(self, user):
+        return self.created_by == user

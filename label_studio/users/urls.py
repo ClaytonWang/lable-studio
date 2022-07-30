@@ -8,9 +8,12 @@ from django.views.static import serve
 from rest_framework import routers
 
 from users import views, api
+from users.api_sign import SignUpInviteViews
 
 router = routers.DefaultRouter()
 router.register(r'users', api.UserAPI, basename='user')
+router.register(r'sign/invite', SignUpInviteViews,
+                basename='user-signup-invite')
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),

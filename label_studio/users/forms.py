@@ -11,6 +11,7 @@ from django.conf import settings
 from users.models import User
 
 
+SIGNUP_INVITE_CODE_LENGTH = 6
 EMAIL_MAX_LENGTH = 256
 PASS_MAX_LENGTH = 64
 PASS_MIN_LENGTH = 8
@@ -53,6 +54,9 @@ class LoginForm(forms.Form):
 
 
 class UserSignupForm(forms.Form):
+    code = forms.CharField(label="Code",
+                           max_length=SIGNUP_INVITE_CODE_LENGTH,
+                           error_messages={'required': 'invite code'})
     email = forms.EmailField(label="Work Email", error_messages={'required': 'Invalid email'})
     password = forms.CharField(max_length=PASS_MAX_LENGTH,
                                error_messages={'required': PASS_LENGTH_ERR},

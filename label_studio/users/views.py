@@ -15,6 +15,10 @@ from core.middleware import enforce_csrf_checks
 from users.functions import proceed_registration
 from organizations.models import Organization
 from organizations.forms import OrganizationSignupForm
+from datetime import datetime
+from datetime import timedelta
+from users.models import SignUpInvite
+from users.functions import proceed_code_registration
 
 
 logger = logging.getLogger()
@@ -47,16 +51,43 @@ def user_signup(request):
 
     # make a new user
     if request.method == 'POST':
-        organization = Organization.objects.first()
-        if settings.DISABLE_SIGNUP_WITHOUT_LINK is True:
-            if not(token and organization and token == organization.token):
-                raise PermissionDenied()
+        # 修改邀请注册，原有注册用户接口关闭
+        data = request.POST.dict()
+        code = data.get('code')
+        invite = SignUpInvite.objects.filter(code=code).first()
+
+        if not invite:
+            raise Exception('请填写有效的验证码')
+
+        if invite.state:
+            raise Exception(f'{code}已经被注册')
+
+        invite_update_time = invite.updated_at.replace(tzinfo=None)
+        expire_time = invite_update_time + timedelta(
+            seconds=settings.SIGNUP_INVITE_EXPIRE_TIME
+        )
+        if datetime.now() > expire_time:
+            raise Exception('邀请链接已经过期')
+
+        #  新建用户，设置用户组 / 组织
+        # organization = Organization.objects.first()
+        # if settings.DISABLE_SIGNUP_WITHOUT_LINK is True:
+        #     if not(token and organization and token == organization.token):
+        #         raise PermissionDenied()
+        #
+        # user_form = forms.UserSignupForm(request.POST)
+        # organization_form = OrganizationSignupForm(request.POST)
+        #
+        # if user_form.is_valid():
+        #     redirect_response = proceed_registration(request, user_form, organization_form, next_page)
+        #     if redirect_response:
+        #         return redirect_response
 
         user_form = forms.UserSignupForm(request.POST)
-        organization_form = OrganizationSignupForm(request.POST)
-
         if user_form.is_valid():
-            redirect_response = proceed_registration(request, user_form, organization_form, next_page)
+            redirect_response = proceed_code_registration(
+                request, user_form, invite.organization, next_page, invite.group
+            )
             if redirect_response:
                 return redirect_response
 
