@@ -120,23 +120,21 @@
 
   }, {% block frontend_settings %}{}{% endblock %});
 
-  // 用户名处理
   (() => {
-    const user = window.APP_SETTINGS.user;
-    try {
-      let name = '';
-      if (user.initials) {
-        name = user.initials;
-      } else if (user.firstName.length === 2) {
-        name = user.firstName;
-      } else {
-        name = (`${user.lastName}${user.firstName}`).trim();
+    const getInitials = (user) => {
+      if (user.first_name && user.last_name) {
+        if (user.first_name.length > 1) {
+          return user.first_name.substring(0, 2);
+        }
+        return (`${user.lastName}${user.firstName}`).substring(0, 2);
+      } else if (user.first_name && !user.last_name) {
+        return user.first_name.substring(0, 1);
+      } else if (user.last_name && !user.first_name) {
+        return user.last_name.substring(0, 1);
       }
-      name = (name || user.username || user.email).toUpperCase();
-      window.APP_SETTINGS.user.displayName = name;
-    } catch (error) {
-      window.APP_SETTINGS.user.displayName = user.initials;
-    }
+      return user.email?.substring(0, 2) || user.username?.substring(0, 2);
+    };
+    window.APP_SETTINGS.getInitials = getInitials;
   })();
 </script>
 

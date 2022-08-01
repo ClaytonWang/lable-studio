@@ -12,7 +12,9 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
+from django.contrib.auth.models import Group
 from users.models import SignUpInvite
+from organizations.models import Organization
 from users.serializers_sign import SignUpInviteListSerializer
 from users.serializers_sign import SignUpInviteDetailSerializer
 from users.serializers_sign import SignUpInviteCreateSerializer
@@ -81,3 +83,13 @@ class SignUpInviteViews(MultiSerializerViewSetMixin, ModelViewSet):
                 data=dict(error=f'{code} 已经存在')
             )
         return None
+
+    @action(methods=['GET'], detail=False)
+    def select(self, request, *args, **kwargs):
+        queryset_org = Organization.objects.values('id', 'title')
+        queryset_group = Group.objects.values('id', 'name')
+        result = dict(
+            group=list(queryset_group),
+            organization=list(queryset_org),
+        )
+        return Response(data=result)
