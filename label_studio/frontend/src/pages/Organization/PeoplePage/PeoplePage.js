@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LsPlus } from "../../../assets/icons";
 import { Button } from "../../../components";
-import { Description } from "../../../components/Description/Description";
-import { Input } from "../../../components/Form";
+import { Input,Select } from "../../../components/Form";
 import { modal } from "../../../components/Modal/Modal";
 import { Space } from "../../../components/Space/Space";
 import { useAPI } from "../../../providers/ApiProvider";
@@ -15,23 +14,86 @@ import "./PeoplePage.styl";
 import { SelectedUser } from "./SelectedUser";
 import { useHistory } from 'react-router';
 import { SwapOutlined } from '@ant-design/icons';
+import { Form } from 'antd';
+
+const layout = {
+  labelCol: {
+    span: 5,
+  },
+  wrapperCol: {
+    span: 19,
+  },
+};
 
 const InvitationModal = ({ link }) => {
+  const [form] = Form.useForm();
+
   return (
     <Block name="invite">
-      <Input
-        value={link}
-        style={{ width: '100%' }}
-        readOnly
-      />
-
-      <Description style={{ width: '70%', marginTop: 16 }}>
-        {t("invite_description", "邀请加入的用户，拥有所有项目权限")}
-        {/* Invite people to join your Label Studio instance. People that you invite have full access to all of your projects.  */}
-        {/* <a href="https://labelstud.io/guide/signup.html">Learn more</a>. */}
-      </Description>
+      <Form
+        style={{ marginTop: 20 }}
+        {...layout}
+        form={form}
+        initialValues={{ group_id: "2", organization_id: "1", code: "" ,url:"" }}
+        layout="horizontal"
+        name="form_in_org"
+        colon={false}>
+        <Form.Item
+          name="group_id"
+          label="角色">
+          <div style={{ width: 250 }}>
+            <Select
+              options={[
+                { label: "标注员", value: "3" },
+                { label: "普通用户", value: "2" },
+                { label: "管理员", value: "1" },
+              ]}
+            />
+          </div>
+        </Form.Item>
+        <Form.Item
+          name="organization_id"
+          label="组织">
+          <div style={{ width: 250 }}>
+            <Select
+              options={[
+                { label: "上海移动大数据中心", value: "1" },
+                { label: "普通用户", value: "2" },
+                { label: "管理员", value: "3" },
+              ]}
+            />
+          </div>
+        </Form.Item>
+        <Form.Item
+          name="code"
+          label="注册验证码"
+        >
+          <Input style={{ width: 250 }} />
+          {/* <Button >复制验证码</Button> */}
+        </Form.Item>
+        <Form.Item
+          name="code"
+          label="注册链接"
+        >
+          <Input style={{ width: 350 }} value={link} readOnly />
+          {/* <Button >复制验链接</Button> */}
+        </Form.Item>
+      </Form>
     </Block>
   );
+};
+
+const createCode = ()=> {
+  let code = "";
+  var codeLength = 6;//验证码的长度，可变
+  var selectChar = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];//所有候选组成验证码的字符
+
+  for (var i = 0; i < codeLength; i++) {
+    var charIndex = Math.floor(Math.random() * 36);
+
+    code += selectChar[charIndex];
+  }
+  return code;
 };
 
 export const PeoplePage = () => {
@@ -42,6 +104,10 @@ export const PeoplePage = () => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [link, setLink] = useState();
+  const [roleList, setRoleList] = useState([]);
+  const [orgList, setOrgList] = useState([]);
+  const [validateCode, setValidateCode] = useState(createCode());
+
 
   const selectUser = useCallback((user) => {
     setSelectedUser(user);
@@ -102,8 +168,18 @@ export const PeoplePage = () => {
     return localStorage.getItem('selectedUser');
   }, []);
 
-  useEffect(() => {
-    api.callApi("inviteLink").then(({ invite_url }) => {
+  useEffect(async () => {
+
+    const groups = await api.callApi("roleList");
+
+    setRoleList(groups);
+
+    api.callApi("signInvite", {
+      body: {
+        code: validateCode,
+        group_id: "",
+        organization_id:config.user.orgnazition.id,
+      } }).then(({ invite_url }) => {
       setInviteLink(invite_url);
     });
   }, []);
