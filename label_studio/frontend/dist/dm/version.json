@@ -1,6 +1,6 @@
 {
-  "message": "chore: 修复中文名展示问题",
-  "commit": "84062e89c890a9f0233e2bf15faccef7278ebbc8",
-  "branch": "xizheng",
-  "date": "2022-07-29 16:31:49 +0800"
+  "message": "chore: 修复中文名称问题",
+  "commit": "652fdae94db024513449958b8360689486424c1c",
+  "branch": "development",
+  "date": "2022-08-01 11:37:45 +0800"
 }

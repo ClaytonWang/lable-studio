@@ -1,4 +1,5 @@
 import { each, isArray, map } from 'lodash';
+import { template } from '@/utils/util';
 
 const Formatter = {
   trans: window.t,
@@ -15,6 +16,8 @@ const Formatter = {
 const format = (key, data, ...options) => {
   try {
     switch (key) {
+      case 'with_template':
+        return formatWithTemplate(data, ...options);
       case 'dm_columns':
         return formatDMColumns(data, ...options);
       case 'ls_export_formats':
@@ -30,6 +33,10 @@ const format = (key, data, ...options) => {
     console.log('i18n.format.error', error);
     return data;
   }
+};
+
+const formatWithTemplate = (key, ...options) => {
+  return Formatter.trans(`${window._projectClass}.${key}`, Formatter.trans(key, ...options));
 };
 
 const validatei18n = {
@@ -82,10 +89,11 @@ const formatExportFormats = (data) => {
 
 const formatDMColumns = (data) => {
   if (isArray(data?.columns)) {
+
     each(data.columns, item => {
       if (item.id) {
-        item.title = Formatter.trans(item.id, item.title);
-        item.help = Formatter.trans(`${item.id}_help`, '');
+        item.title = formatWithTemplate(item.id, item.title);
+        item.help = formatWithTemplate(`${item.id}_help`, '');
       }
     });
   }
