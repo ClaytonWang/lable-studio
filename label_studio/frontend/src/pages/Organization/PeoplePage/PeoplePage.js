@@ -169,10 +169,10 @@ export const PeoplePage = () => {
     localStorage.setItem('selectedUser', user?.id);
   }, [setSelectedUser]);
 
-  const setInviteLink = useCallback((link) => {
+  const setInviteLink = useCallback(() => {
     const hostname = config.hostname || location.origin;
 
-    setLink(`${hostname}${link}`);
+    setLink(`${hostname}${'/user/signup'}`);
   }, [config, setLink]);
 
   const updateLink = useCallback((values) => {
@@ -213,6 +213,7 @@ export const PeoplePage = () => {
     setRoleList(data?.group);
     setOrgList(data?.organization);
     setValidateCode(createCode());
+    setInviteLink();
     // api.callApi("signInvite", {
     //   body: {
     //     code: validateCode,
