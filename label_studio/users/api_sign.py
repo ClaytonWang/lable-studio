@@ -48,7 +48,9 @@ class SignUpInviteViews(MultiSerializerViewSetMixin, ModelViewSet):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
 
-        check_rst = self.check_exists_code(serializer.data.get('code'))
+        code = data.get('code')
+        # save前不能直接调用数据
+        check_rst = self.check_exists_code(code)
         if check_rst:
             return check_rst
 
