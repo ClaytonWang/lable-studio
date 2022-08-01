@@ -79,6 +79,10 @@ export const ProjectProvider: React.FunctionComponent = ({ children }) => {
   }, [params]);
 
   useEffect(() => {
+    window._projectClass = template.class(projectData);
+  }, [projectData]);
+
+  useEffect(() => {
     return () => projectCache.clear();
   }, []);
 
