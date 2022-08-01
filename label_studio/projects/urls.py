@@ -14,13 +14,12 @@ app_name = 'projects'
 
 # collections
 _collections_urlpatterns = [
-    path('', views.project_collection, name='project-index'),
+    path('', views.project_collection, name='collection-index'),
 ]
 
 # reverse for projects:name
 _urlpatterns = [
     path('', views.project_list, name='project-index'),
-    path('collection', views.project_list, name='project-index'),
     path('<int:pk>/settings/', views.project_settings, name='project-settings', kwargs={'sub_path': ''}),
     path('<int:pk>/settings/<sub_path>', views.project_settings, name='project-settings-anything'),
 
