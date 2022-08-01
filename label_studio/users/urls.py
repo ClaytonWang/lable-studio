@@ -9,9 +9,11 @@ from rest_framework import routers
 
 from users import views, api
 from users.api_sign import SignUpInviteViews
+from users.api_group import GroupViews
 
 router = routers.DefaultRouter()
 router.register(r'users', api.UserAPI, basename='user')
+router.register(r'group', GroupViews, basename='groups')
 router.register(r'sign/invite', SignUpInviteViews,
                 basename='user-signup-invite')
 
