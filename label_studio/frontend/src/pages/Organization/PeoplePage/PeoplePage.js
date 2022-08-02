@@ -40,7 +40,7 @@ const InvitationModal = (props) => {
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [form] = Form.useForm();
-  const { link, roles, orgs, code, roleId, orgId, onUpdate } = props;
+  const { link, roles, orgs, code, roleId, orgId, onUpdate ,inviteId } = props;
   const copyTxt = useCallback((txt, type) => {
     if (type === 'code')
       setCopiedCode(true);
@@ -83,6 +83,7 @@ const InvitationModal = (props) => {
                 }
 
                 onUpdate({
+                  inviteId,
                   code,
                   group_id: e.target.value,
                   organization_id,
@@ -108,6 +109,7 @@ const InvitationModal = (props) => {
                   [{ id: group_id }] = roles?.filter((v) => { return v.name === 'user'; });
                 }
                 onUpdate({
+                  inviteId,
                   code,
                   group_id,
                   organization_id: e.target.value,
@@ -167,6 +169,7 @@ export const PeoplePage = () => {
   const [validateCode, setValidateCode] = useState(createCode());
   const [roleId, setRoleId] = useState();
   const [orgId, setOrgId] = useState();
+  const [inviteId, setInviteId] = useState();
 
   const selectUser = useCallback((user) => {
     setSelectedUser(user);
@@ -180,21 +183,43 @@ export const PeoplePage = () => {
     setLink(`${hostname}${'/user/signup'}`);
   }, [config, setLink]);
 
+  const updateInviteCode = (values) => {
+    api.callApi("updateInvite", {
+      params: {
+        pk: values.inviteId,
+      },
+      body: values,
+    });
+  };
+
   const updateLink = useCallback((values) => {
     values.code = createCode();
-    api.callApi("signInvite", { body: values, errorFilter: () => true }).then((data) => {
-      if (data?.status === 400) {
-        //code duplicated
-        values.code = createCode();
-        api.callApi("signInvite", { body: values, errorFilter: () => true });
-      }
-    });
+    if (values.inviteId) {
+      updateInviteCode(values);
+    } else {
+      api.callApi("signInvite", { body: values, errorFilter: () => true }).then((data) => {
+        if (data?.status === 400) {
+          //code duplicated
+          values.code = createCode();
+          api.callApi("signInvite", { body: values, errorFilter: () => true }).then((rsp) => {
+            if (rsp.status === 400) {
+              console.log(rsp);
+            } else {
+              setInviteId(rsp?.id);
+            }
+          });
+        } else {
+          setInviteId(data?.id);
+        }
+      });
+    }
+
     setValidateCode(values.code);
     setOrgId(values.organization_id);
     setRoleId(values.group_id);
   }, [setInviteLink]);
 
-  const inviteModalProps = useCallback((link, roles, orgs, code, roleId, orgId) => ({
+  const inviteModalProps = useCallback((link, roles, orgs, code, roleId, orgId, inviteId) => ({
     title: t("Invite people", "邀请加入"),
     style: { width: 640, height: 472 },
     body: () => (
@@ -205,13 +230,17 @@ export const PeoplePage = () => {
         code={code}
         roleId={roleId}
         orgId={orgId}
+        inviteId={inviteId}
         onUpdate={updateLink} />
     ),
   }), []);
 
   const showInvitationModal = useCallback(() => {
-    inviteModal.current = modal(inviteModalProps(link, roleList, orgList, validateCode, roleId, orgId));
-  }, [inviteModalProps, link, roleList, orgList, validateCode, roleId, orgId]);
+    const [{ id: group_id }] = roleList?.filter((v) => { return v.name === 'user'; });
+
+    updateLink({ group_id, organization_id: config.user.orgnazition.id });
+    inviteModal.current = modal(inviteModalProps(link, roleList, orgList, validateCode, roleId, orgId, inviteId));
+  }, [inviteModalProps, link, roleList, orgList, validateCode, roleId, orgId,inviteId]);
 
   const defaultSelected = useMemo(() => {
     return localStorage.getItem('selectedUser');
@@ -220,18 +249,16 @@ export const PeoplePage = () => {
   useEffect(async () => {
 
     const data = await api.callApi("roleList");
-    const [{ id: group_id }] = data?.group?.filter((v) => { return v.name === 'user'; });
 
     setRoleList(data?.group);
     setOrgList(data?.organization);
-    updateLink({ group_id,organization_id:config.user.orgnazition.id });
     setInviteLink();
 
   }, []);
 
   useEffect(() => {
-    inviteModal.current?.update(inviteModalProps(link, roleList, orgList, validateCode, roleId, orgId));
-  }, [link, roleList, orgList, validateCode, roleId, orgId]);
+    inviteModal.current?.update(inviteModalProps(link, roleList, orgList, validateCode, roleId, orgId,inviteId));
+  }, [link, roleList, orgList, validateCode, roleId, orgId,inviteId]);
 
   const changeOrganization = () => {
     history.push('organization/list');
