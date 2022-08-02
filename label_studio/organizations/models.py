@@ -5,7 +5,7 @@ import logging
 from django.db import models, transaction
 from django.conf import settings
 from django.db.models import Q, Count
-
+from django.contrib.auth.models import Group
 from django.utils.translation import gettext_lazy as _
 
 from core.utils.common import create_hash, get_object_with_check_and_log, get_organization_from_request, load_func
@@ -99,8 +99,6 @@ class Organization(OrganizationMixin, models.Model):
         return self.projects.filter(members__user=user).exists()
 
     def has_permission(self, user):
-        from django.contrib.auth.models import Group
-        from django.conf import settings
         if Group.objects.filter(name=settings.MANAGER_GROUP).first() in \
                 user.groups.all():
             return True
