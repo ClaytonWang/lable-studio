@@ -40,7 +40,7 @@ const InvitationModal = (props) => {
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [form] = Form.useForm();
-  const { link, roles, orgs, code, onUpdate } = props;
+  const { link, roles, orgs, code, roleId, orgId, onUpdate } = props;
   const copyTxt = useCallback((txt, type) => {
     if (type === 'code')
       setCopiedCode(true);
@@ -61,7 +61,7 @@ const InvitationModal = (props) => {
         style={{ marginTop: 20 }}
         {...layout}
         form={form}
-        initialValues={{ group_id: '', organization_id: '', code, link }}
+        initialValues={{ group_id: roleId, organization_id: orgId, code, link }}
         layout="horizontal"
         name="form_in_org"
         colon={false}>
@@ -70,7 +70,7 @@ const InvitationModal = (props) => {
           label="角色">
           <div style={{ width: 250 }}>
             <Select
-              value={2}
+              value={roleId}
               options={roles?.map(v => {
                 return { label: groupName(v.name), value: v.id, name: v.name };
               })}
@@ -96,14 +96,17 @@ const InvitationModal = (props) => {
           label="组织">
           <div style={{ width: 250 }}>
             <Select
-              value={APP_SETTINGS.user.orgnazition.id}
+              value={orgId}
               options={orgs?.map(v => {
                 return { label: v.title, value: v.id };
               })}
               onChange={(e) => {
                 form.setFieldsValue({ organization_id: e.target.value });
-                const group_id = form.getFieldValue('group_id');
+                let group_id = form.getFieldValue('group_id');
 
+                if (!group_id) {
+                  [{ id: group_id }] = roles?.filter((v) => { return v.name === 'user'; });
+                }
                 onUpdate({
                   code,
                   group_id,
@@ -118,8 +121,8 @@ const InvitationModal = (props) => {
           label="注册验证码"
         >
           <>
-            <Input style={{ width: 250 }} value={code } readOnly />
-            <Button primary onClick={() => { copyTxt(code,'code'); }} >
+            <Input style={{ width: 250 }} value={code} readOnly />
+            <Button primary onClick={() => { copyTxt(code, 'code'); }} >
               {copiedCode ? t("Copied!", "已复制！") : '复制验证码'}</Button>
           </>
         </Form.Item>
@@ -128,8 +131,8 @@ const InvitationModal = (props) => {
           label="注册链接"
         >
           <>
-            <Input style={{ width: 330 }} value={link } readOnly />
-            <Button primary onClick={() => { copyTxt(link,'link'); }}>
+            <Input style={{ width: 330 }} value={link} readOnly />
+            <Button primary onClick={() => { copyTxt(link, 'link'); }}>
               {copiedLink ? t("Copied!", "已复制！") : t("Copy link", "复制链接")}</Button>
           </>
         </Form.Item>
@@ -162,6 +165,8 @@ export const PeoplePage = () => {
   const [roleList, setRoleList] = useState([]);
   const [orgList, setOrgList] = useState([]);
   const [validateCode, setValidateCode] = useState(createCode());
+  const [roleId, setRoleId] = useState();
+  const [orgId, setOrgId] = useState();
 
   const selectUser = useCallback((user) => {
     setSelectedUser(user);
@@ -176,16 +181,20 @@ export const PeoplePage = () => {
   }, [config, setLink]);
 
   const updateLink = useCallback((values) => {
-    // api.callApi('resetInviteLink').then(({ invite_url }) => {
-    //   setInviteLink(invite_url);
-    // });
-    api.callApi("signInvite", { body: values }).then((data) => {
-      console.log(data);
-      // setInviteLink(invite_url);
+    values.code = createCode();
+    api.callApi("signInvite", { body: values, errorFilter: () => true }).then((data) => {
+      if (data?.status === 400) {
+        //code duplicated
+        values.code = createCode();
+        api.callApi("signInvite", { body: values, errorFilter: () => true });
+      }
     });
+    setValidateCode(values.code);
+    setOrgId(values.organization_id);
+    setRoleId(values.group_id);
   }, [setInviteLink]);
 
-  const inviteModalProps = useCallback((link, roles, orgs, code) => ({
+  const inviteModalProps = useCallback((link, roles, orgs, code, roleId, orgId) => ({
     title: t("Invite people", "邀请加入"),
     style: { width: 640, height: 472 },
     body: () => (
@@ -194,13 +203,15 @@ export const PeoplePage = () => {
         roles={roles}
         orgs={orgs}
         code={code}
+        roleId={roleId}
+        orgId={orgId}
         onUpdate={updateLink} />
     ),
   }), []);
 
   const showInvitationModal = useCallback(() => {
-    inviteModal.current = modal(inviteModalProps(link, roleList, orgList, validateCode));
-  }, [inviteModalProps, link, roleList, orgList, validateCode]);
+    inviteModal.current = modal(inviteModalProps(link, roleList, orgList, validateCode, roleId, orgId));
+  }, [inviteModalProps, link, roleList, orgList, validateCode, roleId, orgId]);
 
   const defaultSelected = useMemo(() => {
     return localStorage.getItem('selectedUser');
@@ -209,24 +220,18 @@ export const PeoplePage = () => {
   useEffect(async () => {
 
     const data = await api.callApi("roleList");
+    const [{ id: group_id }] = data?.group?.filter((v) => { return v.name === 'user'; });
 
     setRoleList(data?.group);
     setOrgList(data?.organization);
-    setValidateCode(createCode());
+    updateLink({ group_id,organization_id:config.user.orgnazition.id });
     setInviteLink();
-    // api.callApi("signInvite", {
-    //   body: {
-    //     code: validateCode,
-    //     group_id: "",
-    //     organization_id:config.user.orgnazition.id,
-    //   } }).then(({ invite_url }) => {
-    //   setInviteLink(invite_url);
-    // });
+
   }, []);
 
   useEffect(() => {
-    inviteModal.current?.update(inviteModalProps(link, roleList, orgList, validateCode));
-  }, [link, roleList, orgList, validateCode]);
+    inviteModal.current?.update(inviteModalProps(link, roleList, orgList, validateCode, roleId, orgId));
+  }, [link, roleList, orgList, validateCode, roleId, orgId]);
 
   const changeOrganization = () => {
     history.push('organization/list');
