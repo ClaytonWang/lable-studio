@@ -235,6 +235,8 @@ def organization_change(request):
     :return:
     """
     data = request.POST.dict()
+    if not data:
+        data = request.data
     o_id = data.get('organization_id')
     if not o_id:
         return Response(

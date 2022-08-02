@@ -11,11 +11,17 @@ export const API_CONFIG = {
     inviteLink: "/invite",
     resetInviteLink: "POST:/invite/reset-token",
     orgList: "GET:/organizations",
+    allOrg:"GET:/organizations/all",
     addOrg: "POST:/organizations",
     updateOrg: "PATCH:/organizations/:pk",
     deleteOrg: "DELETE:/organizations/:pk",
     orgDetail: "GET:/organizations/:pk",
     changeOrg: "PATCH:/organizations/change",
+
+    //Regist
+    signInvite: "POST:/sign/invite",
+    updateInvite: "PATCH:/sign/invite/:pk",
+    roleList:"GET:/sign/invite/select",
 
     // Project
     projects: "/projects",
