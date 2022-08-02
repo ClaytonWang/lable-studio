@@ -10,7 +10,7 @@ const formItemLayout = {
   wrapperCol: { span: 20 },
 };
 
-const ResponseGeneration = ({ close }) => {
+const ResponseGeneration = ({ close, project }) => {
   return (
     <>
       <Modal.Header>
@@ -27,7 +27,7 @@ const ResponseGeneration = ({ close }) => {
         <Form.Item
           label="提示学习"
         >
-          <PromptTemplate />
+          <PromptTemplate project={project} />
         </Form.Item>
         <Form.Item
           name="tags"
@@ -42,13 +42,13 @@ const ResponseGeneration = ({ close }) => {
             size="compact"
             onClick={close}
           >
-            取消
+            {t("Cancel")}
           </Button>
           <Button
             size="compact"
             look="primary"
           >
-            立即生成
+            {t("ceate_rightnow", "立即生成")}
           </Button>
         </Space>
       </Modal.Footer>
