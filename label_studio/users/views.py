@@ -56,19 +56,6 @@ def user_signup(request):
         code = data.get('code')
         invite = SignUpInvite.objects.filter(code=code).first()
 
-        if not invite:
-            raise Exception('请填写有效的验证码')
-
-        if invite.state:
-            raise Exception(f'{code}已经被注册')
-
-        invite_update_time = invite.updated_at.replace(tzinfo=None)
-        expire_time = invite_update_time + timedelta(
-            seconds=settings.SIGNUP_INVITE_EXPIRE_TIME
-        )
-        if datetime.now() > expire_time:
-            raise Exception('邀请链接已经过期')
-
         #  新建用户，设置用户组 / 组织
         # organization = Organization.objects.first()
         # if settings.DISABLE_SIGNUP_WITHOUT_LINK is True:
