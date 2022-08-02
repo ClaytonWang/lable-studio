@@ -288,9 +288,9 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
     def put(self, request, *args, **kwargs):
         params = request.data
         try:
-            c = self.get_queryset(kwargs.get('id'))
-            print('c', c)
-            c.update(template=params['template'])
+            c = self.get_queryset(request.GET.dict().get('id'))
+            if c:
+                c.update(template=params['template'])
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK
         except Exception as e:
