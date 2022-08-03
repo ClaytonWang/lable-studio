@@ -19,14 +19,20 @@ export const useColumns = (reload) => {
     async (record) => {
       await api.callApi("changeOrg", {
         body: { organization_id: record.id },
+      }).then((rsp) => {
+        if (!rsp) {
+          location.reload();
+        }
       });
-      history.replace("/organization");
     },[]);
 
   const deleteOrg = useCallback(
     async (record) => {
       await api.callApi("deleteOrg", {
-        body: { organization_id: record.id },
+        params: {
+          pk: record.id,
+        },
+        body: { title: record.title },
       });
       reload();
     },[]);
@@ -72,12 +78,16 @@ export const useColumns = (reload) => {
         render: (_, record) => (
           <Space size="middle">
             <Popconfirm
-              title={(record.project_count || record.user_count) ? "是否确定删除该组织?" : "该组织包含有效用户或项目,无法删除."}
-              onConfirm={() => { deleteOrg(record); }}
+              title={(record.project_count || record.user_count) ? "该组织包含有效用户或项目,无法删除." : "是否确定删除该组织?"}
+              onConfirm={() => {
+                if (!(record.project_count || record.user_count)) {
+                  deleteOrg(record);
+                }
+              }}
               icon={(record.project_count || record.user_count) ? <InfoCircleOutlined /> : <ExclamationCircleOutlined style={{ color: 'red' }} />}
               okText="确定"
               cancelText="取消"
-              showCancel={!!(record.project_count || record.user_count)}
+              showCancel={!(record.project_count || record.user_count)}
             >
               <a onClick={() => { setModaEdt(record); }}>删除</a>
             </Popconfirm>

@@ -94,7 +94,10 @@
       lastName: "{{user.last_name}}",
       initials: "{{user.get_initials}}",
       email: "{{user.email}}",
-      orgnazition:"{{user.active_organization.title}}",
+      orgnazition:{
+        title:"{{user.active_organization.title}}",
+        id:"{{user.active_organization.id}}"
+      },
       {% if user.avatar %}
       avatar: "{{user.avatar_url|safe}}",
       {% endif %}
