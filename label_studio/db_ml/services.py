@@ -7,6 +7,8 @@
   > FileName   : services.py
   > CreateTime : 2022/7/7 08:44
 """
+import uuid
+
 from enum import Enum
 import json
 from tasks.models import Task
@@ -15,6 +17,9 @@ from django.db.transaction import atomic
 from tasks.models import Prediction, PredictionDraft
 from tasks.models import TaskDbAlgorithm, TaskDbAlgorithmDraft
 from projects.models import PromptResultDraft, PromptResult
+from model_manager.services import ml_backend_request
+from model_manager.models import ModelManager
+
 PREDICTION_BACKUP_FIELDS = [
     'result', 'score', 'model_version', 'task', 'created_at', 'updated_at'
 ]
@@ -188,3 +193,27 @@ def get_choice_values(result):
             continue
         choices += tmp_choices
     return choices
+
+
+def generate_uuid():
+    return uuid.uuid4()
+
+
+def predict_prompt(model_id, project_id, task_data):
+    """
+    预标注（普通）
+    预标注（0样本） 提示学习
+    :param model_id:
+    :param project_id:
+    :param task_data:
+    :return:
+    """
+    model = ModelManager.objects.filter(id=model_id).first()
+    _params = dict(
+        uuid=f'{generate_uuid()}_{project_id}'
+    )
+    _json = dict(data=task_data)
+    return ml_backend_request(
+        model.url, uri=[], params=_params, json=_json
+    )
+

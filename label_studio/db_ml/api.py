@@ -38,8 +38,8 @@ from db_ml.services import save_raw_data
 from db_ml.services import generate_redis_key
 from db_ml.services import AlgorithmState
 from db_ml.services import redis_set_json, redis_get_json
-from model_manager.services import ml_backend_request
-
+from db_ml.services import generate_uuid
+from db_ml.services import predict_prompt
 
 """
 项目执行算法状态标识
@@ -184,6 +184,7 @@ def prediction(request):
     """
     data = request.data
     project_id = data.get('project_id')
+    model_id = data.get('model_id')
     redis_key = generate_redis_key('prediction', str(project_id))
     query = Task.objects.filter(project_id=project_id)
     if not query:
@@ -219,20 +220,21 @@ def prediction(request):
 
         # TODO 多对话判断
         # 异常的信息回滚
+        task_data = []
         for item in query:
-            # text = item.data.get('dialogue')[0].get('text')
-            text = item.data.get('dialogue', [])
-            data = dict(
-                text=text,
-                project_id=project_id,
+            dialogue = item.data.get('dialogue', [])
+            task_data.append(dict(
                 task_id=item.id,
-                task_tag_id=item.id,
-                user_id=request.user.id,
-                queue_name='prediction',
-            )
-            # 接模型服务接口
-            # /api/ml_backend/predict?orginzation=orginzation&user=user
-            # job = start_job_async_or_sync(job_predict, **data)
+                dialogue=dialogue
+            ))
+
+        state, result = predict_prompt(model_id, project_id, task_data)
+        if state:
+            pass
+        else:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
+
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
 

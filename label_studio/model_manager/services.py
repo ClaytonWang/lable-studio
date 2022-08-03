@@ -35,7 +35,7 @@ def ml_backend_url(host, version, uri: list = ('ml_backend',), **kwargs) -> \
 
 def ml_backend_request(
         host: str, uri: list, version='v1', method: str = 'get',
-        params={}, data={}, json={}
+        params={}, data={}, _json={}
 ):
     """
     {
@@ -51,7 +51,7 @@ def ml_backend_request(
     :param method:
     :param params:
     :param data:
-    :param json:
+    :param _json:
     :return:
     """
     ml_url = ml_backend_url(host, uri=uri, version=version)
@@ -59,7 +59,7 @@ def ml_backend_request(
         'ML Request url:, ', ml_url, '\nparams:', params, '\ndata:', data
     )
     session = getattr(requests, method)
-    response = session(url=ml_url, params=params, data=data, json=json)
+    response = session(url=ml_url, params=params, data=data, json=_json)
     rsp_data = response.json()
     logger.info('ML response: ', rsp_data)
     rsp_state = rsp_data.get('status')
