@@ -14,7 +14,8 @@ from django.conf import settings
 logger = logging.getLogger('db')
 
 
-def ml_backend_url(opt: str, uri: str = 'api/ml_backend', **kwargs) -> str:
+def ml_backend_url(uri: list = ('ml_backend',), **kwargs) -> \
+        str:
     """
     拼接ml backend请求链接
     'import': '/api/ml_backend/import',            # 导入
@@ -33,10 +34,12 @@ def ml_backend_url(opt: str, uri: str = 'api/ml_backend', **kwargs) -> str:
     if not domain:
         raise Exception('ML BACKEND DOMAIN NOT CONFIG.')
 
-    return os.path.join(domain, uri, opt)
+    return os.path.join(domain, 'api', *uri)
 
 
-def ml_backend_request(opt, method, params={}, data={}):
+def ml_backend_request(
+        uri: list, method: str = 'get', params={}, data={}, json={}
+):
     """
     {
     "status": 0,
@@ -45,14 +48,15 @@ def ml_backend_request(opt, method, params={}, data={}):
             "download": url
             }
     }
-    :param opt:
+    :param uri:
     :param method:
     :param params:
     :param data:
+    :param json:
     :return:
     """
-    ml_url = ml_backend_url(opt='export')
-    if opt == 'export':
+    ml_url = ml_backend_url(uri=uri)
+    if 'export' in uri:
         algorithm_url = ''
         if 'url' in params:
             algorithm_url = params.pop('url')
@@ -61,20 +65,12 @@ def ml_backend_request(opt, method, params={}, data={}):
     logger.info(
         'ML Request url:, ', ml_url, '\nparams:', params, '\ndata:', data
     )
-    # session = getattr(requests, method)
-    # response = session(url=ml_url, params=params, data=data)
-    # rsp_data = response.json()
-    rsp_data = {
-        "status": 0,
-        "errorInfo": "",
-        "data": {
-            "download": 'https://127.0.0.1:8000/source/test.tar.gz'
-        }
-    }
+    session = getattr(requests, method)
+    response = session(url=ml_url, params=params, data=data, json=json)
+    rsp_data = response.json()
     logger.info('ML response: ', rsp_data)
     rsp_state = rsp_data.get('status')
     if rsp_state == 0:
         return True, rsp_data.get('data')
     else:
         return False, rsp_data.get('errorInfo')
-

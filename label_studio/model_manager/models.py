@@ -80,3 +80,24 @@ class ModelManager(DummyModelMixin, models.Model):
 
     class Meta:
         unique_together = ("organization_id", "title", "version")
+
+
+class ModelRecord(models.Model):
+    """
+    项目集合
+    """
+    objects = DbOrganizationManager()
+
+    remark = models.JSONField(_('remark'), blank=True, null=True)
+    organization = models.ForeignKey('organizations.Organization', on_delete=models.SET_NULL, related_name='model_record_org', null=True)
+    model = models.ForeignKey('model_manager.ModelManager', on_delete=models.SET_NULL, null=True, blank=True, help_text='', related_name='model_record')
+    project = models.ForeignKey('projects.Project', on_delete=models.SET_NULL, null=True, blank=True, help_text='', related_name='model_record_project')
+    rate = models.FloatField(_('rate'), null=True, blank=True, default=0)
+
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_project_record', on_delete=models.SET_NULL, null=True, verbose_name=_('created by'))
+    updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+    updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_project_record', on_delete=models.SET_NULL, null=True, verbose_name=_('updated by'))
+
+    def has_permission(self, user):
+        return self.organization == user.active_organization

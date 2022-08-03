@@ -38,6 +38,7 @@ from db_ml.services import save_raw_data
 from db_ml.services import generate_redis_key
 from db_ml.services import AlgorithmState
 from db_ml.services import redis_set_json, redis_get_json
+from model_manager.services import ml_backend_request
 
 
 """
@@ -229,7 +230,9 @@ def prediction(request):
                 user_id=request.user.id,
                 queue_name='prediction',
             )
-            job = start_job_async_or_sync(job_predict, **data)
+            # 接模型服务接口
+            # /api/ml_backend/predict?orginzation=orginzation&user=user
+            # job = start_job_async_or_sync(job_predict, **data)
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
 
