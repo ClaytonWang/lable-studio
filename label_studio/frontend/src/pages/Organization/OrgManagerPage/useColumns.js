@@ -19,8 +19,11 @@ export const useColumns = (reload) => {
     async (record) => {
       await api.callApi("changeOrg", {
         body: { organization_id: record.id },
+      }).then((rsp) => {
+        if (!rsp) {
+          location.reload();
+        }
       });
-      history.replace("/organization");
     },[]);
 
   const deleteOrg = useCallback(
