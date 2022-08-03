@@ -52,15 +52,17 @@ class PromptLearning(APIView):
     def post(self, request, *args, **kwargs):
         params = request.data
         print('params', params)
-        project_id = params['project']
+        project_id = params['project_id']
         model_id = params['model_id']
         try:
             # 获取templates
-            template_list = PromptTemplates.objects.filter(project_id=params['project']).values()
+            template_list = PromptTemplates.objects.filter(
+                project_id=project_id
+            ).values()
             # print('template_list', template_list)
             templates = [item['template'] for item in template_list]
             # 获取tasks
-            tasks = Task.objects.filter(project_id=params['project']).values()
+            tasks = Task.objects.filter(project_id=project_id).values()
             redis_key = generate_redis_key('prompt', str(project_id))
             if not tasks:
                 return Response(

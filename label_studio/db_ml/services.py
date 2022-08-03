@@ -215,6 +215,24 @@ def predict_prompt(model_id, project_id, task_data, template=[]):
     )
     _json = dict(data=task_data, templates=template)
     return ml_backend_request(
-        model.url, uri=[], params=_params, json=_json
+        model.url, uri=['ml_backend', 'predict'], params=_params, _json=_json
     )
 
+
+def preprocess_clean(model_ids, project_id, task_data):
+    model_query = ModelManager.objects.filter(id__in=model_ids).values(
+        'id', 'url', 'title')
+    if len(model_ids) != len(model_query):
+        return False, f'{str(model_ids)}模型没有查询到模型'
+
+    model_data = {item['id']: item['url'] for item in model_query}
+    urls = [model_data[_id] for _id in model_ids]
+    first_url = urls.pop(0)
+
+    _params = dict(
+        uuid=f'{generate_uuid()}_{project_id}'
+    )
+    _json = dict(data=task_data, sequence=urls)
+    return ml_backend_request(
+        first_url, uri=['ml_backend', 'preprocess'], params=_params, _json=_json
+    )

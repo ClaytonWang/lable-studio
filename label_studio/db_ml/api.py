@@ -38,8 +38,8 @@ from db_ml.services import save_raw_data
 from db_ml.services import generate_redis_key
 from db_ml.services import AlgorithmState
 from db_ml.services import redis_set_json, redis_get_json
-from db_ml.services import generate_uuid
 from db_ml.services import predict_prompt
+from db_ml.services import preprocess_clean
 
 """
 项目执行算法状态标识
@@ -67,6 +67,8 @@ def clean(request):
     """
     data = request.data
     project_id = data.get('project_id')
+    model_ids = data.get('model_ids', '').split(',')
+    model_ids = [int(item) for item in model_ids]
     query = TaskDbAlgorithm.objects.filter(project_id=project_id)
     if not query:
         return Response(data=dict(msg='Invalid project id'))
@@ -102,18 +104,18 @@ def clean(request):
                 state=1,
             )
 
+        task_data = []
         for item in query:
-            dialog = item.source
-            data = dict(
-                project_id=project_id,
-                task_id=item.task.id,
-                user_id=request.user.id,
-                algorithm_id=item.id,
-                queue_name='algorithm_clean',
-                dialog=dialog,
-            )
-            start_job_async_or_sync(job_clean, **data)
-            # job_clean(**data)
+            dialogue = item.source
+            task_data.append(dict(
+                task_id=item.id,
+                dialogue=dialogue
+            ))
+        state, result = preprocess_clean(model_ids, project_id, task_data)
+        if not state:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
+
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
 
