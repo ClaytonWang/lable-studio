@@ -199,20 +199,21 @@ def generate_uuid():
     return uuid.uuid4()
 
 
-def predict_prompt(model_id, project_id, task_data):
+def predict_prompt(model_id, project_id, task_data, template=[]):
     """
     预标注（普通）
     预标注（0样本） 提示学习
     :param model_id:
     :param project_id:
     :param task_data:
+    :param template:
     :return:
     """
     model = ModelManager.objects.filter(id=model_id).first()
     _params = dict(
         uuid=f'{generate_uuid()}_{project_id}'
     )
-    _json = dict(data=task_data)
+    _json = dict(data=task_data, templates=template)
     return ml_backend_request(
         model.url, uri=[], params=_params, json=_json
     )
