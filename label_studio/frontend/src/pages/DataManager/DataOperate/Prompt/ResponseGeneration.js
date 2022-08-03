@@ -10,7 +10,7 @@ const formItemLayout = {
   wrapperCol: { span: 20 },
 };
 
-const ResponseGeneration = ({ close, project }) => {
+const ResponseGeneration = ({ loading, close, project }) => {
   return (
     <>
       <Modal.Header>
@@ -47,6 +47,7 @@ const ResponseGeneration = ({ close, project }) => {
           <Button
             size="compact"
             look="primary"
+            waiting={loading}
           >
             {t("ceate_rightnow", "立即生成")}
           </Button>

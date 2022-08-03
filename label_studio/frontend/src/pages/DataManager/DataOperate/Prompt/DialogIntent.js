@@ -3,7 +3,7 @@ import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";
 import { PromptTemplate } from "@/components/PromptTemplate/PromptTemplate";
 
-const ResponseGeneration = ({ close, project, request }) => {
+const ResponseGeneration = ({ loading, close, project, request }) => {
   return (
     <>
       <Modal.Header>
@@ -22,6 +22,7 @@ const ResponseGeneration = ({ close, project, request }) => {
             size="compact"
             look="primary"
             onClick={request}
+            waiting={loading}
           >
             {t("ceate_rightnow", "立即生成")}
           </Button>
