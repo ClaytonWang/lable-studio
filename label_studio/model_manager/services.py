@@ -14,7 +14,7 @@ from django.conf import settings
 logger = logging.getLogger('db')
 
 
-def ml_backend_url(uri: list = ('ml_backend',), **kwargs) -> \
+def ml_backend_url(host, version, uri: list = ('ml_backend',), **kwargs) -> \
         str:
     """
     拼接ml backend请求链接
@@ -24,21 +24,18 @@ def ml_backend_url(uri: list = ('ml_backend',), **kwargs) -> \
     'predict': '/api/ml_backend/predict',          # 预标注普通/0样本
     'training': '/api/ml_backend/training',        # 训练
     'cancel': '/api/ml_backend/cancel',            # 训练
-    :param opt:
+    :param version:
     :param uri:
+    :param host:
     :param kwargs:
     :return:
     """
-
-    domain = settings.ML_BACKEND_DOMAIN
-    if not domain:
-        raise Exception('ML BACKEND DOMAIN NOT CONFIG.')
-
-    return os.path.join(domain, 'api', *uri)
+    return os.path.join(host, 'api', version, *uri)
 
 
 def ml_backend_request(
-        uri: list, method: str = 'get', params={}, data={}, json={}
+        host: str, uri: list, version='v1', method: str = 'get',
+        params={}, data={}, json={}
 ):
     """
     {
@@ -48,20 +45,16 @@ def ml_backend_request(
             "download": url
             }
     }
+    :param host:
     :param uri:
+    :param version:
     :param method:
     :param params:
     :param data:
     :param json:
     :return:
     """
-    ml_url = ml_backend_url(uri=uri)
-    if 'export' in uri:
-        algorithm_url = ''
-        if 'url' in params:
-            algorithm_url = params.pop('url')
-        ml_url = os.path.join(ml_url, algorithm_url)
-
+    ml_url = ml_backend_url(host, uri=uri, version=version)
     logger.info(
         'ML Request url:, ', ml_url, '\nparams:', params, '\ndata:', data
     )

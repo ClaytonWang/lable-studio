@@ -88,19 +88,10 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
-
-        state, err = ml_backend_request(
-            ['ml_backend', 'import'], 'post', json=dict(url=url)
-        )
-        if state:
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            return Response(serializer.data, status=status.HTTP_201_CREATED,
-                            headers=headers)
-        else:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST, data=dict(error=err)
-            )
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED,
+                        headers=headers)
 
     def update(self, request, *args, **kwargs):
         self.queryset = ModelManager.objects.filter(pk=kwargs.get('pk'))
@@ -133,6 +124,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
 
     @action(methods=['GET'], detail=False)
     def export(self, request, *args, **kwargs):
+        # model = self.get_model(request)
         url = request.GET.dict('url')
         if not url:
             return Response(
@@ -140,15 +132,17 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
                 data=dict(error="Invalid URL")
             )
         state, rsp = ml_backend_request(
-            ['ml_backend', 'export'], method='get', params=dict(url=url)
+            url, ['ml_backend', 'export'], method='get',
+            params=dict(url=url)
         )
         return self.return_ml_response(state, rsp)
 
     @action(methods=['GET'], detail=False)
     def label(self, request, *args, **kwargs):
-        data = request.GET.dict().get('model_id')
+        model = self.get_model(request)
         state, rsp = ml_backend_request(
-            ['v1', 'getLabels'], method='get'
+            model.url, uri=['getLabels'], method='get',
+            params=dict(url=model.url)
         )
         return self.return_ml_response(state, rsp)
 
@@ -159,6 +153,12 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
             'id', 'title', 'version'
         )
         return Response(data=list(queryset))
+
+    @staticmethod
+    def get_model(request):
+        model_id = request.GET.dict().get('model_id')
+        model = ModelManager.objects.filter(id=model_id).first()
+        return model
 
     @staticmethod
     def return_ml_response(state, rsp):
