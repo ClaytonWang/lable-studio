@@ -103,7 +103,8 @@ class PromptLearning(APIView):
                     dialogue=dialogue
                 ))
             state, result = predict_prompt(
-                model_id, project_id, task_data, templates)
+                model_id, project_id, task_data, 'prompt', templates
+            )
             if state:
                 result = {'status': 0, 'error': ''}
                 resp_status = status.HTTP_200_OK

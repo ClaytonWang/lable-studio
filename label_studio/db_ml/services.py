@@ -8,7 +8,6 @@
   > CreateTime : 2022/7/7 08:44
 """
 import uuid
-
 from enum import Enum
 import json
 from tasks.models import Task
@@ -195,11 +194,14 @@ def get_choice_values(result):
     return choices
 
 
-def generate_uuid():
-    return uuid.uuid4()
+def generate_uuid(algorithm_type, project_id):
+    _uuid = uuid.uuid4()
+    return f'{_uuid}_{algorithm_type}_{project_id}'
 
 
-def predict_prompt(model_id, project_id, task_data, template=[]):
+def predict_prompt(
+        model_id, project_id, task_data, algorithm_type, template=[]
+):
     """
     预标注（普通）
     预标注（0样本） 提示学习
@@ -207,19 +209,18 @@ def predict_prompt(model_id, project_id, task_data, template=[]):
     :param project_id:
     :param task_data:
     :param template:
+    :param algorithm_type:
     :return:
     """
     model = ModelManager.objects.filter(id=model_id).first()
-    _params = dict(
-        uuid=f'{generate_uuid()}_{project_id}'
-    )
+    _params = dict(uuid=generate_uuid(algorithm_type, project_id))
     _json = dict(data=task_data, templates=template)
     return ml_backend_request(
         model.url, uri=['ml_backend', 'predict'], params=_params, _json=_json
     )
 
 
-def preprocess_clean(model_ids, project_id, task_data):
+def preprocess_clean(model_ids, project_id, task_data, algorithm_type):
     model_query = ModelManager.objects.filter(id__in=model_ids).values(
         'id', 'url', 'title')
     if len(model_ids) != len(model_query):
@@ -229,9 +230,7 @@ def preprocess_clean(model_ids, project_id, task_data):
     urls = [model_data[_id] for _id in model_ids]
     first_url = urls.pop(0)
 
-    _params = dict(
-        uuid=f'{generate_uuid()}_{project_id}'
-    )
+    _params = dict(uuid=generate_uuid('clean', project_id))
     _json = dict(data=task_data, sequence=urls)
     return ml_backend_request(
         first_url, uri=['ml_backend', 'preprocess'], params=_params, _json=_json

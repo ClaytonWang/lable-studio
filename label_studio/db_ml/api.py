@@ -230,7 +230,9 @@ def prediction(request):
                 dialogue=dialogue
             ))
 
-        state, result = predict_prompt(model_id, project_id, task_data)
+        state, result = predict_prompt(
+            model_id, project_id, task_data, 'prediction'
+        )
         if state:
             pass
         else:

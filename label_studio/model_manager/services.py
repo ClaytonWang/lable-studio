@@ -64,6 +64,6 @@ def ml_backend_request(
     logger.info('ML response: ', rsp_data)
     rsp_state = rsp_data.get('status')
     if rsp_state == 0:
-        return True, rsp_data.get('data')
+        return True, rsp_data.get('data', '')
     else:
         return False, rsp_data.get('errorInfo')
