@@ -75,7 +75,7 @@ export const useColumns = () => {
         },
       },
       {
-        title: '模型集',
+        title: '模型集合',
         dataIndex: 'model',
         key: 'model',
         render: (_,record) => {
