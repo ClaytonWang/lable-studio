@@ -14,7 +14,8 @@ from django.conf import settings
 logger = logging.getLogger('db')
 
 
-def ml_backend_url(opt: str, uri: str = 'api/ml_backend', **kwargs) -> str:
+def ml_backend_url(host, version, uri: list = ('ml_backend',), **kwargs) -> \
+        str:
     """
     拼接ml backend请求链接
     'import': '/api/ml_backend/import',            # 导入
@@ -23,20 +24,19 @@ def ml_backend_url(opt: str, uri: str = 'api/ml_backend', **kwargs) -> str:
     'predict': '/api/ml_backend/predict',          # 预标注普通/0样本
     'training': '/api/ml_backend/training',        # 训练
     'cancel': '/api/ml_backend/cancel',            # 训练
-    :param opt:
+    :param version:
     :param uri:
+    :param host:
     :param kwargs:
     :return:
     """
-
-    domain = settings.ML_BACKEND_DOMAIN
-    if not domain:
-        raise Exception('ML BACKEND DOMAIN NOT CONFIG.')
-
-    return os.path.join(domain, uri, opt)
+    return os.path.join(host, 'api', version, *uri)
 
 
-def ml_backend_request(opt, method, params={}, data={}):
+def ml_backend_request(
+        host: str, uri: list, version='v1', method: str = 'get',
+        params={}, data={}, _json={}
+):
     """
     {
     "status": 0,
@@ -45,36 +45,25 @@ def ml_backend_request(opt, method, params={}, data={}):
             "download": url
             }
     }
-    :param opt:
+    :param host:
+    :param uri:
+    :param version:
     :param method:
     :param params:
     :param data:
+    :param _json:
     :return:
     """
-    ml_url = ml_backend_url(opt='export')
-    if opt == 'export':
-        algorithm_url = ''
-        if 'url' in params:
-            algorithm_url = params.pop('url')
-        ml_url = os.path.join(ml_url, algorithm_url)
-
+    ml_url = ml_backend_url(host, uri=uri, version=version)
     logger.info(
         'ML Request url:, ', ml_url, '\nparams:', params, '\ndata:', data
     )
-    # session = getattr(requests, method)
-    # response = session(url=ml_url, params=params, data=data)
-    # rsp_data = response.json()
-    rsp_data = {
-        "status": 0,
-        "errorInfo": "",
-        "data": {
-            "download": 'https://127.0.0.1:8000/source/test.tar.gz'
-        }
-    }
+    session = getattr(requests, method)
+    response = session(url=ml_url, params=params, data=data, json=_json)
+    rsp_data = response.json()
     logger.info('ML response: ', rsp_data)
     rsp_state = rsp_data.get('status')
     if rsp_state == 0:
-        return True, rsp_data.get('data')
+        return True, rsp_data.get('data', '')
     else:
         return False, rsp_data.get('errorInfo')
-

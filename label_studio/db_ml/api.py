@@ -38,7 +38,9 @@ from db_ml.services import save_raw_data
 from db_ml.services import generate_redis_key
 from db_ml.services import AlgorithmState
 from db_ml.services import redis_set_json, redis_get_json
-
+from db_ml.services import predict_prompt
+from db_ml.services import preprocess_clean
+from db_ml.services import generate_uuid
 
 """
 项目执行算法状态标识
@@ -66,6 +68,8 @@ def clean(request):
     """
     data = request.data
     project_id = data.get('project_id')
+    model_ids = data.get('model_ids', '').split(',')
+    model_ids = [int(item) for item in model_ids]
     query = TaskDbAlgorithm.objects.filter(project_id=project_id)
     if not query:
         return Response(data=dict(msg='Invalid project id'))
@@ -82,11 +86,13 @@ def clean(request):
     if TaskDbAlgorithmDraft.objects.filter(project_id=project_id).exists():
         TaskDbAlgorithmDraft.objects.filter(project_id=project_id).delete()
 
+    _uuid = generate_uuid('clean', project_id)
     redis_state = dict(
         state=AlgorithmState.ONGOING,
         total=query.count(),
         project_id=project_id,
         username=request.user.username,
+        uuid=_uuid,
     )
     redis_set_json(redis_key, redis_state)
     with atomic():
@@ -101,18 +107,18 @@ def clean(request):
                 state=1,
             )
 
+        task_data = []
         for item in query:
-            dialog = item.source
-            data = dict(
-                project_id=project_id,
-                task_id=item.task.id,
-                user_id=request.user.id,
-                algorithm_id=item.id,
-                queue_name='algorithm_clean',
-                dialog=dialog,
-            )
-            start_job_async_or_sync(job_clean, **data)
-            # job_clean(**data)
+            dialogue = item.source
+            task_data.append(dict(
+                task_id=item.id,
+                dialogue=dialogue
+            ))
+        state, result = preprocess_clean(model_ids, task_data, _uuid)
+        if not state:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
+
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
 
@@ -183,6 +189,7 @@ def prediction(request):
     """
     data = request.data
     project_id = data.get('project_id')
+    model_id = data.get('model_id')
     redis_key = generate_redis_key('prediction', str(project_id))
     query = Task.objects.filter(project_id=project_id)
     if not query:
@@ -201,11 +208,13 @@ def prediction(request):
     if PredictionDraft.objects.filter(task_id__in=task_ids).exists():
         PredictionDraft.objects.filter(task_id__in=task_ids).delete()
 
+    _uuid = generate_uuid('prediction', project_id)
     redis_state = dict(
         state=AlgorithmState.ONGOING,
         total=query.count(),
         project_id=project_id,
         username=request.user.username,
+        uuid=_uuid,
     )
     redis_set_json(redis_key, redis_state)
     # 备份一份原数据后删除原记录
@@ -218,18 +227,21 @@ def prediction(request):
 
         # TODO 多对话判断
         # 异常的信息回滚
+        task_data = []
         for item in query:
-            # text = item.data.get('dialogue')[0].get('text')
-            text = item.data.get('dialogue', [])
-            data = dict(
-                text=text,
-                project_id=project_id,
+            dialogue = item.data.get('dialogue', [])
+            task_data.append(dict(
                 task_id=item.id,
-                task_tag_id=item.id,
-                user_id=request.user.id,
-                queue_name='prediction',
-            )
-            job = start_job_async_or_sync(job_predict, **data)
+                dialogue=dialogue
+            ))
+
+        state, result = predict_prompt(model_id, task_data, _uuid)
+        if state:
+            pass
+        else:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
+
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
 

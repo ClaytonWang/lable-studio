@@ -23,6 +23,7 @@ from model_manager.models import MODEL_TYPE
 from model_manager.services import ml_backend_request
 from db_ml.common import DbPageNumberPagination
 from db_ml.common import MultiSerializerViewSetMixin
+from projects.models import ProjectSet
 
 logger = logging.getLogger(__name__)
 
@@ -47,8 +48,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         data = request.GET.dict()
         _type = data.get('type')
         version = data.get('version')
-        model = data.get('model')
-        project = data.get('project')
+        model = data.get('model_set')
+        project = data.get('project_set')
         self.queryset = ModelManager.objects.\
             for_user_organization(request.user).order_by('-created_at')
         filter_params = dict()
@@ -57,9 +58,9 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         if version:
             filter_params['version'] = version
         if model:
-            filter_params['model'] = model
+            filter_params['title'] = model
         if project:
-            filter_params['project'] = project
+            filter_params['project_set__title'] = project
         if filter_params:
             self.queryset = self.queryset.filter(**filter_params)
         return super(ModelManagerViews, self).list(request, *args, **kwargs)
@@ -78,7 +79,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         data = request.POST.dict()
         if not data:
             data = request.data
-        params = parse.parse_qs(parse.urlparse(data.get('url', '')).query)
+        url = data.get('url', '')
+        params = parse.parse_qs(parse.urlparse(url).query)
         version = params.get('version', [])
         data['version'] = version[0] if len(version) else ''
         data['created_by_id'] = request.user.id
@@ -108,17 +110,21 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
     @action(methods=['GET'], detail=False)
     def select(self, request, *args, **kwargs):
         query = ModelManager.objects.values('version').distinct()
+        model_set_query = ModelManager.objects.values('title').distinct()
+        project_set_query = ProjectSet.objects.values('title').distinct()
+
         result = dict(
             type=dict(MODEL_TYPE),
             version=[item['version'] for item in query],
-            model_set=[],
-            project_set=[],
+            model_set=[item['title'] for item in model_set_query],
+            project_set=[item['title'] for item in project_set_query],
         )
 
         return Response(status=status.HTTP_201_CREATED, data=result)
 
     @action(methods=['GET'], detail=False)
     def export(self, request, *args, **kwargs):
+        # model = self.get_model(request)
         url = request.GET.dict('url')
         if not url:
             return Response(
@@ -126,13 +132,40 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
                 data=dict(error="Invalid URL")
             )
         state, rsp = ml_backend_request(
-            opt='export', method='get', params=dict(url=url)
+            url, ['ml_backend', 'export'], method='get',
+            params=dict(url=url)
         )
+        return self.return_ml_response(state, rsp)
+
+    @action(methods=['GET'], detail=False)
+    def label(self, request, *args, **kwargs):
+        model = self.get_model(request)
+        state, rsp = ml_backend_request(
+            model.url, uri=['getLabels'], method='get',
+            params=dict(url=model.url)
+        )
+        return self.return_ml_response(state, rsp)
+
+    @action(methods=['GET'], detail=False)
+    def model(self, request, *args, **kwargs):
+        queryset = ModelManager.objects.filter(
+            type=request.GET.dict().get('type')).values(
+            'id', 'title', 'version'
+        )
+        return Response(data=list(queryset))
+
+    @staticmethod
+    def get_model(request):
+        model_id = request.GET.dict().get('model_id')
+        model = ModelManager.objects.filter(id=model_id).first()
+        return model
+
+    @staticmethod
+    def return_ml_response(state, rsp):
         if state:
             return Response(data=rsp)
         else:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data=dict(error='ML Backend request error.')
+                data=dict(error=f'算法模块请求异常: {rsp}')
             )
-

@@ -7,6 +7,7 @@
   > FileName   : services.py
   > CreateTime : 2022/7/7 08:44
 """
+import uuid
 from enum import Enum
 import json
 from tasks.models import Task
@@ -15,6 +16,9 @@ from django.db.transaction import atomic
 from tasks.models import Prediction, PredictionDraft
 from tasks.models import TaskDbAlgorithm, TaskDbAlgorithmDraft
 from projects.models import PromptResultDraft, PromptResult
+from model_manager.services import ml_backend_request
+from model_manager.models import ModelManager
+
 PREDICTION_BACKUP_FIELDS = [
     'result', 'score', 'model_version', 'task', 'created_at', 'updated_at'
 ]
@@ -188,3 +192,45 @@ def get_choice_values(result):
             continue
         choices += tmp_choices
     return choices
+
+
+def generate_uuid(algorithm_type, project_id):
+    _uuid = uuid.uuid4()
+    return f'{_uuid}_{algorithm_type}_{project_id}'
+
+
+def predict_prompt(
+        model_id, task_data, _uuid, template=[]
+):
+    """
+    预标注（普通）
+    预标注（0样本） 提示学习
+    :param model_id:
+    :param task_data:
+    :param template:
+    :param _uuid:
+    :return:
+    """
+    model = ModelManager.objects.filter(id=model_id).first()
+    _params = dict(uuid=_uuid)
+    _json = dict(data=task_data, templates=template)
+    return ml_backend_request(
+        model.url, uri=['ml_backend', 'predict'], params=_params, _json=_json
+    )
+
+
+def preprocess_clean(model_ids, task_data, _uuid):
+    model_query = ModelManager.objects.filter(id__in=model_ids).values(
+        'id', 'url', 'title')
+    if len(model_ids) != len(model_query):
+        return False, f'{str(model_ids)}模型没有查询到模型'
+
+    model_data = {item['id']: item['url'] for item in model_query}
+    urls = [model_data[_id] for _id in model_ids]
+    first_url = urls.pop(0)
+
+    _params = dict(uuid=_uuid)
+    _json = dict(data=task_data, sequence=urls)
+    return ml_backend_request(
+        first_url, uri=['ml_backend', 'preprocess'], params=_params, _json=_json
+    )

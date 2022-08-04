@@ -19,6 +19,8 @@ from db_ml.services import PROMPT_BACKUP_FIELDS
 from db_ml.services import generate_redis_key
 from core.redis import redis_set, redis_get
 from db_ml.services import AlgorithmState
+from db_ml.services import predict_prompt
+from db_ml.services import generate_uuid
 from db_ml.services import redis_set_json, redis_get_json
 
 
@@ -51,14 +53,17 @@ class PromptLearning(APIView):
     def post(self, request, *args, **kwargs):
         params = request.data
         print('params', params)
-        project_id = params['project']
+        project_id = params['project_id']
+        model_id = params['model_id']
         try:
             # 获取templates
-            template_list = PromptTemplates.objects.filter(project_id=params['project']).values()
+            template_list = PromptTemplates.objects.filter(
+                project_id=project_id
+            ).values()
             # print('template_list', template_list)
             templates = [item['template'] for item in template_list]
             # 获取tasks
-            tasks = Task.objects.filter(project_id=params['project']).values()
+            tasks = Task.objects.filter(project_id=project_id).values()
             redis_key = generate_redis_key('prompt', str(project_id))
             if not tasks:
                 return Response(
@@ -77,47 +82,38 @@ class PromptLearning(APIView):
                 )
 
             # print('tasks', tasks)
-            # 清空project_id对应的PromtResult表
+            # 清空project_id对应的PromptResult表
             c = PromptResult.objects.filter(project_id=project_id).all()
             if len(c):
                 save_raw_data(c, PromptResultDraft, PROMPT_BACKUP_FIELDS)
                 PromptResult.objects.filter(project_id=project_id).delete()
 
+            _uuid = generate_uuid('prompt', project_id)
             redis_state = dict(
                 state=AlgorithmState.ONGOING,
                 total=len(templates) * len(tasks),
                 project_id=project_id,
                 username=request.user.username,
+                uuid=_uuid,
             )
             redis_set_json(redis_key, redis_state)
 
-            for template in templates:
-                aggregate = []
-                for task in tasks:
-                    # TODO 多对话判断
-                    # result = patch_prompt(template, task['data']['dialogue'])
-                    # text = task.get('data', {}).get('dialogue')[0].get('text')
-                    text = task.get('data', {}).get('dialogue')
-                    data = dict(
-                        text=text,
-                        template=template,
-                        project_id=project_id,
-                        task_id=task.get('id'),
-                        task_tag_id=task.get('id'),
-                        user_id=request.user.id,
-                        queue_name='prompt',
-                        type='prompt',
-                    )
-                    start_job_async_or_sync(job_prompt, **data)
-                    # c = PromptResult(project_id=project_id, task_id=task['id'], metrics=result)
-                    # c.save()
-                    # aggregate.append(c)
-                # print('aggregate', len(aggregate))
-                # 批量入库
-                # PromptResult.objects.bulk_create(aggregate)
-
-            result = {'status': 0, 'error': ''}
-            resp_status = status.HTTP_200_OK
+            task_data = []
+            for task in tasks:
+                dialogue = task.get('data', {}).get('dialogue', [])
+                task_data.append(dict(
+                    task_id=task.get('id'),
+                    dialogue=dialogue
+                ))
+            state, result = predict_prompt(
+                model_id, task_data, _uuid, templates
+            )
+            if state:
+                result = {'status': 0, 'error': ''}
+                resp_status = status.HTTP_200_OK
+            else:
+                result = {'status': 1, 'error': result}
+                resp_status = status.HTTP_400_BAD_REQUEST
         except Exception as e:
             result = {'status': 1, 'error': str(e)}
             resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR

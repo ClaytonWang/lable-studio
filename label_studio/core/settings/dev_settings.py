@@ -8,7 +8,6 @@
   > CreateTime : 2022/6/20 08:41
 """
 
-ML_BACKEND_DOMAIN = 'http://127.0.0.1:9000'
 DATABASES = {
     'default':  {
         'ENGINE': 'django.db.backends.postgresql',
