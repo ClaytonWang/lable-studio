@@ -11,12 +11,14 @@ const Prediction = forwardRef(({ project, showStatus }, ref) => {
   const api = useAPI();
   const [projectType,setProjectType] = useState(null);
 
-  const request = useCallback(() => {
+  const request = useCallback((model_id) => {
     return api.callApi('mlPredictProcess', {
       body: {
         project_id: project.id,
+        model_id,
       },
-    }).then(() => showStatus('prediction'));
+      errorFilter: () => true,
+    }).then(() => { });
   }, [project]);
 
   const onShow = useMemo(() => {
