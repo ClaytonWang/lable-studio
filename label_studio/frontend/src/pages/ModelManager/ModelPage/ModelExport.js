@@ -57,7 +57,6 @@ export const ModelExport = ({ data, onClose }) => {
       closeOnClickOutside={false}
       allowClose={true}
       title={t("Export Model")}
-      colon={false}
     >
       <Form
         style={{ marginTop: 20 }}
@@ -67,6 +66,7 @@ export const ModelExport = ({ data, onClose }) => {
         name="form_in_modal"
         onFinish={onFinish}
         initialValues={data}
+        colon={false}
       >
         <Form.Item name="title" label="模型名称">
           <Input disabled style={{ width: 300 }} placeholder="模型名称" />
