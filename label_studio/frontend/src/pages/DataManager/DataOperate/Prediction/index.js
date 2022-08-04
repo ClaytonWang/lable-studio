@@ -75,12 +75,6 @@ const Prediction = forwardRef(({ project, showStatus }, ref) => {
     modalRef.current?.hide();
   }, []);
 
-  // TEMP
-  useEffect(() => {
-    modalRef.current?.show();
-  }),
-  [];
-
   useImperativeHandle(ref, () => ({
     show: () => {
       onShow();
