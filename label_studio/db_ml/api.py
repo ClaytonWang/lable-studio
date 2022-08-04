@@ -40,6 +40,7 @@ from db_ml.services import AlgorithmState
 from db_ml.services import redis_set_json, redis_get_json
 from db_ml.services import predict_prompt
 from db_ml.services import preprocess_clean
+from db_ml.services import generate_uuid
 
 """
 项目执行算法状态标识
@@ -85,11 +86,13 @@ def clean(request):
     if TaskDbAlgorithmDraft.objects.filter(project_id=project_id).exists():
         TaskDbAlgorithmDraft.objects.filter(project_id=project_id).delete()
 
+    _uuid = generate_uuid('clean', project_id)
     redis_state = dict(
         state=AlgorithmState.ONGOING,
         total=query.count(),
         project_id=project_id,
         username=request.user.username,
+        uuid=_uuid,
     )
     redis_set_json(redis_key, redis_state)
     with atomic():
@@ -111,7 +114,7 @@ def clean(request):
                 task_id=item.id,
                 dialogue=dialogue
             ))
-        state, result = preprocess_clean(model_ids, project_id, task_data)
+        state, result = preprocess_clean(model_ids, task_data, _uuid)
         if not state:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
@@ -205,11 +208,13 @@ def prediction(request):
     if PredictionDraft.objects.filter(task_id__in=task_ids).exists():
         PredictionDraft.objects.filter(task_id__in=task_ids).delete()
 
+    _uuid = generate_uuid('prediction', project_id)
     redis_state = dict(
         state=AlgorithmState.ONGOING,
         total=query.count(),
         project_id=project_id,
         username=request.user.username,
+        uuid=_uuid,
     )
     redis_set_json(redis_key, redis_state)
     # 备份一份原数据后删除原记录
@@ -230,9 +235,7 @@ def prediction(request):
                 dialogue=dialogue
             ))
 
-        state, result = predict_prompt(
-            model_id, project_id, task_data, 'prediction'
-        )
+        state, result = predict_prompt(model_id, task_data, _uuid)
         if state:
             pass
         else:

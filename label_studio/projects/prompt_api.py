@@ -20,6 +20,7 @@ from db_ml.services import generate_redis_key
 from core.redis import redis_set, redis_get
 from db_ml.services import AlgorithmState
 from db_ml.services import predict_prompt
+from db_ml.services import generate_uuid
 from db_ml.services import redis_set_json, redis_get_json
 
 
@@ -87,11 +88,13 @@ class PromptLearning(APIView):
                 save_raw_data(c, PromptResultDraft, PROMPT_BACKUP_FIELDS)
                 PromptResult.objects.filter(project_id=project_id).delete()
 
+            _uuid = generate_uuid('prompt', project_id)
             redis_state = dict(
                 state=AlgorithmState.ONGOING,
                 total=len(templates) * len(tasks),
                 project_id=project_id,
                 username=request.user.username,
+                uuid=_uuid,
             )
             redis_set_json(redis_key, redis_state)
 
@@ -103,7 +106,7 @@ class PromptLearning(APIView):
                     dialogue=dialogue
                 ))
             state, result = predict_prompt(
-                model_id, project_id, task_data, 'prompt', templates
+                model_id, task_data, _uuid, templates
             )
             if state:
                 result = {'status': 0, 'error': ''}

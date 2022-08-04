@@ -200,27 +200,26 @@ def generate_uuid(algorithm_type, project_id):
 
 
 def predict_prompt(
-        model_id, project_id, task_data, algorithm_type, template=[]
+        model_id, task_data, _uuid, template=[]
 ):
     """
     预标注（普通）
     预标注（0样本） 提示学习
     :param model_id:
-    :param project_id:
     :param task_data:
     :param template:
-    :param algorithm_type:
+    :param _uuid:
     :return:
     """
     model = ModelManager.objects.filter(id=model_id).first()
-    _params = dict(uuid=generate_uuid(algorithm_type, project_id))
+    _params = dict(uuid=_uuid)
     _json = dict(data=task_data, templates=template)
     return ml_backend_request(
         model.url, uri=['ml_backend', 'predict'], params=_params, _json=_json
     )
 
 
-def preprocess_clean(model_ids, project_id, task_data, algorithm_type):
+def preprocess_clean(model_ids, task_data, _uuid):
     model_query = ModelManager.objects.filter(id__in=model_ids).values(
         'id', 'url', 'title')
     if len(model_ids) != len(model_query):
@@ -230,7 +229,7 @@ def preprocess_clean(model_ids, project_id, task_data, algorithm_type):
     urls = [model_data[_id] for _id in model_ids]
     first_url = urls.pop(0)
 
-    _params = dict(uuid=generate_uuid('clean', project_id))
+    _params = dict(uuid=_uuid)
     _json = dict(data=task_data, sequence=urls)
     return ml_backend_request(
         first_url, uri=['ml_backend', 'preprocess'], params=_params, _json=_json
