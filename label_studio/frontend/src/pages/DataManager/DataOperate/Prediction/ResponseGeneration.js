@@ -23,7 +23,7 @@ const ResponseGeneration = ({ close, execLabel, models, loading }) => {
       ['升级', '不知情', '套餐'],
     );
     // api
-    //   .callApi("getModelLabel", {
+    //   .callApi("modelLabel", {
     //     params: {
     //       model_id: v,
     //     },

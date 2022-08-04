@@ -51,7 +51,7 @@ const Prediction = forwardRef(({ project, showStatus }, ref) => {
     );
 
     api
-      .callApi("listModelByType", {
+      .callApi("modelList", {
         params: {
           type: modelType,
         },
