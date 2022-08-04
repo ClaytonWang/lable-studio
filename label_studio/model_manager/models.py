@@ -69,6 +69,8 @@ class ModelManager(DummyModelMixin, models.Model):
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_model', on_delete=models.SET_NULL, null=True, verbose_name=_('created by'))
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
 
+    # 基于 指定模型的训练
+    model = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, help_text='训练用的基础模型', related_name='model_config')
     # 项目预留外建，追溯模型训练的项目信息
     project = models.ForeignKey('projects.Project', on_delete=models.SET_NULL, null=True, blank=True, help_text='训练用的项目', related_name='model_config_project')
     # 项目集
@@ -77,6 +79,7 @@ class ModelManager(DummyModelMixin, models.Model):
     # 模型参数 模型调用参数和标签都放在这里
     model_parameter = JSONField(_('run model parameter'), null=True, default=dict, help_text='模型入参数')
     model_result = models.CharField(_('run model result url'), null=True, default='', max_length=140, help_text='模型入参数')
+
 
     class Meta:
         unique_together = ("organization_id", "title", "version")
