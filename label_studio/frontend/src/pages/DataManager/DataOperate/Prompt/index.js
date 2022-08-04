@@ -1,22 +1,38 @@
-import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from "react";
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Modal } from "@/components/Modal/Modal";
 import { useAPI } from "@/providers/ApiProvider";
 import { template } from '@/utils/util';
 import ResponseGeneration from './ResponseGeneration';
 import DialogIntent from './DialogIntent';
 import './index.less';
+import { message } from "antd";
 
 const Prompt = forwardRef(({ project, showStatus }, ref) => {
   const modalRef = useRef();
   const api = useAPI();
+  const [loading, setLoading] = useState(false);
 
-  const request = useCallback(() => {
-    return api.callApi('mlPromptPredict', {
-      body: {
-        project: project.id,
-      },
-    }).then(() => showStatus('prompt'));
-  }, [project]);
+  const request = useCallback(async () => {
+    setLoading(true);
+    return api.callApi("mlPromptTemplateQuery", {
+      params: { project: project.id },
+    }).then(res => {
+      if (res.templates?.length > 0) {
+        return api.callApi('mlPromptPredict', {
+          body: {
+            project: project.id,
+          },
+        }).then(() => {
+          setLoading(false);
+          showStatus('prompt');
+        });
+      } else {
+        setLoading(false);
+        message.error(t('tip_please_complete'));
+      }
+    });
+    
+  }, [project, setLoading]);
 
   const Comp = useMemo(() => {
     const projectClass = template.class(project);
@@ -42,7 +58,7 @@ const Prompt = forwardRef(({ project, showStatus }, ref) => {
   return (
     <Modal className="prompt-zone" bare ref={modalRef} style={{ width:800 }}>
       {
-        Comp ? <Comp close={close} request={request} project={project} /> : null
+        Comp ? <Comp loading={loading} close={close} request={request} project={project} /> : null
       }
     </Modal>
   );
