@@ -12,6 +12,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework import generics, status
 from .models import PromptResult, PromptTemplates, PromptResultDraft
 from tasks.models import Task
+from projects.models import Project
 from core.redis import start_job_async_or_sync
 from db_ml.prompt import job_prompt
 from db_ml.services import save_raw_data
@@ -105,15 +106,22 @@ class PromptLearning(APIView):
                     task_id=task.get('id'),
                     dialogue=dialogue
                 ))
-            state, result = predict_prompt(
-                model_id, task_data, _uuid, templates
-            )
-            if state:
-                result = {'status': 0, 'error': ''}
-                resp_status = status.HTTP_200_OK
-            else:
-                result = {'status': 1, 'error': result}
-                resp_status = status.HTTP_400_BAD_REQUEST
+
+            project = Project.objects.filter(id=project_id).first()
+            if project.template_type == 'intent-dialog':
+                state, result = predict_prompt(
+                    model_id, task_data, _uuid, templates
+                )
+                if state:
+                    result = {'status': 0, 'error': ''}
+                    resp_status = status.HTTP_200_OK
+                else:
+                    result = {'status': 1, 'error': result}
+                    resp_status = status.HTTP_400_BAD_REQUEST
+            elif project.template_type == 'conversational-generation':
+                # 对话生产
+                generate_count = params.get('generate_count')
+
         except Exception as e:
             result = {'status': 1, 'error': str(e)}
             resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR

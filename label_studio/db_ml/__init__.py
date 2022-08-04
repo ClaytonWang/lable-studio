@@ -8,8 +8,3 @@
   > CreateTime : 2022/6/7 16:53
 """
 
-from db_ml.listener_result import RedisSpaceListener
-from core.redis import _redis
-
-listener = RedisSpaceListener(_redis)
-listener.start()
