@@ -43,6 +43,8 @@ export const API_CONFIG = {
     editModel: "PATCH:/model-manager/:pk",
     exportModel: "GET:/model-manager/export",
     filtersModel: "GET:/model-manager/select",
+    modelList: "GET:/model-manager/model",
+    modelLabel:"GET:/model-manager/label",
 
     // Config and Import
     configTemplates: "/templates",
