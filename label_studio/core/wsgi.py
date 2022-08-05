@@ -10,6 +10,6 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'label_studio.core.settings.labe
 
 application = get_wsgi_application()
 
-
-listener = redis_listener()
-listener.start()
+if 'runserver' in os.sys.argv:
+    listener = redis_listener()
+    listener.start()

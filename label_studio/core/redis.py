@@ -1,7 +1,9 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+import time
 import redis
 import logging
+import threading
 import django_rq
 
 from django_rq import get_connection
@@ -18,8 +20,11 @@ except:
 
 
 def redis_listener():
-    from db_ml.listener_result import RedisSpaceListener
-    return RedisSpaceListener(_redis)
+    if redis_healthcheck():
+        from db_ml.listener_result import RedisSpaceListener
+        return RedisSpaceListener(_redis)
+    else:
+        logger.error('Redis connection failed...')
 
 
 def redis_healthcheck():
@@ -97,3 +102,49 @@ def start_job_async_or_sync(job, *args, **kwargs):
         return job
     else:
         return job(*args, **kwargs)
+
+
+class RedisSpaceListener(object):
+    """
+    """
+    def __init__(self, _redis, key_prefix='celery-task-meta-', db_index=0):
+        """
+        """
+        self.redis = _redis
+        self._thread = None
+        self.pubsub = None
+        self.key_prefix = key_prefix
+        self.db_index = db_index
+        self.subscribe()
+
+    def subscribe(self):
+        self.pubsub = self.redis.pubsub()
+        # 订阅消息
+        self.pubsub.psubscribe(
+            f'__keyspace@{self.db_index}__:{self.key_prefix}*'
+        )
+
+    def start(self):
+        print('Redis listening thread ....')
+        self._thread = t = threading.Thread(target=self._monitor)
+        t.setDaemon(False)
+        t.start()
+
+    def _monitor(self):
+        """
+        """
+        from db_ml.listener_result import process_celery_result
+        while True:
+            message = self.pubsub.get_message()
+            if message:
+                if message.get('type') != 'pmessage':
+                    continue
+
+                key = str(message.get('channel', b''), 'utf-8')
+                process_celery_result(key)
+            else:
+                time.sleep(0.1)
+
+    def stop(self):
+        self._thread.join()
+        self._thread = None
