@@ -97,7 +97,6 @@ class PromptLearning(APIView):
                 username=request.user.username,
                 uuid=_uuid,
             )
-            redis_set_json(redis_key, redis_state)
 
             task_data = []
             for task in tasks:
@@ -110,7 +109,7 @@ class PromptLearning(APIView):
             project = Project.objects.filter(id=project_id).first()
             if project.template_type == 'intent-dialog':
                 state, result = predict_prompt(
-                    model_id, task_data, _uuid, templates
+                    project_id, model_id, task_data, _uuid, templates
                 )
                 if state:
                     result = {'status': 0, 'error': ''}
@@ -122,6 +121,7 @@ class PromptLearning(APIView):
                 # 对话生产
                 generate_count = params.get('generate_count')
 
+            redis_set_json(redis_key, redis_state)
         except Exception as e:
             result = {'status': 1, 'error': str(e)}
             resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR

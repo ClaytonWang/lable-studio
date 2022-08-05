@@ -8,9 +8,7 @@
   > FileName   : algorithm_result.py
   > CreateTime : 2022/8/4 08:27
 """
-import time
 import logging
-import threading
 from core.redis import redis_get
 from tasks.models import Prediction
 from tasks.models import TaskDbAlgorithm
@@ -32,42 +30,6 @@ RETRY    重试
 REVOKED  撤销
 
 """
-
-
-class RedisSpaceListener(object):
-    """
-    """
-    def __init__(self, redis, key_prefix='celery-task-meta-', db_index=0):
-        """
-        """
-        self.redis = redis
-        self._thread = None
-        self.pubsub = self.redis.pubsub()
-        # 订阅消息
-        self.pubsub.psubscribe(f'__keyspace@{db_index}__:{key_prefix}*')
-
-    def start(self):
-        print('redis listen threading ....')
-        self._thread = t = threading.Thread(target=self._monitor)
-        t.setDaemon(False)
-        t.start()
-
-    def _monitor(self):
-        """
-        """
-        while True:
-            message = self.pubsub.get_message()
-            if message:
-                if message.get('type') != 'pmessage':
-                    continue
-                key = str(message.get('channel', b''), 'utf-8')
-                print(key)
-            else:
-                time.sleep(0.1)
-
-    def stop(self):
-        self._thread.join()
-        self._thread = None
 
 
 def process_celery_result(key):
@@ -108,6 +70,28 @@ def split_project_and_task_id(celery_task_id) -> list:
 
 
 def insert_prediction_value(algorithm_result, project_id, task_id):
+    """
+    celery result
+    {
+        "status":"SUCCESS",
+        "result":{
+            "annotation":"aa",
+            "confidence":0.05
+        },
+        "traceback":null,
+        "children":[
+
+        ],
+        "date_done":"2022-08-04T04:43:40.201419",
+        "task_id":"uuid_test-460"
+    }
+
+    :param algorithm_result:
+    :param project_id:
+    :param task_id:
+    :return:
+    """
+
     if not task_id or not project_id:
         logger.warning(
             f"Invalid project id or task id."
@@ -115,14 +99,15 @@ def insert_prediction_value(algorithm_result, project_id, task_id):
         )
         return
 
-    res_text, confidence = '', 0
+    annotation = algorithm_result.get('annotation', '')
+    confidence = algorithm_result.get('confidence', 0)
     pre_result = {
         'origin': 'prediction',
         'from_name': 'intent',
         'to_name': 'dialogue',
         'type': 'choices',
         'value': {
-            'choices': [res_text], 'start': 0, 'end': 1
+            'choices': [annotation], 'start': 0, 'end': 1
         },
     }
     tag_data = dict(
@@ -140,30 +125,59 @@ def insert_prediction_value(algorithm_result, project_id, task_id):
             defaults=tag_data, task=task_id
         )
         redis_update_finish_state(redis_key, p_state)
-        print('obj:', obj.id, ' auto: ', res_text, ' is_ created:',
+        print('obj:', obj.id, ' auto: ', annotation, ' is_ created:',
               is_created)
 
 
 def inset_prompt_value(algorithm_result, project_id, task_id):
-    res_text, confidence = '', 0
+    """
+    {
+        "status":"SUCCESS",
+        "result":{
+            "task":"",
+            "annotation":"",
+            "confidence":9.4,
+            "average":{
+                "正面标签":"",
+                "负面标签":""
+            },
+            "output":[
+                {
+                    "template":"你好，我是模版A1",
+                    "label":"正面",
+                    "score":"烂片%f",
+                    "wgtedAvg":5.4
+                },
+                {
+                    "template":"你好，我是模版B",
+                    "label":"负面",
+                    "score":"精品%f",
+                    "wgtedAvg":3.4
+                }
+            ]
+        },
+        "traceback":null,
+        "children":[
+
+        ],
+        "date_done":"2022-08-04T04:43:40.201419",
+        "task_id":"uuid_test-460"
+    }
+    :param algorithm_result:
+    :param project_id:
+    :param task_id:
+    :return:
+    """
+
+    # annotation, confidence = '', 0
+    annotation = algorithm_result.get('annotation', '')
+    confidence = algorithm_result.get('confidence', 0)
     result = {
         "task": '',
-        "annotation": res_text,
+        "annotation": annotation,
         "confidence": confidence,
-        # "average": {"正面标签": np.random.rand(), "负面标签": np.random.rand()},
-        # "output":
-        #     [
-        #         {"template": "你好，我是模版A1",
-        #       "label": "正面",
-        #       # "score": "烂片%f" % np.random.rand(),
-        #       # "wgtedAvg": np.random.rand()
-        #          },
-        #      {
-        #          "template": "你好，我是模版B",
-        #       "label": "负面",
-        #       "score": "精品%f" % np.random.rand(),
-        #       "wgtedAvg": np.random.rand()}
-        #      ]
+        "average": '',
+        "output": []
     }
     redis_key = generate_redis_key('prompt', project_id)
     p_state = redis_get_json(redis_key)
