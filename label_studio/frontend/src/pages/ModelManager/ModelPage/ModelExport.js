@@ -6,6 +6,21 @@ import { Button } from "../../../components";
 import { Input } from "../../../components/Form";
 import { ApiContext } from "../../../providers/ApiProvider";
 
+const layout = {
+  labelCol: {
+    span: 5,
+  },
+  wrapperCol: {
+    span: 19,
+  },
+};
+const tailLayout = {
+  wrapperCol: {
+    offset: 8,
+    span: 16,
+  },
+};
+
 export const ModelExport = ({ data, onClose }) => {
   const api = useContext(ApiContext);
   const [form] = Form.useForm();
@@ -17,30 +32,14 @@ export const ModelExport = ({ data, onClose }) => {
     onClose?.(force, "export");
   }, []);
 
-  const layout = {
-    labelCol: {
-      span: 5,
-    },
-    wrapperCol: {
-      span: 19,
-    },
-  };
-  const tailLayout = {
-    wrapperCol: {
-      offset: 8,
-      span: 16,
-    },
-  };
-
   const onFinish = async () => {
     setWaiting(true);
     try {
-      const values = form.getFieldsValue(Object.keys(data));
-
-      await api.callApi("exportModel", {
-        params: { url: values.url },
+      const down = await api.callApi("exportModel", {
+        params: { pk: data.id },
       });
 
+      window.open(down.download);
       onHide(true);
     } catch (e) {
       console.error(e);
@@ -57,7 +56,6 @@ export const ModelExport = ({ data, onClose }) => {
       closeOnClickOutside={false}
       allowClose={true}
       title={t("Export Model")}
-      colon={false}
     >
       <Form
         style={{ marginTop: 20 }}
@@ -67,6 +65,7 @@ export const ModelExport = ({ data, onClose }) => {
         name="form_in_modal"
         onFinish={onFinish}
         initialValues={data}
+        colon={false}
       >
         <Form.Item name="title" label="模型名称">
           <Input disabled style={{ width: 300 }} placeholder="模型名称" />

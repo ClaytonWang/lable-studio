@@ -59,7 +59,6 @@ export const ModelEdit = ({ data, onClose }) => {
       closeOnClickOutside={false}
       allowClose={true}
       title={t("Edit Model")}
-      colon={false}
     >
       <Form
         style={{ marginTop: 20 }}
@@ -69,13 +68,14 @@ export const ModelEdit = ({ data, onClose }) => {
         layout="horizontal"
         name="form_in_modal"
         onFinish={onFinish}
+        colon={false}
       >
-        <Form.Item name="title" label="模型名称">
+        <Form.Item name="title_version" label="当前模型名称">
           <Input disabled style={{ width: 300 }} placeholder="模型名称" />
         </Form.Item>
 
         <Form.Item
-          name="model"
+          name="title"
           label="模型集名称"
           rules={[
             {

@@ -16,7 +16,7 @@ const formItemLayout = {
   wrapperCol: { span: 19 },
 };
 
-const IntentResponse = ({ close ,execLabel }) => {
+const IntentResponse = ({ close, execLabel }) => {
   const { project } = useProject();
   const [template, setCurrentTemplate] = useState(null);
   const [config, _setConfig] = React.useState("");

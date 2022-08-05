@@ -76,7 +76,7 @@ export const ModelImport = ({ onClose }) => {
             { type: "string", max: 20, min: 2 },
           ]}
         >
-          <Input style={{ width: 300 }} placeholder="模型名称" />
+          <Input style={{ width: 300 }} placeholder="请输入模型名称" />
         </Form.Item>
         <Form.Item
           name="type"
@@ -94,7 +94,6 @@ export const ModelImport = ({ onClose }) => {
                 { label: "对话意图分类", value: "intention" },
                 { label: "对话生成", value: "generation" },
                 { label: "清洗模型", value: "clean" },
-                { label: "其他", value: "other" },
               ]}
               placeholder={t("Please select Model type")}
             />
@@ -110,7 +109,7 @@ export const ModelImport = ({ onClose }) => {
             },
           ]}
         >
-          <Input style={{ width: 300 }} placeholder="模型URL" />
+          <Input style={{ width: 300 }} placeholder="请输入模型对应URL" />
         </Form.Item>
         <Form.Item {...tailLayout}>
           <Button
