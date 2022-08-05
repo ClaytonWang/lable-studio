@@ -20,3 +20,7 @@ if __name__ == '__main__':
             "forget to activate a virtual environment?"
         ) from exc
     execute_from_command_line(sys.argv)
+
+    from core.redis import redis_listener
+    listener = redis_listener()
+    listener.start()

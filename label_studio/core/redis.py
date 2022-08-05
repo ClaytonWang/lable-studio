@@ -17,6 +17,11 @@ except:
     _redis = None
 
 
+def redis_listener():
+    from db_ml.listener_result import RedisSpaceListener
+    return RedisSpaceListener(_redis)
+
+
 def redis_healthcheck():
     if not _redis:
         return False

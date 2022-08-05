@@ -122,15 +122,20 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         return Response(status=status.HTTP_201_CREATED, data=result)
 
-    @action(methods=['GET'], detail=False)
+    @action(methods=['GET'], detail=True)
     def export(self, request, *args, **kwargs):
         # model = self.get_model(request)
-        url = request.GET.dict('url')
+        # url = request.GET.dict('url')
+        query = ModelManager.objects.filter(pk=kwargs.get('pk')).first()
+        url = query.url
         if not url:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
-                data=dict(error="Invalid URL")
+                data=dict(error="Invalid ID")
             )
+        # 测试
+        return Response(data={"download": url})
+        # 调用算法服务
         state, rsp = ml_backend_request(
             url, ['ml_backend', 'export'], method='get',
             params=dict(url=url)

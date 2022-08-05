@@ -190,8 +190,8 @@ def prediction(request):
     data = request.data
     project_id = data.get('project_id')
     model_id = data.get('model_id')
-    redis_key = generate_redis_key('prediction', str(project_id))
     query = Task.objects.filter(project_id=project_id)
+    redis_key = generate_redis_key('prediction', str(project_id))
     if not query:
         return Response(
             status=status.HTTP_400_BAD_REQUEST,
@@ -235,12 +235,17 @@ def prediction(request):
                 dialogue=dialogue
             ))
 
-        state, result = predict_prompt(model_id, task_data, _uuid)
-        if state:
+        project = query.first().project
+        if project.template_type == 'intent-dialog':
+            state, result = predict_prompt(model_id, task_data, _uuid)
+            if not state:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data=dict(message=result))
+        elif project.template_type == 'conversational-generation':
+            # 对话生产
+            generate_count = data.get('generate_count')
             pass
-        else:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
 
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
