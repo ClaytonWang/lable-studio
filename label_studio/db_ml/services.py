@@ -16,6 +16,7 @@ from django.db.transaction import atomic
 from tasks.models import Prediction, PredictionDraft
 from tasks.models import TaskDbAlgorithm, TaskDbAlgorithmDraft
 from projects.models import PromptResultDraft, PromptResult
+from projects.models import ProjectSummary
 from model_manager.services import ml_backend_request
 from model_manager.models import ModelManager
 
@@ -194,17 +195,31 @@ def get_choice_values(result):
     return choices
 
 
+def geta_project_labels(project_id):
+    summary = ProjectSummary.objects.filter(project_id=project_id).first()
+
+    labels = []
+    for k in summary.created_annotations:
+        for item in k.split('|'):
+            vls = summary.created_labels.get(item)
+            if not vls:
+                continue
+            labels += list(vls.keys())
+    return labels
+
+
 def generate_uuid(algorithm_type, project_id):
     _uuid = uuid.uuid4()
     return f'{_uuid}_{algorithm_type}_{project_id}'
 
 
 def predict_prompt(
-        model_id, task_data, _uuid, template=[]
+        project_id, model_id, task_data, _uuid, template=[]
 ):
     """
     预标注（普通）
     预标注（0样本） 提示学习
+    :param project_id:
     :param model_id:
     :param task_data:
     :param template:
@@ -213,13 +228,17 @@ def predict_prompt(
     """
     model = ModelManager.objects.filter(id=model_id).first()
     _params = dict(uuid=_uuid)
-    _json = dict(data=task_data, templates=template)
+    _json = dict(
+        data=task_data,
+        templates=template,
+        labels=geta_project_labels(project_id)
+    )
     return ml_backend_request(
         model.url, uri=['ml_backend', 'predict'], params=_params, _json=_json
     )
 
 
-def preprocess_clean(model_ids, task_data, _uuid):
+def preprocess_clean(project_id, model_ids, task_data, _uuid):
     model_query = ModelManager.objects.filter(id__in=model_ids).values(
         'id', 'url', 'title')
     if len(model_ids) != len(model_query):
@@ -230,7 +249,10 @@ def preprocess_clean(model_ids, task_data, _uuid):
     first_url = urls.pop(0)
 
     _params = dict(uuid=_uuid)
-    _json = dict(data=task_data, sequence=urls)
+    _json = dict(
+        labels=geta_project_labels(project_id),
+        data=task_data, sequence=urls
+    )
     return ml_backend_request(
         first_url, uri=['ml_backend', 'preprocess'], params=_params, _json=_json
     )

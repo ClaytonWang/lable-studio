@@ -94,7 +94,7 @@ def clean(request):
         username=request.user.username,
         uuid=_uuid,
     )
-    redis_set_json(redis_key, redis_state)
+
     with atomic():
         query_alg = TaskDbAlgorithm.objects.filter(project_id=project_id).all()
         if len(query_alg):
@@ -114,10 +114,14 @@ def clean(request):
                 task_id=item.id,
                 dialogue=dialogue
             ))
-        state, result = preprocess_clean(model_ids, task_data, _uuid)
+        state, result = preprocess_clean(
+            project_id, model_ids, task_data, _uuid
+        )
         if not state:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
+
+        redis_set_json(redis_key, redis_state)
 
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
@@ -216,7 +220,6 @@ def prediction(request):
         username=request.user.username,
         uuid=_uuid,
     )
-    redis_set_json(redis_key, redis_state)
     # 备份一份原数据后删除原记录
     with atomic():
         query_pre = Prediction.objects.filter(task_id__in=task_ids).all()
@@ -237,7 +240,9 @@ def prediction(request):
 
         project = query.first().project
         if project.template_type == 'intent-dialog':
-            state, result = predict_prompt(model_id, task_data, _uuid)
+            state, result = predict_prompt(
+               project_id, model_id, task_data, _uuid
+            )
             if not state:
                 return Response(
                     status=status.HTTP_400_BAD_REQUEST,
@@ -246,6 +251,8 @@ def prediction(request):
             # 对话生产
             generate_count = data.get('generate_count')
             pass
+
+        redis_set_json(redis_key, redis_state)
 
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
@@ -268,14 +275,15 @@ def query_task(request):
         state = True
         finish = p_state.get('finish', 0)
         total = p_state.get('total', 0)
-        return Response(data=dict(
-            total=total,
-            finish=finish,
-            # true 是进行中  false是结束或未开始
-            state=state if finish != total or \
-                           state == AlgorithmState.ONGOING else False,
-            rate=round(finish / total, 2) if total > 0 else 0
-        ))
+        # # 先注释，看着像是多余的代码
+        # return Response(data=dict(
+        #     total=total,
+        #     finish=finish,
+        #     # true 是进行中  false是结束或未开始
+        #     state=state if finish != total or \
+        #                    state == AlgorithmState.ONGOING else False,
+        #     rate=round(finish / total, 2) if total > 0 else 0
+        # ))
 
     if algorithm_type == 'prediction':
         finish_task = Prediction.objects.filter(

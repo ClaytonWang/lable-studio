@@ -21,7 +21,6 @@ except:
 
 def redis_listener():
     if redis_healthcheck():
-        from db_ml.listener_result import RedisSpaceListener
         return RedisSpaceListener(_redis)
     else:
         logger.error('Redis connection failed...')
