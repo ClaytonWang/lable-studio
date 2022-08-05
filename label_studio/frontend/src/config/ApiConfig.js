@@ -41,7 +41,7 @@ export const API_CONFIG = {
     modelManager: "GET:/model-manager",
     importModel: "POST:/model-manager",
     editModel: "PATCH:/model-manager/:pk",
-    exportModel: "GET:/model-manager/export",
+    exportModel: "GET:/model-manager/:pk/export",
     filtersModel: "GET:/model-manager/select",
     modelList: "GET:/model-manager/model",
     modelLabel:"GET:/model-manager/label",

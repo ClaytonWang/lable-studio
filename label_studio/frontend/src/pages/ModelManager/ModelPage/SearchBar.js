@@ -123,8 +123,8 @@ export const SearchBar = React.memo((props) => {
       await props.onSearch(props.pageSize, {
         type: obj["type"],
         version: obj["version"],
-        mdoel_group: obj["model_set"],
-        project_group: obj["project_set"],
+        mdoel_set: obj["model_set"],
+        project_set: obj["project_set"],
       });
     }
   };

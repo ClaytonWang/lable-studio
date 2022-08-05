@@ -13,12 +13,12 @@ export const useColumns = () => {
     return [
       {
         title: '模型名称',
-        dataIndex: 'title',
-        key: 'title',
+        dataIndex: 'title_version',
+        key: 'title_version',
         render: (_, record) => {
           if (record.type === 'clean')
             return (
-              <Elem name="title">
+              <Elem name="title_version">
                 { _ }
               </Elem>
             );
@@ -75,21 +75,21 @@ export const useColumns = () => {
         },
       },
       {
-        title: '模型集合',
-        dataIndex: 'model',
-        key: 'model',
+        title: '模型集',
+        dataIndex: 'title',
+        key: 'title',
         render: (_,record) => {
-          if (!record.model) return '/';
-          return record.model;
+          if (!record.title) return '/';
+          return record.title;
         },
       },
       {
         title: '项目集合',
-        dataIndex: 'project',
-        key: 'project',
+        dataIndex: 'project_set',
+        key: 'project_set',
         render: (_,record) => {
-          if (!record.project) return '/';
-          return record.project;
+          if (!record.project_set) return '/';
+          return record.project_set?.title;
         },
       },
       {
