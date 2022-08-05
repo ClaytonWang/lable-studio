@@ -15,23 +15,23 @@ const ResponseGeneration = ({ close, execLabel, models, loading }) => {
   const onFinish = useCallback((values) => {
     execLabel(values);
   }, [execLabel]);
-  const [tags, setTags] = useState([]);
-  const api = useAPI();
-  const onModelChange = useCallback(v => {
-    // TEMP
-    setTags(
-      ['升级', '不知情', '套餐'],
-    );
-    // api
-    //   .callApi("modelLabel", {
-    //     params: {
-    //       model_id: v,
-    //     },
-    //   })
-    //   .then((res) => {
-    //     setTags(res || []);
-    //   });
-  });
+  // const [tags, setTags] = useState([]);
+  // const api = useAPI();
+  // const onModelChange = useCallback(v => {
+  //   // TEMP
+  //   setTags(
+  //     ['升级', '不知情', '套餐'],
+  //   );
+  //   // api
+  //   //   .callApi("modelLabel", {
+  //   //     params: {
+  //   //       model_id: v,
+  //   //     },
+  //   //   })
+  //   //   .then((res) => {
+  //   //     setTags(res || []);
+  //   //   });
+  // });
 
   return (
     <>
@@ -54,7 +54,7 @@ const ResponseGeneration = ({ close, execLabel, models, loading }) => {
           label="选择模型"
           rules={[{ required: true, message: t('tip_please_complete') }]}
         >
-          <Select onChange={onModelChange}>
+          <Select>
             {
               map(models, item => {
                 return (
@@ -66,7 +66,7 @@ const ResponseGeneration = ({ close, execLabel, models, loading }) => {
             }
           </Select>
         </Form.Item>
-        <Form.Item
+        {/* <Form.Item
           label="所选标签模型"
         >
           <Space size="small">
@@ -76,7 +76,7 @@ const ResponseGeneration = ({ close, execLabel, models, loading }) => {
               })
             }
           </Space>
-        </Form.Item>
+        </Form.Item> */}
         <Modal.Footer>
           <Space align="end">
             <Button

@@ -13,21 +13,21 @@ const formItemLayout = {
 };
 
 const ResponseGeneration = ({ loading, close, project, request }) => {
-  const [tags, setTags] = useState([]);
+  // const [tags, setTags] = useState([]);
   const [form] = Form.useForm();
   const onFinish = useCallback(() => {
     form.validateFields()
       .then(values => {
         request({
           ...values,
-          tags,
+          // tags,
         });
       });
-  }, [request, tags]);
+  }, [request]);
 
-  const onChangeTag = useCallback((v) => {
-    setTags(v);
-  }, []);
+  // const onChangeTag = useCallback((v) => {
+  //   setTags(v);
+  // }, []);
 
   return (
     <>
@@ -44,14 +44,14 @@ const ResponseGeneration = ({ loading, close, project, request }) => {
           <PromptTemplate project={project} />
         </Form.Item>
       </Form>
-      <Row>
+      {/* <Row>
         <Col className="label-wrapper" span={4}>
           <label>标签</label>
         </Col>
         <Col className="item-wrapper" span={20}>
           <ProjectTag value={tags} onChange={onChangeTag} />
         </Col>
-      </Row>
+      </Row> */}
       <Modal.Footer>
         <Space align="end">
           <Button size="compact" onClick={close}>
