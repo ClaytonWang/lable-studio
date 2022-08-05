@@ -407,5 +407,7 @@
   "prompt_template": "提示学习模版",
   "tip_prompt_template": "[dlg]代表整个对话，[dlg1]代表对话第一行，[dlg2]代表对话第二行，[dlgx]代表对话第x行，[mask]代表被遮罩的内容。",
   "help_prompt_template": "请输入提示学习模板,例:[dlg]你的心情很[mask]",
-  "ceate_rightnow": "立即生成"
+  "ceate_rightnow": "立即生成",
+  "conversational-ai-response-generation.label_prediction": "生成对话(普通)",
+  "conversational-ai-response-generation.label_prompt": "生成对话(0样本)"
 }
