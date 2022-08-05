@@ -139,7 +139,7 @@ export default forwardRef((props, ref) => {
         task ? (
           <div style={{ padding: 16, textAlign: 'center' }}>
             <Space direction="vertical">
-              <h2>{t.formatWithTemplate(`$label_${task.type}`, task.type)}...</h2>
+              <h2>{t.format('with_template', `$label_${task.type}`, task.type)}...</h2>
               <Progress type="circle" percent={progress} />
               <Space style={{ marginTop: 8 }}>
                 <Button onClick={handleCancel}>{t('Cancel')}</Button>
