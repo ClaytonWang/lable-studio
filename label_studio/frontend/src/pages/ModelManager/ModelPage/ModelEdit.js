@@ -82,6 +82,7 @@ export const ModelEdit = ({ data, onClose }) => {
               required: true,
               message: "请输入模型集名称。",
             },
+            { type: "string", max: 20, min: 2 },
           ]}
         >
           <Input style={{ width: 300 }} placeholder="模型集名称" />
