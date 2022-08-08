@@ -19,6 +19,8 @@ from projects.models import PromptResultDraft, PromptResult
 from projects.models import ProjectSummary
 from model_manager.services import ml_backend_request
 from model_manager.models import ModelManager
+from model_manager.services import ml_backend_params
+
 
 PREDICTION_BACKUP_FIELDS = [
     'result', 'score', 'model_version', 'task', 'created_at', 'updated_at'
@@ -195,7 +197,7 @@ def get_choice_values(result):
     return choices
 
 
-def geta_project_labels(project_id):
+def gate_project_labels(project_id):
     summary = ProjectSummary.objects.filter(project_id=project_id).first()
 
     labels = []
@@ -205,7 +207,8 @@ def geta_project_labels(project_id):
             if not vls:
                 continue
             labels += list(vls.keys())
-    return labels
+
+    return {index: value for index, value in enumerate(labels)}
 
 
 def generate_uuid(algorithm_type, project_id):
@@ -228,11 +231,12 @@ def predict_prompt(
     """
     model = ModelManager.objects.filter(id=model_id).first()
     _params = dict(uuid=_uuid)
-    _json = dict(
+    _json = ml_backend_params(
         data=task_data,
+        labels=gate_project_labels(project_id),
         templates=template,
-        labels=geta_project_labels(project_id)
     )
+
     return ml_backend_request(
         model.url, uri=['ml_backend', 'predict'], params=_params, _json=_json
     )
@@ -249,9 +253,12 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
     first_url = urls.pop(0)
 
     _params = dict(uuid=_uuid)
-    _json = dict(
-        labels=geta_project_labels(project_id),
-        data=task_data, sequence=urls
+    _json = ml_backend_params(
+        data=task_data,
+        labels=gate_project_labels(project_id),
+        extra=dict(
+            sequence=urls
+        )
     )
     return ml_backend_request(
         first_url, uri=['ml_backend', 'preprocess'], params=_params, _json=_json
