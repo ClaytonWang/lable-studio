@@ -21,7 +21,7 @@ if __name__ == '__main__':
         ) from exc
     execute_from_command_line(sys.argv)
 
-    # if 'runserver' in sys.argv:
-    #     from core.redis import redis_listener
-    #     listener = redis_listener()
-    #     listener.start()
+    if 'runserver' in sys.argv:
+        from core.redis import redis_listener
+        listener = redis_listener()
+        listener.start()
