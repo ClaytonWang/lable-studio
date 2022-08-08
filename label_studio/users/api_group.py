@@ -19,9 +19,9 @@ from .serializers_group import GroupUpdatedSerializer
 # from base.models import PmsPage
 # from base.models import PmsButton
 # from .services import update_auth_page_or_btn
-# from settings import SYSTEM_GROUP
+from django.conf import settings
 from db_ml.common import MultiSerializerViewSetMixin
-
+SYSTEM_GROUP = settings.SYSTEM_GROUP
 logger = logging.getLogger('info')
 
 

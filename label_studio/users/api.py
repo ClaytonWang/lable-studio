@@ -1,6 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
 import logging
+from rest_framework import status
 import drf_yasg.openapi as openapi
 
 from django_filters.rest_framework import DjangoFilterBackend
@@ -136,6 +137,44 @@ class UserAPI(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         return super(UserAPI, self).destroy(request, *args, **kwargs)
+
+    @action(methods=['GET'], detail=False)
+    def all(self, request, *args, **kwargs):
+        group = request.GET.dict().get('group')
+        if not group:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=dict(error=f'必须指定角色')
+            )
+        queryset = User.objects.filter(
+            groups__name=group
+        ).values('id', 'email', 'username', 'first_name', 'last_name')
+        return Response(data=list(queryset))
+
+    @action(methods=['POST'], detail=False)
+    def update_user_group(self, request):
+        """
+        指定用户设置分组    一个用户只有一个角色（分组）
+        :param request:
+        :return:
+        """
+        from django.contrib.auth.models import Group
+        data = request.data
+        user_id = data.get('user_id')
+        group_id = data.get('group_id')
+        user = User.objects.filter(id=user_id).first()
+        group = Group.objects.filter(id=group_id)
+        if not group:
+            return Response(
+                status=400,
+                data=dict(detail=f'指定用户组不存在')
+            )
+
+        if user.groups.all():
+            user.groups.remove()
+
+        user.groups.add(group)
+        return Response(status=201, data=dict(msg='更新成功'))
 
 
 @method_decorator(name='post', decorator=swagger_auto_schema(

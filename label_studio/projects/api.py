@@ -42,7 +42,9 @@ from core.utils.io import find_dir, find_file, read_yaml
 from data_manager.functions import get_prepared_queryset, filters_ordering_selected_items_exist
 from data_manager.models import View
 from core.utils.exceptions import LabelStudioValidationErrorSentryIgnored
-
+from rest_framework.decorators import api_view
+from rest_framework.decorators import permission_classes
+from rest_framework.permissions import IsAuthenticated
 logger = logging.getLogger(__name__)
 
 
@@ -131,14 +133,16 @@ class ProjectListAPI(generics.ListCreateAPIView):
 
     def get_queryset(self):
         set_id=self.request.query_params.get('set_id')
-        query_params = dict(organization=self.request.user.active_organization)
+        queryset = Project.objects.for_user(self.request.user)
+        # query_params = dict(organization=self.request.user.active_organization)
+        query_params = dict()
         if set_id in [-1, "-1"]:
             query_params['set_id__isnull'] = True
         elif set_id:
             query_params['set_id'] = set_id
         else:
             pass
-        projects = Project.objects.filter(**query_params)
+        projects = queryset.filter(**query_params)
         return ProjectManager.with_counts_annotate(projects).prefetch_related('members', 'created_by')
 
     def get_serializer_context(self):
@@ -557,3 +561,30 @@ class ProjectModelVersions(generics.RetrieveAPIView):
     def get(self, request, *args, **kwargs):
         project = self.get_object()
         return Response(data=project.get_model_versions(with_counters=True))
+
+
+@api_view(['POST', 'DELETE'])
+@permission_classes([IsAuthenticated])
+def project_set_user(request, pk):
+    """
+    :param request:
+    :return:
+    """
+    from users.models import User
+    data = request.data
+    user_id = data.get('user_id')
+
+    project = Project.objects.filter(id=pk).first()
+    user = User.objects.filter(id=user_id).first()
+    if not project or not user:
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST, data=dict(error='项目或是用户无效')
+        )
+
+    if request.method == 'POST':
+        project.annotator.add(user)
+        pass
+    elif request.method == 'DELETE':
+        project.annotator.remove(user)
+
+    return Response(data=dict(message='提交成功'))

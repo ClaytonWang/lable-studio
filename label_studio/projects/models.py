@@ -37,10 +37,17 @@ TEMPLATE_TYPE = (
     ('conversational-generation', '对话生成'),
     ('', '其他'),
 )
+ANNOTATOR_GROUP = 'annotator'
 
 
 class ProjectManager(models.Manager):
     def for_user(self, user):
+        group = user.groups.all().first()
+        if group and group.name == ANNOTATOR_GROUP:
+            return self.filter(
+                organization=user.active_organization,
+                annotator=user
+            )
         return self.filter(organization=user.active_organization)
 
     COUNTER_FIELDS = [
@@ -239,6 +246,11 @@ class Project(ProjectMixin, models.Model):
     template_type = models.CharField(
         _('template_type'), max_length=50, blank=True, null=True, default='',
         # choices=TEMPLATE_TYPE
+    )
+    # 项目 用户权限关联
+    annotator = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="org_project",
+        default=None, null=True, blank=True
     )
 
     def __init__(self, *args, **kwargs):
