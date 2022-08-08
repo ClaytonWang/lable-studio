@@ -14,6 +14,18 @@ from django.conf import settings
 logger = logging.getLogger('db')
 
 
+def ml_backend_params(
+        data, labels=[], templates=[], return_num=None, extra={}
+):
+    return dict(
+        data=data,
+        labels=labels,
+        templates=templates,
+        return_nums=return_num,
+        extra=extra
+    )
+
+
 def ml_backend_url(host, version, uri: list = ('ml_backend',), **kwargs) -> \
         str:
     """
@@ -38,13 +50,32 @@ def ml_backend_request(
         params={}, data={}, _json={}
 ):
     """
-    {
-    "status": 0,
-    "errorInfo": "",
-    "data": {
-            "download": url
+    算法参数：
+        {
+            'labels':{0: '套餐', 1: '语音', 2: '流量', 3: '办理', 4: '否定', 5: '默认',  6: '肯定', 7: '不办理', 8: '返回主屏幕'}
+            'templates': ['[dlg]请生成[lb]相关回复', '[dlg]你可以咨询[lb]相关问题']
+            'return_nums': 3,
+            'data':[
+                {
+                    'task_id': 450,
+                    'dialogue': [
+                       {'text': '好的，请问您还有其他业务需要办理吗？', 'author': 'a'},
+                       {'text': '查套餐.查语音.查流量？', 'author': 'b'},
+                       {'text': '正在为您办理XXX业务，业务套餐为XXX元xxx分钟包含XX兆流量', 'author': 'a'},
+                       {'text': '您的XXX业务办理成功，请问您还有其他业务需要办理查询吗', 'author': 'b'},
+                    ]
+                }
+            ]
+        }
+    算法返回：
+        {
+            "status": 0,
+            "errorInfo": "",
+            "data": {
+                "download": url
             }
-    }
+        }
+
     :param host:
     :param uri:
     :param version:

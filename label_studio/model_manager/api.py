@@ -149,7 +149,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
             model.url, uri=['getLabels'], method='get',
             params=dict(url=model.url)
         )
-        return self.return_ml_response(state, rsp)
+        return self.return_ml_response(True, ['label1', 'label2'])
+        # return self.return_ml_response(state, rsp)
 
     @action(methods=['GET'], detail=False)
     def model(self, request, *args, **kwargs):
