@@ -15,6 +15,7 @@ import { Space } from "@/components/Space/Space";
 import { Modal } from "@/components/Modal/Modal";
 import { useAPI } from "@/providers/ApiProvider";
 import { Block, Elem } from "../../utils/bem";
+import "./ProjectList.less";
 
 export const ProjectsList = ({
   projects,
@@ -117,7 +118,7 @@ export const ProjectsList = ({
             rules={[
               {
                 required: true,
-                message: t("tip_please_complete", "请完整填写表单"),
+                message: t("placeholder_select_collection", "请选择集合"),
               },
             ]}
           >
@@ -208,14 +209,14 @@ const ProjectCard = ({ project, updateCollection }) => {
                       {t("Settings")}
                     </Menu.Item>
                     <Menu.Item href={`/projects/${project.id}/data?labeling=1`}>
-                      {t("Label", "手动标注")}
+                      {t("Labels", "Labels")}
                     </Menu.Item>
                     <Menu.Item
                       onClick={() => {
                         updateCollection(project);
                       }}
                     >
-                      {t("collection")}
+                      {t("label_collection", "集合")}
                     </Menu.Item>
                   </Menu>
                 )}
