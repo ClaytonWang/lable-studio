@@ -7,6 +7,7 @@ import { InstructionsSettings } from './InstructionsSettings';
 import { LabelingSettings } from './LabelingSettings';
 import { MachineLearningSettings } from './MachineLearningSettings/MachineLearningSettings';
 import { StorageSettings } from './StorageSettings/StorageSettings';
+import { RoleSetting } from './RoleSetting';
 
 
 export const MenuLayout = ({ children, ...routeProps }) => {
@@ -16,6 +17,7 @@ export const MenuLayout = ({ children, ...routeProps }) => {
         GeneralSettings,
         LabelingSettings,
         InstructionsSettings,
+        RoleSetting,
         MachineLearningSettings,
         StorageSettings,
         WebhookPage,
@@ -36,6 +38,7 @@ export const SettingsPage = {
   pages: {
     InstructionsSettings,
     LabelingSettings,
+    RoleSetting,
     MachineLearningSettings,
     StorageSettings,
     WebhookPage,
