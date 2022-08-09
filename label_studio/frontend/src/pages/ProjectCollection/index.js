@@ -201,6 +201,9 @@ export const ProjectCollection = () => {
                   required: true,
                   message: t("tip_please_complete", "请完整填写表单"),
                 },
+                {
+                  max: 20,
+                },
               ]}
             >
               <Input disabled={status === "delete"} />
