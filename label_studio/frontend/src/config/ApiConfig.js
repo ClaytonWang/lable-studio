@@ -4,6 +4,7 @@ export const API_CONFIG = {
   endpoints: {
     // Users
     users: "/users",
+    usersList:"GET:/users/all",
     me: "/current-user/whoami",
 
     // Organization
@@ -112,6 +113,7 @@ export const API_CONFIG = {
     createWebhook: "POST:/webhooks",
     deleteWebhook: "DELETE:/webhooks/:pk",
     webhooksInfo: "/webhooks/info",
+
   },
   alwaysExpectJSON: false,
 };
