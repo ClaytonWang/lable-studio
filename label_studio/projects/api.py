@@ -572,19 +572,25 @@ def project_set_user(request, pk):
     """
     from users.models import User
     data = request.data
-    user_id = data.get('user_id')
+    user_ids = data.get('user_ids', '').split(',')
+    user_ids = [int(item) for item in user_ids]
 
     project = Project.objects.filter(id=pk).first()
-    user = User.objects.filter(id=user_id).first()
-    if not project or not user:
+    users = User.objects.filter(id__in=user_ids).all()
+    if not project or not users:
         return Response(
             status=status.HTTP_400_BAD_REQUEST, data=dict(error='项目或是用户无效')
         )
 
-    if request.method == 'POST':
-        project.annotator.add(user)
-        pass
-    elif request.method == 'DELETE':
-        project.annotator.remove(user)
+    queryset = project.annotator.all()
+    exists_ids = [item.id for item in queryset]
+    remove_ids = list(set(exists_ids).difference(set(user_ids)))
+    wait_add_ids = list(set(user_ids).difference(set(exists_ids)))
+
+    for user in users:
+        if user.id in remove_ids:
+            project.annotator.remove(user)
+        elif user.id in wait_add_ids:
+            project.annotator.add(user)
 
     return Response(data=dict(message='提交成功'))
