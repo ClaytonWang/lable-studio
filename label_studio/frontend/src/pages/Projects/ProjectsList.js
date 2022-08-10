@@ -209,7 +209,7 @@ const ProjectCard = ({ project, updateCollection }) => {
                       {t("Settings")}
                     </Menu.Item>
                     <Menu.Item href={`/projects/${project.id}/data?labeling=1`}>
-                      {t("Labels", "Labels")}
+                      {t("Labels")}
                     </Menu.Item>
                     <Menu.Item
                       onClick={() => {

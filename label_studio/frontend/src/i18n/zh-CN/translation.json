@@ -409,5 +409,7 @@
   "help_prompt_template": "请输入提示学习模板,例:[dlg]你的心情很[mask]",
   "ceate_rightnow": "立即生成",
   "conversational-ai-response-generation.label_prediction": "生成对话(普通)",
-  "conversational-ai-response-generation.label_prompt": "生成对话(0样本)"
+  "conversational-ai-response-generation.label_prompt": "生成对话(0样本)",
+  "on_the_road": "人在环路",
+  "label_collection": "集合"
 }

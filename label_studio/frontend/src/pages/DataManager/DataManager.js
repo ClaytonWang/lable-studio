@@ -1,4 +1,4 @@
-import React,{ createRef, useCallback, useEffect, useRef,useState } from 'react';
+import React,{ createRef, useCallback, useEffect, useMemo,useRef, useState } from 'react';
 import { generatePath, useHistory } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import { Loading } from '../../components';
@@ -16,7 +16,8 @@ import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
 import ProjectStatus from './ProjectStatus';
-import DataOperate, { Clean, Prediction, Prompt } from './DataOperate';
+import DataOperate, { Clean, HumanInTheLoop, Prediction, Prompt } from './DataOperate';
+import { template } from '@/utils/util';
 import "./DataManager.styl";
 
 // 按钮相关操作
@@ -26,12 +27,14 @@ const { refs, showStatus, actions } = (() => {
     clean: createRef(),
     prompt: createRef(),
     prediction: createRef(),
+    human: createRef(),
   };
   const showStatus = (type) => refs.status.current?.status(type);
   const actions = {
     clean: () => refs.clean.current?.show(),
     prompt: () => refs.prompt.current?.show(),
     prediction: () => refs.prediction.current?.show(),
+    human: () => refs.human.current?.show(),
   };
 
   return { refs, actions, showStatus };
@@ -231,6 +234,7 @@ export const DataManagerPage = ({ ...props }) => {
           clean: () => refs.clean.current?.reload(),
         }}
       />
+      <HumanInTheLoop ref={refs.human} project={project} />
       <Block ref={root} name="datamanager"/>
     </>
 
@@ -246,6 +250,7 @@ DataManagerPage.context = ({ dmRef }) => {
   const location = useFixedLocation();
   const { project } = useProject();
   const [mode, setMode] = useState(dmRef?.mode ?? "explorer");
+  const projectClass = useMemo(() => template.class(project), [project]);
 
   const links = {
     '/settings': t("Settings"),
@@ -313,6 +318,18 @@ DataManagerPage.context = ({ dmRef }) => {
           {t("Instructions")}
         </Button>
       )}
+
+      {
+        projectClass === 'intent-classification-for-dialog' ? (
+          <Button
+            size="compact"
+            data-external
+            onClick={actions.human}
+          >
+            {t('on_the_road', '人在环路')}
+          </Button>
+        ) : null
+      }
 
       {Object.entries(links).map(([path, label]) => (
         <Button
