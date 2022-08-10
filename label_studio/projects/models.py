@@ -42,7 +42,7 @@ ANNOTATOR_GROUP = 'annotator'
 
 class ProjectManager(models.Manager):
     def for_user(self, user):
-        group = user.groups.all().first()
+        group = user.groups.first()
         if group and group.name == ANNOTATOR_GROUP:
             return self.filter(
                 organization=user.active_organization,

@@ -199,7 +199,10 @@ export const ProjectCollection = () => {
               rules={[
                 {
                   required: true,
-                  message: t("tip_please_complete", "请完整填写表单"),
+                  message: "集合名称不能为空",
+                },
+                {
+                  max: 20,
                 },
               ]}
             >
