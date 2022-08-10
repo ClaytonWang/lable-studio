@@ -133,9 +133,11 @@ def user_account(request):
             form.save()
             return redirect(reverse('user-account'))
 
+    group = user.groups.first()
     return render(request, 'users/user_account.html', {
         'settings': settings,
         'user': user,
         'user_profile_form': form,
-        'token': token
+        'token': token,
+        'group': group.name if group else None,
     })
