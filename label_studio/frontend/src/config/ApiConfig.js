@@ -30,6 +30,7 @@ export const API_CONFIG = {
     updateProject: "PATCH:/projects/:pk",
     createProject: "POST:/projects",
     deleteProject: "DELETE:/projects/:pk",
+    addProjectRole:"POST:/projects/:pk/user",
 
     // Project Collection
     collections: "/project-set",
