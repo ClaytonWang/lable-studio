@@ -42,13 +42,13 @@ ANNOTATOR_GROUP = 'annotator'
 
 class ProjectManager(models.Manager):
     def for_user(self, user):
-        group = user.groups.all().first()
+        group = user.groups.first()
+        query = self.filter(organization=user.active_organization)
         if group and group.name == ANNOTATOR_GROUP:
-            return self.filter(
-                organization=user.active_organization,
-                annotator=user
+            return query.filter(
+                Q(annotator=user) | Q(created_by=user)
             )
-        return self.filter(organization=user.active_organization)
+        return query
 
     COUNTER_FIELDS = [
         'task_number',

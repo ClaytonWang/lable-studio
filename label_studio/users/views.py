@@ -1,6 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
 import logging
+from unittest import case
 
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, reverse
@@ -116,7 +117,6 @@ def user_login(request):
         'next': next_page
     })
 
-
 @login_required
 def user_account(request):
     user = request.user
@@ -133,9 +133,17 @@ def user_account(request):
             form.save()
             return redirect(reverse('user-account'))
 
+    group_dic={
+        'admin':"管理员",
+        'user':'普通用户',
+        'annotator':'标注员'
+    }
+    group = user.groups.first()
+    group_disp = group_dic.get(group.name,'')
     return render(request, 'users/user_account.html', {
         'settings': settings,
         'user': user,
         'user_profile_form': form,
-        'token': token
+        'token': token,
+        'group': group_disp if group else None,
     })

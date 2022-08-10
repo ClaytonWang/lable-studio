@@ -155,3 +155,15 @@ class UpdateLastActivityMiddleware(CommonMiddleware):
         if hasattr(request, 'user') and request.method not in SAFE_METHODS:
             if request.user.is_authenticated:
                 request.user.update_last_activity()
+
+
+class SetGroupUIDMiddleware(CommonMiddleware):
+
+    def process_request(self, request):
+        if not hasattr(request.user, 'group'):
+            setattr(
+                request.user,
+                'group',
+                request.user.groups.first().name if request.user.groups.first()
+                else ''
+            )

@@ -140,6 +140,13 @@ class UserAPI(viewsets.ModelViewSet):
 
     @action(methods=['GET'], detail=False)
     def all(self, request, *args, **kwargs):
+        """
+        查询指定分组用户，且带出该用户分配的项目
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
         group = request.GET.dict().get('group')
         if not group:
             return Response(
@@ -147,9 +154,24 @@ class UserAPI(viewsets.ModelViewSet):
                 data=dict(error=f'必须指定角色')
             )
         queryset = User.objects.filter(
-            groups__name=group
-        ).values('id', 'email', 'username', 'first_name', 'last_name')
-        return Response(data=list(queryset))
+            groups__name=group,
+            active_organization=request.user.active_organization
+        ).values(
+            'id', 'email', 'username', 'first_name', 'last_name',
+            'org_project__id'
+        )
+        result = {}
+        for query in queryset:
+            u_id = query['id']
+            p_id = query.pop('org_project__id')
+            p_ids = [p_id] if p_id else []
+            if u_id not in result:
+                query['project_ids'] = p_ids
+            else:
+                query['project_ids'] = result[u_id]['project_ids'] + p_ids
+            result[u_id] = query
+
+        return Response(data=list(result.values()))
 
     @action(methods=['POST'], detail=False)
     def update_user_group(self, request):

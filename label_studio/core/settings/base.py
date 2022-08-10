@@ -196,6 +196,7 @@ INSTALLED_APPS = [
     'webhooks',
     'labels_manager',
     'model_manager',
+    'pms',
 ]
 
 MIDDLEWARE = [
@@ -213,6 +214,7 @@ MIDDLEWARE = [
     'core.middleware.CommonMiddleware',
     'django_user_agents.middleware.UserAgentMiddleware',
     'core.middleware.SetSessionUIDMiddleware',
+    'core.middleware.SetGroupUIDMiddleware',
     'core.middleware.ContextLogMiddleware',
     'core.middleware.DatabaseIsLockedRetryMiddleware',
     'core.current_request.ThreadLocalMiddleware',
