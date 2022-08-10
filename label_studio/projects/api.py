@@ -563,7 +563,7 @@ class ProjectModelVersions(generics.RetrieveAPIView):
         return Response(data=project.get_model_versions(with_counters=True))
 
 
-@api_view(['POST', 'DELETE'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def project_set_user(request, pk):
     """

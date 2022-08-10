@@ -196,6 +196,7 @@ INSTALLED_APPS = [
     'webhooks',
     'labels_manager',
     'model_manager',
+    'pms',
 ]
 
 MIDDLEWARE = [
