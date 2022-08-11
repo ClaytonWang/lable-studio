@@ -64,7 +64,6 @@ export const RoleSetting = () => {
       }
     });
 
-    console.log(ids);
     await api.callApi('addProjectRole', {
       params: {
         pk: project.id,
