@@ -3,6 +3,7 @@ import { template } from '@/utils/util';
 import Clean from './Clean';
 import Prediction from './Prediction';
 import Prompt from './Prompt';
+import HumanInTheLoop from './HumanInTheLoop';
 
 const Button = (props) => {
   return <button className="dm-button dm-button_size_medium dm-button_look_primary" {...props} />;
@@ -12,8 +13,8 @@ const DialogIntentOperate = ({ actions }) => {
   return (
     <>
       <Button onClick={actions.clean}>{t("label_clean")}</Button>
-      <Button onClick={actions.prompt}>{t("label_prompt")}</Button>
-      <Button onClick={actions.prediction}>{t("label_prediction")}</Button>
+      <Button onClick={actions.prompt}>{t.format("with_template", "label_prompt")}</Button>
+      <Button onClick={actions.prediction}>{t.format("with_template", "label_prediction")}</Button>
     </>
   );
 };
@@ -21,8 +22,8 @@ const DialogIntentOperate = ({ actions }) => {
 const ResponseGenerateOperate = ({ actions }) => {
   return (
     <>
-      <Button onClick={actions.prompt}>{t("label_prompt")}</Button>
-      <Button onClick={actions.prediction}>{t("label_prediction")}</Button>
+      <Button onClick={actions.prompt}>{t.format("with_template", "label_prompt")}</Button>
+      <Button onClick={actions.prediction}>{t.format("with_template", "label_prediction")}</Button>
     </>
   );
 };
@@ -47,5 +48,6 @@ export default DataOperate;
 export {
   Clean,
   Prediction,
-  Prompt
+  Prompt,
+  HumanInTheLoop
 };

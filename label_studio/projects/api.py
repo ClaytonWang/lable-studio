@@ -563,7 +563,7 @@ class ProjectModelVersions(generics.RetrieveAPIView):
         return Response(data=project.get_model_versions(with_counters=True))
 
 
-@api_view(['POST', 'DELETE'])
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def project_set_user(request, pk):
     """
@@ -573,13 +573,13 @@ def project_set_user(request, pk):
     from users.models import User
     data = request.data
     user_ids = data.get('user_ids', '').split(',')
-    user_ids = [int(item) for item in user_ids]
+    user_ids = [int(item) for item in user_ids if item]
 
     project = Project.objects.filter(id=pk).first()
     users = User.objects.filter(id__in=user_ids).all()
-    if not project or not users:
+    if not project:
         return Response(
-            status=status.HTTP_400_BAD_REQUEST, data=dict(error='项目或是用户无效')
+            status=status.HTTP_400_BAD_REQUEST, data=dict(error='项目无效')
         )
 
     queryset = project.annotator.all()
