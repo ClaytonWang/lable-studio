@@ -8,6 +8,7 @@
   > FileName   : algorithm_result.py
   > CreateTime : 2022/8/4 08:27
 """
+import json
 import logging
 from core.redis import redis_get
 from tasks.models import Prediction
@@ -21,47 +22,65 @@ from db_ml.services import update_prediction_data
 logger = logging.getLogger(__file__)
 
 """
-CELERY STATE
-PENDING  等待
-STARTED  开始
-SUCCESS  成功
-FAILURE  失败
-RETRY    重试
-REVOKED  撤销
+
 
 """
 
 
 def process_celery_result(key):
+    """
+    celery status
+    CELERY STATE
+    PENDING  等待
+    STARTED  开始
+    RETRY    重试
+
+    SUCCESS  成功
+
+    FAILURE  失败
+    REVOKED  撤销
+
+    :param key:
+    :return:
+    """
     k_result = redis_get(key)
+    k_result = json.loads(str(k_result, 'utf-8'))
     # 状态判断 不符合处理的状态丢弃
 
-    celery_task_id = k_result.get('task_id')
-    algorithm_type, project_id, task_id = split_project_and_task_id(
-        celery_task_id
-    )
+    logger.info(f'Redis message: {k_result}')
+    task_status = k_result.get('status')
 
+    if task_status in ('PENDING', 'STARTED', 'RETRY'):
+        return
+
+    if task_status in ('FAILURE', 'REVOKED'):
+        k_result['result'] = ''
+
+    algorithm_type, project_id, task_id = split_project_and_task_id(key)
     algorithm_result = k_result.get('result')
     if algorithm_type == 'prediction':
         insert_prediction_value(algorithm_result, project_id, task_id)
-        pass
     elif algorithm_type == 'prompt':
-        pass
+        inset_prompt_value(algorithm_result, project_id, task_id)
     elif algorithm_type == 'clean':
-        pass
+        insert_clean_value(algorithm_result, project_id, task_id)
     else:
         logger.info(f'Invalid algorithm_type: {algorithm_type}')
 
 
 def split_project_and_task_id(celery_task_id) -> list:
     """
-    celery-task-met-{_uuid}_{algorithm_type}_{project_id}_{task_id}'
+    celery-task-met_{uuid}_{algorithm_type}_{project_id}_{task_id}'
     :param celery_task_id:
     :return:
     """
-    algorithm_type, project_id, task_id = None, None, None
+    uuid, algorithm_type, project_id, task_id = None, None, None, None
     try:
-        _, algorithm_type, project_id, task_id = celery_task_id.split('-')
+        ids = celery_task_id.split('_')
+        if len(ids) == 5:
+            _, uuid, algorithm_type, project_id, task_id = ids
+        elif len(ids) == 4:
+            _, uuid, algorithm_type, project_id = ids
     except Exception as e:
         logger.warning(
             f'Redis receive celery id :{celery_task_id} \n exception msg:{e}'
@@ -74,14 +93,9 @@ def insert_prediction_value(algorithm_result, project_id, task_id):
     celery result
     {
         "status":"SUCCESS",
-        "result":{
-            "annotation":"aa",
-            "confidence":0.05
-        },
+        "result":["肯定", 0.42131],
         "traceback":null,
-        "children":[
-
-        ],
+        "children":[],
         "date_done":"2022-08-04T04:43:40.201419",
         "task_id":"uuid_test-460"
     }
@@ -99,8 +113,8 @@ def insert_prediction_value(algorithm_result, project_id, task_id):
         )
         return
 
-    annotation = algorithm_result.get('annotation', '')
-    confidence = algorithm_result.get('confidence', 0)
+    annotation = algorithm_result[0]
+    confidence = algorithm_result[1]
     pre_result = {
         'origin': 'prediction',
         'from_name': 'intent',

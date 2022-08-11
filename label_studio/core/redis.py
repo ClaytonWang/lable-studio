@@ -106,7 +106,7 @@ def start_job_async_or_sync(job, *args, **kwargs):
 class RedisSpaceListener(object):
     """
     """
-    def __init__(self, _redis, key_prefix='celery-task-meta-', db_index=0):
+    def __init__(self, _redis, key_prefix='celery-task-meta_', db_index=0):
         """
         """
         self.redis = _redis
@@ -114,23 +114,23 @@ class RedisSpaceListener(object):
         self.pubsub = None
         self.key_prefix = key_prefix
         self.db_index = db_index
+        self.monitor_key = f'__keyspace@{self.db_index}__:{self.key_prefix}*'
         self.subscribe()
 
     def subscribe(self):
         self.pubsub = self.redis.pubsub()
         # 订阅消息
-        self.pubsub.psubscribe(
-            f'__keyspace@{self.db_index}__:{self.key_prefix}*'
-        )
+        self.pubsub.psubscribe(self.monitor_key)
 
     def start(self):
-        print('Redis listening thread ....')
+        print(f'Redis listening thread .... key: {self.monitor_key}')
         self._thread = t = threading.Thread(target=self._monitor)
         t.setDaemon(False)
         t.start()
 
     def _monitor(self):
         """
+        celery
         """
         from db_ml.listener_result import process_celery_result
         while True:
@@ -139,8 +139,12 @@ class RedisSpaceListener(object):
                 if message.get('type') != 'pmessage':
                     continue
 
-                key = str(message.get('channel', b''), 'utf-8')
-                process_celery_result(key)
+                channel = str(message.get('channel', b''), 'utf-8')
+                try:
+                    key_space, key = channel.split('__:')
+                    process_celery_result(key)
+                except Exception as e:
+                    logger.error(f'Redis monitor error: {e}')
             else:
                 time.sleep(0.1)
 
