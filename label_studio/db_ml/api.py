@@ -239,21 +239,24 @@ def prediction(request):
             ))
 
         project = query.first().project
+        state, result = None, None
         if project.template_type == 'intent-dialog':
             state, result = predict_prompt(
                project_id, model_id, task_data, _uuid
             )
-            if not state:
-                return Response(
-                    status=status.HTTP_400_BAD_REQUEST,
-                    data=dict(message=result))
         elif project.template_type == 'conversational-generation':
             # 对话生产
             generate_count = data.get('generate_count')
-            pass
-
+            state, result = predict_prompt(
+                project_id, model_id, task_data, _uuid,
+                return_num=generate_count,
+            )
+        if not state:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=dict(message=result)
+            )
         redis_set_json(redis_key, redis_state)
-
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
 

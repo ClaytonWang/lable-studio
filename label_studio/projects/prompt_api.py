@@ -106,20 +106,26 @@ class PromptLearning(APIView):
                     dialogue=dialogue
                 ))
 
+            state, result = None, None
             project = Project.objects.filter(id=project_id).first()
             if project.template_type == 'intent-dialog':
                 state, result = predict_prompt(
                     project_id, model_id, task_data, _uuid, templates
                 )
-                if state:
-                    result = {'status': 0, 'error': ''}
-                    resp_status = status.HTTP_200_OK
-                else:
-                    result = {'status': 1, 'error': result}
-                    resp_status = status.HTTP_400_BAD_REQUEST
             elif project.template_type == 'conversational-generation':
                 # 对话生产
                 generate_count = params.get('generate_count')
+                state, result = predict_prompt(
+                    project_id, model_id, task_data, _uuid, templates,
+                    return_num=generate_count,
+                )
+
+            if state:
+                result = {'status': 0, 'error': ''}
+                resp_status = status.HTTP_200_OK
+            else:
+                result = {'status': 1, 'error': result}
+                resp_status = status.HTTP_400_BAD_REQUEST
 
             redis_set_json(redis_key, redis_state)
         except Exception as e:
