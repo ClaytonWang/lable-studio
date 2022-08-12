@@ -231,7 +231,7 @@ def predict_prompt(
     :return:
     """
     model = ModelManager.objects.filter(id=model_id).first()
-    _params = dict(uuid=_uuid)
+    _params = dict()
     _json = ml_backend_params(
         data=task_data,
         labels=gate_project_labels(project_id),
@@ -240,7 +240,8 @@ def predict_prompt(
     )
 
     return ml_backend_request(
-        model.url, uri=['ml_backend', 'predict'], params=_params, _json=_json
+        model.url, uri=['ml_backend', 'predict', _uuid], params=_params,
+        _json=_json
     )
 
 

@@ -237,7 +237,7 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id):
 
 def insert_clean_value(algorithm_result, project_id, task_id):
     """
-    "result":[
+    "result":
          {
             'task_id': 450,
             'dialogue': [
@@ -247,17 +247,15 @@ def insert_clean_value(algorithm_result, project_id, task_id):
                    {'text': '您的XXX业务办理成功，请问您还有其他业务需要办理查询吗', 'author': 'b'},
              ]
          }
-    ]
+
 
     :param algorithm_result:
     :param project_id:
     :param task_id:
     :return:
     """
-    dialogue = algorithm_result[0].get('dialogue', []) \
-        if len(algorithm_result) else []
+    dialogue = algorithm_result.get('dialogue', [])
     try:
-
         redis_key = generate_redis_key('clean', project_id)
         p_state = redis_get_json(redis_key)
         if p_state and p_state.get('state') == AlgorithmState.ONGOING:
