@@ -15,13 +15,14 @@ logger = logging.getLogger('db')
 
 
 def ml_backend_params(
-        data, labels=[], templates=[], return_num=None, extra={}
+        data, labels=[], templates=[], extra={}
 ):
-    return dict(
-        data=data,
+    extra.update(**dict(
         labels=labels,
         templates=templates,
-        return_nums=return_num,
+    ))
+    return dict(
+        data=data,
         extra=extra
     )
 

@@ -217,7 +217,7 @@ def generate_uuid(algorithm_type, project_id):
 
 
 def predict_prompt(
-        project_id, model_id, task_data, _uuid, template=[]
+        project_id, model_id, task_data, _uuid, template=[], return_num=0
 ):
     """
     预标注（普通）
@@ -227,18 +227,21 @@ def predict_prompt(
     :param task_data:
     :param template:
     :param _uuid:
+    :param return_num:
     :return:
     """
     model = ModelManager.objects.filter(id=model_id).first()
-    _params = dict(uuid=_uuid)
+    _params = dict()
     _json = ml_backend_params(
         data=task_data,
         labels=gate_project_labels(project_id),
         templates=template,
+        extra=dict(return_num=return_num)
     )
 
     return ml_backend_request(
-        model.url, uri=['ml_backend', 'predict'], params=_params, _json=_json
+        model.url, uri=['ml_backend', 'predict', _uuid], params=_params,
+        _json=_json
     )
 
 
