@@ -72,24 +72,23 @@ const IntentResponse = ({ close, execLabel }) => {
   }, []);
 
   const saveConfig = useCallback(async () => {
-    // const res = await api.callApi("updateProjectRaw", {
-    //   params: {
-    //     pk: project.id,
-    //   },
-    //   body: {
-    //     label_config: config,
-    //   },
-    // });
+    const res = await api.callApi("updateProjectRaw", {
+      params: {
+        pk: project.id,
+      },
+      body: {
+        label_config: config,
+      },
+    });
 
-    // if (res.ok) {
-    //   execLabel(execModel);
-    //   close();
-    //   return true;
-    // }
-    execLabel({ model_id:execModel });
-    // const error = await res.json();
+    if (res.ok) {
+      execLabel({ model_id:execModel });
+      close();
+      return true;
+    }
+    const error = await res.json();
 
-    // return error;
+    return error;
   }, [project, config,execModel]);
 
   const exec = () => {
