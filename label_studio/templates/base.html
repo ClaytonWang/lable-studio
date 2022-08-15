@@ -94,6 +94,8 @@
       lastName: "{{user.last_name}}",
       initials: "{{user.get_initials}}",
       group: "{{user.group}}",
+      page: JSON.parse("{{user.page|escapejs}}"),
+      button: JSON.parse("{{user.button|escapejs}}"),
       email: "{{user.email}}",
       orgnazition:{
         title:"{{user.active_organization.title}}",

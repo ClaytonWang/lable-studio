@@ -582,15 +582,13 @@ def project_set_user(request, pk):
             status=status.HTTP_400_BAD_REQUEST, data=dict(error='项目无效')
         )
 
-    queryset = project.annotator.all()
-    exists_ids = [item.id for item in queryset]
-    remove_ids = list(set(exists_ids).difference(set(user_ids)))
-    wait_add_ids = list(set(user_ids).difference(set(exists_ids)))
+    exists_user = project.annotator.all()
+    remove_users = list(set(exists_user).difference(set(users)))
+    wait_add_users = list(set(users).difference(set(exists_user)))
 
-    for user in users:
-        if user.id in remove_ids:
-            project.annotator.remove(user)
-        elif user.id in wait_add_ids:
-            project.annotator.add(user)
+    for r_user in remove_users:
+        project.annotator.remove(r_user)
+    for a_user in wait_add_users:
+        project.annotator.add(a_user)
 
     return Response(data=dict(message='提交成功'))

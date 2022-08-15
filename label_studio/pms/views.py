@@ -156,15 +156,8 @@ def user_info(request):
     pms = query_pms.values('name', 'title', 'code')
     acs = user_access(user)
     buttons = get_user_btn(user)
-    buttons_code = dict()
-    # for page_code, _btn in buttons.items():
-    #     buttons_code[page_code] = [item['code'] for item in _btn]
-
-    for item in query_pms:
-        if item.code not in buttons_code:
-            buttons_code[item.code] = []
 
     results['group'] = acs
     results['page'] = pms
-    results['buttons'] = buttons
+    results['button'] = buttons
     return Response(data=results)
