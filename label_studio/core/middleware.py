@@ -14,6 +14,9 @@ from django.conf import settings
 from django.utils.http import escape_leading_slashes
 from rest_framework.permissions import SAFE_METHODS
 from core.utils.contextlog import ContextLog
+from pms.models import PmsPage
+from pms.services import user_group_query
+from pms.services import get_user_btn
 
 
 def enforce_csrf_checks(func):
@@ -167,3 +170,13 @@ class SetGroupUIDMiddleware(CommonMiddleware):
                 request.user.groups.first().name if request.user.groups.first()
                 else ''
             )
+
+        if not hasattr(request.user, 'page') or not hasattr(request.user, 'button'):
+            query_pms = user_group_query(request.user, PmsPage)
+            pms = query_pms.values('name', 'title', 'code')
+            button = get_user_btn(request.user)
+
+            setattr(request.user, 'page', json.dumps(list(pms), ensure_ascii=False))
+            setattr(request.user, 'button', json.dumps(button, ensure_ascii=False))
+
+            pass

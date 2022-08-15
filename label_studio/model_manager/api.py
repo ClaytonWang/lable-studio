@@ -134,7 +134,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
                 data=dict(error="Invalid ID")
             )
         # 测试
-        return Response(data={"download": url})
+        # return Response(data={"download": url})
         # 调用算法服务
         state, rsp = ml_backend_request(
             url, ['ml_backend', 'export'], method='get',
@@ -145,12 +145,12 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
     @action(methods=['GET'], detail=False)
     def label(self, request, *args, **kwargs):
         model = self.get_model(request)
+        # return self.return_ml_response(True, ['label1', 'label2'])
         state, rsp = ml_backend_request(
             model.url, uri=['getLabels'], method='get',
             params=dict(url=model.url)
         )
-        return self.return_ml_response(True, ['label1', 'label2'])
-        # return self.return_ml_response(state, rsp)
+        return self.return_ml_response(state, rsp)
 
     @action(methods=['GET'], detail=False)
     def model(self, request, *args, **kwargs):
