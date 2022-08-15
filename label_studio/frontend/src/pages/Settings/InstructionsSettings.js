@@ -36,7 +36,7 @@ export const InstructionsSettings = () => {
 
         <Form.Actions>
           <Form.Indicator>
-            <span case="success">{t("Saved!")}</span>
+            <span case="success">{t("Saved!", "已保存!")}</span>
           </Form.Indicator>
           <Button type="submit" look="primary" style={{ width: 120 }}>{t("Save")}</Button>
         </Form.Actions>
