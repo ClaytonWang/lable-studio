@@ -20,7 +20,7 @@ const IntentResponse = ({ close, execLabel }) => {
   const { project } = useProject();
   const [template, setCurrentTemplate] = useState(null);
   const [config, _setConfig] = React.useState("");
-  const [execModel, setExecModel] = React.useState("");
+  const [execModel, setExecModel] = React.useState(localStorage.getItem('selectedTrainModel'));
   const [execModelList, setExecModelList] = React.useState([]);
   const [modelLabels, setModelLabels] = React.useState([]);
   const api = useAPI();
@@ -82,11 +82,10 @@ const IntentResponse = ({ close, execLabel }) => {
     });
 
     if (res.ok) {
-      execLabel(execModel);
+      execLabel({ model_id:execModel });
       close();
       return true;
     }
-
     const error = await res.json();
 
     return error;
