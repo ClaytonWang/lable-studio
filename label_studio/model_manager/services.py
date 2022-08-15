@@ -27,7 +27,7 @@ def ml_backend_params(
     )
 
 
-def ml_backend_url(host, version, uri: list = ('ml_backend',), **kwargs) -> \
+def ml_backend_url(host, version, uri: list = [], **kwargs) -> \
         str:
     """
     拼接ml backend请求链接
@@ -87,9 +87,7 @@ def ml_backend_request(
     :return:
     """
     ml_url = ml_backend_url(host, uri=uri, version=version)
-    logger.info(
-        'ML Request url:, ', ml_url, '\nparams:', params, '\ndata:', data
-    )
+    logger.info(f'ML Request url:, {ml_url}\nparams: {params}\ndata:{data}')
     session = getattr(requests, method)
     response = session(url=ml_url, params=params, data=data, json=_json)
     rsp_data = response.json()

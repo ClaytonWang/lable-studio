@@ -240,8 +240,8 @@ def predict_prompt(
     )
 
     return ml_backend_request(
-        model.url, uri=['ml_backend', 'predict', _uuid], params=_params,
-        _json=_json
+        model.url, uri=['predict', _uuid], params=_params,
+        _json=_json, method="post"
     )
 
 
@@ -264,5 +264,6 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
         )
     )
     return ml_backend_request(
-        first_url, uri=['ml_backend', 'preprocess'], params=_params, _json=_json
+        first_url, uri=['preprocess'], params=_params, _json=_json,
+        method='post',
     )
