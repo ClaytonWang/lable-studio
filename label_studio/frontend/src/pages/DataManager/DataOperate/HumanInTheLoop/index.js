@@ -35,10 +35,10 @@ export default forwardRef(({ project }, ref) => {
   }, [setType]);
 
   // TEMP
-  useEffect(() => {
-    modalRef.current?.show();
-    setType("train");
-  }, []);
+  // useEffect(() => {
+  //   modalRef.current?.show();
+  //   setType("train");
+  // }, []);
 
   console.log(type);
 
