@@ -163,6 +163,10 @@ class UpdateLastActivityMiddleware(CommonMiddleware):
 class SetGroupUIDMiddleware(CommonMiddleware):
 
     def process_request(self, request):
+
+        if request.user.is_anonymous:
+            return
+
         if not hasattr(request.user, 'group'):
             setattr(
                 request.user,
