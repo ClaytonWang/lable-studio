@@ -137,7 +137,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         # return Response(data={"download": url})
         # 调用算法服务
         state, rsp = ml_backend_request(
-            url, ['ml_backend', 'export'], method='get',
+            url, ['export'], method='get',
             params=dict(url=url)
         )
         return self.return_ml_response(state, rsp)
