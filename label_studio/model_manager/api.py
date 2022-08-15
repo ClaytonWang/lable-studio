@@ -148,7 +148,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         # return self.return_ml_response(True, ['label1', 'label2'])
         state, rsp = ml_backend_request(
             model.url, uri=['getLabels'], method='get',
-            params=dict(url=model.url)
+            # params=dict(url=model.url)
         )
         return self.return_ml_response(state, rsp)
 
