@@ -85,6 +85,42 @@ def is_admin(groups):
     return False
 
 
+def user_group_no_auth(user, model):
+    _query = model.objects.all()
+    groups = user.groups.all()
+
+    #
+    if is_admin(groups=groups):
+        return []
+
+    query = _query.filter(~Q(user=user) & ~Q(group__in=groups))
+    return query
+
+
+def user_btn_no_auth(user):
+    """
+
+    :param access:
+    :param user:
+    :return:
+    """
+    query_btn = user_group_no_auth(user, PmsButton)
+    if not query_btn:
+        return dict()
+
+    query_vls = query_btn.values('name', 'code', 'page__code').all()
+    results = dict()
+    for item in query_vls:
+        page_code = item.pop('page__code')
+        if page_code in results:
+            btn = results[page_code]
+            btn.append(item)
+            results[page_code] = btn
+        else:
+            results[page_code] = [item]
+    return results
+
+
 def user_group_query(user, pms_model, pms_type='all'):
     """
     pms_model   PmsButton or PmsPage

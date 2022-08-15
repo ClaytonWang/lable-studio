@@ -150,6 +150,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
             model.url, uri=['getLabels'], method='get',
             # params=dict(url=model.url)
         )
+        if state:
+            return Response(data=rsp.values())
         return self.return_ml_response(state, rsp)
 
     @action(methods=['GET'], detail=False)
