@@ -109,7 +109,7 @@
   "HTML": "网页",
   "Time Series": "时间文件",
   "Common Formats": "常见格式",
-  "Saved!": "已保存",
+  "Saved!": "已保存!",
   "Validate and Save": "校验并保存",
   "Add Storage": "添加存储",
   "save_to_cloud_tip": "将完成的数据保存到Amazon S3，Google Cloud，Microsoft Azure或Redis。",

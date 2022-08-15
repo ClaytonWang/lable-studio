@@ -14,6 +14,7 @@ export const RoleSetting = () => {
   const [currentPageSize] = usePageSize('page_size', 30);
   const [totalItems, setTotalItems] = useState(0);
   const { project } = useContext(ProjectContext);
+  const [waiting, setWaiting] = useState(false);
 
   const fetchUsers = useCallback(async (page, pageSize) => {
     const response = await api.callApi('usersList', {
@@ -26,13 +27,13 @@ export const RoleSetting = () => {
 
     if (response) {
       response.map((user) => {
-        user.hasRole = user.project_ids.includes(project.id);
+        user.hasRole = user.project_ids.includes(parseInt(project.id));
         return user;
       });
       setUsersList(response);
       setTotalItems(response.length);
     }
-  }, [api]);
+  }, [project]);
 
   const setRole = useCallback((user_id) => {
     const list = usersList.map(u => {
@@ -63,7 +64,7 @@ export const RoleSetting = () => {
         ids.push(v.id);
       }
     });
-
+    setWaiting(true);
     await api.callApi('addProjectRole', {
       params: {
         pk: project.id,
@@ -72,11 +73,12 @@ export const RoleSetting = () => {
         user_ids: ids.join(","),
       },
     });
+    setWaiting(false);
   }, [usersList]);
 
   useEffect(() => {
     fetchUsers(currentPage, currentPageSize);
-  }, []);
+  }, [project]);
 
   return (
     <>
@@ -123,7 +125,10 @@ export const RoleSetting = () => {
             </Elem>
           )}
         </Elem>
-        <Button look="primary" style={{ float: 'right', width: 100, marginTop: 20 }} onClick={saveConfig}>{t("Save")}</Button>
+        <div style={{ float: 'right', marginTop: 20 ,display:'flex' }}>
+          { waiting && <span style={{ marginTop:10,color:'green' }}>{t("Saved!", "已保存!")}</span>}
+          <Button look="primary" style={{ width:100 }} onClick={saveConfig} waiting={waiting}>{t("Save")}</Button>
+        </div>
         <Pagination
           page={currentPage}
           urlParamName="page"
