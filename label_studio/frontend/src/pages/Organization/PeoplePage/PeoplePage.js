@@ -274,9 +274,13 @@ export const PeoplePage = () => {
             <Button icon={<LsPlus />} primary onClick={showInvitationModal}>
               {t("Add People", "添加用户")}
             </Button>
-            <Button icon={<SwapOutlined rotate={90} />} primary onClick={changeOrganization}>
-              {t("Change Organization", "切换组织")}
-            </Button>
+            {
+              !Object.keys(APP_SETTINGS.user.button).includes("001") && (
+                <Button icon={<SwapOutlined rotate={90} />} primary onClick={changeOrganization}>
+                  {t("Change Organization", "切换组织")}
+                </Button>
+              )
+            }
           </Space>
         </Space>
       </Elem>
