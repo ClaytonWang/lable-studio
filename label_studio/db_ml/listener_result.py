@@ -11,6 +11,7 @@
 import json
 import logging
 from core.redis import redis_get
+from projects.models import Project
 from tasks.models import Prediction
 from tasks.models import TaskDbAlgorithm
 from projects.models import PromptResult
@@ -67,16 +68,22 @@ def process_celery_result(key):
         return
 
     algorithm_result = k_result.get('result')
-    if algorithm_type == 'prediction-intent':
-        data = get_prediction_intent_df(algorithm_result, task_id)
-        insert_prediction_value(data, project_id, task_id)
-    elif algorithm_type == 'prediction-generate':
-        data = get_prediction_generate_df(algorithm_result, task_id)
-        insert_prediction_value(data, project_id, task_id)
-    elif algorithm_type == 'prompt-intent':
-        insert_prompt_intent_value(algorithm_result, project_id, task_id)
-    elif algorithm_type == 'prompt-generate':
-        insert_prompt_generate_value()
+    project = Project.objects.filter(id=project_id).first()
+    if not project:
+        logger.info(f'Invalid project id : {project_id}')
+        return
+    if project.template_type == 'intent-dialog':
+        if algorithm_type == 'prediction':
+            data = get_prediction_intent_df(algorithm_result, task_id)
+            insert_prediction_value(data, project_id, task_id)
+        elif algorithm_type == 'prompt':
+            insert_prompt_intent_value(algorithm_result, project_id, task_id)
+    elif project.template_type == 'conversational-generation':
+        if algorithm_type == 'prediction':
+            data = get_prediction_generate_df(algorithm_result, task_id)
+            insert_prediction_value(data, project_id, task_id)
+        elif algorithm_type == 'prompt':
+            insert_prompt_generate_value()
     elif algorithm_type == 'clean':
         insert_clean_value(algorithm_result, project_id, task_id)
     else:
@@ -89,13 +96,14 @@ def split_project_and_task_id(celery_task_id) -> list:
     :param celery_task_id:
     :return:
     """
+    "celery-task-meta-d648d0ea-469b-4eff-96d4-529920fec100_prediction_83_811"
     uuid, algorithm_type, project_id, task_id = None, None, None, None
     try:
         ids = celery_task_id.split('_')
-        if len(ids) == 5:
-            _, uuid, algorithm_type, project_id, task_id = ids
-        elif len(ids) == 4:
-            _, uuid, algorithm_type, project_id = ids
+        if len(ids) == 4:
+            _, algorithm_type, project_id, task_id = ids
+        elif len(ids) == 3:
+            _, algorithm_type, project_id = ids
     except Exception as e:
         logger.warning(
             f'Redis receive celery id :{celery_task_id} \n exception msg:{e}'
@@ -126,7 +134,7 @@ def insert_prediction_value(data, project_id, task_id):
     p_state = redis_get_json(redis_key)
     if p_state and p_state.get('state') == AlgorithmState.ONGOING:
         obj, is_created = Prediction.objects.update_or_create(
-            defaults=tag_data, task=task_id
+            defaults=tag_data, task_id=task_id
         )
         redis_update_finish_state(redis_key, p_state)
         print('obj:', obj.id, ' is_ created:', is_created)
@@ -145,7 +153,7 @@ def get_prediction_intent_df(algorithm_result, task_id):
         },
     }
     tag_data = dict(
-        task=task_id,
+        task_id=task_id,
         result=[pre_result],
         score=round(confidence, 4),
 
