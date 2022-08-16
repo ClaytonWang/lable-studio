@@ -90,10 +90,13 @@ def ml_backend_request(
     logger.info(f'ML Request url:, {ml_url} {method} \nparams: {params}\ndata:{data}')
     session = getattr(requests, method)
     response = session(url=ml_url, params=params, data=data, json=_json)
-    rsp_data = response.json()
-    logger.info('ML response: ', rsp_data)
-    rsp_state = rsp_data.get('status')
-    if rsp_state == 0:
-        return True, rsp_data.get('data', '')
+    if response.status_code == 200:
+        rsp_data = response.json()
+        logger.info('ML response: ', rsp_data)
+        rsp_state = rsp_data.get('status')
+        if rsp_state == 0:
+            return True, rsp_data.get('data', '')
+        else:
+            return False, rsp_data.get('errorInfo')
     else:
-        return False, rsp_data.get('errorInfo')
+        return False, response.text

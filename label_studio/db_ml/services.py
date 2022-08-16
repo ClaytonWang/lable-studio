@@ -289,7 +289,8 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
     urls = [model_data[_id] for _id in model_ids]
     first_url = urls.pop(0)
 
-    _params = dict(uuid=_uuid)
+    # _params = dict(uuid=_uuid)
+    _params = {}
     _json = ml_backend_params(
         data=task_data,
         labels=get_project_labels(project_id),
