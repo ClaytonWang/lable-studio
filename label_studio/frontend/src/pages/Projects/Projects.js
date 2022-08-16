@@ -14,6 +14,7 @@ import { DataManagerPage } from "../DataManager/DataManager";
 import { SettingsPage } from "../Settings";
 import "./Projects.styl";
 import { EmptyProjectsList, ProjectsList } from "./ProjectsList";
+import { useConfig } from "@/providers/ConfigProvider";
 
 const getCurrentPage = () => {
   const pageNumberFromURL = new URLSearchParams(location.search).get("page");
@@ -23,6 +24,7 @@ const getCurrentPage = () => {
 
 export const ProjectsPage = () => {
   const api = React.useContext(ApiContext);
+  const config = useConfig();
   const [projectsList, setProjectsList] = React.useState([]);
   const [networkState, setNetworkState] = React.useState(null);
   const [currentPage, setCurrentPage] = useState(getCurrentPage());
@@ -90,6 +92,7 @@ export const ProjectsPage = () => {
       openModal,
       showButton: projectsList.length > 0,
       gotoCollection,
+      config,
     });
   }, [projectsList.length]);
 
@@ -159,13 +162,17 @@ ProjectsPage.routes = ({ store }) => [
     },
   },
 ];
-ProjectsPage.context = ({ openModal, showButton, gotoCollection }) => {
+ProjectsPage.context = ({ openModal, showButton, gotoCollection,config }) => {
   if (!showButton) return null;
   return (
     <Space>
-      <Button onClick={gotoCollection} look="primary" size="compact">
-        {t("Project collection", "项目集合设置")}
-      </Button>
+      {
+        !Object.keys(config.user.button).includes("004")&&(
+          <Button onClick={gotoCollection} look="primary" size="compact">
+            {t("Project collection", "项目集合设置")}
+          </Button>
+        )
+      }
       <Button onClick={openModal} look="primary" size="compact">
         {t("Insert", "新增")}
       </Button>

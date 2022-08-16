@@ -37,6 +37,7 @@ const groupName = (name) => {
 };
 
 const InvitationModal = (props) => {
+  const config = useConfig();
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
   const [form] = Form.useForm();
@@ -79,7 +80,7 @@ const InvitationModal = (props) => {
                 let organization_id = form.getFieldValue('organization_id');
 
                 if (!organization_id) {
-                  organization_id = APP_SETTINGS.user.orgnazition.id;
+                  organization_id = config.user.orgnazition.id;
                 }
 
                 onUpdate({
@@ -275,7 +276,7 @@ export const PeoplePage = () => {
               {t("Add People", "添加用户")}
             </Button>
             {
-              !Object.keys(APP_SETTINGS.user.button).includes("001") && (
+              !Object.keys(config.user.button).includes("001") && (
                 <Button icon={<SwapOutlined rotate={90} />} primary onClick={changeOrganization}>
                   {t("Change Organization", "切换组织")}
                 </Button>
