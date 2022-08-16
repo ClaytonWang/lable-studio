@@ -15,6 +15,7 @@ import { isDefined } from '../../utils/helpers';
 import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
+import { useConfig } from "@/providers/ConfigProvider";
 import ProjectStatus from './ProjectStatus';
 import DataOperate, { Clean, HumanInTheLoop, Prediction, Prompt } from './DataOperate';
 import { template } from '@/utils/util';
@@ -23,7 +24,7 @@ import "./DataManager.styl";
 // 按钮相关操作
 const { refs, showStatus, actions } = (() => {
   const refs = {
-    status: createRef(), 
+    status: createRef(),
     clean: createRef(),
     prompt: createRef(),
     prediction: createRef(),
@@ -247,6 +248,7 @@ DataManagerPage.pages = {
   ImportModal,
 };
 DataManagerPage.context = ({ dmRef }) => {
+  const config = useConfig();
   const location = useFixedLocation();
   const { project } = useProject();
   const [mode, setMode] = useState(dmRef?.mode ?? "explorer");
@@ -320,15 +322,16 @@ DataManagerPage.context = ({ dmRef }) => {
       )}
 
       {
-        projectClass === 'intent-classification-for-dialog' ? (
-          <Button
-            size="compact"
-            data-external
-            onClick={actions.human}
-          >
-            {t('on_the_road', '人在环路')}
-          </Button>
-        ) : null
+        projectClass === 'intent-classification-for-dialog'
+        && !Object.keys(config.user.button).includes("002") ? (
+            <Button
+              size="compact"
+              data-external
+              onClick={actions.human}
+            >
+              {t('on_the_road', '人在环路')}
+            </Button>
+          ) : null
       }
 
       {Object.entries(links).map(([path, label]) => (
