@@ -106,7 +106,7 @@ def start_job_async_or_sync(job, *args, **kwargs):
 class RedisSpaceListener(object):
     """
     """
-    def __init__(self, _redis, key_prefix='celery-task-meta_', db_index=0):
+    def __init__(self, _redis, key_prefix='celery-task-meta-', db_index=0):
         """
         """
         self.redis = _redis
