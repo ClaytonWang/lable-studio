@@ -17,6 +17,7 @@ from tasks.models import Prediction, PredictionDraft
 from tasks.models import TaskDbAlgorithm, TaskDbAlgorithmDraft
 from projects.models import PromptResultDraft, PromptResult
 from projects.models import ProjectSummary
+from projects.models import Project
 from model_manager.services import ml_backend_request
 from model_manager.models import ModelManager
 from model_manager.services import ml_backend_params
@@ -197,18 +198,29 @@ def get_choice_values(result):
     return choices
 
 
-def gate_project_labels(project_id):
-    summary = ProjectSummary.objects.filter(project_id=project_id).first()
-
+def get_project_labels(project_id):
+    project = Project.objects.filter(id=project_id).first()
     labels = []
-    for k in summary.created_annotations:
-        for item in k.split('|'):
-            vls = summary.created_labels.get(item)
-            if not vls:
-                continue
-            labels += list(vls.keys())
+    if project and project.parsed_label_config:
+        parsed_label_config = project.parsed_label_config
+        intent = parsed_label_config.get('intent', {})
+        labels = intent.get('labels', {})
+        if isinstance(labels, list):
+            return labels
+        elif isinstance(labels, dict):
+            return list(labels.keys())
+    return labels
 
-    return {index: value for index, value in enumerate(labels)}
+    # summary = ProjectSummary.objects.filter(project_id=project_id).first()
+    # labels = []
+    # for k in summary.created_annotations:
+    #     for item in k.split('|'):
+    #         vls = summary.created_labels.get(item)
+    #         if not vls:
+    #             continue
+    #         labels += list(vls.keys())
+    #
+    # return {index: value for index, value in enumerate(labels)}
 
 
 def generate_uuid(algorithm_type, project_id):
@@ -217,7 +229,8 @@ def generate_uuid(algorithm_type, project_id):
 
 
 def predict_prompt(
-        project_id, model_id, task_data, _uuid, template=[], return_num=0
+        project_id, model_id, task_data, _uuid, template=[], return_num=0,
+        prompt_type=None
 ):
     """
     预标注（普通）
@@ -228,13 +241,20 @@ def predict_prompt(
     :param template:
     :param _uuid:
     :param return_num:
+    :param prompt_type:
     :return:
     """
-    model = ModelManager.objects.filter(id=model_id).first()
+
+    if prompt_type == 'intent-dialog':
+        model = ModelManager.objects.filter(token='101469da9d088219').first()
+    elif prompt_type == 'conversational-generation':
+        model = ModelManager.objects.filter(token='9e72f8c5aa27811d').first()
+    else:
+        model = ModelManager.objects.filter(id=model_id).first()
     _params = dict()
     _json = ml_backend_params(
         data=task_data,
-        labels=gate_project_labels(project_id),
+        labels=get_project_labels(project_id),
         templates=template,
         extra=dict(return_num=return_num)
     )
@@ -246,8 +266,22 @@ def predict_prompt(
 
 
 def preprocess_clean(project_id, model_ids, task_data, _uuid):
-    model_query = ModelManager.objects.filter(id__in=model_ids).values(
-        'id', 'url', 'title')
+    if model_ids:
+        model_query = ModelManager.objects.filter(id__in=model_ids).values(
+            'id', 'url', 'title')
+    else:
+        tokens = ['130a104f9fd7d257', '71da5487bb41d24c', '5c69636f596635f3']
+        model_query = ModelManager.objects.filter(
+            token__in=tokens
+        ).values('id', 'url', 'title', 'token')
+        model_ids = []
+        for token in tokens:
+            for model in model_query:
+                if token != model['token']:
+                    continue
+                model_ids.append(model['id'])
+                break
+
     if len(model_ids) != len(model_query):
         return False, f'{str(model_ids)}模型没有查询到模型'
 
@@ -258,12 +292,12 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
     _params = dict(uuid=_uuid)
     _json = ml_backend_params(
         data=task_data,
-        labels=gate_project_labels(project_id),
+        labels=get_project_labels(project_id),
         extra=dict(
-            sequence=urls
+            pipelines=urls
         )
     )
     return ml_backend_request(
-        first_url, uri=['preprocess'], params=_params, _json=_json,
+        first_url, uri=['pipeline', _uuid], params=_params, _json=_json,
         method='post',
     )

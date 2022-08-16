@@ -23,6 +23,7 @@ from db_ml.services import AlgorithmState
 from db_ml.services import predict_prompt
 from db_ml.services import generate_uuid
 from db_ml.services import redis_set_json, redis_get_json
+from db_ml.services import get_project_labels
 
 
 class PromptLearning(APIView):
@@ -55,7 +56,7 @@ class PromptLearning(APIView):
         params = request.data
         print('params', params)
         project_id = params['project_id']
-        model_id = params['model_id']
+        model_id = params.get('model_id', None)
         try:
             # 获取templates
             template_list = PromptTemplates.objects.filter(
@@ -100,35 +101,42 @@ class PromptLearning(APIView):
             state, result, total_count = None, None, 0
             total_count = len(templates) * len(tasks)
             project = Project.objects.filter(id=project_id).first()
+            _uuid = generate_uuid('prompt', project_id)
             if project.template_type == 'intent-dialog':
-                _uuid = generate_uuid('prompt-intent', project_id)
                 state, result = predict_prompt(
-                    project_id, model_id, task_data, _uuid, templates
+                    project_id, model_id, task_data, _uuid, templates,
+                    prompt_type='intent-dialog',
                 )
             elif project.template_type == 'conversational-generation':
                 # 对话生产
-                generate_count = params.get('generate_count', 1)
-                total_count = total_count * generate_count
-                _uuid = generate_uuid('prompt-generate', project_id)
-                state, result = predict_prompt(
-                    project_id, model_id, task_data, _uuid, templates,
-                    return_num=generate_count,
-                )
+                labels = get_project_labels(project_id)
+                if len(labels):
+                    generate_count = params.get('generate_count', 1)
+                    total_count = total_count * generate_count
+                    state, result = predict_prompt(
+                        project_id, model_id, task_data, _uuid, templates,
+                        return_num=generate_count,
+                        prompt_type='conversational-generation',
+                    )
+                else:
+                    state = False
+                    result = '项目未设置标签'
 
             if state:
                 result = {'status': 0, 'error': ''}
                 resp_status = status.HTTP_200_OK
+
+                redis_state = dict(
+                    state=AlgorithmState.ONGOING,
+                    total=total_count,
+                    project_id=project_id,
+                    username=request.user.username,
+                )
+                redis_set_json(redis_key, redis_state)
             else:
                 result = {'status': 1, 'error': result}
                 resp_status = status.HTTP_400_BAD_REQUEST
 
-            redis_state = dict(
-                state=AlgorithmState.ONGOING,
-                total=total_count,
-                project_id=project_id,
-                username=request.user.username,
-            )
-            redis_set_json(redis_key, redis_state)
         except Exception as e:
             result = {'status': 1, 'error': str(e)}
             resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR

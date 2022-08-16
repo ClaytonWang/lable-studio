@@ -83,7 +83,7 @@ def process_celery_result(key):
             data = get_prediction_generate_df(algorithm_result, task_id)
             insert_prediction_value(data, project_id, task_id)
         elif algorithm_type == 'prompt':
-            insert_prompt_generate_value()
+            insert_prompt_generate_value(algorithm_result, project_id, task_id)
     elif algorithm_type == 'clean':
         insert_clean_value(algorithm_result, project_id, task_id)
     else:
