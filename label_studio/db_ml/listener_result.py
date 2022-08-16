@@ -20,7 +20,7 @@ from db_ml.services import generate_redis_key
 from db_ml.services import redis_set_json, redis_get_json
 from db_ml.services import redis_update_finish_state
 from db_ml.services import update_prediction_data
-logger = logging.getLogger(__file__)
+logger = logging.getLogger('db')
 
 """
 
