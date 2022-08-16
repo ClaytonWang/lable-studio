@@ -12,7 +12,7 @@ const Prompt = forwardRef(({ project, showStatus }, ref) => {
   const api = useAPI();
   const [loading, setLoading] = useState(false);
 
-  const request = useCallback(async (body) => {
+  const request = useCallback(async (body = {}) => {
     setLoading(true);
     return api.callApi("mlPromptTemplateQuery", {
       params: { project: project.id },
@@ -20,7 +20,7 @@ const Prompt = forwardRef(({ project, showStatus }, ref) => {
       if (res.templates?.length > 0) {
         return api.callApi('mlPromptPredict', {
           body: {
-            project: project.id,
+            project_id: project.id,
             ...body,
           },
         }).then(() => {

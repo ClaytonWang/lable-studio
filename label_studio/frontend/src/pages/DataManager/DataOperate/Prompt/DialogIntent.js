@@ -21,7 +21,7 @@ const ResponseGeneration = ({ loading, close, project, request }) => {
           <Button
             size="compact"
             look="primary"
-            onClick={request}
+            onClick={() => request()}
             waiting={loading}
           >
             {t("ceate_rightnow", "立即生成")}
