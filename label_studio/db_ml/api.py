@@ -69,7 +69,7 @@ def clean(request):
     data = request.data
     project_id = data.get('project_id')
     model_ids = data.get('model_ids', '').split(',')
-    model_ids = [int(item) for item in model_ids]
+    model_ids = [int(item) for item in model_ids if item]
     query = TaskDbAlgorithm.objects.filter(project_id=project_id)
     if not query:
         return Response(data=dict(msg='Invalid project id'))
