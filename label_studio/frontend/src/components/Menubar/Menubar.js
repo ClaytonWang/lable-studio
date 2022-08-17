@@ -189,20 +189,31 @@ export const Menubar = ({
                   data-external
                   exact
                 />
-                <Menu.Item
-                  label={t("Organization")}
-                  to="/organization"
-                  icon={<IconPersonInCircle/>}
-                  data-external
-                  exact
-                />
-                <Menu.Item
-                  label={t("Models Management")}
-                  to="/model-manager"
-                  icon={<LsSettings/>}
-                  data-external
-                  exact
-                />
+                {
+                  !config.user.page.some((v) => {
+                    return v.name === "organization";
+                  }) && (
+                    <Menu.Item
+                      label={t("Organization")}
+                      to="/organization"
+                      icon={<IconPersonInCircle/>}
+                      data-external
+                      exact
+                    />
+                  )
+                }
+                {
+                  !config.user.page.some((v) => {
+                    return v.name === "model";
+                  }) && (
+                    <Menu.Item
+                      label={t("Models Management")}
+                      to="/model-manager"
+                      icon={<LsSettings/>}
+                      data-external
+                      exact
+                    />
+                  )}
 
                 <Menu.Spacer/>
 
