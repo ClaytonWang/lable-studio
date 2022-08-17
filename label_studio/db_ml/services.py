@@ -256,7 +256,7 @@ def predict_prompt(
         data=task_data,
         labels=get_project_labels(project_id),
         templates=template,
-        extra=dict(return_num=return_num)
+        extra=dict(return_nums=return_num)
     )
 
     return ml_backend_request(

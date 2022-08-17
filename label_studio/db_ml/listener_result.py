@@ -14,6 +14,7 @@ from core.redis import redis_get
 from projects.models import Project
 from tasks.models import Prediction
 from tasks.models import TaskDbAlgorithm
+from tasks.models import Annotation
 from projects.models import PromptResult
 from db_ml.services import AlgorithmState
 from db_ml.services import generate_redis_key
@@ -78,14 +79,14 @@ def process_celery_result(key):
             insert_prediction_value(data, project_id, task_id)
         elif algorithm_type == 'prompt':
             insert_prompt_intent_value(algorithm_result, project_id, task_id)
+        elif algorithm_type == 'clean':
+            insert_clean_value(algorithm_result, project_id, task_id)
     elif project.template_type == 'conversational-generation':
         if algorithm_type == 'prediction':
             data = get_prediction_generate_df(algorithm_result, task_id)
             insert_prediction_value(data, project_id, task_id)
         elif algorithm_type == 'prompt':
             insert_prompt_generate_value(algorithm_result, project_id, task_id)
-    elif algorithm_type == 'clean':
-        insert_clean_value(algorithm_result, project_id, task_id)
     else:
         logger.info(f'Invalid algorithm_type: {algorithm_type}')
 
@@ -180,6 +181,7 @@ def get_prediction_generate_df(algorithm_result, task_id):
 
 def insert_prompt_intent_value(algorithm_result, project_id, task_id):
     """
+    预标注 0样本
     :param algorithm_result:
     :param project_id:
     :param task_id:
@@ -210,7 +212,13 @@ def insert_prompt_intent_value(algorithm_result, project_id, task_id):
 
 
 def insert_prompt_generate_value(algorithm_result, project_id, task_id):
-
+    """
+    对话生成 0样本
+    :param algorithm_result:
+    :param project_id:
+    :param task_id:
+    :return:
+    """
     text = []
     for sub_text in algorithm_result:
         for _text in sub_text:
@@ -226,14 +234,17 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id):
         },
     }
     tag_data = dict(
-        task=task_id,
+        task_id=task_id,
         result=[pre_result],
     )
-
     redis_key = generate_redis_key('prompt', project_id)
     p_state = redis_get_json(redis_key)
     if p_state and p_state.get('state') == AlgorithmState.ONGOING:
-        update_prediction_data(task_id, tag_data)
+        a, is_created = Annotation.objects.update_or_create(
+            defaults=tag_data, task_id=task_id
+        )
+        print(f'prompt annotation result: {a} {is_created}')
+
         c = PromptResult(
             project_id=project_id,
             task_id=task_id,
@@ -243,7 +254,7 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id):
         redis_update_finish_state(redis_key, p_state)
 
 
-def insert_clean_value(algorithm_result, project_id, task_id):
+def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
     """
     "result":
          {
@@ -259,15 +270,19 @@ def insert_clean_value(algorithm_result, project_id, task_id):
 
     :param algorithm_result:
     :param project_id:
-    :param task_id:
+    :param db_algorithm_id:
     :return:
     """
-    dialogue = algorithm_result.get('dialogue', [])
+    if 'dialogue' in algorithm_result:
+        dialogue = algorithm_result.get('dialogue', [])
+    else:
+        dialogue = algorithm_result
     try:
         redis_key = generate_redis_key('clean', project_id)
         p_state = redis_get_json(redis_key)
         if p_state and p_state.get('state') == AlgorithmState.ONGOING:
-            TaskDbAlgorithm.objects.filter(task_id=task_id).update(
+            # 传入的是TaskDbAlgorithm的DI
+            TaskDbAlgorithm.objects.filter(id=db_algorithm_id).update(
                 algorithm=dialogue, state=2, remarks=''
             )
             redis_update_finish_state(redis_key, p_state)

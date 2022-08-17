@@ -18,7 +18,7 @@ def ml_backend_params(
         data, labels=[], templates=[], extra={}
 ):
     extra.update(**dict(
-        labels=labels,
+        labels={index: label for index, label in enumerate(labels)},
         templates=templates,
     ))
     return dict(
