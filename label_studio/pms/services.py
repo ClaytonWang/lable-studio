@@ -109,16 +109,16 @@ def user_btn_no_auth(user):
         return dict()
 
     query_vls = query_btn.values('name', 'code', 'page__code').all()
-    results = dict()
-    for item in query_vls:
-        page_code = item.pop('page__code')
-        if page_code in results:
-            btn = results[page_code]
-            btn.append(item)
-            results[page_code] = btn
-        else:
-            results[page_code] = [item]
-    return results
+    # results = dict()
+    # for item in query_vls:
+    #     page_code = item.pop('page__code')
+    #     if page_code in results:
+    #         btn = results[page_code]
+    #         btn.append(item)
+    #         results[page_code] = btn
+    #     else:
+    #         results[page_code] = [item]
+    return list(query_vls)
 
 
 def user_group_query(user, pms_model, pms_type='all'):
