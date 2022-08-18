@@ -140,7 +140,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
             url, ['export'], method='get',
             params=dict(url=url)
         )
-        return self.return_ml_response(state, rsp)
+        rsp_data = {"download": rsp}
+        return self.return_ml_response(state, rsp_data)
 
     @action(methods=['GET'], detail=False)
     def label(self, request, *args, **kwargs):
