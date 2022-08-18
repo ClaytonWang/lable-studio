@@ -106,7 +106,7 @@ def user_btn_no_auth(user):
     """
     query_btn = user_group_no_auth(user, PmsButton)
     if not query_btn:
-        return dict()
+        return []
 
     query_vls = query_btn.values('name', 'code', 'page__code').all()
     # results = dict()

@@ -167,7 +167,9 @@ ProjectsPage.context = ({ openModal, showButton, gotoCollection,config }) => {
   return (
     <Space>
       {
-        !Object.keys(config.user.button).includes("004")&&(
+        !config.user.noauth_button?.some((v) => {
+          return v.code === "002_002";
+        })&&(
           <Button onClick={gotoCollection} look="primary" size="compact">
             {t("Project collection", "项目集合设置")}
           </Button>

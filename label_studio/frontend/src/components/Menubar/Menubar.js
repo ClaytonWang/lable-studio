@@ -190,7 +190,7 @@ export const Menubar = ({
                   exact
                 />
                 {
-                  !config.user.page.some((v) => {
+                  !config.user.noauth_page.some((v) => {
                     return v.name === "organization";
                   }) && (
                     <Menu.Item
@@ -203,7 +203,7 @@ export const Menubar = ({
                   )
                 }
                 {
-                  !config.user.page.some((v) => {
+                  !config.user.noauth_page.some((v) => {
                     return v.name === "model";
                   }) && (
                     <Menu.Item
