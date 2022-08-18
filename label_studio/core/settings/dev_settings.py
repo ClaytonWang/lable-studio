@@ -22,25 +22,25 @@ DATABASES = {
 
 RQ_QUEUES = {
     'default': {
-        'HOST': 'redis',
+        'HOST': '124.71.161.146',
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,
     },
     'prediction': {
-        'HOST': 'redis',
+        'HOST': '124.71.161.146',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
     'algorithm_clean': {
-        'HOST': 'redis',
+        'HOST': '124.71.161.146',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
     'prompt': {
-        'HOST': 'redis',
+        'HOST': '124.71.161.146',
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 18000,
