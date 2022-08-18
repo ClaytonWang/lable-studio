@@ -69,6 +69,18 @@ def process_celery_result(key):
         return
 
     algorithm_result = k_result.get('result')
+    process_algorithm_result(algorithm_type, project_id, task_id, algorithm_result)
+
+
+def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_result):
+    """
+
+    :param algorithm_type:
+    :param project_id:
+    :param task_id:
+    :param algorithm_result:
+    :return:
+    """
     project = Project.objects.filter(id=project_id).first()
     if not project:
         logger.info(f'Invalid project id : {project_id}')
@@ -282,11 +294,12 @@ def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
         p_state = redis_get_json(redis_key)
         if p_state and p_state.get('state') == AlgorithmState.ONGOING:
             # 传入的是TaskDbAlgorithm的DI
+            print('db_algorithm_id: ', db_algorithm_id)
             TaskDbAlgorithm.objects.filter(id=db_algorithm_id).update(
                 algorithm=dialogue, state=2, remarks=''
             )
             redis_update_finish_state(redis_key, p_state)
     except Exception as e:
-        TaskDbAlgorithm.objects.filter(task_id=task_id).update(
+        TaskDbAlgorithm.objects.filter(task_id=db_algorithm_id).update(
             state=3, remarks=str(e)
         )

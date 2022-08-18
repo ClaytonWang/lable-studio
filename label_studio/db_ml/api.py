@@ -41,6 +41,7 @@ from db_ml.services import redis_set_json, redis_get_json
 from db_ml.services import predict_prompt
 from db_ml.services import preprocess_clean
 from db_ml.services import generate_uuid
+from db_ml.listener_result import process_algorithm_result, split_project_and_task_id
 
 """
 项目执行算法状态标识
@@ -369,3 +370,28 @@ def cancel_job(request):
     #         status=400, data=f'End of task execution. Project Id:{project_id}'
     #     )
     return Response(data=dict(msg='cancel successfully'))
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def job_result(request):
+    data = request.POST.dict()
+    if not data:
+        data = request.data
+
+    celery_task_id = data.get('celery_task_id')
+    result = data.get('result')
+    algorithm_type, project_id, task_id = split_project_and_task_id(celery_task_id)
+    state, error = 0, ''
+    if not algorithm_type or not project_id or not task_id:
+        state = 1
+        error = 'Required parameters algorithm_type, project_id task_id'
+
+    try:
+        process_algorithm_result(algorithm_type, project_id, task_id, result)
+    except Exception as e:
+        state = 1
+        error = str(e)
+        print(f'Process algorithm error : {e}')
+
+    return Response(data={'status': state, 'error': error})
