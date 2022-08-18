@@ -309,9 +309,9 @@ def query_task(request):
         if clean_task_query.filter(state=1).count():
             state = True
     elif algorithm_type == 'prompt':
-        total_task = PromptTemplates.objects.filter(
-            project_id=project_id
-        ).count() * total_task
+        # total_task = PromptTemplates.objects.filter(
+        #     project_id=project_id
+        # ).count() * total_task
         finish_task = PromptResult.objects.filter(
             project_id=project_id
         ).count()
