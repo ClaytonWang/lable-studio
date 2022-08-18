@@ -99,7 +99,7 @@ class PromptLearning(APIView):
                 ))
 
             state, result, total_count = None, None, 0
-            total_count = len(templates) * len(tasks)
+            total_count = len(tasks)
             project = Project.objects.filter(id=project_id).first()
             _uuid = generate_uuid('prompt', project_id)
             if project.template_type == 'intent-dialog':
@@ -112,7 +112,7 @@ class PromptLearning(APIView):
                 labels = get_project_labels(project_id)
                 if len(labels):
                     generate_count = params.get('generate_count', 1)
-                    total_count = total_count * generate_count
+                    # total_count = total_count * generate_count
                     state, result = predict_prompt(
                         project_id, model_id, task_data, _uuid, templates,
                         return_num=generate_count,
