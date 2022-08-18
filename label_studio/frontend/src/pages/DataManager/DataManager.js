@@ -323,7 +323,9 @@ DataManagerPage.context = ({ dmRef }) => {
 
       {
         projectClass === 'intent-classification-for-dialog'
-        && !Object.keys(config.user.button).includes("002") ? (
+        && !config.user.button?.some((v) => {
+          return v.code === "002_001";
+        }) ? (
             <Button
               size="compact"
               data-external

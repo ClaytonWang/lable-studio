@@ -276,7 +276,9 @@ export const PeoplePage = () => {
               {t("Add People", "添加用户")}
             </Button>
             {
-              !Object.keys(config.user.button).includes("001") && (
+              !config.user.noauth_button?.some((v) => {
+                return v.code === "001_001";
+              }) && (
                 <Button icon={<SwapOutlined rotate={90} />} primary onClick={changeOrganization}>
                   {t("Change Organization", "切换组织")}
                 </Button>

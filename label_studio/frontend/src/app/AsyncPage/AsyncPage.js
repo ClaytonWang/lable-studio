@@ -11,6 +11,7 @@ const pageCache = new Map();
 const pageFromHTML = (html) => {
   const parser = new DOMParser();
   const document = parser.parseFromString(html, 'text/html');
+
   return document;
 };
 
@@ -100,7 +101,7 @@ const swapContent = async (oldPage, newPage) => {
   if (currentContent && newContent) {
     await swapNodes(currentContent, newContent);
   } else {
-    await swapNodes(oldPage.body.children[0], newContent, {removeOld: false});
+    await swapNodes(oldPage.body.children[0], newContent, { removeOld: false });
   }
 };
 
@@ -176,12 +177,14 @@ const isVisitable = (target) => {
 };
 
 const locationWithoutHash = () => {
-  const {href} = location;
+  const { href } = location;
+
   return href.replace(/#(.*)/g, '');
 };
 
 const fetchPage = async (locationUrl) => {
   const html = await loadAsyncPage(locationUrl);
+
   return html ? pageFromHTML(html) : null;
 };
 
@@ -214,7 +217,7 @@ export const AsyncPageContext = createContext(null);
 
 export const AsyncPageConsumer = AsyncPageContext.Consumer;
 
-export const AsyncPage = ({children}) => {
+export const AsyncPage = ({ children }) => {
   const initialContent = document;
 
   const history = useHistory();
@@ -253,10 +256,10 @@ export const AsyncPage = ({children}) => {
   // useEffect(onPopState, [location]);
 
   useEffect(() => {
-    document.addEventListener('click', onLinkClick, {capture: true});
+    document.addEventListener('click', onLinkClick, { capture: true });
     window.addEventListener('popstate', onPopState);
     return () => {
-      document.removeEventListener('click', onLinkClick, {capture: true});
+      document.removeEventListener('click', onLinkClick, { capture: true });
       window.removeEventListener('popstate', onPopState);
     };
   }, []);
