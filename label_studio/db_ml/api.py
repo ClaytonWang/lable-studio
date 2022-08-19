@@ -381,7 +381,7 @@ def job_result(request):
     data = request.data
 
     task_status = data.get('status')
-    logger.info(f'ML return message: {data}')
+    print(f'ML return message: {data}')
 
     if task_status in ('PENDING', 'STARTED', 'RETRY'):
         return
