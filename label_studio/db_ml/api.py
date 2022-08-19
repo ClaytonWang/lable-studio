@@ -7,7 +7,7 @@
   > FileName   : api.py
   > CreateTime : 2022/6/7 15:29
 """
-import time
+import json
 import logging
 from django.db import connection
 from django.db.models import Count
@@ -42,6 +42,7 @@ from db_ml.services import predict_prompt
 from db_ml.services import preprocess_clean
 from db_ml.services import generate_uuid
 from db_ml.listener_result import process_algorithm_result, split_project_and_task_id
+logger = logging.getLogger('db')
 
 """
 项目执行算法状态标识
@@ -379,11 +380,20 @@ def job_result(request):
     if not data:
         data = request.data
 
+    task_status = data.get('status')
+    logger.info(f'ML return message: {data}')
+
+    if task_status in ('PENDING', 'STARTED', 'RETRY'):
+        return
+
+    if task_status in ('FAILURE', 'REVOKED'):
+        data['result'] = ''
+
     celery_task_id = data.get('celery_task_id')
     result = data.get('result')
     algorithm_type, project_id, task_id = split_project_and_task_id(celery_task_id)
     state, error = 0, ''
-    if not algorithm_type or not project_id or not task_id:
+    if not algorithm_type or not project_id:
         state = 1
         error = 'Required parameters algorithm_type, project_id task_id'
 
