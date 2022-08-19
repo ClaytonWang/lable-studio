@@ -376,9 +376,9 @@ def cancel_job(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def job_result(request):
-    data = request.POST.dict()
-    if not data:
-        data = request.data
+    # data = request.POST.dict()
+    # if not data:
+    data = request.data
 
     task_status = data.get('status')
     logger.info(f'ML return message: {data}')
