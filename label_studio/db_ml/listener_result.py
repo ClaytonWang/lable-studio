@@ -252,10 +252,10 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id):
     redis_key = generate_redis_key('prompt', project_id)
     p_state = redis_get_json(redis_key)
     if p_state and p_state.get('state') == AlgorithmState.ONGOING:
-        a, is_created = Annotation.objects.update_or_create(
+        a, is_created = Prediction.objects.update_or_create(
             defaults=tag_data, task_id=task_id
         )
-        print(f'prompt annotation result: {a} {is_created}')
+        print(f'prompt Prediction result: {a} {is_created}')
 
         c = PromptResult(
             project_id=project_id,
