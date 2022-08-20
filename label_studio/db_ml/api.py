@@ -374,7 +374,7 @@ def cancel_job(request):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def job_result(request):
     # data = request.POST.dict()
     # if not data:
