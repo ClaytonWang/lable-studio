@@ -357,7 +357,7 @@ class DataManagerTaskSerializer(TaskSerializer):
         data = self.pre_data.get(str(obj.id), [])
         result = data.get('result', []) if len(data) else []
         pre_choices = get_choice_values(result)
-        return ','.join(pre_choices)
+        return pre_choices
 
         # label, rst = self.check_update_time(obj)
         # if label == 'pre':
@@ -376,7 +376,7 @@ class DataManagerTaskSerializer(TaskSerializer):
             return ''
         result = data.get('result', []) if len(data) else []
         choices = get_choice_values(result)
-        return ','.join(choices)
+        return choices
 
     def to_representation(self, obj):
         """ Dynamically manage including of some fields in the API result

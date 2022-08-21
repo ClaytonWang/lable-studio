@@ -191,7 +191,12 @@ def get_choice_values(result):
     """
     choices = []
     for item in result:
-        tmp_choices = item.get('value', {}).get('choices', [])
+        _type = item.get('type')
+        if _type == 'choices':
+            tmp_choices = item.get('value', {}).get('choices', [])
+        elif _type == 'textarea':
+            tmp_choices = item.get('value', {}).get('text', [])
+
         if not tmp_choices:
             continue
         choices += tmp_choices
