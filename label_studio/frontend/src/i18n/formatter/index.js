@@ -1,5 +1,4 @@
-import { each, isArray, map } from 'lodash';
-import { template } from '@/utils/util';
+import { each, get, isArray, map } from 'lodash';
 
 const Formatter = {
   trans: window.t,
@@ -20,6 +19,8 @@ const format = (key, data, ...options) => {
         return formatWithTemplate(data, ...options);
       case 'dm_columns':
         return formatDMColumns(data, ...options);
+      case 'dm_data':
+        return formatDMData(data, ...options);
       case 'ls_export_formats':
         return formatExportFormats(data, ...options);
       case 'dm_actions':
@@ -96,6 +97,26 @@ const formatDMColumns = (data) => {
         item.help = formatWithTemplate(`${item.id}_help`, '');
       }
     });
+  }
+  return data;
+};
+
+const formatDMData = (data, apiMethod) => {
+  if (apiMethod === 'tasks') {
+    switch (window._projectClass) {
+      case 'conversational-ai-response-generation':
+        each(data?.tasks, item => {
+          item.auto_label = get([].concat(item.auto_label), [0], '');
+          item.manual_label = get([].concat(item.manual_label), [0], '');
+        });
+        break;
+      case 'intent-classification-for-dialog':
+        each(data?.tasks, item => {
+          item.auto_label = [].concat(item.auto_label).join(',');
+          item.manual_label = [].concat(item.manual_label).join(',');
+        });
+        break;
+    }
   }
   return data;
 };
