@@ -87,15 +87,35 @@ class ModelManager(DummyModelMixin, models.Model):
 
 class ModelRecord(models.Model):
     """
-    项目集合
+    人在环路-训练记录
     """
     objects = DbOrganizationManager()
 
-    remark = models.JSONField(_('remark'), blank=True, null=True)
+    # 组织
     organization = models.ForeignKey('organizations.Organization', on_delete=models.SET_NULL, related_name='model_record_org', null=True)
+    # 训练前模型
     model = models.ForeignKey('model_manager.ModelManager', on_delete=models.SET_NULL, null=True, blank=True, help_text='', related_name='model_record')
+    # 新模型
+    new_model = models.ForeignKey('model_manager.ModelManager', on_delete=models.SET_NULL, null=True, blank=True)
+    # 项目
     project = models.ForeignKey('projects.Project', on_delete=models.SET_NULL, null=True, blank=True, help_text='', related_name='model_record_project')
-    rate = models.FloatField(_('rate'), null=True, blank=True, default=0)
+
+    # 正确标注数
+    exactness = models.IntegerField(_('exactness annotation'), default=0)
+    # 总任务数
+    total = models.IntegerField(_('total task'), default=0)
+    # 是否训练
+    is_train = models.BooleanField(_('train'), default=False)
+    # 准确率
+    accuracy_rate = models.FloatField(_('accuracy rate'), null=True, blank=True, default=0)
+    # 新模型准确率
+    new_accuracy_rate = models.FloatField(_('new accuracy rate'), null=True, blank=True, default=0)
+    # 新模型训练任务数
+    new_model_train_task = models.IntegerField('', null=True, blank=True, default=None)
+    # 新模型评估任务数
+    new_model_assessment_task = models.IntegerField('', null=True, blank=True, default=None)
+    # 训练进度
+    training_progress = models.FloatField('', null=True, blank=True, default=None)
 
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_project_record', on_delete=models.SET_NULL, null=True, verbose_name=_('created by'))
