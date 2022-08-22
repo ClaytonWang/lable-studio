@@ -332,7 +332,7 @@ def query_task(request):
         total=total_task,
         finish=finish_task,
         # true 是进行中  false是结束或未开始
-        state=state if rate != 1 else True,
+        state=state if rate != 1 else False,
         rate=rate
     ))
 
