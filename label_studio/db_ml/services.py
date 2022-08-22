@@ -249,12 +249,14 @@ def predict_prompt(
     :param prompt_type:
     :return:
     """
-
     if prompt_type == 'intent-dialog':
+        # 预标注（0样本）
         model = ModelManager.objects.filter(token='101469da9d088219').first()
     elif prompt_type == 'conversational-generation':
+        # 生成对话（0样本）
         model = ModelManager.objects.filter(token='9e72f8c5aa27811d').first()
     else:
+        # 预标注普通   生成对话普通   前端有选择模型
         model = ModelManager.objects.filter(id=model_id).first()
     _params = dict()
     _json = ml_backend_params(

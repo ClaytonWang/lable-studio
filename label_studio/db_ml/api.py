@@ -41,6 +41,7 @@ from db_ml.services import redis_set_json, redis_get_json
 from db_ml.services import predict_prompt
 from db_ml.services import preprocess_clean
 from db_ml.services import generate_uuid
+from db_ml.services import get_project_labels
 from db_ml.listener_result import process_algorithm_result, split_project_and_task_id
 logger = logging.getLogger('db')
 
@@ -248,11 +249,16 @@ def prediction(request):
             )
         elif project.template_type == 'conversational-generation':
             # 对话生产
-            generate_count = data.get('generate_count')
-            state, result = predict_prompt(
-                project_id, model_id, task_data, _uuid,
-                return_num=generate_count,
-            )
+            labels = get_project_labels(project_id)
+            if len(labels):
+                generate_count = data.get('generate_count')
+                state, result = predict_prompt(
+                    project_id, model_id, task_data, _uuid,
+                    return_num=generate_count,
+                )
+            else:
+                state = False
+                result = '项目未设置标签'
         if not state:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
@@ -321,12 +327,13 @@ def query_task(request):
     else:
         return Response(dict(rate=0, state=False))
 
+    rate = round(finish_task / total_task, 2) if total_task > 0 else 0
     return Response(data=dict(
         total=total_task,
         finish=finish_task,
         # true 是进行中  false是结束或未开始
-        state=state,
-        rate=round(finish_task / total_task, 2) if total_task > 0 else 0
+        state=state if rate != 1 else True,
+        rate=rate
     ))
 
 
