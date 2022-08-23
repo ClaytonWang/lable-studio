@@ -50,8 +50,7 @@ class ModelRecordViews(MultiSerializerViewSetMixin, ModelViewSet):
         """
         data = request.GET.dict()
         model_id = data.get('model_id')
-        self.queryset = ModelRecord.objects.filter(
-            model_id=model_id).order_by('-created_at')
+        self.queryset = ModelRecord.objects.filter().order_by('-created_at')
         return super(ModelRecordViews, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
@@ -63,3 +62,10 @@ class ModelRecordViews(MultiSerializerViewSetMixin, ModelViewSet):
         """
         self.queryset = ModelRecord.objects.filter(pk=kwargs.get('pk'))
         return super(ModelRecordViews, self).retrieve(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        self.queryset = ModelRecord.objects.filter(pk=kwargs.get('pk'))
+        if len(self.queryset) and self.queryset[0].category != 'assessment':
+            raise Exception('只能删除评估模型')
+        super(ModelRecordViews, self).destroy(request, *args, **kwargs)
+        return Response(status=200, data=dict(message='删除成功'))
