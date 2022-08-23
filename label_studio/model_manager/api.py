@@ -82,7 +82,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         url = data.get('url', '')
         params = parse.parse_qs(parse.urlparse(url).query)
         version = params.get('version', [])
-        data['version'] = version[0] if len(version) else ''
+        data['version'] = version[0] if len(version) else '1.0'
         data['created_by_id'] = request.user.id
         data['organization_id'] = request.user.active_organization.id
 
@@ -103,7 +103,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
             request, *args,**kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        self.queryset = ModelManager.objects.filter(pk=kwargs.get('pk'))
+        self.queryset = ModelManager.objects.filter(
+            pk=kwargs.get('pk'), )
         super(ModelManagerViews, self).destroy(request, *args, **kwargs)
         return Response(status=200, data=dict(message='删除成功'))
 

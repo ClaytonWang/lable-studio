@@ -51,6 +51,12 @@ MODEL_STATE = (
 )
 
 
+MODEL_TRAIN_TYPE = (
+    ('train', '训练'),
+    ('assessment', '评估'),
+)
+
+
 class ModelManager(DummyModelMixin, models.Model):
 
     objects = DbOrganizationManager()
@@ -80,7 +86,6 @@ class ModelManager(DummyModelMixin, models.Model):
     model_parameter = JSONField(_('run model parameter'), null=True, default=dict, help_text='模型入参数')
     model_result = models.CharField(_('run model result url'), null=True, default='', max_length=140, help_text='模型入参数')
 
-
     class Meta:
         unique_together = ("organization_id", "title", "version")
 
@@ -101,9 +106,9 @@ class ModelRecord(models.Model):
     project = models.ForeignKey('projects.Project', on_delete=models.SET_NULL, null=True, blank=True, help_text='', related_name='model_record_project')
 
     # 正确标注数
-    exactness = models.IntegerField(_('exactness annotation'), default=0)
+    exactness_count = models.IntegerField(_('exactness annotation'), default=0, null=True)
     # 总任务数
-    total = models.IntegerField(_('total task'), default=0)
+    total_count = models.IntegerField(_('total task'), default=0, null=True)
     # 是否训练
     is_train = models.BooleanField(_('train'), default=False)
     # 准确率
@@ -116,6 +121,8 @@ class ModelRecord(models.Model):
     new_model_assessment_task = models.IntegerField('', null=True, blank=True, default=None)
     # 训练进度
     training_progress = models.FloatField('', null=True, blank=True, default=None)
+    # 分类 训练&评估
+    category = models.CharField('', max_length=15, choices=MODEL_TRAIN_TYPE)
 
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_project_record', on_delete=models.SET_NULL, null=True, verbose_name=_('created by'))
