@@ -48,6 +48,7 @@ export default forwardRef(({ project }, ref) => {
         bare
         ref={modalRef}
         className="human-zone"
+        closeOnClickOutside={false}
         style={
           type === "evaluate"
             ? {
