@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { Button, Select, Space, Tooltip } from "antd";
-import { QuestionCircleOutlined } from "@ant-design/icons";
+import { Button, Popconfirm, Select, Space,Tooltip } from "antd";
+import { ExclamationCircleOutlined,QuestionCircleOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import { PlusOutlined } from "@ant-design/icons";
 import { Modal } from "@/components/Modal/Modal";
@@ -150,7 +150,17 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
           {
             title: "操作",
             render: () => {
-              return <Button type="link">删除</Button>;
+              return (
+                <Popconfirm
+                  title="确定要删除当前记录吗?"
+                  onConfirm={() => { }}
+                  icon={<ExclamationCircleOutlined style={{ color: 'red' }}  />}
+                  okText="确定"
+                  cancelText="取消">
+                  <Button type="link">删除</Button>
+                </Popconfirm>
+              );
+
             },
           },
         ]}

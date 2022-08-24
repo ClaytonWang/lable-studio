@@ -1,10 +1,18 @@
-import { Col, Form, Input, Row, Tag } from "antd";
+import React, { useState } from 'react';
+import { Col, Form, Input, Row, Select, Tag } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { Modal } from "@/components/Modal/Modal";
 import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";
+const { Option } = Select;
 
 export default ({ onCancel }) => {
+  const [modelType, setModelType]=useState("tip_learn");
+
+  const handleChange = (value) => {
+    setModelType(value);
+  };
+
   return (
     <div className="evaluate">
       <Modal.Header>
@@ -14,7 +22,17 @@ export default ({ onCancel }) => {
         <Row>
           <Col span={8}>
             <Form.Item label="模型集名称">
-              <Input />
+              <Row>
+                <Col span={modelType==="tip_learn"?12:24}>
+                  <Select defaultValue="tip_learn" onChange={handleChange}>
+                    <Option value="tip_learn">提示学习</Option>
+                    <Option value="other">其他</Option>
+                  </Select>
+                </Col>
+                <Col span={modelType==="tip_learn"?12:0}>
+                  <Input />
+                </Col>
+              </Row>
             </Form.Item>
           </Col>
           <Col span={8}>
