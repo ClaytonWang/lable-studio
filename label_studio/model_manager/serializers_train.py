@@ -4,7 +4,7 @@
 """
   > Author     : YIN
   > Mail       : jindu.yin@digitalbrain.cn
-  > FileName   : serializers_record.py
+  > FileName   : serializers_train.py
   > CreateTime : 2022/8/3 09:07
 """
 from rest_framework import serializers
@@ -12,10 +12,10 @@ from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework.serializers import SerializerMethodField
 from users.serializers import UserSimpleSerializer
 from projects.serializers_set import ProjectSetDetailSerializer
-from model_manager.models import ModelRecord
+from model_manager.models import ModelTrain
 
 
-class ModelRecordListSerializer(serializers.ModelSerializer):
+class ModelTrainListSerializer(serializers.ModelSerializer):
     """
     """
     created_by = UserSimpleSerializer(default={}, help_text='created owner')
@@ -45,27 +45,27 @@ class ModelRecordListSerializer(serializers.ModelSerializer):
         return model.title + model.version if model else ''
 
     class Meta:
-        model = ModelRecord
+        model = ModelTrain
         fields = '__all__'
 
 
-class ModelRecordDetailSerializer(ModelRecordListSerializer):
+class ModelTrainDetailSerializer(ModelTrainListSerializer):
     class Meta:
-        model = ModelRecord
+        model = ModelTrain
         fields = '__all__'
 
 
-class ModelRecordCreateSerializer(serializers.ModelSerializer):
+class ModelTrainCreateSerializer(serializers.ModelSerializer):
 
     """
     """
 
     class Meta:
-        model = ModelRecord
+        model = ModelTrain
         fields = '__all__'
 
 
-class ModelRecordUpdateSerializer(ModelRecordCreateSerializer):
+class ModelTrainUpdateSerializer(ModelTrainCreateSerializer):
 
     """
     """
