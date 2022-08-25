@@ -10,7 +10,7 @@ from django.conf.urls import url
 # 增加promt - api.py
 from . import api, views
 from .api import ModelManagerViews
-from .api_record import ModelRecordViews
+from .api_train import ModelTrainViews
 
 app_name = 'model_manager'
 
@@ -23,7 +23,7 @@ _urlpatterns = [
 router = DefaultRouter(trailing_slash=False)
 router_record = DefaultRouter(trailing_slash=False)
 router.register(r'', ModelManagerViews, basename='model configer')
-router_record.register(r'', ModelRecordViews, basename='model record')
+router_record.register(r'', ModelTrainViews, basename='model record')
 _api_urlpatterns = [
     path('', include(router.urls)),
 ]
@@ -34,6 +34,6 @@ _api_urlpatterns_templates = [
 
 urlpatterns = [
     path('api/model-manager/', include(_api_urlpatterns)),
-    path('api/model-record/', include(router_record.urls)),
+    path('api/model-train/', include(router_record.urls)),
     path('model-manager/', include(_urlpatterns)),
 ]
