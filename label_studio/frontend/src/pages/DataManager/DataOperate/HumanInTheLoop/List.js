@@ -1,35 +1,50 @@
-import { useCallback } from "react";
+import { useCallback ,useContext } from "react";
 import { Button, Popconfirm, Select, Space,Tooltip } from "antd";
 import { ExclamationCircleOutlined,QuestionCircleOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import { PlusOutlined } from "@ant-design/icons";
 import { Modal } from "@/components/Modal/Modal";
+import { ApiContext } from '@/providers/ApiProvider';
+import { useProject } from "@/providers/ProjectProvider";
 
 export default ({ onCancel, onEvaluate, onTrain }) => {
-  const request = useCallback(() => {
-    return {
-      data: [
-        {
-          id: 1,
-          prev_model: "移动模型3.0",
-          project: "6月涨薪",
-          label_count: "300",
-          task_count: "300",
-          is_train: true,
-          prev_precision_rate: "90%",
-          next_precision_rate: "88%",
-          next_model: "移动模型3.1",
-          next_train_task: "500",
-          next_evaluate_task: "400",
-          train_rate: "77%",
-          project_collection: "移动模型",
-          time: "2022-03-04 11:11:11",
-          operator: "西征",
-        },
-      ],
-      success: true,
-      totla: 1,
-    };
+  const api = useContext(ApiContext);
+  const { project } = useProject();
+
+  const request = useCallback(async () => {
+    if (!project.id) {
+      return {};
+    }
+    return await api.callApi("listTrain", {
+      params: {
+        project_id:project.id,
+      },
+    });
+
+
+    // return {
+    //   data: [
+    //     {
+    //       id: 1,
+    //       prev_model: "移动模型3.0",
+    //       project: "6月涨薪",
+    //       label_count: "300",
+    //       task_count: "300",
+    //       is_train: true,
+    //       prev_precision_rate: "90%",
+    //       next_precision_rate: "88%",
+    //       next_model: "移动模型3.1",
+    //       next_train_task: "500",
+    //       next_evaluate_task: "400",
+    //       train_rate: "77%",
+    //       project_collection: "移动模型",
+    //       time: "2022-03-04 11:11:11",
+    //       operator: "西征",
+    //     },
+    //   ],
+    //   success: true,
+    //   totla: 1,
+    // };
   }, []);
 
   return (
