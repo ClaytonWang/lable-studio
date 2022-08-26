@@ -23,6 +23,16 @@ class ModelTrainListSerializer(serializers.ModelSerializer):
     new_model_title_version = SerializerMethodField()
     project_title = SerializerMethodField()
     project_set = SerializerMethodField()
+    new_model_train_task = SerializerMethodField()
+    new_model_assessment_task = SerializerMethodField()
+
+    @staticmethod
+    def get_new_model_train_task(obj):
+        return obj.train_task.count()
+
+    @staticmethod
+    def get_new_model_assessment_task(obj):
+        return obj.assessment_task.count()
 
     @staticmethod
     def get_project_set(obj):
@@ -46,7 +56,8 @@ class ModelTrainListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ModelTrain
-        fields = '__all__'
+        exclude = ['train_task', 'assessment_task']
+        # fields = '__all__'
 
 
 class ModelTrainDetailSerializer(ModelTrainListSerializer):
@@ -59,10 +70,25 @@ class ModelTrainCreateSerializer(serializers.ModelSerializer):
 
     """
     """
+    model_id = serializers.IntegerField(required=True)
+    new_model_id = serializers.IntegerField(required=False)
+    project_id = serializers.IntegerField(required=True)
+    created_by_id = serializers.IntegerField(required=True)
+    updated_by_id = serializers.IntegerField(required=False)
+    organization_id = serializers.IntegerField(required=False)
 
     class Meta:
         model = ModelTrain
-        fields = '__all__'
+        # fields = [item.name for item in ModelTrain._meta.local_fields] + [
+        #     'model_id', 'new_model_id', 'project_id',
+        #     'created_by_id', 'updated_by_id', 'organization_id'
+        # ]
+        fields = [
+            'exactness_count', 'total_count', 'is_train',
+            'accuracy_rate', 'new_accuracy_rate', 'training_progress', 'category', 'created_at',
+            'updated_at', 'state', 'model_parameter', 'model_result', 'model_id', 'new_model_id',
+            'project_id', 'created_by_id', 'updated_by_id', 'organization_id']
+        print('....')
 
 
 class ModelTrainUpdateSerializer(ModelTrainCreateSerializer):
