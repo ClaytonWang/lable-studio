@@ -55,14 +55,27 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         :param kwargs:
         :return: dict
         """
+        filter_keys = ['project_id', 'model_id', 'user_id', 'project_set_id']
         data = request.GET.dict()
-        project_id = data.get('project_id')
-        if not project_id:
+        filter_params = dict()
+        for key in filter_keys:
+            value = data.get(key)
+            if not value:
+                continue
+            if key == 'user_id':
+                filter_params['created_by_id'] = value
+            elif key == 'project_set_id':
+                filter_params['project__set_id'] = value
+            elif key == 'is_train':
+                if value == 'true':
+                    filter_params['is_train'] = True
+                elif value == 'false':
+                    filter_params['is_train'] = False
+            else:
+                filter_params[key] = value
+        if not filter_params.get('project_id'):
             raise Exception('必须指定项目')
-
-        self.queryset = ModelTrain.objects.filter(
-            project_id=project_id
-        ).order_by('-created_at')
+        self.queryset = ModelTrain.objects.filter(**filter_params).order_by('-created_at')
         return super(ModelTrainViews, self).list(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False)
@@ -85,7 +98,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             project_sets=list(project_set),
         )
 
-        return Response(status=status.HTTP_201_CREATED, data=result)
+        return Response(status=status.HTTP_200_OK, data=result)
 
     @action(methods=['GET'], detail=False)
     def model(self, request, *args, **kwargs):
@@ -155,10 +168,14 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         if operate == 'train':
             train_task = math.floor(task_count * 0.8)
-            model = ModelManager.objects.filter(id=model_id).first()
-            max_version_model = ModelManager.objects.filter(token=model.token).order_by('-version').first()
-            result['version'] = model.version
-            result['new_version'] = str(format(float(max_version_model.version) + 1, '.1f'))
+            if model_id:
+                model = ModelManager.objects.filter(id=model_id).first()
+                max_version_model = ModelManager.objects.filter(token=model.token).order_by('-version').first()
+                result['version'] = model.version
+                result['new_version'] = str(format(float(max_version_model.version) + 1, '.1f'))
+            else:
+                result['version'] = '0.0'
+                result['new_version'] = '1.0'
             result['new_model_train_task'] = train_task
             result['new_model_assessment_task'] = task_count - train_task
 
@@ -205,6 +222,15 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         :param kwargs:
         :return:
         """
+        data = self.get_train_assessment_params(request)
+        serializer = ModelTrainCreateSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @staticmethod
+    def get_train_assessment_params(request):
         data = request.POST.dict()
         if not data:
             data = request.data
@@ -213,11 +239,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         data['created_by_id'] = request.user.id
         data['updated_by_id'] = request.user.id
         data['organization_id'] = request.user.active_organization.id
-        serializer = ModelTrainCreateSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return data
 
     def destroy(self, request, *args, **kwargs):
         self.queryset = ModelTrain.objects.filter(pk=kwargs.get('pk'))
