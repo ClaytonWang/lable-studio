@@ -97,10 +97,16 @@ class ModelTrain(models.Model):
     accuracy_rate = models.FloatField(_('accuracy rate'), null=True, blank=True, default=0)
     # 新模型准确率
     new_accuracy_rate = models.FloatField(_('new accuracy rate'), null=True, blank=True, default=0)
-    # 新模型训练任务数
-    new_model_train_task = models.IntegerField('', null=True, blank=True, default=None)
-    # 新模型评估任务数
-    new_model_assessment_task = models.IntegerField('', null=True, blank=True, default=None)
+    # # 新模型训练任务数
+    # new_model_train_task = models.IntegerField('', null=True, blank=True, default=None)
+    # # 新模型评估任务数
+    # new_model_assessment_task = models.IntegerField('', null=True, blank=True, default=None)
+
+    # 新模型训练任务
+    train_task = models.ManyToManyField('tasks.Task', related_name='model_train', default=None, blank=True, null=True)
+    # 新模型评估任务
+    assessment_task = models.ManyToManyField('tasks.Task', related_name='model_assessment', default=None, blank=True, null=True)
+
     # 训练进度
     training_progress = models.FloatField('', null=True, blank=True, default=None)
     # 分类 训练&评估
