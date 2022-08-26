@@ -1,4 +1,4 @@
-import { useCallback ,useContext } from "react";
+import { useCallback ,useContext, useEffect,useState } from "react";
 import { Button, Popconfirm, Select, Space,Tooltip } from "antd";
 import { ExclamationCircleOutlined,QuestionCircleOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
@@ -6,10 +6,14 @@ import { PlusOutlined } from "@ant-design/icons";
 import { Modal } from "@/components/Modal/Modal";
 import { ApiContext } from '@/providers/ApiProvider';
 import { useProject } from "@/providers/ProjectProvider";
+const { Option } = Select;
 
 export default ({ onCancel, onEvaluate, onTrain }) => {
   const api = useContext(ApiContext);
   const { project } = useProject();
+  const [prevModels, setPrevModels] = useState([]);
+  const [operators, setOperators] = useState([]);
+  const [projectSets,setProjectSets]=useState([]);
 
   const request = useCallback(async () => {
     if (!project.id) {
@@ -47,6 +51,29 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
     // };
   }, []);
 
+  const selectOfTrain = useCallback(
+    async () => {
+      if (!project.id) {
+        return {};
+      }
+      return await api.callApi("selectOfTrain", {
+        params: {
+          project_id:project.id,
+        },
+      });
+    },
+    [project],
+  );
+
+  useEffect(async () => {
+    selectOfTrain().then((data) => {
+      setPrevModels(data?.models);
+      setOperators(data?.users);
+      setProjectSets(data?.project_sets);
+    });
+
+  },[]);
+
   return (
     <>
       <Modal.Header>
@@ -64,10 +91,25 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
         rowKey="id"
         headerTitle={(
           <Space>
-            <Select key="0" placeholder="训练前模型" />
-            <Select key="1"  placeholder="操作人" />
-            <Select key="2"  placeholder="是否训练" />
-            <Select key="3"  placeholder="项目集合" />
+            <Select key="0" placeholder="训练前模型" >
+              {prevModels.map((model) => (
+                <Option key={model.id}>{model.title}</Option>
+              ))}
+            </Select>
+            <Select key="1" placeholder="操作人" >
+              {operators.map((user) => (
+                <Option key={user}>{user}</Option>
+              ))}
+            </Select>
+            <Select key="2" placeholder="是否训练">
+              <Option key="true">是</Option>
+              <Option key="false">否</Option>
+            </Select>
+            <Select key="3" placeholder="项目集合" >
+              {projectSets.map((proj) => (
+                <Option key={proj}>{proj}</Option>
+              ))}
+            </Select>
           </Space>
         )}
         toolBarRender={() => [
