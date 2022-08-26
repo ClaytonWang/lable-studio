@@ -1,36 +1,58 @@
-import { useCallback } from "react";
+import { useCallback ,useContext, useEffect,useState } from "react";
 import { Button, Popconfirm, Select, Space,Tooltip } from "antd";
 import { ExclamationCircleOutlined,QuestionCircleOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import { PlusOutlined } from "@ant-design/icons";
 import { Modal } from "@/components/Modal/Modal";
+import { ApiContext } from '@/providers/ApiProvider';
+import { useProject } from "@/providers/ProjectProvider";
+const { Option } = Select;
 
 export default ({ onCancel, onEvaluate, onTrain }) => {
-  const request = useCallback(() => {
+  const api = useContext(ApiContext);
+  const { project } = useProject();
+  const [prevModels, setPrevModels] = useState([]);
+  const [operators, setOperators] = useState([]);
+  const [projectSets, setProjectSets] = useState([]);
+
+  const getListData = useCallback(async () => {
+    if (!project.id) {
+      return {};
+    }
+    const result = await api.callApi("listTrain", {
+      params: {
+        project_id:project.id,
+      },
+    });
+
     return {
-      data: [
-        {
-          id: 1,
-          prev_model: "移动模型3.0",
-          project: "6月涨薪",
-          label_count: "300",
-          task_count: "300",
-          is_train: true,
-          prev_precision_rate: "90%",
-          next_precision_rate: "88%",
-          next_model: "移动模型3.1",
-          next_train_task: "500",
-          next_evaluate_task: "400",
-          train_rate: "77%",
-          project_collection: "移动模型",
-          time: "2022-03-04 11:11:11",
-          operator: "西征",
-        },
-      ],
+      data: result.results,
       success: true,
-      totla: 1,
+      total: result.count,
     };
-  }, []);
+
+  }, [project]);
+
+  const selectOfTrain = useCallback(
+    async () => {
+      if (!project.id) {
+        return {};
+      }
+      return await api.callApi("selectOfTrain", {
+        params: {
+          project_id:project.id,
+        },
+      });
+    },[project]);
+
+  useEffect(async () => {
+    selectOfTrain().then((data) => {
+      setPrevModels(data?.models);
+      setOperators(data?.users);
+      setProjectSets(data?.project_sets);
+    });
+
+  },[]);
 
   return (
     <>
@@ -45,14 +67,29 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
       <ProTable
         options={false}
         search={false}
-        request={request}
+        request={getListData}
         rowKey="id"
         headerTitle={(
           <Space>
-            <Select key="0" placeholder="训练前模型" />
-            <Select key="1"  placeholder="操作人" />
-            <Select key="2"  placeholder="是否训练" />
-            <Select key="3"  placeholder="项目集合" />
+            <Select key="0" placeholder="训练前模型" >
+              {prevModels.map((model) => (
+                <Option key={model.id}>{model.title}</Option>
+              ))}
+            </Select>
+            <Select key="1" placeholder="操作人" >
+              {operators.map((user) => (
+                <Option key={user}>{user}</Option>
+              ))}
+            </Select>
+            <Select key="2" placeholder="是否训练">
+              <Option key="true">是</Option>
+              <Option key="false">否</Option>
+            </Select>
+            <Select key="3" placeholder="项目集合" >
+              {projectSets.map((proj) => (
+                <Option key={proj.id}>{proj.title}</Option>
+              ))}
+            </Select>
           </Space>
         )}
         toolBarRender={() => [
