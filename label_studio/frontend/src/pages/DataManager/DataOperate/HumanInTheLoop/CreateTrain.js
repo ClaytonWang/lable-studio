@@ -40,7 +40,7 @@ export default ({ onCancel }) => {
       return await api.callApi("modelTrainInit", {
         params: {
           project_id: project.id,
-          model_id: '18',
+          model_id: currModel.id===tip_learn.id?'':currModel.id,
           operate:'train',
         },
       });
@@ -72,7 +72,9 @@ export default ({ onCancel }) => {
       <Modal.Header>
         <span><PlusOutlined />新增训练</span>
       </Modal.Header>
-      <Form className="content">
+      <Form
+        initialValues={trainModalData}
+        className="content">
         <Row>
           <Col span={8}>
             <Form.Item label="模型集名称">
