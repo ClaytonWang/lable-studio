@@ -121,7 +121,9 @@ export const API_CONFIG = {
     modelTrain: "/model-train/model",
     selectOfTrain: "/model-train/select",
     assessment: "POST:/model-train/assessment",
-    modelConfig:"/model-train/config",
+    modelConfig: "/model-train/config",
+    modelTrainInit: "/model-train/init",
+    modelTrainModel:"/model-train/model",
   },
   alwaysExpectJSON: false,
 };
