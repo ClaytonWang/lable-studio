@@ -239,7 +239,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         # 拼接模型服务参数
         task_data = []
         task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
-        train_count = math.floor(task_query.count * 0.8)
+        train_count = math.floor(task_query.count() * 0.8)
         train_task = task_query[:train_count]
         check_task = task_query[train_count:]
         for item in train_task:
@@ -273,7 +273,6 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             'state', 'organization', 'project'
         ]
         model_data = dict()
-        model_data['model_parameter'] = data.get('model_params')
         model_data['model'] = model
         model_data['state'] = 3
         model_data['version'] = new_version
@@ -285,12 +284,13 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         new_model = ModelManager.objects.create(**model_data)
         if new_model and obj_id:
             new_train = ModelTrain.objects.filter(id=obj_id).first()
-            new_train.model = model
+            # new_train.model = model
             new_train.new_model = new_model
 
             # 训练关联任务
             new_train.train_task.add(*train_task)
             new_train.assessment_task.all(*train_task)
+            new_train.save()
 
     @action(methods=['POST'], detail=False)
     def assessment(self, request, *args, **kwargs):
