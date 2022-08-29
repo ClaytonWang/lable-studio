@@ -43,7 +43,18 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
           project_id:project.id,
         },
       });
-    },[project]);
+    }, [project]);
+
+  const deleteData = useCallback(
+    async (id) => {
+      await api.callApi("delTrain", {
+        params: {
+          pk:id,
+        },
+      }).then((data) => {
+        getListData();
+      });
+    }, []);
 
   useEffect(async () => {
     selectOfTrain().then((data) => {
@@ -186,11 +197,11 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
           },
           {
             title: "操作",
-            render: () => {
+            render: (_,record) => {
               return (
                 <Popconfirm
                   title="确定要删除当前记录吗?"
-                  onConfirm={() => { }}
+                  onConfirm={() => { deleteData(record.id);}}
                   icon={<ExclamationCircleOutlined style={{ color: 'red' }}  />}
                   okText="确定"
                   cancelText="取消">

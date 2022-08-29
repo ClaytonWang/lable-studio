@@ -1,6 +1,7 @@
 import {
   forwardRef,
   useCallback,
+  useContext,
   useEffect,
   useImperativeHandle,
   useMemo,
@@ -8,12 +9,14 @@ import {
   useState
 } from "react";
 import { Modal } from "@/components/Modal/Modal";
+import { ApiContext } from '@/providers/ApiProvider';
 import CreateEvaluate from "./CreateEvaluate";
 import CreateTrain from "./CreateTrain";
 import List from "./List";
 import "./index.less";
 
 export default forwardRef(({ project }, ref) => {
+  const api = useContext(ApiContext);
   const modalRef = useRef();
   const [type, setType] = useState("list");
 
@@ -26,6 +29,19 @@ export default forwardRef(({ project }, ref) => {
   const onCancel = useCallback(() => {
     modalRef.current?.hide();
   }, [modalRef]);
+
+  const onSubmit = useCallback(async (url,params) => {
+    if (!url) return;
+    await api.callApi(url, {
+      body: {
+        project_id: project.id,
+        ...params,
+      },
+    });
+    modalRef.current?.hide();
+    setType("list");
+  },[modalRef,setType]);
+
   const handler = useMemo(() => {
     return {
       onCancel: () => setType("list"),
@@ -33,14 +49,6 @@ export default forwardRef(({ project }, ref) => {
       onEvaluate: () => setType("evaluate"),
     };
   }, [setType]);
-
-  // TEMP
-  // useEffect(() => {
-  //   modalRef.current?.show();
-  //   setType("train");
-  // }, []);
-
-  console.log(type);
 
   return (
     <>
@@ -61,8 +69,8 @@ export default forwardRef(({ project }, ref) => {
         }
       >
         {type === "list" && <List onCancel={onCancel} onEvaluate={handler.onEvaluate} onTrain={handler.onTrain} />}
-        {type === "evaluate" && <CreateEvaluate onCancel={handler.onCancel} />}
-        {type === "train" && <CreateTrain onCancel={handler.onCancel} />}
+        {type === "evaluate" && <CreateEvaluate onCancel={handler.onCancel} onSubmit={ onSubmit } />}
+        {type === "train" && <CreateTrain onCancel={handler.onCancel} onSubmit={ onSubmit } />}
       </Modal>
     </>
   );
