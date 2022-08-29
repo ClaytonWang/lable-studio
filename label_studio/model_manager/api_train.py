@@ -27,6 +27,7 @@ from rest_framework.pagination import PageNumberPagination
 from model_manager.serializers_train import ModelTrainListSerializer
 from model_manager.serializers_train import ModelTrainDetailSerializer
 from model_manager.serializers_train import ModelTrainCreateSerializer
+from .serializers import ModelManagerDetailSerializer, ModelManagerCreateSerializer
 from model_manager.serializers_train import ModelTrainUpdateSerializer
 from model_manager.models import ModelTrain, ModelManager
 from projects.models import ProjectSet, Project
@@ -34,6 +35,11 @@ from tasks.models import Task, Annotation, Prediction
 from db_ml.common import DbPageNumberPagination
 from db_ml.common import MultiSerializerViewSetMixin
 from db_ml.services import get_choice_values
+from db_ml.services import train_model
+from db_ml.services import generate_uuid
+from db_ml.services import get_first_version_model
+from db_ml.services import INTENT_DIALOG_PROMPT_TOKEN
+
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +61,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         :param kwargs:
         :return: dict
         """
-        filter_keys = ['project_id', 'model_id', 'user_id', 'project_set_id']
+        filter_keys = ['project_id', 'model_id', 'user_id', 'project_set_id', 'is_train']
         data = request.GET.dict()
         filter_params = dict()
         for key in filter_keys:
@@ -168,14 +174,9 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         if operate == 'train':
             train_task = math.floor(task_count * 0.8)
-            if model_id:
-                model = ModelManager.objects.filter(id=model_id).first()
-                max_version_model = ModelManager.objects.filter(token=model.token).order_by('-version').first()
-                result['version'] = model.version
-                result['new_version'] = str(format(float(max_version_model.version) + 1, '.1f'))
-            else:
-                result['version'] = '0.0'
-                result['new_version'] = '1.0'
+            version, new_version = self.get_model_version(model_id)
+            result['version'] = version
+            result['new_version'] = new_version
             result['new_model_train_task'] = train_task
             result['new_model_assessment_task'] = task_count - train_task
 
@@ -202,6 +203,18 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         data = serializer.data
         return Response(data)
 
+    @staticmethod
+    def get_model_version(model_id):
+        version, new_version = '0.0', '1.0'
+        if model_id:
+            model = ModelManager.objects.filter(id=model_id).first()
+            max_version_model = ModelManager.objects.filter(
+                token=model.token, project=model.project
+            ).order_by('-version').first()
+            version = model.version
+            new_version = str(format(float(max_version_model.version) + 1, '.1f'))
+        return version, new_version
+
     @action(methods=['POST'], detail=False)
     def train(self, request, *args, **kwargs):
         """
@@ -211,7 +224,73 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         :param kwargs:
         :return:
         """
-        pass
+        data = self.get_train_assessment_params(request)
+        model_id = data.get('model_id')
+
+        # train
+        version, new_version = self.get_model_version(model_id)
+        data['state'] = 3
+        data['category'] = 'train'
+        data['is_train'] = True
+        data['version'] = version
+        data['new_version'] = new_version
+        train_data = self.created_train(data)
+
+        # 拼接模型服务参数
+        task_data = []
+        task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
+        train_count = math.floor(task_query.count * 0.8)
+        train_task = task_query[:train_count]
+        check_task = task_query[train_count:]
+        for item in train_task:
+            dialogue = item.data.get('dialogue', [])
+            task_data.append(dict(
+                task_id=item.id,
+                dialogue=dialogue
+            ))
+
+        obj_id = train_data.get('id')
+        _uuid = generate_uuid('train', obj_id)
+
+        # 模型管理建记录
+        if model_id:
+            model = ModelManager.objects.filter(id=model_id).first()
+        else:
+            model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
+
+        # 调用模型服务
+        train_model(
+            project_id=data.get('project_id'),
+            model_id=model.id,
+            task_data=task_data,
+            _uuid=_uuid,
+        )
+
+        # 建模型管理记录
+        serializer = ModelManagerDetailSerializer(instance=model)
+        init_filed = [
+            'project_set', 'title', 'url', 'token', 'version', 'type',
+            'state', 'organization', 'project'
+        ]
+        model_data = dict()
+        model_data['model_parameter'] = data.get('model_params')
+        model_data['model'] = model
+        model_data['state'] = 3
+        model_data['version'] = new_version
+
+        for k, v in serializer.data.items():
+            if k in init_filed:
+                model_data[k] = v
+
+        new_model = ModelManager.objects.create(**model_data)
+        if new_model and obj_id:
+            new_train = ModelTrain.objects.filter(id=obj_id).first()
+            new_train.model = model
+            new_train.new_model = new_model
+
+            # 训练关联任务
+            new_train.train_task.add(*train_task)
+            new_train.assessment_task.all(*train_task)
 
     @action(methods=['POST'], detail=False)
     def assessment(self, request, *args, **kwargs):
@@ -222,18 +301,25 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         :param kwargs:
         :return:
         """
-        data = self.get_train_assessment_params(request)
+        post_data = self.get_train_assessment_params(request)
+        obj_data = self.created_train(post_data)
+        headers = self.get_success_headers(obj_data)
+        return Response(post_data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def created_train(self, data):
         serializer = ModelTrainCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        return serializer.data
 
     @staticmethod
     def get_train_assessment_params(request):
         data = request.POST.dict()
         if not data:
             data = request.data
+
+        if not data.get('project_id'):
+            raise Exception('必须指定项目')
 
         data['category'] = 'assessment'
         data['created_by_id'] = request.user.id

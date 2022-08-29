@@ -22,6 +22,8 @@ from model_manager.services import ml_backend_request
 from model_manager.models import ModelManager
 from model_manager.services import ml_backend_params
 
+INTENT_DIALOG_PROMPT_TOKEN = '101469da9d088219'
+CONVERSATIONAL_GENERATION_TOKEN = '101469da9d088219'
 
 PREDICTION_BACKUP_FIELDS = [
     'result', 'score', 'model_version', 'task', 'created_at', 'updated_at'
@@ -251,10 +253,10 @@ def predict_prompt(
     """
     if prompt_type == 'intent-dialog':
         # 预标注（0样本）
-        model = ModelManager.objects.filter(token='101469da9d088219').first()
+        model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
     elif prompt_type == 'conversational-generation':
         # 生成对话（0样本）
-        model = ModelManager.objects.filter(token='9e72f8c5aa27811d').first()
+        model = get_first_version_model(CONVERSATIONAL_GENERATION_TOKEN)
     else:
         # 预标注普通   生成对话普通   前端有选择模型
         model = ModelManager.objects.filter(id=model_id).first()
@@ -270,6 +272,12 @@ def predict_prompt(
         model.url, uri=['predict', _uuid], params=_params,
         _json=_json, method="post"
     )
+
+
+def get_first_version_model(token, version=1.0):
+    return ModelManager.objects.filter(
+        token=token, versio=version
+    ).order_by('-id').first()
 
 
 def preprocess_clean(project_id, model_ids, task_data, _uuid):
@@ -308,4 +316,26 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
     return ml_backend_request(
         first_url, uri=['pipeline', _uuid], params=_params, _json=_json,
         method='post',
+    )
+
+
+def train_model(
+        project_id, model_id, task_data, _uuid, template=[], return_num=0,
+):
+    if model_id:
+        model = ModelManager.objects.filter(id=model_id).first()
+    else:
+        model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
+
+    _params = dict()
+    _json = ml_backend_params(
+        data=task_data,
+        labels=get_project_labels(project_id),
+        templates=template,
+        extra=dict(return_nums=return_num)
+    )
+
+    return ml_backend_request(
+        model.url, uri=['train', _uuid], params=_params,
+        _json=_json, method="post"
     )
