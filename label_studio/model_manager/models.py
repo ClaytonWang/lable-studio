@@ -80,6 +80,8 @@ class ModelTrain(models.Model):
 
     # 组织
     organization = models.ForeignKey('organizations.Organization', on_delete=models.SET_NULL, related_name='model_record_org', null=True)
+    # 提示学习 未选择模型提供的名称
+    model_title = models.CharField(_('title'), max_length=20, help_text='Model name. ')
     # 训练前模型
     model = models.ForeignKey('model_manager.ModelManager', on_delete=models.SET_NULL, null=True, blank=True, help_text='', related_name='model_record')
     # 新模型
