@@ -108,7 +108,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
             </Select>
             <Select key="1" placeholder="操作人" >
               {operators.map((user) => (
-                <Option key={user}>{user}</Option>
+                <Option key={user.user_id}>{user.username}</Option>
               ))}
             </Select>
             <Select key="2" placeholder="是否训练">
