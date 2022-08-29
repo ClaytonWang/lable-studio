@@ -1,4 +1,4 @@
-import { useCallback ,useContext, useEffect,useState } from "react";
+import { useCallback ,useContext, useEffect,useRef,useState } from "react";
 import { Button, Popconfirm, Select, Space,Tooltip } from "antd";
 import { ExclamationCircleOutlined,QuestionCircleOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
@@ -6,6 +6,8 @@ import { PlusOutlined } from "@ant-design/icons";
 import { Modal } from "@/components/Modal/Modal";
 import { ApiContext } from '@/providers/ApiProvider';
 import { useProject } from "@/providers/ProjectProvider";
+import { Userpic } from '@/components';
+import { format } from 'date-fns';
 const { Option } = Select;
 
 export default ({ onCancel, onEvaluate, onTrain }) => {
@@ -14,6 +16,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
   const [prevModels, setPrevModels] = useState([]);
   const [operators, setOperators] = useState([]);
   const [projectSets, setProjectSets] = useState([]);
+  const ref = useRef();
 
   const getListData = useCallback(async () => {
     if (!project.id) {
@@ -51,8 +54,8 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
         params: {
           pk:id,
         },
-      }).then((data) => {
-        getListData();
+      }).then(() => {
+        ref.current.reload();
       });
     }, []);
 
@@ -65,6 +68,21 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
 
   },[]);
 
+  const formatNumber = (value) => {
+    if (!value)
+      value = 0;
+    try {
+      value = parseFloat(value) * 100;
+    } catch (e) {
+      value = 0;
+    }
+    return new Intl.NumberFormat('en', {
+      style: 'unit',
+      unit: 'percent',
+    }).format(value);
+  };
+
+
   return (
     <>
       <Modal.Header>
@@ -76,6 +94,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
         </Space>
       </Modal.Header>
       <ProTable
+        actionRef={ ref}
         options={false}
         search={false}
         request={getListData}
@@ -134,31 +153,52 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
           },
           {
             title: "项目",
-            dataIndex: "project",
+            dataIndex: "project_title",
           },
           {
             title: "正确标注数",
-            dataIndex: "label_count",
+            dataIndex: "exactness_count",
           },
           {
             title: "总任务数",
-            dataIndex: "task_count",
+            dataIndex: "total_count",
           },
           {
             title: "是否训练",
             dataIndex: "is_train",
+            render: (_,record) => {
+              return (
+                <div>
+                  {record.is_train?'是':'否'}
+                </div>
+              );
+            },
           },
           {
             title: "当前准确率",
-            dataIndex: "prev_precision_rate",
+            dataIndex: "accuracy_rate",
+            render: (_,record) => {
+              return (
+                <div>
+                  {formatNumber(record.accuracy_rate)}
+                </div>
+              );
+            },
           },
           {
             title: "新模型准确率",
-            dataIndex: "next_precision_rate",
+            dataIndex: "new_accuracy_rate",
+            render: (_,record) => {
+              return (
+                <div>
+                  {formatNumber(record.new_accuracy_rate)}
+                </div>
+              );
+            },
           },
           {
             title: "新模型",
-            dataIndex: "next_model",
+            dataIndex: "new_model",
             render: (v) => {
               return <Button type="link">{v}</Button>;
             },
@@ -169,7 +209,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
                 新模型训练任务数
               </Tooltip>
             ),
-            dataIndex: "next_train_task",
+            dataIndex: "new_model_train_task",
           },
           {
             title: (
@@ -177,23 +217,44 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
                 新模型评估任务数
               </Tooltip>
             ),
-            dataIndex: "next_evaluate_task",
+            dataIndex: "new_model_assessment_task",
           },
           {
             title: "训练进度",
-            dataIndex: "train_rate",
+            dataIndex: "training_progress",
+            render: (_,record) => {
+              return (
+                <div >
+                  {formatNumber(record.training_progress)}
+                </div>
+              );
+            },
           },
           {
             title: "项目集合",
-            dataIndex: "project_collection",
+            dataIndex: "project_set",
           },
           {
             title: "时间",
-            dataIndex: "time",
+            dataIndex: "updated_at",
+            render: (_, record) => {
+              return (
+                <div name="created-date">
+                  {format(new Date(record.created_at), "yyyy-MM-dd HH:mm")}
+                </div>
+              );
+            },
           },
           {
             title: "操作人",
-            dataIndex: "operator",
+            dataIndex: 'created_by',
+            render: (_, record) => {
+              return (
+                <div name="created-by">
+                  <Userpic src="#" user={record.created_by} showUsername />
+                </div>
+              );
+            },
           },
           {
             title: "操作",
