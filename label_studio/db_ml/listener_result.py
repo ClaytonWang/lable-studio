@@ -21,6 +21,9 @@ from db_ml.services import generate_redis_key
 from db_ml.services import redis_set_json, redis_get_json
 from db_ml.services import redis_update_finish_state
 from db_ml.services import update_prediction_data
+from db_ml.services import get_first_version_model
+from db_ml.services import INTENT_DIALOG_PROMPT_TOKEN
+from model_manager.models import ModelTrain, ModelManager
 logger = logging.getLogger('db')
 
 """
@@ -85,22 +88,30 @@ def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_resu
     if not project:
         logger.info(f'Invalid project id : {project_id}')
         return
-    if project.template_type == 'intent-dialog':
-        if algorithm_type == 'prediction':
-            data = get_prediction_intent_df(algorithm_result, task_id)
-            insert_prediction_value(data, project_id, task_id)
-        elif algorithm_type == 'prompt':
-            insert_prompt_intent_value(algorithm_result, project_id, task_id)
-        elif algorithm_type == 'clean':
-            insert_clean_value(algorithm_result, project_id, task_id)
-    elif project.template_type == 'conversational-generation':
-        if algorithm_type == 'prediction':
-            data = get_prediction_generate_df(algorithm_result, task_id)
-            insert_prediction_value(data, project_id, task_id)
-        elif algorithm_type == 'prompt':
-            insert_prompt_generate_value(algorithm_result, project_id, task_id)
+    if algorithm_type == 'train':
+        #
+        """
+        train 时，project_id带的是modelTrain的主键
+         {port: 100010}
+        """
+        insert_train_model(algorithm_result, project_id)
     else:
-        logger.info(f'Invalid algorithm_type: {algorithm_type}')
+        if project.template_type == 'intent-dialog':
+            if algorithm_type == 'prediction':
+                data = get_prediction_intent_df(algorithm_result, task_id)
+                insert_prediction_value(data, project_id, task_id)
+            elif algorithm_type == 'prompt':
+                insert_prompt_intent_value(algorithm_result, project_id, task_id)
+            elif algorithm_type == 'clean':
+                insert_clean_value(algorithm_result, project_id, task_id)
+        elif project.template_type == 'conversational-generation':
+            if algorithm_type == 'prediction':
+                data = get_prediction_generate_df(algorithm_result, task_id)
+                insert_prediction_value(data, project_id, task_id)
+            elif algorithm_type == 'prompt':
+                insert_prompt_generate_value(algorithm_result, project_id, task_id)
+        else:
+            logger.info(f'Invalid algorithm_type: {algorithm_type}')
 
 
 def split_project_and_task_id(celery_task_id) -> list:
@@ -303,3 +314,18 @@ def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
         TaskDbAlgorithm.objects.filter(task_id=db_algorithm_id).update(
             state=3, remarks=str(e)
         )
+
+
+def insert_train_model(algorithm_result, model_train_id):
+    port = algorithm_result.get('port')
+    if not port:
+        logger.error('训练模型未返回端口')
+    train = ModelTrain.objects.filter(id=model_train_id).first()
+    if train.category != 'train':
+        logger.error(f'训练记录类型错误，tain id :{model_train_id}')
+        return
+
+    domain = train.url.split(':')[0] if ':' in train.url else train.url
+    train.url = f'{domain}:{port}'
+    train.state = 4
+    train.save()
