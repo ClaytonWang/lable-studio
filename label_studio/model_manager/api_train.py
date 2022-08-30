@@ -303,6 +303,8 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         :return:
         """
         post_data = self.get_train_assessment_params(request)
+        if 'model_id' in post_data and post_data.get('model_id') is None:
+            post_data.pop('model_id')
         obj_data = self.created_train(post_data)
         headers = self.get_success_headers(obj_data)
         return Response(post_data, status=status.HTTP_201_CREATED, headers=headers)

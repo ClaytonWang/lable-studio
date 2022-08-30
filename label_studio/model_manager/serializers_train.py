@@ -70,7 +70,7 @@ class ModelTrainCreateSerializer(serializers.ModelSerializer):
 
     """
     """
-    model_id = serializers.IntegerField(required=True)
+    model_id = serializers.IntegerField(required=False)
     new_model_id = serializers.IntegerField(required=False)
     project_id = serializers.IntegerField(required=True)
     created_by_id = serializers.IntegerField(required=True)
