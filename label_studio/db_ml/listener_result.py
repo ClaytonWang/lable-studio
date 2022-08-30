@@ -317,7 +317,8 @@ def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
 
 
 def insert_train_model(algorithm_result, model_train_id):
-    port = algorithm_result.get('port')
+    # port = algorithm_result.get('port')
+    port = algorithm_result
     if not port:
         logger.error('训练模型未返回端口')
     train = ModelTrain.objects.filter(id=model_train_id).first()
