@@ -88,8 +88,7 @@ class ModelTrainCreateSerializer(serializers.ModelSerializer):
             'accuracy_rate', 'new_accuracy_rate', 'training_progress', 'category', 'created_at',
             'updated_at', 'state', 'model_parameter', 'model_result', 'model_id', 'new_model_id',
             'project_id', 'created_by_id', 'updated_by_id', 'organization_id',
-            'model_parameter']
-        print('....')
+            'model_parameter', 'model_title']
 
 
 class ModelTrainUpdateSerializer(ModelTrainCreateSerializer):

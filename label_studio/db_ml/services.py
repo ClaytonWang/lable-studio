@@ -276,7 +276,7 @@ def predict_prompt(
 
 def get_first_version_model(token, version=1.0):
     return ModelManager.objects.filter(
-        token=token, versio=version
+        token=token, version=version
     ).order_by('-id').first()
 
 
