@@ -14,17 +14,27 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
   const api = useContext(ApiContext);
   const { project } = useProject();
   const [prevModels, setPrevModels] = useState([]);
+  const [prevModelId, setPrevModelId] = useState('');
   const [operators, setOperators] = useState([]);
+  const [operatorId, setOperatorId] = useState('');
+  const [isTrain, setIsTrain] = useState('');
+  const [projectSetId, setProjectSetId] = useState('');
   const [projectSets, setProjectSets] = useState([]);
   const ref = useRef();
 
-  const getListData = useCallback(async () => {
+  const getListData = async (params = {}) => {
     if (!project.id) {
       return {};
     }
     const result = await api.callApi("listTrain", {
       params: {
-        project_id:project.id,
+        project_id: project.id,
+        page: params.current,
+        page_size: params.pageSize,
+        model_id:prevModelId,
+        user_id: operatorId,
+        is_train: isTrain,
+        project_set_id:projectSetId,
       },
     });
 
@@ -34,7 +44,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
       total: result.count,
     };
 
-  }, [project]);
+  };
 
   const selectOfTrain = useCallback(
     async () => {
@@ -82,6 +92,25 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
     }).format(value);
   };
 
+  const modelChange = (e) => {
+    setPrevModelId(e);
+    ref.current.reload();
+  };
+
+  const operatorChange = (e) => {
+    setOperatorId(e);
+    ref.current.reload();
+  };
+
+  const isTrainChange = (e) => {
+    setIsTrain(e);
+    ref.current.reload();
+  };
+
+  const projectChange = (e) => {
+    setProjectSetId(e);
+    ref.current.reload();
+  };
 
   return (
     <>
@@ -94,34 +123,42 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
         </Space>
       </Modal.Header>
       <ProTable
-        actionRef={ ref}
-        options={false}
+        actionRef={ref}
         search={false}
         request={getListData}
         rowKey="id"
+        options={false}
         headerTitle={(
           <Space>
-            <Select key="0" placeholder="训练前模型" >
+            <Select key="0" placeholder="训练前模型" onChange={modelChange} >
+              <Option key="">不限</Option>
               {prevModels.map((model) => (
                 <Option key={model.id}>{model.title}</Option>
               ))}
             </Select>
-            <Select key="1" placeholder="操作人" >
+            <Select key="1" placeholder="操作人" onChange={operatorChange} >
+              <Option key="">不限</Option>
               {operators.map((user) => (
                 <Option key={user.user_id}>{user.username}</Option>
               ))}
             </Select>
-            <Select key="2" placeholder="是否训练">
+            <Select key="2" placeholder="是否训练" onChange={isTrainChange} >
+              <Option key="">不限</Option>
               <Option key="true">是</Option>
               <Option key="false">否</Option>
             </Select>
-            <Select key="3" placeholder="项目集合" >
+            <Select key="3" placeholder="项目集合" onChange={projectChange} >
+              <Option key="">不限</Option>
               {projectSets.map((proj) => (
                 <Option key={proj.id}>{proj.title}</Option>
               ))}
             </Select>
           </Space>
         )}
+        pagination={{
+          pageSize: 5,
+          showSizeChanger: true,
+        }}
         toolBarRender={() => [
           <Button key="cancel" onClick={onCancel}>
             取消
@@ -146,7 +183,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
         columns={[
           {
             title: "训练前模型",
-            dataIndex: "prev_model",
+            dataIndex: "model_title_version",
             render: (v) => {
               return <Button type="link">{v}</Button>;
             },
@@ -198,7 +235,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
           },
           {
             title: "新模型",
-            dataIndex: "new_model",
+            dataIndex: "new_model_title_version",
             render: (v) => {
               return <Button type="link">{v}</Button>;
             },

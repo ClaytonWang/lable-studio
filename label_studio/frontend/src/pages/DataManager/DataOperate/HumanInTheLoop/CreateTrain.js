@@ -87,7 +87,7 @@ export default ({ onCancel,onSubmit }) => {
       return;
     }
     trainModalData.model_id = currModel.id==='tip_learn' ? null : currModel.id;
-    onSubmit('assessment',{ ...trainModalData,model_title:currModel.model_title });
+    onSubmit('train',{ ...trainModalData,model_title:currModel.model_title });
   };
 
   const handleInput = (e) => {
