@@ -184,8 +184,8 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
           {
             title: "训练前模型",
             dataIndex: "model_title_version",
-            render: (v) => {
-              return <Button type="link">{v}</Button>;
+            render: (v,record) => {
+              return (record.category === "train" ? <Button type="link">{v}</Button> : { v });
             },
           },
           {
