@@ -42,6 +42,7 @@ from db_ml.services import predict_prompt
 from db_ml.services import preprocess_clean
 from db_ml.services import generate_uuid
 from db_ml.services import get_project_labels
+from db_ml.services import train_failure_delete_train_model
 from db_ml.listener_result import process_algorithm_result, split_project_and_task_id
 logger = logging.getLogger('db')
 
@@ -393,13 +394,18 @@ def job_result(request):
     if task_status in ('PENDING', 'STARTED', 'RETRY'):
         return
 
-    if task_status in ('FAILURE', 'REVOKED'):
+    state, error = 0, ''
+    celery_task_id = data.get('celery_task_id')
+    algorithm_type, project_id, task_id = split_project_and_task_id(celery_task_id)
+    if algorithm_type == 'train' and task_status == 'FAILURE':
+        state = 1
+        error = 'Task status is failed'
+        train_failure_delete_train_model(project_id)
+        return Response(data={'status': state, 'error': error})
+    elif task_status in ('FAILURE', 'REVOKED'):
         data['result'] = ''
 
-    celery_task_id = data.get('celery_task_id')
     result = data.get('result')
-    algorithm_type, project_id, task_id = split_project_and_task_id(celery_task_id)
-    state, error = 0, ''
     if not algorithm_type or not project_id:
         state = 1
         error = 'Required parameters algorithm_type, project_id task_id'

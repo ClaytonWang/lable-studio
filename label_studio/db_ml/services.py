@@ -343,3 +343,14 @@ def train_model(
         model.url, uri=['train', _uuid], params=_params,
         _json=_json, method="post"
     )
+
+
+def train_failure_delete_train_model(model_train_id):
+    from model_manager.models import ModelTrain, ModelManager
+
+    train = ModelTrain.objects.filter(id=model_train_id).first()
+    if not train:
+        return
+
+    train.new_model and train.new_model.delete()
+    train.delete()
