@@ -133,7 +133,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
             <Select key="0" placeholder="训练前模型" onChange={modelChange} >
               <Option key="">不限</Option>
               {prevModels.map((model) => (
-                <Option key={model.id}>{model.title}</Option>
+                <Option key={model.id}>{model.title} { model.version}</Option>
               ))}
             </Select>
             <Select key="1" placeholder="操作人" onChange={operatorChange} >
