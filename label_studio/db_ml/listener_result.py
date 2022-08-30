@@ -84,10 +84,6 @@ def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_resu
     :param algorithm_result:
     :return:
     """
-    project = Project.objects.filter(id=project_id).first()
-    if not project:
-        logger.info(f'Invalid project id : {project_id}')
-        return
     if algorithm_type == 'train':
         #
         """
@@ -96,6 +92,10 @@ def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_resu
         """
         insert_train_model(algorithm_result, project_id)
     else:
+        project = Project.objects.filter(id=project_id).first()
+        if not project:
+            logger.info(f'Invalid project id : {project_id}')
+            return
         if project.template_type == 'intent-dialog':
             if algorithm_type == 'prediction':
                 data = get_prediction_intent_df(algorithm_result, task_id)
@@ -323,7 +323,7 @@ def insert_train_model(algorithm_result, model_train_id):
         logger.error('训练模型未返回端口')
     train = ModelTrain.objects.filter(id=model_train_id).first()
     if train.category != 'train':
-        logger.error(f'训练记录类型错误，tain id :{model_train_id}')
+        logger.error(f'训练记录类型错误，train id :{model_train_id}')
         return
 
     domain = train.url.split(':')[0] if ':' in train.url else train.url
