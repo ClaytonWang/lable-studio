@@ -234,12 +234,12 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         data['is_train'] = True
         data['version'] = version
         data['new_version'] = new_version
-        train_data = self.created_train(data)
+        new_train = self.created_train(data)
 
         # 拼接模型服务参数
         task_data = []
         task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
-        train_count = math.floor(task_query.count * 0.8)
+        train_count = math.floor(task_query.count() * 0.8)
         train_task = task_query[:train_count]
         check_task = task_query[train_count:]
         for item in train_task:
@@ -249,7 +249,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
                 dialogue=dialogue
             ))
 
-        obj_id = train_data.get('id')
+        obj_id = new_train.id
         _uuid = generate_uuid('train', obj_id)
 
         # 模型管理建记录
@@ -264,6 +264,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             model_id=model.id,
             task_data=task_data,
             _uuid=_uuid,
+            model_parameter=new_train.model_parameter
         )
 
         # 建模型管理记录
@@ -273,7 +274,6 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             'state', 'organization', 'project'
         ]
         model_data = dict()
-        model_data['model_parameter'] = data.get('model_params')
         model_data['model'] = model
         model_data['state'] = 3
         model_data['version'] = new_version
@@ -285,12 +285,13 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         new_model = ModelManager.objects.create(**model_data)
         if new_model and obj_id:
             new_train = ModelTrain.objects.filter(id=obj_id).first()
-            new_train.model = model
+            # new_train.model = model
             new_train.new_model = new_model
 
             # 训练关联任务
             new_train.train_task.add(*train_task)
-            new_train.assessment_task.all(*train_task)
+            new_train.assessment_task.all(*check_task)
+            new_train.save()
 
     @action(methods=['POST'], detail=False)
     def assessment(self, request, *args, **kwargs):
@@ -302,6 +303,8 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         :return:
         """
         post_data = self.get_train_assessment_params(request)
+        if 'model_id' in post_data and post_data.get('model_id') is None:
+            post_data.pop('model_id')
         obj_data = self.created_train(post_data)
         headers = self.get_success_headers(obj_data)
         return Response(post_data, status=status.HTTP_201_CREATED, headers=headers)
@@ -309,8 +312,9 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
     def created_train(self, data):
         serializer = ModelTrainCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return serializer.data
+        new_train = ModelTrain.objects.create(**serializer.data)
+        # self.perform_create(serializer)
+        return new_train
 
     @staticmethod
     def get_train_assessment_params(request):
