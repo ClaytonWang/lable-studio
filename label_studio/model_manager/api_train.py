@@ -142,10 +142,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             raise Exception('项目模版类型错误，支持模版是对话意图识别。')
 
         tasks = Task.objects.filter(project_id=project_id)
-        anno_query = Annotation.objects.filter(task__in=tasks)
-        anno_result = {str(item.task_id): item.result for item in anno_query}
-        pre_query = Prediction.objects.filter(task__in=tasks)
-        pre_result = {str(item.task_id): item.result for item in pre_query}
+        anno_result, pre_result = self.get_project_label_result(tasks)
 
         # TODO 手动标注和自动标注，历史数据引起的错误
         exactness_count, error_count, total_count, accuracy_rate = 0, 0, 0, 0
@@ -181,6 +178,15 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             result['new_model_assessment_task'] = task_count - train_task
 
         return Response(data=result)
+
+    @staticmethod
+    def get_project_label_result(tasks):
+        anno_query = Annotation.objects.filter(task__in=tasks)
+        anno_result = {str(item.task_id): item.result for item in anno_query}
+        pre_query = Prediction.objects.filter(task__in=tasks)
+        pre_result = {str(item.task_id): item.result for item in pre_query}
+
+        return anno_result, pre_result
 
     @staticmethod
     def get_model_of_project(project_id):
@@ -242,11 +248,23 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         train_count = math.floor(task_query.count() * 0.8)
         train_task = task_query[:train_count]
         check_task = task_query[train_count:]
+
+        anno_result, pre_result = self.get_project_label_result(train_task)
         for item in train_task:
+            task_id = item.id
+            # 有手动标注取手动标注的值，没有取自动标注的值
+            label = ''
+            if task_id in anno_result:
+                label = get_choice_values(anno_result.get(task_id))
+
+            if not label and task_id in pre_result:
+                label = get_choice_values(anno_result.get(task_id))
+
             dialogue = item.data.get('dialogue', [])
             task_data.append(dict(
-                task_id=item.id,
-                dialogue=dialogue
+                task_id=task_id,
+                dialogue=dialogue,
+                label=label,
             ))
 
         obj_id = new_train.id
@@ -269,18 +287,16 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         # 建模型管理记录
         serializer = ModelManagerDetailSerializer(instance=model)
-        init_filed = [
-            'project_set', 'title', 'url', 'token', 'version', 'type',
-            'state', 'organization', 'project'
-        ]
         model_data = dict()
         model_data['model'] = model
         model_data['state'] = 3
         model_data['version'] = new_version
 
-        for k, v in serializer.data.items():
-            if k in init_filed:
-                model_data[k] = v
+        for field in [
+            'title', 'url', 'token', 'type',
+            'organization', 'project', 'project_set'
+        ]:
+            model_data[field] = getattr(serializer.instance, field)
 
         new_model = ModelManager.objects.create(**model_data)
         if new_model and obj_id:
@@ -290,8 +306,12 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
             # 训练关联任务
             new_train.train_task.add(*train_task)
-            new_train.assessment_task.all(*check_task)
+            new_train.assessment_task.add(*check_task)
             new_train.save()
+
+        train_serializer = ModelTrainDetailSerializer(instance=new_train)
+        headers = self.get_success_headers(train_serializer.data)
+        return Response(train_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(methods=['POST'], detail=False)
     def assessment(self, request, *args, **kwargs):

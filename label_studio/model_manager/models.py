@@ -44,7 +44,7 @@ class ModelManager(DummyModelMixin, models.Model):
 
     # title 模型集名称，模型名称是模型集名称 + 版本
     title = models.CharField(_('title'), max_length=20, help_text='Model set name. ')
-    url = models.TextField(_('url'), unique=True, help_text='URL for the machine learning model server')
+    url = models.TextField(_('url'), help_text='URL for the machine learning model server')
     description = models.TextField(_('description'), blank=True, null=True, default='', help_text='model configer description')
     token = models.CharField(_('token'), max_length=65, default=create_hash, null=True, blank=True)
 
