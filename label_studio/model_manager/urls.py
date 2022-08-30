@@ -27,6 +27,9 @@ router_record.register(r'', ModelTrainViews, basename='model record')
 _api_urlpatterns = [
     path('', include(router.urls)),
 ]
+_api_record_urlpatterns = [
+    path('', include(router_record.urls)),
+]
 
 _api_urlpatterns_templates = [
 ]
@@ -34,6 +37,6 @@ _api_urlpatterns_templates = [
 
 urlpatterns = [
     path('api/model-manager/', include(_api_urlpatterns)),
-    path('api/model-train/', include(router_record.urls)),
+    path('api/model-train/', include(_api_record_urlpatterns)),
     path('model-manager/', include(_urlpatterns)),
 ]

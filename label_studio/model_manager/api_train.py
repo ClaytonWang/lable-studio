@@ -179,6 +179,21 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         return Response(data=result)
 
+    @action(methods=['GET'], detail=True)
+    def accuracy(self, request, *args, **kwargs):
+        model_id = request.GET.dict().get('model_id')
+        if not model_id:
+            train = ModelTrain.objects.fitler(id=kwargs.get('pk')).first()
+            model_id = train.model.id
+
+        queryset = ModelTrain.objects.filter(model_id=model_id).values_list(
+            'model__title', 'model_version', 'project_title',
+            'accuracy_rate', 'created_at', 'created_by'
+        )
+        print(len(queryset))
+
+        return Response(data={})
+        # pk = kwargs.get('pk')
     @staticmethod
     def get_project_label_result(tasks):
         anno_query = Annotation.objects.filter(task__in=tasks)
@@ -253,7 +268,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         for item in train_task:
             task_id = item.id
             # 有手动标注取手动标注的值，没有取自动标注的值
-            label = ''
+            label = '升级'
             if task_id in anno_result:
                 label = get_choice_values(anno_result.get(task_id))
 
@@ -323,13 +338,13 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         :return:
         """
         post_data = self.get_train_assessment_params(request)
-        if 'model_id' in post_data and post_data.get('model_id') is None:
-            post_data.pop('model_id')
         obj_data = self.created_train(post_data)
         headers = self.get_success_headers(obj_data)
         return Response(post_data, status=status.HTTP_201_CREATED, headers=headers)
 
     def created_train(self, data):
+        if 'model_id' in data and data.get('model_id') is None:
+            data.pop('model_id')
         serializer = ModelTrainCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         new_train = ModelTrain.objects.create(**serializer.data)
