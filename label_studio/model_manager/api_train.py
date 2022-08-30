@@ -269,18 +269,16 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         # 建模型管理记录
         serializer = ModelManagerDetailSerializer(instance=model)
-        init_filed = [
-            'project_set', 'title', 'url', 'token', 'version', 'type',
-            'state', 'organization', 'project'
-        ]
         model_data = dict()
         model_data['model'] = model
         model_data['state'] = 3
         model_data['version'] = new_version
 
-        for k, v in serializer.data.items():
-            if k in init_filed:
-                model_data[k] = v
+        for field in [
+            'title', 'url', 'token', 'type',
+            'organization', 'project', 'project_set'
+        ]:
+            model_data[field] = getattr(serializer.instance, field)
 
         new_model = ModelManager.objects.create(**model_data)
         if new_model and obj_id:
@@ -290,8 +288,12 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
             # 训练关联任务
             new_train.train_task.add(*train_task)
-            new_train.assessment_task.all(*check_task)
+            new_train.assessment_task.add(*check_task)
             new_train.save()
+
+        train_serializer = ModelTrainDetailSerializer(instance=new_train)
+        headers = self.get_success_headers(train_serializer.data)
+        return Response(train_serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     @action(methods=['POST'], detail=False)
     def assessment(self, request, *args, **kwargs):
