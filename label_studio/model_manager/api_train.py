@@ -306,9 +306,10 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         model_data['model'] = model
         model_data['state'] = 3
         model_data['version'] = new_version
+        model_data['title'] = data.get('model_title')
 
         for field in [
-            'title', 'url', 'token', 'type',
+            'url', 'token', 'type',
             'organization', 'project', 'project_set'
         ]:
             model_data[field] = getattr(serializer.instance, field)
