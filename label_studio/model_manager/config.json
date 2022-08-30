@@ -1,1 +1,9 @@
-{"batch_size": 8, "num_epoch": 2, "lr": 1e-05, "seed": 2, "split_rate": 0.8}
+{"batch_size": 8,
+  "epoch": 2,
+  "lr": 1e-05,
+  "shuffle": true,
+  "split_rate": 0.8,
+  "max_seq_length": 256,
+  "decoder_max_length": 3
+}
+

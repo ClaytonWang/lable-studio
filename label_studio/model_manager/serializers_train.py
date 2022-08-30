@@ -70,7 +70,7 @@ class ModelTrainCreateSerializer(serializers.ModelSerializer):
 
     """
     """
-    model_id = serializers.IntegerField(required=True)
+    model_id = serializers.IntegerField(required=False)
     new_model_id = serializers.IntegerField(required=False)
     project_id = serializers.IntegerField(required=True)
     created_by_id = serializers.IntegerField(required=True)
@@ -87,7 +87,8 @@ class ModelTrainCreateSerializer(serializers.ModelSerializer):
             'exactness_count', 'total_count', 'is_train',
             'accuracy_rate', 'new_accuracy_rate', 'training_progress', 'category', 'created_at',
             'updated_at', 'state', 'model_parameter', 'model_result', 'model_id', 'new_model_id',
-            'project_id', 'created_by_id', 'updated_by_id', 'organization_id']
+            'project_id', 'created_by_id', 'updated_by_id', 'organization_id',
+            'model_parameter']
         print('....')
 
 

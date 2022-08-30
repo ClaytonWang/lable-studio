@@ -321,6 +321,7 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
 
 def train_model(
         project_id, model_id, task_data, _uuid, template=[], return_num=0,
+        **kwargs
 ):
     if model_id:
         model = ModelManager.objects.filter(id=model_id).first()
@@ -328,11 +329,14 @@ def train_model(
         model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
 
     _params = dict()
+    extra = dict(return_nums=return_num)
+    if kwargs.get('model_parameter'):
+        extra.update(**kwargs.get('model_parameter', {}))
     _json = ml_backend_params(
         data=task_data,
         labels=get_project_labels(project_id),
         templates=template,
-        extra=dict(return_nums=return_num)
+        extra=extra
     )
 
     return ml_backend_request(
