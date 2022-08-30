@@ -133,7 +133,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
             <Select key="0" placeholder="训练前模型" onChange={modelChange} >
               <Option key="">不限</Option>
               {prevModels.map((model) => (
-                <Option key={model.id}>{model.title}</Option>
+                <Option key={model.id}>{model.title} { model.version}</Option>
               ))}
             </Select>
             <Select key="1" placeholder="操作人" onChange={operatorChange} >
@@ -184,8 +184,8 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
           {
             title: "训练前模型",
             dataIndex: "model_title_version",
-            render: (v) => {
-              return <Button type="link">{v}</Button>;
+            render: (v,record) => {
+              return (record.model_title_version? <Button type="link">{v}</Button> : '/');
             },
           },
           {
@@ -297,14 +297,16 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
             title: "操作",
             render: (_,record) => {
               return (
-                <Popconfirm
-                  title="确定要删除当前记录吗?"
-                  onConfirm={() => { deleteData(record.id);}}
-                  icon={<ExclamationCircleOutlined style={{ color: 'red' }}  />}
-                  okText="确定"
-                  cancelText="取消">
-                  <Button type="link">删除</Button>
-                </Popconfirm>
+                record.category==='assessment'? (
+                  <Popconfirm
+                    title="确定要删除当前记录吗?"
+                    onConfirm={() => { deleteData(record.id);}}
+                    icon={<ExclamationCircleOutlined style={{ color: 'red' }}  />}
+                    okText="确定"
+                    cancelText="取消">
+                    <Button type="link">删除</Button>
+                  </Popconfirm>
+                ):'删除'
               );
 
             },

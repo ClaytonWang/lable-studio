@@ -1,11 +1,17 @@
-import React, { useCallback,useContext,useEffect,useState } from 'react';
+import "codemirror/lib/codemirror.css";
+import "codemirror/theme/material.css";
+import "codemirror/mode/javascript/javascript.js";
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { UnControlled as CodeMirror } from 'react-codemirror2';
 import { Col, Form, Input, Row, Select, Tag } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
+import { CodepenCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Modal } from "@/components/Modal/Modal";
 import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";
 import { useProject } from "@/providers/ProjectProvider";
 import { ApiContext } from '@/providers/ApiProvider';
+import { Template } from '@/pages/CreateProject/Config/Template';
+import { ConfigureControl } from '@/pages/CreateProject/Config/Config';
 const { Option } = Select;
 
 const tip_learn = {
@@ -13,12 +19,24 @@ const tip_learn = {
   title: "提示学习",
 };
 
+const formatJSON = (json) => {
+  if (!json) return '';
+  return JSON.stringify(json);
+};
+
+let newModelConfig = null;
+
 export default ({ onCancel,onSubmit }) => {
   const api = useContext(ApiContext);
   const [currModel, setCurrModel] = useState(tip_learn);
   const [trainModalData, setTrainModalData] = useState({});
   const [trainModels, setTrainModels] = useState([]);
   const [ipnutStatus, setIpnutStatus] = useState('');
+  const [template, setCurrentTemplate] = useState(null);
+  const [config, _setConfig] = useState("");
+  const [modelLabels, setModelLabels] = React.useState([]);
+  const [modelConfig, setModelConfig] = React.useState('');
+
   const { project } = useProject();
 
   const formatNumber = (value) => {
@@ -59,11 +77,18 @@ export default ({ onCancel,onSubmit }) => {
           operate:'train',
         },
       });
-    },[project,currModel]);
+    }, [project, currModel]);
+
+  const getModelConfig = useCallback(async () => {
+    return await api.callApi("modelConfig", {});
+  },[]);
 
 
   const handleChange = (value, option) => {
     setCurrModel(option.model);
+    if (option.model.id !== tip_learn.id) {
+      getModelLabels(option.model.id);
+    }
   };
 
   useEffect(() => {
@@ -75,7 +100,25 @@ export default ({ onCancel,onSubmit }) => {
     });
   }, []);
 
+  const setConfig = useCallback(config => {
+    _setConfig(config);
+  }, [_setConfig]);
+
+  const setTemplate = useCallback(config => {
+    const tpl = new Template({ config });
+
+    tpl.onConfigUpdate = setConfig;
+    setConfig(config);
+    setCurrentTemplate(tpl);
+  }, [setConfig, setCurrentTemplate]);
+
   useEffect(() => {
+    // if (project.label_config) {
+    //   setTemplate(project.label_config);
+    // }
+    getModelConfig().then(data => {
+      setModelConfig(data);
+    });
     getTrainInit().then(data => {
       setTrainModalData(data);
     });
@@ -86,8 +129,11 @@ export default ({ onCancel,onSubmit }) => {
       setIpnutStatus('error');
       return;
     }
-    trainModalData.model_id = currModel.id==='tip_learn' ? null : currModel.id;
-    onSubmit('train',{ ...trainModalData,model_title:currModel.model_title });
+    trainModalData.model_id = currModel.id === 'tip_learn' ? null : currModel.id;
+    let model_params = modelConfig;
+
+    if (newModelConfig) model_params = newModelConfig;
+    onSubmit('train',{ ...trainModalData,model_title:currModel.model_title,model_params });
   };
 
   const handleInput = (e) => {
@@ -101,6 +147,17 @@ export default ({ onCancel,onSubmit }) => {
     tip_learn.model_title = inputValue;
     setCurrModel(tip_learn);
   };
+
+  const getModelLabels = useCallback(async (model_id) => {
+    if(!model_id) return [];
+    const data = await api.callApi("modelLabel", {
+      params: {
+        model_id,
+      },
+    });
+
+    setModelLabels(data);
+  }, []);
 
   return (
     <div className="evaluate">
@@ -173,13 +230,44 @@ export default ({ onCancel,onSubmit }) => {
             </Form.Item>
           </Col>
         </Row>
+        {
+          modelLabels.length>0  && (
+            <Row>
+              <Col span={24}>
+                <Form.Item label="当前模型标签">
+                  <Space>
+                    {
+                      modelLabels && modelLabels.map(tag => {
+                        return (
+                          <Tag key={tag}>{tag}</Tag>
+                        );
+                      })
+                    }
+                  </Space>
+                </Form.Item>
+              </Col>
+            </Row>
+          )
+        }
         <Row>
-          <Col>
-            <Form.Item label="当前模型标签">
-              <Space>
-                <Tag>升级</Tag>
-                <Tag>不知情</Tag>
-              </Space>
+          <Col span={16} >
+            <Form.Item label="模型配置">
+              <div style={{ display: "json" }}>
+                <CodeMirror
+                  name="code"
+                  id="model_edit_code"
+                  value={formatJSON(modelConfig)}
+                  options={{ mode: {
+                    name: "javascript",
+                    json: true,
+                    statementIndent: 2,
+                  }, theme: "default", lineNumbers: true,
+                  }}
+                  onChange={(editor, data, value) => {
+                    newModelConfig = value;
+                  }}
+                />
+              </div>
             </Form.Item>
           </Col>
         </Row>
