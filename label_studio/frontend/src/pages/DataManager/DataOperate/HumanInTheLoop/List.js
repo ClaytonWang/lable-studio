@@ -18,13 +18,16 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
   const [projectSets, setProjectSets] = useState([]);
   const ref = useRef();
 
-  const getListData = useCallback(async () => {
+  const getListData = async (params = {}, sort, filter) => {
+    console.log(params,sort, filter);
     if (!project.id) {
       return {};
     }
     const result = await api.callApi("listTrain", {
       params: {
-        project_id:project.id,
+        project_id: project.id,
+        page: params.current,
+        page_size: params.pageSize,
       },
     });
 
@@ -34,7 +37,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
       total: result.count,
     };
 
-  }, [project]);
+  };
 
   const selectOfTrain = useCallback(
     async () => {
@@ -122,6 +125,10 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
             </Select>
           </Space>
         )}
+        pagination={{
+          pageSize: 5,
+          showSizeChanger: true,
+        }}
         toolBarRender={() => [
           <Button key="cancel" onClick={onCancel}>
             取消

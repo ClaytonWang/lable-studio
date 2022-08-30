@@ -121,6 +121,7 @@ export const API_CONFIG = {
     modelTrain: "/model-train/model",
     selectOfTrain: "/model-train/select",
     assessment: "POST:/model-train/assessment",
+    train:"POST:/model-train/train",
     modelConfig: "/model-train/config",
     modelTrainInit: "/model-train/init",
     modelTrainModel:"/model-train/model",
