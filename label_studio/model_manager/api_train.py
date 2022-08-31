@@ -191,10 +191,8 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             'model__title', 'model__version', 'project__title',
             'accuracy_rate', 'created_at', 'created_by'
         )
-        print(len(queryset))
-
         return Response(data=list(queryset))
-        # pk = kwargs.get('pk')
+
     @staticmethod
     def get_project_label_result(tasks):
         anno_query = Annotation.objects.filter(task__in=tasks)
