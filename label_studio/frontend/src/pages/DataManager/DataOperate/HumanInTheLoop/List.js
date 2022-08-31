@@ -191,7 +191,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
             ellipsis: true,
             render: (v, record) => {
               return (
-                record.model_title_version ? <a onClick={() => { onAccuracy(record.model); }}>{v}</a> : '/'
+                record.model_title_version ? <a onClick={() => { onAccuracy(record.id,record.model); }}>{v}</a> : '/'
               );
             },
           },
@@ -254,7 +254,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
             dataIndex: "new_model_title_version",
             ellipsis: true,
             render: (v,record) => {
-              return <a onClick={() => { onAccuracy(record.new_model);}}>{v}</a>;
+              return <a onClick={() => { onAccuracy(record.id,record.new_model);}}>{v}</a>;
             },
           },
           {

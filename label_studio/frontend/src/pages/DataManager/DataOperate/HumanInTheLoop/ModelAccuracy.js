@@ -7,7 +7,7 @@ import { ApiContext } from '@/providers/ApiProvider';
 import { format } from 'date-fns';
 import { Userpic } from '@/components';
 
-export default ({ onCancel ,modelId }) => {
+export default ({ onCancel ,evalId,modelId }) => {
   const api = useContext(ApiContext);
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -26,13 +26,14 @@ export default ({ onCancel ,modelId }) => {
     }).format(value);
   };
 
-  const getListData = async (pk) => {
+  const getListData = async (pk,model_id) => {
     if (!pk) {
       return [];
     }
     return await api.callApi("accuracy", {
       params: {
         pk,
+        model_id,
       },
     });
   };
@@ -40,13 +41,16 @@ export default ({ onCancel ,modelId }) => {
   const columns = [
     {
       title: '模型',
-      dataIndex: 'new_model_title_version',
-      key: 'new_model_title_version',
+      dataIndex: 'model__title',
+      key: 'model__title',
+      render: (_, record) => {
+        return record.model__title+record.model__version;
+      },
     },
     {
       title: '项目',
-      dataIndex: 'project_title',
-      key: 'project_title',
+      dataIndex: 'project__title',
+      key: 'project__title',
     },
     {
       title: "准确率",
@@ -85,7 +89,7 @@ export default ({ onCancel ,modelId }) => {
 
   useEffect(() => {
     setLoading(true);
-    getListData(modelId).then(data => {
+    getListData(evalId,modelId).then(data => {
       setLoading(false);
       setDataSource(data);
     });

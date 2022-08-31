@@ -21,6 +21,7 @@ export default forwardRef(({ project }, ref) => {
   const modalRef = useRef();
   const [type, setType] = useState("list");
   const [modelId, setModelId] = useState('');
+  const [evalId, setEvalId] = useState('');
 
   useImperativeHandle(ref, () => ({
     show: () => {
@@ -49,8 +50,9 @@ export default forwardRef(({ project }, ref) => {
       onCancel: () => setType("list"),
       onTrain: () => setType("train"),
       onEvaluate: () => setType("evaluate"),
-      onAccuracy: (id) => {
-        setModelId(id);
+      onAccuracy: (eval_id,model_id) => {
+        setModelId(model_id);
+        setEvalId(eval_id);
         setType("accuracy");
       },
     };
@@ -77,7 +79,7 @@ export default forwardRef(({ project }, ref) => {
         {type === "list" && <List onCancel={onCancel} onEvaluate={handler.onEvaluate} onTrain={handler.onTrain} onAccuracy={handler.onAccuracy } />}
         {type === "evaluate" && <CreateEvaluate onCancel={handler.onCancel} onSubmit={ onSubmit } />}
         {type === "train" && <CreateTrain onCancel={handler.onCancel} onSubmit={ onSubmit } />}
-        {type === "accuracy" && <ModelAccuracy onCancel={handler.onCancel} modelId={ modelId } />}
+        {type === "accuracy" && <ModelAccuracy onCancel={handler.onCancel} evalId={ evalId } modelId={ modelId } />}
       </Modal>
     </>
   );
