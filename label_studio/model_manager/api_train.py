@@ -16,6 +16,7 @@ from urllib import parse
 from drf_yasg.utils import swagger_auto_schema
 from django.http import Http404
 from django.db.models import F, Q
+from django.db.transaction import atomic
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
@@ -186,13 +187,13 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             train = ModelTrain.objects.fitler(id=kwargs.get('pk')).first()
             model_id = train.model.id
 
-        queryset = ModelTrain.objects.filter(model_id=model_id).values_list(
-            'model__title', 'model_version', 'project_title',
+        queryset = ModelTrain.objects.filter(model_id=model_id).values(
+            'model__title', 'model__version', 'project__title',
             'accuracy_rate', 'created_at', 'created_by'
         )
         print(len(queryset))
 
-        return Response(data={})
+        return Response(data=list(queryset))
         # pk = kwargs.get('pk')
     @staticmethod
     def get_project_label_result(tasks):
@@ -255,75 +256,74 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         data['is_train'] = True
         data['version'] = version
         data['new_version'] = new_version
-        new_train = self.created_train(data)
 
-        # 拼接模型服务参数
-        task_data = []
-        task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
-        train_count = math.floor(task_query.count() * 0.8)
-        train_task = task_query[:train_count]
-        check_task = task_query[train_count:]
+        with atomic():
+            new_train = self.created_train(data)
 
-        anno_result, pre_result = self.get_project_label_result(train_task)
-        for item in train_task:
-            task_id = item.id
-            # 有手动标注取手动标注的值，没有取自动标注的值
-            label = '升级'
-            if task_id in anno_result:
-                label = get_choice_values(anno_result.get(task_id))
+            # 拼接模型服务参数
+            task_data = []
+            task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
+            train_count = math.floor(task_query.count() * 0.8)
+            train_task = task_query[:train_count]
+            check_task = task_query[train_count:]
 
-            if not label and task_id in pre_result:
-                label = get_choice_values(anno_result.get(task_id))
+            # 模型管理建记录
+            if model_id:
+                model = ModelManager.objects.filter(id=model_id).first()
+            else:
+                model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
 
-            dialogue = item.data.get('dialogue', [])
-            task_data.append(dict(
-                task_id=task_id,
-                dialogue=dialogue,
-                label=label,
-            ))
+            # 建模型管理记录
+            serializer = ModelManagerDetailSerializer(instance=model)
+            model_data = dict()
+            model_data['model'] = model
+            model_data['state'] = 3
+            model_data['version'] = new_version
+            model_data['title'] = data.get('model_title')
+            model_data['created_by'] = request.user
 
-        obj_id = new_train.id
-        _uuid = generate_uuid('train', obj_id)
+            for field in [
+                'url', 'token', 'type',
+                'organization', 'project', 'project_set'
+            ]:
+                model_data[field] = getattr(serializer.instance, field)
 
-        # 模型管理建记录
-        if model_id:
-            model = ModelManager.objects.filter(id=model_id).first()
-        else:
-            model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
+            new_model = ModelManager.objects.create(**model_data)
+            if new_model and new_train:
+                new_train.new_model = new_model
+                # 训练关联任务
+                new_train.train_task.add(*train_task)
+                new_train.assessment_task.add(*check_task)
+                new_train.save()
 
-        # 调用模型服务
-        train_model(
-            project_id=data.get('project_id'),
-            model_id=model.id,
-            task_data=task_data,
-            _uuid=_uuid,
-            model_parameter=new_train.model_parameter
-        )
+            # 调用模型服务
+            anno_result, pre_result = self.get_project_label_result(train_task)
+            for item in train_task:
+                task_id = item.id
+                # 有手动标注取手动标注的值，没有取自动标注的值
+                label = '升级'
+                # if task_id in anno_result:
+                #     label = get_choice_values(anno_result.get(task_id))
+                #
+                # if not label and task_id in pre_result:
+                #     label = get_choice_values(anno_result.get(task_id))
 
-        # 建模型管理记录
-        serializer = ModelManagerDetailSerializer(instance=model)
-        model_data = dict()
-        model_data['model'] = model
-        model_data['state'] = 3
-        model_data['version'] = new_version
-        model_data['title'] = data.get('model_title')
+                dialogue = item.data.get('dialogue', [])
+                task_data.append(dict(
+                    task_id=task_id,
+                    dialogue=dialogue,
+                    label=label,
+                ))
 
-        for field in [
-            'url', 'token', 'type',
-            'organization', 'project', 'project_set'
-        ]:
-            model_data[field] = getattr(serializer.instance, field)
-
-        new_model = ModelManager.objects.create(**model_data)
-        if new_model and obj_id:
-            new_train = ModelTrain.objects.filter(id=obj_id).first()
-            # new_train.model = model
-            new_train.new_model = new_model
-
-            # 训练关联任务
-            new_train.train_task.add(*train_task)
-            new_train.assessment_task.add(*check_task)
-            new_train.save()
+            obj_id = new_train.id
+            _uuid = generate_uuid('train', obj_id)
+            train_model(
+                project_id=data.get('project_id'),
+                model_id=model.id,
+                task_data=task_data,
+                _uuid=_uuid,
+                model_parameter=new_train.model_parameter
+            )
 
         train_serializer = ModelTrainDetailSerializer(instance=new_train)
         headers = self.get_success_headers(train_serializer.data)
