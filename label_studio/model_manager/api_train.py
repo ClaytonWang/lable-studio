@@ -11,25 +11,17 @@ import os
 import math
 import json
 import logging
-import pathlib
-from urllib import parse
-from drf_yasg.utils import swagger_auto_schema
-from django.http import Http404
 from django.db.models import F, Q
 from django.db.transaction import atomic
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework.views import exception_handler
-from rest_framework import generics
 from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
-from rest_framework.pagination import PageNumberPagination
 from model_manager.serializers_train import ModelTrainListSerializer
 from model_manager.serializers_train import ModelTrainDetailSerializer
 from model_manager.serializers_train import ModelTrainCreateSerializer
-from .serializers import ModelManagerDetailSerializer, ModelManagerCreateSerializer
-from model_manager.serializers_train import ModelTrainUpdateSerializer
+from model_manager.serializers_train import ModelTrainAccuracySerializer
+from .serializers import ModelManagerDetailSerializer
 from model_manager.models import ModelTrain, ModelManager
 from projects.models import ProjectSet, Project
 from tasks.models import Task, Annotation, Prediction
@@ -40,6 +32,8 @@ from db_ml.services import train_model
 from db_ml.services import generate_uuid
 from db_ml.services import get_first_version_model
 from db_ml.services import INTENT_DIALOG_PROMPT_TOKEN
+from .serializers import ModelManagerCreateSerializer
+from model_manager.serializers_train import ModelTrainUpdateSerializer
 
 
 logger = logging.getLogger(__name__)
@@ -187,14 +181,19 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             train = ModelTrain.objects.fitler(id=kwargs.get('pk')).first()
             model_id = train.model.id
 
-        queryset = ModelTrain.objects.filter(model_id=model_id).values(
-            'model__title', 'model__version', 'project__title',
-            'accuracy_rate', 'created_at', 'created_by'
-        )
-        print(len(queryset))
+        train = ModelTrain.objects.filter(model_id=model_id).all()
+        serializer = ModelTrainAccuracySerializer(instance=train, many=True)
+        data = serializer.data
+        # .values(
+        # 'model__title', 'model__version', 'project__title',
+        # 'accuracy_rate', 'created_at', 'created_by'
+        # )
+        result = []
+        # for item in queryset:
+        #     pass
+            # item['created_by'] = UserSimpleSerializer(instance=)
+        return Response(data=list(data))
 
-        return Response(data=list(queryset))
-        # pk = kwargs.get('pk')
     @staticmethod
     def get_project_label_result(tasks):
         anno_query = Annotation.objects.filter(task__in=tasks)

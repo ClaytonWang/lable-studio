@@ -97,3 +97,30 @@ class ModelTrainUpdateSerializer(ModelTrainCreateSerializer):
     """
     pass
 
+
+class ModelTrainAccuracySerializer(serializers.ModelSerializer):
+
+    created_by = UserSimpleSerializer(default={})
+    model_title = serializers.SerializerMethodField()
+    model_version = serializers.SerializerMethodField()
+    project_title = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_model_title(obj):
+        return obj.model.title
+        pass
+
+    @staticmethod
+    def get_model_version(obj):
+        return obj.model.version
+
+    @staticmethod
+    def get_project_title(obj):
+        return obj.project.title
+
+    class Meta:
+        model = ModelTrain
+        fields = [
+            'model_title', 'model_version', 'project_title',
+            'accuracy_rate', 'created_at', 'created_by'
+        ]
