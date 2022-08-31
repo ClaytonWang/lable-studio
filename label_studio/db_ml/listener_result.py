@@ -331,9 +331,12 @@ def insert_train_model(algorithm_result, model_train_id):
     if not new_model:
         print('model train id is :', model_train_id, ' Not new_model.')
         return
-    domain = new_model.url.split(':')[0] if ':' in new_model.url else new_model.url
-    new_model.url = f'{domain}:{port}'
-    new_model.state = 4
-    new_model.save()
-    train.state = 4
-    train.save()
+    if ':' in new_model.url:
+        domain = ':'.join(new_model.url.split(':')[:-1])
+        new_model.url = f'{domain}:{port}'
+        new_model.state = 4
+        new_model.save()
+        train.state = 4
+        train.save()
+    else:
+        print('Model url is invalid. model id :', new_model.id)
