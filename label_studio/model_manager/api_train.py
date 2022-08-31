@@ -231,9 +231,11 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             model = ModelManager.objects.filter(id=model_id).first()
             max_version_model = ModelManager.objects.filter(
                 token=model.token, project=model.project
-            ).order_by('-version').first()
-            version = model.version
-            new_version = str(format(float(max_version_model.version) + 1, '.1f'))
+            ).values('version')
+            max_version_model = list(max_version_model)
+            max_version_model.sort(key=lambda k: int(float(k['version'])), reverse=True)
+            version = max_version_model[0]['version']
+            new_version = str(format(float(version) + 1, '.1f'))
         return version, new_version
 
     @action(methods=['POST'], detail=False)

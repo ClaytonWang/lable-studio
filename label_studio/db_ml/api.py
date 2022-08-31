@@ -397,6 +397,7 @@ def job_result(request):
     state, error = 0, ''
     celery_task_id = data.get('celery_task_id')
     algorithm_type, project_id, task_id = split_project_and_task_id(celery_task_id)
+    print(' algorithm_type: ', algorithm_type, ' project_id: ', project_id, ' task_id: ', task_id)
     if algorithm_type == 'train' and task_status == 'FAILURE':
         state = 1
         error = 'Task status is failed'
