@@ -318,6 +318,7 @@ def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
 
 def insert_train_model(algorithm_result, model_train_id):
     # port = algorithm_result.get('port')
+    print('result :::::', algorithm_result, ' train_id: ', model_train_id)
     port = algorithm_result
     if not port:
         logger.error('训练模型未返回端口')
@@ -326,7 +327,13 @@ def insert_train_model(algorithm_result, model_train_id):
         logger.error(f'训练记录类型错误，train id :{model_train_id}')
         return
 
-    domain = train.url.split(':')[0] if ':' in train.url else train.url
-    train.url = f'{domain}:{port}'
+    new_model = train.new_model
+    if not new_model:
+        print('model train id is :', model_train_id, ' Not new_model.')
+        return
+    domain = new_model.url.split(':')[0] if ':' in new_model.url else new_model.url
+    new_model.url = f'{domain}:{port}'
+    new_model.state = 4
+    new_model.save()
     train.state = 4
     train.save()
