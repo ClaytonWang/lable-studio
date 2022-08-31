@@ -187,13 +187,13 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             train = ModelTrain.objects.fitler(id=kwargs.get('pk')).first()
             model_id = train.model.id
 
-        queryset = ModelTrain.objects.filter(model_id=model_id).values_list(
-            'model__title', 'model_version', 'project_title',
+        queryset = ModelTrain.objects.filter(model_id=model_id).values(
+            'model__title', 'model__version', 'project__title',
             'accuracy_rate', 'created_at', 'created_by'
         )
         print(len(queryset))
 
-        return Response(data={})
+        return Response(data=list(queryset))
         # pk = kwargs.get('pk')
     @staticmethod
     def get_project_label_result(tasks):
@@ -302,11 +302,11 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
                 task_id = item.id
                 # 有手动标注取手动标注的值，没有取自动标注的值
                 label = '升级'
-                if task_id in anno_result:
-                    label = get_choice_values(anno_result.get(task_id))
-
-                if not label and task_id in pre_result:
-                    label = get_choice_values(anno_result.get(task_id))
+                # if task_id in anno_result:
+                #     label = get_choice_values(anno_result.get(task_id))
+                #
+                # if not label and task_id in pre_result:
+                #     label = get_choice_values(anno_result.get(task_id))
 
                 dialogue = item.data.get('dialogue', [])
                 task_data.append(dict(
