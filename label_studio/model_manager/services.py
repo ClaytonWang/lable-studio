@@ -89,6 +89,8 @@ def ml_backend_request(
     ml_url = ml_backend_url(host, uri=uri, version=version)
     logger.info(f'ML Request url:, {ml_url} {method} \nparams: {params}\ndata:{data}')
     session = getattr(requests, method)
+    # ml_url = 'http://127.0.0.1:5000/api/v1/train'
+    # print(_json['extra']['labels'])
     response = session(url=ml_url, params=params, data=data, json=_json)
     if response.status_code == 200:
         rsp_data = response.json()
