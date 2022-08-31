@@ -188,25 +188,32 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
           {
             title: "训练前模型",
             dataIndex: "model_title_version",
-            render: (v,record) => {
-              return (record.model_title_version? <a onClick={() => { onAccuracy(record.new_model);}}>{v}</a> : '/');
+            ellipsis: true,
+            render: (v, record) => {
+              return (
+                record.model_title_version ? <a onClick={() => { onAccuracy(record.model); }}>{v}</a> : '/'
+              );
             },
           },
           {
             title: "项目",
             dataIndex: "project_title",
+            ellipsis: true,
           },
           {
             title: "正确标注数",
             dataIndex: "exactness_count",
+            ellipsis: true,
           },
           {
             title: "总任务数",
             dataIndex: "total_count",
+            ellipsis: true,
           },
           {
             title: "是否训练",
             dataIndex: "is_train",
+            ellipsis: true,
             render: (_,record) => {
               return (
                 <div>
@@ -218,6 +225,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
           {
             title: "当前准确率",
             dataIndex: "accuracy_rate",
+            ellipsis: true,
             render: (_,record) => {
               return (
                 <div>
@@ -227,8 +235,12 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
             },
           },
           {
-            title: "新模型准确率",
+            title: (
+              <Tooltip title="新模型准确率">
+                新模型准确率
+              </Tooltip>),
             dataIndex: "new_accuracy_rate",
+            ellipsis: true,
             render: (_,record) => {
               return (
                 <div>
@@ -240,6 +252,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
           {
             title: "新模型",
             dataIndex: "new_model_title_version",
+            ellipsis: true,
             render: (v,record) => {
               return <a onClick={() => { onAccuracy(record.new_model);}}>{v}</a>;
             },
@@ -250,6 +263,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
                 新模型训练任务数
               </Tooltip>
             ),
+            ellipsis: true,
             dataIndex: "new_model_train_task",
           },
           {
@@ -259,10 +273,12 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
               </Tooltip>
             ),
             dataIndex: "new_model_assessment_task",
+            ellipsis: true,
           },
           {
             title: "训练进度",
             dataIndex: "training_progress",
+            ellipsis: true,
             render: (_,record) => {
               return (
                 <div >
@@ -274,6 +290,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
           {
             title: "项目集合",
             dataIndex: "project_set",
+            ellipsis: true,
           },
           {
             title: "时间",
@@ -308,7 +325,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
                     icon={<ExclamationCircleOutlined style={{ color: 'red' }}  />}
                     okText="确定"
                     cancelText="取消">
-                    <Button type="link">删除</Button>
+                    <a>删除</a>
                   </Popconfirm>
                 ):'删除'
               );
