@@ -44,7 +44,7 @@ export default ({ onCancel ,evalId,modelId }) => {
       dataIndex: 'model_title',
       key: 'model_title',
       render: (_, record) => {
-        return record.model__title+record.model__version;
+        return record.model_title+record.model_version;
       },
     },
     {
@@ -105,13 +105,10 @@ export default ({ onCancel ,evalId,modelId }) => {
       </Modal.Header>
       <Table
         style={{ paddingLeft:24,paddingRight:24,marginBottom:-1 }}
-        rowKey="id"
         columns={columns}
         dataSource={dataSource}
         pagination={{
           pageSize: 5,
-          showSizeChanger: true,
-          pageSizeOptions:[5,10,20],
         }}
         loading={loading} />
       <Modal.Footer>
