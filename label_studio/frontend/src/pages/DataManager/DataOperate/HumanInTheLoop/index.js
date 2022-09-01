@@ -12,6 +12,7 @@ import { Modal } from "@/components/Modal/Modal";
 import { ApiContext } from '@/providers/ApiProvider';
 import CreateEvaluate from "./CreateEvaluate";
 import CreateTrain from "./CreateTrain";
+import ModelAccuracy from "./ModelAccuracy";
 import List from "./List";
 import "./index.less";
 
@@ -19,6 +20,8 @@ export default forwardRef(({ project }, ref) => {
   const api = useContext(ApiContext);
   const modalRef = useRef();
   const [type, setType] = useState("list");
+  const [modelId, setModelId] = useState('');
+  const [evalId, setEvalId] = useState('');
 
   useImperativeHandle(ref, () => ({
     show: () => {
@@ -47,6 +50,11 @@ export default forwardRef(({ project }, ref) => {
       onCancel: () => setType("list"),
       onTrain: () => setType("train"),
       onEvaluate: () => setType("evaluate"),
+      onAccuracy: (eval_id,model_id) => {
+        setModelId(model_id);
+        setEvalId(eval_id);
+        setType("accuracy");
+      },
     };
   }, [setType]);
 
@@ -58,7 +66,7 @@ export default forwardRef(({ project }, ref) => {
         className="human-zone"
         closeOnClickOutside={false}
         style={
-          type === "evaluate"
+          type === "evaluate" || type==="accuracy"
             ? {
               minWidth: 800,
             }
@@ -68,9 +76,10 @@ export default forwardRef(({ project }, ref) => {
             }
         }
       >
-        {type === "list" && <List onCancel={onCancel} onEvaluate={handler.onEvaluate} onTrain={handler.onTrain} />}
+        {type === "list" && <List onCancel={onCancel} onEvaluate={handler.onEvaluate} onTrain={handler.onTrain} onAccuracy={handler.onAccuracy } />}
         {type === "evaluate" && <CreateEvaluate onCancel={handler.onCancel} onSubmit={ onSubmit } />}
         {type === "train" && <CreateTrain onCancel={handler.onCancel} onSubmit={ onSubmit } />}
+        {type === "accuracy" && <ModelAccuracy onCancel={handler.onCancel} evalId={ evalId } modelId={ modelId } />}
       </Modal>
     </>
   );

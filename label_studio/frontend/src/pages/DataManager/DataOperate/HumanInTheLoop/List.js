@@ -1,5 +1,6 @@
 import { useCallback ,useContext, useEffect,useRef,useState } from "react";
-import { Button, Popconfirm, Select, Space,Tooltip } from "antd";
+import { Popconfirm, Select, Space, Tooltip } from "antd";
+import { Button } from "@/components/Button/Button";
 import { ExclamationCircleOutlined,QuestionCircleOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
 import { PlusOutlined } from "@ant-design/icons";
@@ -10,7 +11,7 @@ import { Userpic } from '@/components';
 import { format } from 'date-fns';
 const { Option } = Select;
 
-export default ({ onCancel, onEvaluate, onTrain }) => {
+export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
   const api = useContext(ApiContext);
   const { project } = useProject();
   const [prevModels, setPrevModels] = useState([]);
@@ -131,24 +132,24 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
         headerTitle={(
           <Space>
             <Select key="0" placeholder="训练前模型" onChange={modelChange} >
-              <Option key="">不限</Option>
+              <Option value="">不限</Option>
               {prevModels.map((model) => (
-                <Option key={model.id}>{model.title} { model.version}</Option>
+                <Option key={model.id} title={ model.title + model.version}>{model.title}{ model.version}</Option>
               ))}
             </Select>
             <Select key="1" placeholder="操作人" onChange={operatorChange} >
-              <Option key="">不限</Option>
+              <Option value="">不限</Option>
               {operators.map((user) => (
                 <Option key={user.user_id}>{user.username}</Option>
               ))}
             </Select>
             <Select key="2" placeholder="是否训练" onChange={isTrainChange} >
-              <Option key="">不限</Option>
-              <Option key="true">是</Option>
-              <Option key="false">否</Option>
+              <Option value="">不限</Option>
+              <Option value="true">是</Option>
+              <Option value="false">否</Option>
             </Select>
             <Select key="3" placeholder="项目集合" onChange={projectChange} >
-              <Option key="">不限</Option>
+              <Option value="">不限</Option>
               {projectSets.map((proj) => (
                 <Option key={proj.id}>{proj.title}</Option>
               ))}
@@ -158,13 +159,15 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
         pagination={{
           pageSize: 5,
           showSizeChanger: true,
+          pageSizeOptions:[5,10,20],
         }}
         toolBarRender={() => [
-          <Button key="cancel" onClick={onCancel}>
+          <Button key="cancel" size="compact" onClick={onCancel}>
             取消
           </Button>,
           <Button
-            type="primary"
+            look="primary"
+            size="compact"
             icon={<PlusOutlined />}
             onClick={onEvaluate}
             key="add_evaluate"
@@ -172,7 +175,8 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
             新增评估
           </Button>,
           <Button
-            type="primary"
+            look="primary"
+            size="compact"
             icon={<PlusOutlined />}
             onClick={onTrain}
             key="add_train"
@@ -184,25 +188,32 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
           {
             title: "训练前模型",
             dataIndex: "model_title_version",
-            render: (v,record) => {
-              return (record.model_title_version? <Button type="link">{v}</Button> : '/');
+            ellipsis: true,
+            render: (v, record) => {
+              return (
+                record.model_title_version ? <a onClick={() => { onAccuracy(record.id,record.model); }}>{v}</a> : '/'
+              );
             },
           },
           {
             title: "项目",
             dataIndex: "project_title",
+            ellipsis: true,
           },
           {
             title: "正确标注数",
             dataIndex: "exactness_count",
+            ellipsis: true,
           },
           {
             title: "总任务数",
             dataIndex: "total_count",
+            ellipsis: true,
           },
           {
             title: "是否训练",
             dataIndex: "is_train",
+            ellipsis: true,
             render: (_,record) => {
               return (
                 <div>
@@ -214,6 +225,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
           {
             title: "当前准确率",
             dataIndex: "accuracy_rate",
+            ellipsis: true,
             render: (_,record) => {
               return (
                 <div>
@@ -223,8 +235,12 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
             },
           },
           {
-            title: "新模型准确率",
+            title: (
+              <Tooltip title="新模型准确率">
+                新模型准确率
+              </Tooltip>),
             dataIndex: "new_accuracy_rate",
+            ellipsis: true,
             render: (_,record) => {
               return (
                 <div>
@@ -236,8 +252,9 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
           {
             title: "新模型",
             dataIndex: "new_model_title_version",
-            render: (v) => {
-              return <Button type="link">{v}</Button>;
+            ellipsis: true,
+            render: (v,record) => {
+              return <a onClick={() => { onAccuracy(record.id,record.new_model);}}>{v}</a>;
             },
           },
           {
@@ -246,6 +263,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
                 新模型训练任务数
               </Tooltip>
             ),
+            ellipsis: true,
             dataIndex: "new_model_train_task",
           },
           {
@@ -255,10 +273,12 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
               </Tooltip>
             ),
             dataIndex: "new_model_assessment_task",
+            ellipsis: true,
           },
           {
             title: "训练进度",
             dataIndex: "training_progress",
+            ellipsis: true,
             render: (_,record) => {
               return (
                 <div >
@@ -270,6 +290,7 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
           {
             title: "项目集合",
             dataIndex: "project_set",
+            ellipsis: true,
           },
           {
             title: "时间",
@@ -304,11 +325,10 @@ export default ({ onCancel, onEvaluate, onTrain }) => {
                     icon={<ExclamationCircleOutlined style={{ color: 'red' }}  />}
                     okText="确定"
                     cancelText="取消">
-                    <Button type="link">删除</Button>
+                    <a>删除</a>
                   </Popconfirm>
                 ):'删除'
               );
-
             },
           },
         ]}
