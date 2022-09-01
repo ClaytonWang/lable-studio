@@ -41,16 +41,16 @@ export default ({ onCancel ,evalId,modelId }) => {
   const columns = [
     {
       title: '模型',
-      dataIndex: 'model__title',
-      key: 'model__title',
+      dataIndex: 'model_title',
+      key: 'model_title',
       render: (_, record) => {
         return record.model__title+record.model__version;
       },
     },
     {
       title: '项目',
-      dataIndex: 'project__title',
-      key: 'project__title',
+      dataIndex: 'project_title',
+      key: 'project_title',
     },
     {
       title: "准确率",
