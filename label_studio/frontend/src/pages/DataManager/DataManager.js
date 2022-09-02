@@ -18,6 +18,7 @@ import { APIConfig } from './api-config';
 import { useConfig } from "@/providers/ConfigProvider";
 import ProjectStatus from './ProjectStatus';
 import DataOperate, { Clean, HumanInTheLoop, Prediction, Prompt } from './DataOperate';
+import { CleanConfig } from "./DataOperate/Clean/CleanConfig";
 import { template } from '@/utils/util';
 import "./DataManager.styl";
 
@@ -25,6 +26,7 @@ import "./DataManager.styl";
 const { refs, showStatus, actions } = (() => {
   const refs = {
     status: createRef(),
+    cleanCfg: createRef(),
     clean: createRef(),
     prompt: createRef(),
     prediction: createRef(),
@@ -32,6 +34,7 @@ const { refs, showStatus, actions } = (() => {
   };
   const showStatus = (type) => refs.status.current?.status(type);
   const actions = {
+    cleanCfg: () => refs.cleanCfg.current?.show(),
     clean: () => refs.clean.current?.show(),
     prompt: () => refs.prompt.current?.show(),
     prediction: () => refs.prediction.current?.show(),
@@ -225,10 +228,8 @@ export const DataManagerPage = ({ ...props }) => {
     <>
       <Prediction ref={refs.prediction} project={project} showStatus={showStatus} />
       <Prompt ref={refs.prompt} project={project} showStatus={showStatus} />
-      <Clean
-        showStatus={() => showStatus('clean')}
-        ref={refs.clean}
-      />
+      <Clean showStatus={() => showStatus('clean')} ref={refs.clean} />
+      <CleanConfig ref={refs.cleanCfg} />
       <ProjectStatus
         ref={refs.status}
         onFinish={{

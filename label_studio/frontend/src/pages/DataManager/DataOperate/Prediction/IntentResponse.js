@@ -140,7 +140,7 @@ const IntentResponse = ({ close, execLabel }) => {
             <Select
               value={ localStorage.getItem("selectedTrainModel")}
               options={execModelList?.map(v => {
-                return { label: v.title+v.version, value: v.id };
+                return { label: v.title_version, value: v.id };
               })}
               placeholder={t("Please select Model type")}
               onChange={(e) => {
