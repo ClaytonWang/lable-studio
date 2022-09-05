@@ -176,10 +176,10 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
     @action(methods=['GET'], detail=True)
     def accuracy(self, request, *args, **kwargs):
-        model_id = request.GET.dict().get('model_id')
-        if not model_id:
-            train = ModelTrain.objects.fitler(id=kwargs.get('pk')).first()
-            model_id = train.model.id
+        model_id = kwargs.get('pk')
+        # if not model_id:
+        #     train = ModelTrain.objects.fitler(id=kwargs.get('pk')).first()
+        #     model_id = train.model.id
 
         train = ModelTrain.objects.filter(model_id=model_id).all()
         serializer = ModelTrainAccuracySerializer(instance=train, many=True)
