@@ -7,7 +7,7 @@ import { ApiContext } from '@/providers/ApiProvider';
 import { format } from 'date-fns';
 import { Userpic } from '@/components';
 
-export default ({ onCancel ,evalId,modelId }) => {
+export default ({ onCancel ,modelId }) => {
   const api = useContext(ApiContext);
   const [dataSource, setDataSource] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -26,14 +26,13 @@ export default ({ onCancel ,evalId,modelId }) => {
     }).format(value);
   };
 
-  const getListData = async (pk,model_id) => {
-    if (!pk) {
+  const getListData = async (model_id) => {
+    if (!model_id) {
       return [];
     }
     return await api.callApi("accuracy", {
       params: {
-        pk,
-        model_id,
+        pk:model_id,
       },
     });
   };
@@ -89,7 +88,7 @@ export default ({ onCancel ,evalId,modelId }) => {
 
   useEffect(() => {
     setLoading(true);
-    getListData(evalId,modelId).then(data => {
+    getListData(modelId).then(data => {
       setLoading(false);
       setDataSource(data);
     });

@@ -6,6 +6,8 @@ import { Pagination } from '../../../components';
 import { SearchBar } from "./SearchBar";
 import { ModelExport } from './ModelExport';
 import { ModelEdit } from "./ModelEdit";
+import { Modal } from "@/components/Modal/Modal";
+import ModelAccuracy from "../../DataManager/DataOperate/HumanInTheLoop/ModelAccuracy";
 
 
 export const ModelList = (props) => {
@@ -41,6 +43,15 @@ export const ModelList = (props) => {
         {col.modalEdt ? (
           <ModelEdit data={col.modalEdt} onClose={onClose} />
         ) : null}
+        {col.modalAccuracy ? (
+          <Modal
+            bare
+            visible
+            style={{ minWidth:800 }}
+            closeOnClickOutside={false}>
+            <ModelAccuracy modelId={col.modalAccuracy?.id} onCancel={() => { col.setModalAccuracy(null);}} />
+          </Modal>
+        ):null}
       </Elem>
       <Elem name="pages">
         <Pagination
