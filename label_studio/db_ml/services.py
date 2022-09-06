@@ -23,7 +23,7 @@ from model_manager.models import ModelManager
 from model_manager.services import ml_backend_params
 
 INTENT_DIALOG_PROMPT_TOKEN = '101469da9d088219'
-CONVERSATIONAL_GENERATION_TOKEN = '101469da9d088219'
+CONVERSATIONAL_GENERATION_TOKEN = '9e72f8c5aa27811d'
 
 PREDICTION_BACKUP_FIELDS = [
     'result', 'score', 'model_version', 'task', 'created_at', 'updated_at'
