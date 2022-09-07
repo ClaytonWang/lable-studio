@@ -12,7 +12,7 @@ const formItemLayout = {
   wrapperCol: { span: 17 },
 };
 
-export const CleanConfig = forwardRef(({ onClose },ref) => {
+export const CleanConfig = forwardRef((ref) => {
   const api = useContext(ApiContext);
   const [cleanModels, setCleanModels] = useState([]);
   const [steps, setSteps] = useState([1]);
@@ -25,9 +25,8 @@ export const CleanConfig = forwardRef(({ onClose },ref) => {
     },
   }));
 
-  const onHide = useCallback(async (force) => {
+  const onHide = useCallback(async () => {
     modalRef?.current.hide();
-    onClose?.(force, "edit");
   }, []);
 
   const addStep = useCallback(async (stp) => {
@@ -111,11 +110,11 @@ export const CleanConfig = forwardRef(({ onClose },ref) => {
       </Form>
       <Modal.Footer>
         <Space align="end">
-          <Button size="compact" onClick={close}>
+          <Button size="compact" onClick={onHide}>
             {t("Cancel")}
           </Button>
           <Button onClick={onFinish} size="compact" look="primary" >
-            立即清洗
+            下一步
           </Button>
         </Space>
       </Modal.Footer>

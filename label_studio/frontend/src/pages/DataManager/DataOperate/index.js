@@ -1,6 +1,6 @@
 import React from 'react';
 import { template } from '@/utils/util';
-import Clean from './Clean';
+import Clean from './Clean/Clean';
 import Prediction from './Prediction';
 import Prompt from './Prompt';
 import HumanInTheLoop from './HumanInTheLoop';
