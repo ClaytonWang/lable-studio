@@ -1,6 +1,6 @@
 import React from 'react';
 import { template } from '@/utils/util';
-import Clean from './Clean';
+import Clean from './Clean/Clean';
 import Prediction from './Prediction';
 import Prompt from './Prompt';
 import HumanInTheLoop from './HumanInTheLoop';
@@ -12,7 +12,7 @@ const Button = (props) => {
 const DialogIntentOperate = ({ actions }) => {
   return (
     <>
-      <Button onClick={actions.clean}>{t("label_clean")}</Button>
+      <Button onClick={actions.cleanCfg}>{t("label_clean")}</Button>
       <Button onClick={actions.prompt}>{t.format("with_template", "label_prompt")}</Button>
       <Button onClick={actions.prediction}>{t.format("with_template", "label_prediction")}</Button>
     </>
