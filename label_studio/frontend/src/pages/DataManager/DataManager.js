@@ -229,7 +229,7 @@ export const DataManagerPage = ({ ...props }) => {
       <Prediction ref={refs.prediction} project={project} showStatus={showStatus} />
       <Prompt ref={refs.prompt} project={project} showStatus={showStatus} />
       <Clean ref={refs.clean} showStatus={() => showStatus('clean')} />
-      <CleanConfig ref={refs.cleanCfg} />
+      <CleanConfig ref={refs.cleanCfg} cleanRefs={ refs.clean} />
       <ProjectStatus
         ref={refs.status}
         onFinish={{
