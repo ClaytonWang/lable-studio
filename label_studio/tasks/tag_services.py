@@ -18,7 +18,7 @@ def bulk_create_algorithm_clean(task_dialog: list):
     serializer.is_valid(raise_exception=True)
     clean_instances = serializer.save()
     print("*" * 20, len(clean_instances))
-    logger.debug('Success insert count:', len(clean_instances))
+    logger.debug(f'Success insert count:{len(clean_instances)}')
 
 
 def delete_algorithm_clean(task_ids: list):

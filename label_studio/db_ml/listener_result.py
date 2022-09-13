@@ -289,6 +289,8 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id):
 
 def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
     """
+     'result': [{'text': '您好，女士，我这边看到了，他每个月给您扣取的费用都是正常费用，您的正常的月费用的。', 'author': ''}],
+
     "result":
          {
             'task_id': 450,
@@ -315,10 +317,13 @@ def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
         p_state = redis_get_json(redis_key)
         if p_state and p_state.get('state') == AlgorithmState.ONGOING:
             # 传入的是TaskDbAlgorithm的DI
-            print('db_algorithm_id: ', db_algorithm_id)
-            TaskDbAlgorithm.objects.filter(id=db_algorithm_id).update(
-                algorithm=dialogue, state=2, remarks=''
-            )
+            query = TaskDbAlgorithm.objects.filter(id=db_algorithm_id).first()
+            print('db_algorithm_id: ', db_algorithm_id, ' query:', query.id, 'result:', dialogue)
+            if query:
+                query.algorithm = dialogue
+                query.state = 2
+                query.remarks = ''
+                query.save(update_fields=['algorithm', 'state', 'remarks'])
             count = TaskDbAlgorithm.objects.filter(project_id=project_id).count()
             redis_update_finish_state(redis_key, p_state, count=count)
     except Exception as e:
