@@ -123,8 +123,10 @@ def redis_get_json(key):
     return json.loads(bytes.decode(data)) if data else {}
 
 
-def redis_update_finish_state(redis_key, redis_data):
+def redis_update_finish_state(redis_key, redis_data, count=0):
     finish = int(redis_data.get('finish', 0)) + 1
+    if count != 0 and finish < count:
+        finish = count
     redis_data['finish'] = finish
     if finish == int(redis_data.get('total', 0)):
         redis_data['state'] = AlgorithmState.FAILED

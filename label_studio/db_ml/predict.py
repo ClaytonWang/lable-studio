@@ -49,59 +49,59 @@ class Predictor:
         return self.id2class[indices.item()], confidence.item()
 
 
-def job_predict(*args, **kwargs):
-    db_ml_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(db_ml_dir, 'models', 'model_path')
-    label_file = 'data/营业厅数字人项目事项v1.0-人工匹配规则枚举.xlsx'
-    label_file_path = os.path.join(db_ml_dir, label_file)
-    predictor = Predictor(
-        model_path, label_file=label_file_path, device='cpu'
-    )
-    text = str(kwargs.get('text', []))
-    task_id = kwargs.get('task_id')
-    task = Task.objects.filter(id=task_id).first()
-
-    res_text, confidence = '', 0
-    if not task:
-        print(f'Task id invalid. Input data: task id [{task_id}]')
-        return
-    elif task and text:
-        res_text, confidence = predictor.predict(text)
-    else:
-        pass
-
-    _type = kwargs.get('type', 'pre')
-    if _type == 'pre':
-        # label-studio数据结构
-        pre_result = {
-            'origin': 'prediction',
-            'from_name': 'intent',
-            'to_name': 'dialogue',
-            'type': 'choices',
-            'value': {
-                'choices': [res_text], 'start': 0, 'end': 1
-            },
-        }
-        tag_data = dict(
-            # project_id=kwargs.get('project_id'),
-            task=task,
-            result=[pre_result],
-            score=round(confidence, 4),
-
-        )
-        print(f"results: ....{str(tag_data)}")
-        redis_key = generate_redis_key(
-            'prediction', str(kwargs.get('project_id', ''))
-        )
-        p_state = redis_get_json(redis_key)
-        if p_state and p_state.get('state') == AlgorithmState.ONGOING:
-            obj, is_created = Prediction.objects.update_or_create(
-                defaults=tag_data, task=task
-            )
-            redis_update_finish_state(redis_key, p_state)
-            print('obj:', obj.id, ' auto: ', res_text, ' is_ created:', is_created)
-    else:
-        print('kwargs:', kwargs, ' cancel')
+# def job_predict(*args, **kwargs):
+#     db_ml_dir = os.path.dirname(os.path.abspath(__file__))
+#     model_path = os.path.join(db_ml_dir, 'models', 'model_path')
+#     label_file = 'data/营业厅数字人项目事项v1.0-人工匹配规则枚举.xlsx'
+#     label_file_path = os.path.join(db_ml_dir, label_file)
+#     predictor = Predictor(
+#         model_path, label_file=label_file_path, device='cpu'
+#     )
+#     text = str(kwargs.get('text', []))
+#     task_id = kwargs.get('task_id')
+#     task = Task.objects.filter(id=task_id).first()
+#
+#     res_text, confidence = '', 0
+#     if not task:
+#         print(f'Task id invalid. Input data: task id [{task_id}]')
+#         return
+#     elif task and text:
+#         res_text, confidence = predictor.predict(text)
+#     else:
+#         pass
+#
+#     _type = kwargs.get('type', 'pre')
+#     if _type == 'pre':
+#         # label-studio数据结构
+#         pre_result = {
+#             'origin': 'prediction',
+#             'from_name': 'intent',
+#             'to_name': 'dialogue',
+#             'type': 'choices',
+#             'value': {
+#                 'choices': [res_text], 'start': 0, 'end': 1
+#             },
+#         }
+#         tag_data = dict(
+#             # project_id=kwargs.get('project_id'),
+#             task=task,
+#             result=[pre_result],
+#             score=round(confidence, 4),
+#
+#         )
+#         print(f"results: ....{str(tag_data)}")
+#         redis_key = generate_redis_key(
+#             'prediction', str(kwargs.get('project_id', ''))
+#         )
+#         p_state = redis_get_json(redis_key)
+#         if p_state and p_state.get('state') == AlgorithmState.ONGOING:
+#             obj, is_created = Prediction.objects.update_or_create(
+#                 defaults=tag_data, task=task
+#             )
+#             redis_update_finish_state(redis_key, p_state)
+#             print('obj:', obj.id, ' auto: ', res_text, ' is_ created:', is_created)
+#     else:
+#         print('kwargs:', kwargs, ' cancel')
 
 
 if __name__ == '__main__':

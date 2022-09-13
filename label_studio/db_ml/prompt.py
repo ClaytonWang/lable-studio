@@ -64,51 +64,51 @@ class Predictor:
         return self.id2class[indices.item()], confidence.item()
 
 
-def job_prompt(**kwargs):
-    text = kwargs.get('text')
-    task_id = kwargs.get('task_id')
-    project_id = kwargs.get('project_id')
-    # db_ml_dir = os.path.dirname(os.path.abspath(__file__))
-    # model_path = os.path.join(db_ml_dir, 'models', 'model_prompt')
-    # predictor = Predictor(model_path=model_path, device='cpu')
-    # res_text, confidence = predictor.predict(text)
-    text = str(text).strip()
-    res_text = TEMPLATE_PROMPT.get(text, random.choice(['升级', '不知情', '外呼']))
-    confidence = np.random.rand()
-    print('prompt : ', res_text, 'confidence:', confidence)
-    result = {
-        "task": text + kwargs.get('template', ''),
-        "annotation": res_text,
-        "confidence": confidence,
-        # "average": {"正面标签": np.random.rand(), "负面标签": np.random.rand()},
-        # "output":
-        #     [
-        #         {"template": "你好，我是模版A1",
-        #       "label": "正面",
-        #       # "score": "烂片%f" % np.random.rand(),
-        #       # "wgtedAvg": np.random.rand()
-        #          },
-        #      {
-        #          "template": "你好，我是模版B",
-        #       "label": "负面",
-        #       "score": "精品%f" % np.random.rand(),
-        #       "wgtedAvg": np.random.rand()}
-        #      ]
-    }
-    redis_key = generate_redis_key(
-        'prompt', str(kwargs.get('project_id', ''))
-    )
-    p_state = redis_get_json(redis_key)
-    if p_state and p_state.get('state') == AlgorithmState.ONGOING:
-        update_prediction_data(task_id, result)
-        c = PromptResult(
-            project_id=project_id,
-            task_id=task_id,
-            metrics=result
-        )
-        c.save()
-        redis_update_finish_state(redis_key, p_state)
-    time.sleep(0.1)
+# def job_prompt(**kwargs):
+#     text = kwargs.get('text')
+#     task_id = kwargs.get('task_id')
+#     project_id = kwargs.get('project_id')
+#     # db_ml_dir = os.path.dirname(os.path.abspath(__file__))
+#     # model_path = os.path.join(db_ml_dir, 'models', 'model_prompt')
+#     # predictor = Predictor(model_path=model_path, device='cpu')
+#     # res_text, confidence = predictor.predict(text)
+#     text = str(text).strip()
+#     res_text = TEMPLATE_PROMPT.get(text, random.choice(['升级', '不知情', '外呼']))
+#     confidence = np.random.rand()
+#     print('prompt : ', res_text, 'confidence:', confidence)
+#     result = {
+#         "task": text + kwargs.get('template', ''),
+#         "annotation": res_text,
+#         "confidence": confidence,
+#         # "average": {"正面标签": np.random.rand(), "负面标签": np.random.rand()},
+#         # "output":
+#         #     [
+#         #         {"template": "你好，我是模版A1",
+#         #       "label": "正面",
+#         #       # "score": "烂片%f" % np.random.rand(),
+#         #       # "wgtedAvg": np.random.rand()
+#         #          },
+#         #      {
+#         #          "template": "你好，我是模版B",
+#         #       "label": "负面",
+#         #       "score": "精品%f" % np.random.rand(),
+#         #       "wgtedAvg": np.random.rand()}
+#         #      ]
+#     }
+#     redis_key = generate_redis_key(
+#         'prompt', str(kwargs.get('project_id', ''))
+#     )
+#     p_state = redis_get_json(redis_key)
+#     if p_state and p_state.get('state') == AlgorithmState.ONGOING:
+#         update_prediction_data(task_id, result)
+#         c = PromptResult(
+#             project_id=project_id,
+#             task_id=task_id,
+#             metrics=result
+#         )
+#         c.save()
+#         redis_update_finish_state(redis_key, p_state)
+#     time.sleep(0.1)
 
 
 TEMPLATE_PROMPT = {

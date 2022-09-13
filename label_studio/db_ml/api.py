@@ -23,8 +23,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
 from core.redis import start_job_async_or_sync
 from core.redis import redis_set, redis_get
-from db_ml.predict import job_predict
-from db_ml.clean import job_clean
 from tasks.models import Task
 from tasks.models import Prediction, PredictionDraft
 from tasks.models import TaskDbAlgorithm, TaskDbAlgorithmDraft

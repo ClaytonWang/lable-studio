@@ -12,6 +12,7 @@ import json
 import logging
 from core.redis import redis_get
 from projects.models import Project
+from tasks.models import Task
 from tasks.models import Prediction
 from tasks.models import TaskDbAlgorithm
 from tasks.models import Annotation
@@ -160,7 +161,10 @@ def insert_prediction_value(data, project_id, task_id):
         obj, is_created = Prediction.objects.update_or_create(
             defaults=tag_data, task_id=task_id
         )
-        redis_update_finish_state(redis_key, p_state)
+        finish_task_count = Prediction.objects.filter(
+            task__in=Task.objects.filter(project_id=project_id)
+        ).count()
+        redis_update_finish_state(redis_key, p_state, count=finish_task_count)
         print('obj:', obj.id, ' is_ created:', is_created)
 
 
@@ -231,7 +235,10 @@ def insert_prompt_intent_value(algorithm_result, project_id, task_id):
             metrics=result
         )
         c.save()
-        redis_update_finish_state(redis_key, p_state)
+        finish_task_count = PromptResult.objects.filter(
+            project_id=project_id
+        ).count()
+        redis_update_finish_state(redis_key, p_state, count=finish_task_count)
 
 
 def insert_prompt_generate_value(algorithm_result, project_id, task_id):
@@ -274,7 +281,10 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id):
             metrics=algorithm_result
         )
         c.save()
-        redis_update_finish_state(redis_key, p_state)
+        finish_task_count = PromptResult.objects.filter(
+            project_id=project_id
+        ).count()
+        redis_update_finish_state(redis_key, p_state, count=finish_task_count)
 
 
 def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
@@ -309,7 +319,8 @@ def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
             TaskDbAlgorithm.objects.filter(id=db_algorithm_id).update(
                 algorithm=dialogue, state=2, remarks=''
             )
-            redis_update_finish_state(redis_key, p_state)
+            count = TaskDbAlgorithm.objects.filter(project_id=project_id).count()
+            redis_update_finish_state(redis_key, p_state, count=count)
     except Exception as e:
         TaskDbAlgorithm.objects.filter(task_id=db_algorithm_id).update(
             state=3, remarks=str(e)
