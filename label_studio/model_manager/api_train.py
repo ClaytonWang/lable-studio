@@ -346,6 +346,9 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
     def created_train(self, data):
         if 'model_id' in data and data.get('model_id') is None:
+            model = ModelManager.objects.filter(id=data.get('model_id')).first()
+            if model:
+                data['model_title'] = model.title
             data.pop('model_id')
         serializer = ModelTrainCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
