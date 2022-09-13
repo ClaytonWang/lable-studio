@@ -129,6 +129,7 @@ def redis_update_finish_state(redis_key, redis_data, count=0):
         finish = count
     redis_data['finish'] = finish
     if finish == int(redis_data.get('total', 0)):
+        # FAILED 结束
         redis_data['state'] = AlgorithmState.FAILED
     redis_set_json(redis_key, redis_data)
 

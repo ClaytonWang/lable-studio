@@ -10,6 +10,7 @@
 """
 import json
 import logging
+from django.db.models import Q
 from core.redis import redis_get
 from projects.models import Project
 from tasks.models import Task
@@ -324,7 +325,8 @@ def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
                 query.state = 2
                 query.remarks = ''
                 query.save(update_fields=['algorithm', 'state', 'remarks'])
-            count = TaskDbAlgorithm.objects.filter(project_id=project_id).count()
+            count = TaskDbAlgorithm.objects.filter(
+                project_id=project_id).filter(~Q(algorithm='')).count()
             redis_update_finish_state(redis_key, p_state, count=count)
     except Exception as e:
         TaskDbAlgorithm.objects.filter(task_id=db_algorithm_id).update(
