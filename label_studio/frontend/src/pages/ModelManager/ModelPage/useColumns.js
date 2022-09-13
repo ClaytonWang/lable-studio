@@ -8,6 +8,7 @@ import { useMemo, useState } from 'react';
 export const useColumns = () => {
   const [modalExp, setModalExp] = useState(null);
   const [modalEdt, setModaEdt] = useState(null);
+  const [modalAccuracy, setModalAccuracy] = useState(null);
 
   const columns = useMemo(() => {
     return [
@@ -23,7 +24,7 @@ export const useColumns = () => {
               </Elem>
             );
           else
-            return (<a>{record.title}</a>);
+            return (<a onClick={() => { setModalAccuracy(record);}}>{record.title}</a>);
         },
       },
       {
@@ -112,5 +113,7 @@ export const useColumns = () => {
     setModalExp,
     modalEdt,
     setModaEdt,
+    modalAccuracy,
+    setModalAccuracy,
   };
 };

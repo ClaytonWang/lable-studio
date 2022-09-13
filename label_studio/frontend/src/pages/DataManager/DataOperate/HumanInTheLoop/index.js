@@ -79,7 +79,7 @@ export default forwardRef(({ project }, ref) => {
         {type === "list" && <List onCancel={onCancel} onEvaluate={handler.onEvaluate} onTrain={handler.onTrain} onAccuracy={handler.onAccuracy } />}
         {type === "evaluate" && <CreateEvaluate onCancel={handler.onCancel} onSubmit={ onSubmit } />}
         {type === "train" && <CreateTrain onCancel={handler.onCancel} onSubmit={ onSubmit } />}
-        {type === "accuracy" && <ModelAccuracy onCancel={handler.onCancel} evalId={ evalId } modelId={ modelId } />}
+        {type === "accuracy" && <ModelAccuracy onCancel={handler.onCancel} modelId={ modelId } />}
       </Modal>
     </>
   );

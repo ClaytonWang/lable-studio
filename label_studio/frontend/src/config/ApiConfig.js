@@ -92,7 +92,7 @@ export const API_CONFIG = {
     mlPromptTemplateQuery: 'GET:/templates/prompt-learning/:project',
 
     // Clean
-    clExec: "POST:/dbml/clean",
+    clExecClean: "POST:/dbml/clean",
     clReplace: "PATCH:/dbml/replace",
     clList: "GET:/clean_tag",
     clQueryStatus: "GET:/dbml/clean/query_task",

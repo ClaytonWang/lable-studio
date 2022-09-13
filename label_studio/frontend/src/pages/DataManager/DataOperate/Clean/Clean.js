@@ -69,10 +69,13 @@ export default forwardRef(({ showStatus }, ref) => {
 
   const request = useMemo(() => {
     return {
-      clExec: () => {
-        return api.callApi("clExec", {
+      clExecClean: () => {
+        let model_ids = localStorage.getItem('selectedCleanModel');
+
+        return api.callApi("clExecClean", {
           body: {
             project_id: project.id,
+            model_ids,
           },
         });
       },
@@ -130,7 +133,7 @@ export default forwardRef(({ showStatus }, ref) => {
   }));
 
   const handleExec = () => {
-    request.clExec().then(showStatus);
+    request.clExecClean().then(showStatus);
   };
   const handleReplace = () => {
     request.clReplace();
@@ -167,7 +170,7 @@ export default forwardRef(({ showStatus }, ref) => {
               <Elem name="buttons">
                 <Space>
                   <Button size="compact" look="primary" onClick={handleExec}>
-                    {t("clean_exec", "导入清洗算法")}
+                  开始清洗
                   </Button>
                   <Button size="compact" look="primary" onClick={handleReplace}>
                     {t("clean_replace_data", "替换原对话")}
