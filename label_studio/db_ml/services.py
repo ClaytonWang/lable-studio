@@ -279,7 +279,7 @@ def predict_prompt(
 def get_first_version_model(token, version=1.0):
     return ModelManager.objects.filter(
         token=token, version=version
-    ).order_by('-id').first()
+    ).order_by('id').first()
 
 
 def preprocess_clean(project_id, model_ids, task_data, _uuid):
