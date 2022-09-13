@@ -14,7 +14,6 @@ from .models import PromptResult, PromptTemplates, PromptResultDraft
 from tasks.models import Task
 from projects.models import Project
 from core.redis import start_job_async_or_sync
-from db_ml.prompt import job_prompt
 from db_ml.services import save_raw_data
 from db_ml.services import PROMPT_BACKUP_FIELDS
 from db_ml.services import generate_redis_key

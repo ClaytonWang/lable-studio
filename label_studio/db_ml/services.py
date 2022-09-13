@@ -23,7 +23,7 @@ from model_manager.models import ModelManager
 from model_manager.services import ml_backend_params
 
 INTENT_DIALOG_PROMPT_TOKEN = '101469da9d088219'
-CONVERSATIONAL_GENERATION_TOKEN = '101469da9d088219'
+CONVERSATIONAL_GENERATION_TOKEN = '9e72f8c5aa27811d'
 
 PREDICTION_BACKUP_FIELDS = [
     'result', 'score', 'model_version', 'task', 'created_at', 'updated_at'
@@ -123,8 +123,10 @@ def redis_get_json(key):
     return json.loads(bytes.decode(data)) if data else {}
 
 
-def redis_update_finish_state(redis_key, redis_data):
+def redis_update_finish_state(redis_key, redis_data, count=0):
     finish = int(redis_data.get('finish', 0)) + 1
+    if count != 0 and finish < count:
+        finish = count
     redis_data['finish'] = finish
     if finish == int(redis_data.get('total', 0)):
         redis_data['state'] = AlgorithmState.FAILED
