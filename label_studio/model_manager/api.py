@@ -148,6 +148,9 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
     def label(self, request, *args, **kwargs):
         model = self.get_model(request)
         # return self.return_ml_response(True, ['label1', 'label2'])
+        if not model:
+            raise Exception('未查询到模型')
+
         state, rsp = ml_backend_request(
             model.url, uri=['getLabels'], method='get',
             # params=dict(url=model.url)
