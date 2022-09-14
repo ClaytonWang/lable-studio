@@ -9,8 +9,8 @@ import chr from "chroma-js";
 import { format } from "date-fns";
 import { NavLink } from "react-router-dom";
 import { LsBulb, LsCheck, LsEllipsis, LsMinus } from "../../assets/icons";
-import { Form, Input, Select } from "antd";
-import { Button, Dropdown, Menu, Pagination, Userpic } from "../../components";
+import { Dropdown, Form, Input,Menu,Select } from "antd";
+import { Button, Pagination, Userpic } from "../../components";
 import { Space } from "@/components/Space/Space";
 import { Modal } from "@/components/Modal/Modal";
 import { useAPI } from "@/providers/ApiProvider";
@@ -166,6 +166,7 @@ export const EmptyProjectsList = ({ openModal }) => {
 };
 
 const ProjectCard = ({ project, updateCollection }) => {
+
   const color = useMemo(() => {
     return project.color === "#FFFFFF" ? null : project.color;
   }, [project]);
@@ -178,6 +179,45 @@ const ProjectCard = ({ project, updateCollection }) => {
       }
       : {};
   }, [color]);
+
+  const menu = (
+    <Menu
+      items={[
+        {
+          label: (
+            <Elem
+              tag={NavLink}
+              name="link"
+              data-external
+              to={`/projects/${project.id}/settings`}>
+              { t("Settings")}
+            </Elem>),
+          key: '1',
+        },
+        {
+          label: (
+            <Elem
+              tag={NavLink}
+              name="link"
+              data-external
+              to={`/projects/${project.id}/data?labeling=1`}>
+              { t("Labels")}
+            </Elem>),
+          key: '2',
+        },
+        {
+          label: (
+            <Elem
+              name="link"
+              data-external
+              onClick={() => { updateCollection(project); }}>
+              { t("label_collection", "集合") }
+            </Elem>),
+          key: '3',
+        },
+      ]}
+    />
+  );
 
   return (
     <Elem
@@ -202,27 +242,12 @@ const ProjectCard = ({ project, updateCollection }) => {
                 e.preventDefault();
               }}
             >
-              <Dropdown.Trigger
-                content={(
-                  <Menu>
-                    <Menu.Item href={`/projects/${project.id}/settings`}>
-                      {t("Settings")}
-                    </Menu.Item>
-                    <Menu.Item href={`/projects/${project.id}/data?labeling=1`}>
-                      {t("Labels")}
-                    </Menu.Item>
-                    <Menu.Item
-                      onClick={() => {
-                        updateCollection(project);
-                      }}
-                    >
-                      {t("label_collection", "集合")}
-                    </Menu.Item>
-                  </Menu>
-                )}
+              <Dropdown
+                trigger={['click']}
+                overlay={(menu)}
               >
                 <Button size="small" type="text" icon={<LsEllipsis />} />
-              </Dropdown.Trigger>
+              </Dropdown>
             </Elem>
           </Elem>
           <Elem name="summary">
