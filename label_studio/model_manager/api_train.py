@@ -354,7 +354,8 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         return version, new_version
 
     def created_train(self, data):
-        if 'model_id' in data and data.get('model_id') is None:
+        model_id = data.get('model_id')
+        if model_id:
             model = ModelManager.objects.filter(id=data.get('model_id')).first()
             if model:
                 data['model_title'] = model.title
