@@ -194,50 +194,6 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             # item['created_by'] = UserSimpleSerializer(instance=)
         return Response(data=list(data))
 
-    @staticmethod
-    def get_project_label_result(tasks):
-        anno_query = Annotation.objects.filter(task__in=tasks)
-        anno_result = {str(item.task_id): item.result for item in anno_query}
-        pre_query = Prediction.objects.filter(task__in=tasks)
-        pre_result = {str(item.task_id): item.result for item in pre_query}
-
-        return anno_result, pre_result
-
-    @staticmethod
-    def get_model_of_project(project_id):
-        queryset = ModelManager.objects.filter(
-            Q(type__in=('intention', 'generation'), project_id__isnull=True) |
-            Q(project_id__id=project_id)
-        ).values('id', 'title', 'version')
-        return queryset
-
-    def retrieve(self, request, *args, **kwargs):
-        """
-        :param request:
-        :param args:
-        :param kwargs:
-        :return:
-        """
-        self.queryset = ModelTrain.objects.filter(pk=kwargs.get('pk'))
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        data = serializer.data
-        return Response(data)
-
-    @staticmethod
-    def get_model_version(model_id):
-        version, new_version = '0.0', '1.0'
-        if model_id:
-            model = ModelManager.objects.filter(id=model_id).first()
-            max_version_model = ModelManager.objects.filter(
-                token=model.token, project=model.project
-            ).values('version')
-            max_version_model = list(max_version_model)
-            max_version_model.sort(key=lambda k: int(float(k['version'])), reverse=True)
-            version = max_version_model[0]['version']
-            new_version = str(format(float(version) + 1, '.1f'))
-        return version, new_version
-
     @action(methods=['POST'], detail=False)
     def train(self, request, *args, **kwargs):
         """
@@ -343,6 +299,59 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         obj_data = self.created_train(post_data)
         headers = self.get_success_headers(obj_data)
         return Response(post_data, status=status.HTTP_201_CREATED, headers=headers)
+
+    @action(methods=['GET'], detail=True)
+    def finished(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        # state = 4 是训练完成
+        if ModelTrain.objects.filter(id=pk, is_train=True, state=4).exists():
+            return Response(data=dict(is_finished=True))
+        else:
+            return Response(data=dict(is_finished=False))
+
+    @staticmethod
+    def get_project_label_result(tasks):
+        anno_query = Annotation.objects.filter(task__in=tasks)
+        anno_result = {str(item.task_id): item.result for item in anno_query}
+        pre_query = Prediction.objects.filter(task__in=tasks)
+        pre_result = {str(item.task_id): item.result for item in pre_query}
+
+        return anno_result, pre_result
+
+    @staticmethod
+    def get_model_of_project(project_id):
+        queryset = ModelManager.objects.filter(
+            Q(type__in=('intention', 'generation'), project_id__isnull=True) |
+            Q(project_id__id=project_id)
+        ).values('id', 'title', 'version')
+        return queryset
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        :param request:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        self.queryset = ModelTrain.objects.filter(pk=kwargs.get('pk'))
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+        return Response(data)
+
+    @staticmethod
+    def get_model_version(model_id):
+        version, new_version = '0.0', '1.0'
+        if model_id:
+            model = ModelManager.objects.filter(id=model_id).first()
+            max_version_model = ModelManager.objects.filter(
+                token=model.token, project=model.project
+            ).values('version')
+            max_version_model = list(max_version_model)
+            max_version_model.sort(key=lambda k: int(float(k['version'])), reverse=True)
+            version = max_version_model[0]['version']
+            new_version = str(format(float(version) + 1, '.1f'))
+        return version, new_version
 
     def created_train(self, data):
         if 'model_id' in data and data.get('model_id') is None:
