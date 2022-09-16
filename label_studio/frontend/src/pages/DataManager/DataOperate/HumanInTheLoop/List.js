@@ -9,9 +9,10 @@ import { ApiContext } from '@/providers/ApiProvider';
 import { useProject } from "@/providers/ProjectProvider";
 import { Userpic } from '@/components';
 import { format } from 'date-fns';
+import { tr } from "date-fns/locale";
 const { Option } = Select;
 
-let isFirst = true;
+let isNeedLoading = true;
 
 export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
   const api = useContext(ApiContext);
@@ -30,7 +31,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
     if (!project.id) {
       return {};
     }
-    if (isFirst) {
+    if (isNeedLoading) {
       setLoading(true);
     }
     const result = await api.callApi("listTrain", {
@@ -45,9 +46,9 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
       },
     });
 
-    if (isFirst) {
+    if (isNeedLoading) {
+      isNeedLoading=false;
       setLoading(false);
-      isFirst=false;
     }
     return {
       data: result.results,
@@ -181,7 +182,8 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
         pagination={{
           pageSize: 5,
           showSizeChanger: true,
-          pageSizeOptions:[5,10,20],
+          pageSizeOptions: [5, 10, 20],
+          onChange: (page) => { if(page>1){isNeedLoading=true;}},
         }}
         toolBarRender={() => [
           <Button key="cancel" size="compact" onClick={onCancel}>
@@ -302,7 +304,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
             dataIndex: "training_progress",
             ellipsis: true,
             render: (_,record) => {
-              return (
+              return (record.category==='assessment'?'/': (
                 <Progress type="circle"
                   strokeColor={{
                     '0%': '#108ee9',
@@ -310,6 +312,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
                   }}
                   percent={formatNumber(record.training_progress)}
                   width={40} />
+              )
               );
             },
           },
