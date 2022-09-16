@@ -114,6 +114,7 @@ class ModelTrain(models.Model):
     # 分类 训练&评估
     category = models.CharField('', max_length=15, choices=MODEL_TRAIN_TYPE)
 
+    train_finished_at = models.DateTimeField(_('finished at'), null=True, blank=True)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_project_record', on_delete=models.SET_NULL, null=True, verbose_name=_('created by'))
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)

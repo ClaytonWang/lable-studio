@@ -8,6 +8,7 @@
   > FileName   : algorithm_result.py
   > CreateTime : 2022/8/4 08:27
 """
+import datetime
 import json
 import logging
 from django.db.models import Q
@@ -355,6 +356,7 @@ def insert_train_model(algorithm_result, model_train_id):
         new_model.state = 4
         new_model.save()
         train.state = 4
+        train.train_finished_at = datetime.datetime.now()
         train.save()
     else:
         print('Model url is invalid. model id :', new_model.id)
