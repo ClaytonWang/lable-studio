@@ -258,7 +258,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             for item in train_task:
                 task_id = item.id
                 # 有手动标注取手动标注的值，没有取自动标注的值
-                # label = '升级'
+                label = ''
                 if task_id in anno_result:
                     label = get_choice_values(anno_result.get(task_id))
 
