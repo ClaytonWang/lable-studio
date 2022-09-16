@@ -20,7 +20,7 @@ MODEL_TRAIN_AVERAGE_TIME_KEY = 'MODEL_TRAIN_AVERAGE_TIME'
 MODEL_TRAIN_EXPIRE_TIME = 60 * 60 * 24
 
 
-def average_time():
+def average_time() -> float:
     """
     平均时间写到Redis，设置固定的有效时间，
     时间过期重新计算平均时间
@@ -31,6 +31,7 @@ def average_time():
     """
     from django.conf import settings
     _avg = redis_get(MODEL_TRAIN_AVERAGE_TIME_KEY)
+    _avg = _avg.decode('utf-8') if _avg and isinstance(_avg, bytes) else _avg
     if not _avg:
         if redis_healthcheck():
             query = ModelTrain.objects.filter(state=4, is_train=True).order_by('-created_at')[:10]
@@ -47,7 +48,7 @@ def average_time():
             redis_set(MODEL_TRAIN_AVERAGE_TIME_KEY, _avg, MODEL_TRAIN_EXPIRE_TIME)
         else:
             _avg = getattr(settings, 'MODEL_TRAIN_INDIVIDUAL_TASK_TIME')
-    return _avg
+    return float(_avg)
 
 
 class ModelTrainListSerializer(serializers.ModelSerializer):
@@ -67,9 +68,8 @@ class ModelTrainListSerializer(serializers.ModelSerializer):
         if obj.state == 3:
             avg = average_time()
             dt = datetime.datetime.now(tz=utc) - obj.created_at
-            total_time = float(avg.decode('utf-8')) * obj.train_task.count()
+            total_time = avg * obj.train_task.count()
             _rate = round(dt.seconds / total_time, 2)
-            print('.....', _rate)
             return _rate if _rate <= 1 else 1
         else:
             return None
