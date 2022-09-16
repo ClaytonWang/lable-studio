@@ -37,9 +37,14 @@ def average_time() -> float:
             query = ModelTrain.objects.filter(state=4, is_train=True).order_by('-created_at')[:10]
             train_average = []
             for item in query:
+                if item.train_task.count() == 0:
+                    continue
+
                 finished = item.train_finished_at if item.train_finished_at else item.updated_at
                 time_dt = finished - item.created_at
                 avg_time = round(time_dt.seconds / item.train_task.count(), 2)
+                if avg_time < 0:
+                    continue
                 train_average.append(avg_time)
             if train_average:
                 _avg = round(sum(train_average) / len(train_average), 2)
