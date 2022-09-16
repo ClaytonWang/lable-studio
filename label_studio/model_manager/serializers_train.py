@@ -61,10 +61,10 @@ class ModelTrainListSerializer(serializers.ModelSerializer):
     project_set = SerializerMethodField()
     new_model_train_task = SerializerMethodField()
     new_model_assessment_task = SerializerMethodField()
-    rate = SerializerMethodField()
+    training_progress = SerializerMethodField()
 
     @staticmethod
-    def get_rate(obj):
+    def get_training_progress(obj):
         if obj.state == 3:
             avg = average_time()
             dt = datetime.datetime.now(tz=utc) - obj.created_at
