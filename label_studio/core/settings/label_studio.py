@@ -72,6 +72,8 @@ versions = collect_versions()
 # in Label Studio Community version, feature flags are always ON
 FEATURE_FLAGS_DEFAULT_VALUE = True
 
+# 模型训练时间
+MODEL_TRAIN_INDIVIDUAL_TASK_TIME = 0.25
 # 注册有效时间是2天
 SIGNUP_INVITE_EXPIRE_TIME = 60 * 60 * 24 * 2
 # 系统分组，不能进行删除和编辑
