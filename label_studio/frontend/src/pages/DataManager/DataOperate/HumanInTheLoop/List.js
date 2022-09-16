@@ -1,5 +1,5 @@
 import { useCallback ,useContext, useEffect,useRef,useState } from "react";
-import { Popconfirm, Select, Space, Tooltip } from "antd";
+import { Popconfirm, Progress, Select, Space,Tooltip } from "antd";
 import { Button } from "@/components/Button/Button";
 import { ExclamationCircleOutlined,QuestionCircleOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
@@ -11,6 +11,8 @@ import { Userpic } from '@/components';
 import { format } from 'date-fns';
 const { Option } = Select;
 
+let isFirst = true;
+
 export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
   const api = useContext(ApiContext);
   const { project } = useProject();
@@ -21,11 +23,15 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
   const [isTrain, setIsTrain] = useState('');
   const [projectSetId, setProjectSetId] = useState('');
   const [projectSets, setProjectSets] = useState([]);
+  const [loading, setLoading] = useState(false);
   const ref = useRef();
 
   const getListData = async (params = {}) => {
     if (!project.id) {
       return {};
+    }
+    if (isFirst) {
+      setLoading(true);
     }
     const result = await api.callApi("listTrain", {
       params: {
@@ -39,6 +45,10 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
       },
     });
 
+    if (isFirst) {
+      setLoading(false);
+      isFirst=false;
+    }
     return {
       data: result.results,
       success: true,
@@ -77,6 +87,16 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
       setProjectSets(data?.project_sets);
     });
 
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      ref.current?.reload();
+    },2000);
+
+    return () => {
+      clearInterval(timer);
+    };
   },[]);
 
   const formatNumber = (value) => {
@@ -87,10 +107,11 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
     } catch (e) {
       value = 0;
     }
-    return new Intl.NumberFormat('en', {
-      style: 'unit',
-      unit: 'percent',
-    }).format(value);
+    // return new Intl.NumberFormat('en', {
+    //   style: 'unit',
+    //   unit: 'percent',
+    // }).format(value);
+    return value;
   };
 
   const modelChange = (e) => {
@@ -124,6 +145,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
         </Space>
       </Modal.Header>
       <ProTable
+        loading={ loading }
         actionRef={ref}
         search={false}
         request={getListData}
@@ -281,9 +303,13 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
             ellipsis: true,
             render: (_,record) => {
               return (
-                <div >
-                  {formatNumber(record.training_progress)}
-                </div>
+                <Progress type="circle"
+                  strokeColor={{
+                    '0%': '#108ee9',
+                    '100%': '#87d068',
+                  }}
+                  percent={formatNumber(record.training_progress)}
+                  width={40} />
               );
             },
           },
