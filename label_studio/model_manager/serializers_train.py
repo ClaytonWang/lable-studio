@@ -69,7 +69,10 @@ class ModelTrainListSerializer(serializers.ModelSerializer):
             avg = average_time()
             dt = datetime.datetime.now(tz=utc) - obj.created_at
             total_time = avg * obj.train_task.count()
-            _rate = round(dt.seconds / total_time, 2)
+            if total_time <= 0:
+                return None
+            else:
+                _rate = round(dt.seconds / total_time, 2)
             return _rate if _rate < 1 else 0.99
         # 训练完成
         elif obj.state == 4:
