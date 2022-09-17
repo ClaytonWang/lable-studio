@@ -355,7 +355,7 @@ def train_failure_delete_train_model(model_train_id):
     if not train:
         return
 
-    train.assessment_task.all().delete()
-    train.train_task.all().delete()
+    train.assessment_task.clear()
+    train.train_task.clear()
     train.new_model and train.new_model.delete()
     train.delete()
