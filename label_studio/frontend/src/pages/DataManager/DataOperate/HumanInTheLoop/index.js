@@ -43,7 +43,7 @@ export default forwardRef(({ project }, ref) => {
       },
     });
     message.success('添加成功!');
-    modalRef.current?.hide();
+    // modalRef.current?.hide();
     setType("list");
   },[modalRef,setType]);
 

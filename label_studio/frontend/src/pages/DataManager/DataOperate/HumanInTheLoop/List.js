@@ -9,7 +9,8 @@ import { ApiContext } from '@/providers/ApiProvider';
 import { useProject } from "@/providers/ProjectProvider";
 import { Userpic } from '@/components';
 import { format } from 'date-fns';
-import { tr } from "date-fns/locale";
+
+import { LsCross } from '@/assets/icons';
 const { Option } = Select;
 
 let isNeedLoading = true;
@@ -144,6 +145,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
             <QuestionCircleOutlined />
           </Tooltip>
         </Space>
+        <a tag={Button} name="close" onClick={onCancel}><LsCross/></a>
       </Modal.Header>
       <ProTable
         loading={ loading }
