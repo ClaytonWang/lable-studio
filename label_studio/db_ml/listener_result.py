@@ -26,7 +26,7 @@ from db_ml.services import redis_update_finish_state
 from db_ml.services import update_prediction_data
 from db_ml.services import train_failure_delete_train_model
 from model_manager.models import ModelTrain, ModelManager
-from core.redis import _redis, redis_get, redis_set, redis_delete
+from core.redis import _redis, redis_get, redis_set, redis_delete, redis_healthcheck
 logger = logging.getLogger('db')
 
 """
@@ -36,7 +36,11 @@ logger = logging.getLogger('db')
 
 
 def read_redis_data(project_id, algorithm_type):
-    fuzzy_key = f'celery-task-meta*_{algorithm_type}_{project_id}_*'
+    fuzzy_key = f'celery-task-meta*_{algorithm_type}_{project_id}*'
+    if not redis_healthcheck():
+        print('Redis is disconnect')
+        return
+    
     for key in _redis.scan_iter(fuzzy_key):
         try:
             key = key.decode('utf-8')
