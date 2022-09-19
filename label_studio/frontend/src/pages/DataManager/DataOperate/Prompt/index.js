@@ -26,13 +26,14 @@ const Prompt = forwardRef(({ project, showStatus }, ref) => {
         }).then(() => {
           setLoading(false);
           showStatus('prompt');
+          close();
         });
       } else {
         setLoading(false);
         message.error(t('tip_please_complete'));
       }
     });
-    
+
   }, [project, setLoading]);
 
   const Comp = useMemo(() => {

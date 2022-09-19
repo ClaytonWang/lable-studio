@@ -65,7 +65,7 @@ const PromptTemplate = ({ project }) => {
     <div className='prompt-template'>
       <div className='operate-zone'>
         <Space align="end">
-          <Button
+          <a
             size='small'
             type="primary"
             onClick={() => {
@@ -74,8 +74,8 @@ const PromptTemplate = ({ project }) => {
                 type: 'add',
               });
             }}
-            icon={<PlusOutlined />}
-          >{t("Insert")}</Button>
+            // icon={<PlusOutlined />}
+          >{t("Insert")}<PlusOutlined /></a>
         </Space>
       </div>
       <EditableProTable

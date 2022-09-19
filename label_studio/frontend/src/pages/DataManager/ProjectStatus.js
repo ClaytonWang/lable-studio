@@ -13,6 +13,11 @@ const TASK_TYPE = [
   'prompt',
 ];
 
+const dataReload = () => {
+  window.dataManager.fetchProject({ force: true, interaction: 'refresh' });
+  window.dataManager.store.currentView?.reload();
+};
+
 export default forwardRef((props, ref) => {
   const modalRef = useRef();
   const api = useAPI();
@@ -73,7 +78,7 @@ export default forwardRef((props, ref) => {
       setVisible(task.type);
       const timer = setInterval(() => {
         request.sync(task.type);
-      }, 3000);
+      }, 2000);
 
       return () => clearInterval(timer);
     } else {
@@ -82,7 +87,8 @@ export default forwardRef((props, ref) => {
         if (props.onFinish?.[visible]) {
           props.onFinish?.[visible]();
         } else {
-          window.location.reload();
+          // window.location.reload();
+          dataReload();
         }
 
         modalRef.current?.hide();
@@ -102,7 +108,8 @@ export default forwardRef((props, ref) => {
           if (props.onFinish?.[taskType]) {
             props.onFinish?.[taskType]();
           } else {
-            window.location.reload();
+            // window.location.reload();
+            dataReload();
           }
         }
       });
@@ -146,7 +153,7 @@ export default forwardRef((props, ref) => {
               }} type="circle" percent={progress} />
               <Space style={{ marginTop: 8 }}>
                 <a onClick={handleCancel}>{t('Cancel')}</a>
-                <a onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</a>
+                <a style={{ marginLeft:24 }} onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</a>
               </Space>
             </Space>
           </div>

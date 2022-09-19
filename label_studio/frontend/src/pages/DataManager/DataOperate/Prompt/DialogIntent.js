@@ -3,7 +3,7 @@ import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";
 import { PromptTemplate } from "@/components/PromptTemplate/PromptTemplate";
 
-const ResponseGeneration = ({ loading, close, project, request }) => {
+const DialogIntent = ({ loading, close, project, request }) => {
   return (
     <>
       <Modal.Header>
@@ -32,4 +32,4 @@ const ResponseGeneration = ({ loading, close, project, request }) => {
   );
 };
 
-export default ResponseGeneration;
+export default DialogIntent;
