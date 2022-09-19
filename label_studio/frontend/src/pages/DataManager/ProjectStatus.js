@@ -140,10 +140,13 @@ export default forwardRef((props, ref) => {
           <div style={{ padding: 16, textAlign: 'center' }}>
             <Space direction="vertical">
               <h2>{t.format('with_template', `label_${task.type}`, task.type)}...</h2>
-              <Progress type="circle" percent={progress} />
+              <Progress strokeColor={{
+                '0%': '#108ee9',
+                '100%': '#87d068',
+              }} type="circle" percent={progress} />
               <Space style={{ marginTop: 8 }}>
-                <Button onClick={handleCancel}>{t('Cancel')}</Button>
-                <Button onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</Button>
+                <a onClick={handleCancel}>{t('Cancel')}</a>
+                <a onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</a>
               </Space>
             </Space>
           </div>

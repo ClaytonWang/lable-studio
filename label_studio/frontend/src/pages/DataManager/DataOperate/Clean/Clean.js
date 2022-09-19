@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useMemo, useRef } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { message } from 'antd';
 import { EditableProTable } from "@ant-design/pro-components";
 import { compact, trim } from "lodash";
@@ -66,6 +66,7 @@ export default forwardRef(({ showStatus }, ref) => {
   const { project } = useProject();
   const tableRef = useRef();
   const modalRef = useRef();
+  const [loading, setLoading] = useState(false);
 
   const request = useMemo(() => {
     return {
@@ -133,10 +134,17 @@ export default forwardRef(({ showStatus }, ref) => {
   }));
 
   const handleExec = () => {
-    request.clExecClean().then(showStatus);
+    setLoading(true);
+    request.clExecClean().then(() => {
+      showStatus();
+      setLoading(false);
+    });
   };
   const handleReplace = () => {
-    request.clReplace();
+    setLoading(true);
+    request.clReplace().then(() => {
+      setLoading(false);
+    });
   };
   const handleRowDataChange = (id, data) => {
     request.clLabelManually(id, data.manual).then(() => {
@@ -169,10 +177,10 @@ export default forwardRef(({ showStatus }, ref) => {
               </Elem>
               <Elem name="buttons">
                 <Space>
-                  <Button size="compact" look="primary" onClick={handleExec}>
+                  <Button size="compact" waiting={ loading } look="primary" onClick={handleExec}>
                   开始清洗
                   </Button>
-                  <Button size="compact" look="primary" onClick={handleReplace}>
+                  <Button size="compact" waiting={ loading } look="primary" onClick={handleReplace}>
                     {t("clean_replace_data", "替换原对话")}
                   </Button>
                 </Space>
@@ -181,6 +189,7 @@ export default forwardRef(({ showStatus }, ref) => {
           </Elem>
           <Elem name="content">
             <EditableProTable
+              loading={ loading }
               rowKey="id"
               size="small"
               recordCreatorProps={false}

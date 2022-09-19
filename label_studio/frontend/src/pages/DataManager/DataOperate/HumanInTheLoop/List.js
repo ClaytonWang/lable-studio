@@ -1,5 +1,5 @@
 import { useCallback ,useContext, useEffect,useRef,useState } from "react";
-import { Popconfirm, Select, Space, Tooltip } from "antd";
+import { Popconfirm, Progress, Select, Space,Tooltip } from "antd";
 import { Button } from "@/components/Button/Button";
 import { ExclamationCircleOutlined,QuestionCircleOutlined } from "@ant-design/icons";
 import { ProTable } from "@ant-design/pro-components";
@@ -9,7 +9,10 @@ import { ApiContext } from '@/providers/ApiProvider';
 import { useProject } from "@/providers/ProjectProvider";
 import { Userpic } from '@/components';
 import { format } from 'date-fns';
+import { tr } from "date-fns/locale";
 const { Option } = Select;
+
+let isNeedLoading = true;
 
 export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
   const api = useContext(ApiContext);
@@ -21,11 +24,15 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
   const [isTrain, setIsTrain] = useState('');
   const [projectSetId, setProjectSetId] = useState('');
   const [projectSets, setProjectSets] = useState([]);
+  const [loading, setLoading] = useState(false);
   const ref = useRef();
 
   const getListData = async (params = {}) => {
     if (!project.id) {
       return {};
+    }
+    if (isNeedLoading) {
+      setLoading(true);
     }
     const result = await api.callApi("listTrain", {
       params: {
@@ -39,6 +46,10 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
       },
     });
 
+    if (isNeedLoading) {
+      isNeedLoading=false;
+      setLoading(false);
+    }
     return {
       data: result.results,
       success: true,
@@ -77,6 +88,16 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
       setProjectSets(data?.project_sets);
     });
 
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      ref.current?.reload();
+    },2000);
+
+    return () => {
+      clearInterval(timer);
+    };
   },[]);
 
   const formatNumber = (value) => {
@@ -87,10 +108,11 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
     } catch (e) {
       value = 0;
     }
-    return new Intl.NumberFormat('en', {
-      style: 'unit',
-      unit: 'percent',
-    }).format(value);
+    // return new Intl.NumberFormat('en', {
+    //   style: 'unit',
+    //   unit: 'percent',
+    // }).format(value);
+    return value;
   };
 
   const modelChange = (e) => {
@@ -124,6 +146,7 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
         </Space>
       </Modal.Header>
       <ProTable
+        loading={ loading }
         actionRef={ref}
         search={false}
         request={getListData}
@@ -159,7 +182,8 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
         pagination={{
           pageSize: 5,
           showSizeChanger: true,
-          pageSizeOptions:[5,10,20],
+          pageSizeOptions: [5, 10, 20],
+          onChange: (page) => { if(page>1){isNeedLoading=true;}},
         }}
         toolBarRender={() => [
           <Button key="cancel" size="compact" onClick={onCancel}>
@@ -280,10 +304,15 @@ export default ({ onCancel, onEvaluate, onTrain,onAccuracy }) => {
             dataIndex: "training_progress",
             ellipsis: true,
             render: (_,record) => {
-              return (
-                <div >
-                  {formatNumber(record.training_progress)}
-                </div>
+              return (record.category==='assessment'?'/': (
+                <Progress type="circle"
+                  strokeColor={{
+                    '0%': '#108ee9',
+                    '100%': '#87d068',
+                  }}
+                  percent={formatNumber(record.training_progress)}
+                  width={40} />
+              )
               );
             },
           },
