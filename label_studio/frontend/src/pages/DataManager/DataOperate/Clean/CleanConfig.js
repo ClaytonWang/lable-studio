@@ -28,8 +28,10 @@ export const CleanConfig = forwardRef(({ cleanRefs }, ref) => {
   }));
 
   const onHide = useCallback(async () => {
-    localStorage.setItem('selectedCleanModel', '');
-    modalRef?.current.hide();
+    modalRef?.current.hide(() => {
+      setSteps([{ step: 1, value: null, status: null }]);
+      localStorage.setItem('selectedCleanModel', '');
+    });
   }, []);
 
   const addStep = useCallback((stp) => {
@@ -98,7 +100,9 @@ export const CleanConfig = forwardRef(({ cleanRefs }, ref) => {
         modelIds.push(v.value);
       });
       localStorage.setItem('selectedCleanModel', modelIds.join(','));
-      modalRef?.current.hide();
+      modalRef?.current.hide(() => {
+        setSteps([{ step: 1, value: null, status: null }]);
+      });
       cleanRefs?.current.show();
     }
   },[steps]);
