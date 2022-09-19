@@ -24,15 +24,59 @@ from db_ml.services import generate_redis_key
 from db_ml.services import redis_set_json, redis_get_json
 from db_ml.services import redis_update_finish_state
 from db_ml.services import update_prediction_data
-from db_ml.services import get_first_version_model
-from db_ml.services import INTENT_DIALOG_PROMPT_TOKEN
+from db_ml.services import train_failure_delete_train_model
 from model_manager.models import ModelTrain, ModelManager
+from core.redis import _redis, redis_get, redis_set, redis_delete
 logger = logging.getLogger('db')
 
 """
 
 
 """
+
+
+def read_redis_data(project_id, algorithm_type):
+    fuzzy_key = f'celery-task-meta*_{algorithm_type}_{project_id}_*'
+    for key in _redis.scan_iter(fuzzy_key):
+        try:
+            key = key.decode('utf-8')
+            k_result = redis_get(key)
+            k_result = json.loads(str(k_result, 'utf-8'))
+            status = k_result.get('status')
+            result = k_result.get('result', '')
+            print(k_result)
+            data = dict(
+                celery_task_id=key,
+                status=status,
+                result=result
+            )
+            process_callback_result(data)
+        except Exception as e:
+            print(f'ML Exception: {e} celery_task_id {key}')
+        finally:
+            redis_delete(key)
+            pass
+
+
+def process_callback_result(data):
+    task_status = data.get('status')
+    celery_task_id = data.get('celery_task_id')
+    result = data.get('result')
+    print(f'ML return message: {data}')
+    if task_status in ('PENDING', 'STARTED', 'RETRY'):
+        print(f'ML celery task id : {celery_task_id}  status: {task_status}')
+        return
+
+    algorithm_type, project_id, task_id = split_project_and_task_id(celery_task_id)
+    print(' algorithm_type: ', algorithm_type, ' project_id: ', project_id, ' task_id: ', task_id)
+    if algorithm_type == 'train' and task_status == 'FAILURE':
+        train_failure_delete_train_model(project_id)
+        print(f'ML Train Task status is failed. {celery_task_id}')
+    else:
+        if task_status in ['SUCCESS']:
+            process_algorithm_result(algorithm_type, project_id, task_id, result)
+        else:
+            print(f'ML Task status is failed. {celery_task_id}')
 
 
 def process_celery_result(key):
