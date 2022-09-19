@@ -14,7 +14,7 @@ const TASK_TYPE = [
 ];
 
 const dataReload = () => {
-  window.dataManager.fetchProject({ force: true, interaction: 'refresh' });
+  window.dataManager.store.fetchProject({ force: true, interaction: 'refresh' });
   window.dataManager.store.currentView?.reload();
 };
 
