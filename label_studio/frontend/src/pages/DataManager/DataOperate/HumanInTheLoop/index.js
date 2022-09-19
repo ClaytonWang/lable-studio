@@ -8,6 +8,7 @@ import {
   useRef,
   useState
 } from "react";
+import { message } from 'antd';
 import { Modal } from "@/components/Modal/Modal";
 import { ApiContext } from '@/providers/ApiProvider';
 import CreateEvaluate from "./CreateEvaluate";
@@ -41,6 +42,7 @@ export default forwardRef(({ project }, ref) => {
         ...params,
       },
     });
+    message.success('添加成功!');
     modalRef.current?.hide();
     setType("list");
   },[modalRef,setType]);

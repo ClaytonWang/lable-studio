@@ -152,8 +152,8 @@ export default forwardRef((props, ref) => {
                 '100%': '#87d068',
               }} type="circle" percent={progress} />
               <Space style={{ marginTop: 8 }}>
-                <a onClick={handleCancel}>{t('Cancel')}</a>
-                <a style={{ marginLeft:24 }} onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</a>
+                <Button onClick={handleCancel}>{t('Cancel')}</Button>
+                <Button style={{ marginLeft:24 }} onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</Button>
               </Space>
             </Space>
           </div>
