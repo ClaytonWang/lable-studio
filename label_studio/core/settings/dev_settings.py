@@ -20,29 +20,29 @@ DATABASES = {
 }
 
 
-RQ_QUEUES = {
-    'default': {
-        'HOST': '124.71.161.146',
-        'PORT': 6379,
-        'DB': 0,
-        'DEFAULT_TIMEOUT': 18000,
-    },
-    'prediction': {
-        'HOST': '124.71.161.146',
-        'PORT': 6379,
-        'DB': 1,
-        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
-    },
-    'algorithm_clean': {
-        'HOST': '124.71.161.146',
-        'PORT': 6379,
-        'DB': 1,
-        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
-    },
-    'prompt': {
-        'HOST': '124.71.161.146',
-        'PORT': 6379,
-        'DB': 1,
-        'DEFAULT_TIMEOUT': 18000,
-    },
-}
+# RQ_QUEUES = {
+#     'default': {
+#         'HOST': '124.71.161.146',
+#         'PORT': 6379,
+#         'DB': 0,
+#         'DEFAULT_TIMEOUT': 18000,
+#     },
+#     'prediction': {
+#         'HOST': '124.71.161.146',
+#         'PORT': 6379,
+#         'DB': 1,
+#         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+#     },
+#     'algorithm_clean': {
+#         'HOST': '124.71.161.146',
+#         'PORT': 6379,
+#         'DB': 1,
+#         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+#     },
+#     'prompt': {
+#         'HOST': '124.71.161.146',
+#         'PORT': 6379,
+#         'DB': 1,
+#         'DEFAULT_TIMEOUT': 18000,
+#     },
+# }

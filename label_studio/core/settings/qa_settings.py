@@ -19,29 +19,29 @@ DATABASES = {
     }
 }
 
-RQ_QUEUES = {
-    'default': {
-        'HOST': 'redis',
-        'PORT': 6379,
-        'DB': 0,
-        'DEFAULT_TIMEOUT': 18000,
-    },
-    'prediction': {
-        'HOST': 'redis',
-        'PORT': 6379,
-        'DB': 1,
-        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
-    },
-    'algorithm_clean': {
-        'HOST': 'redis',
-        'PORT': 6379,
-        'DB': 1,
-        'DEFAULT_TIMEOUT': 3600 * 24 * 2,
-    },
-    'prompt': {
-        'HOST': 'redis',
-        'PORT': 6379,
-        'DB': 1,
-        'DEFAULT_TIMEOUT': 18000,
-    },
-}
+# RQ_QUEUES = {
+#     'default': {
+#         'HOST': 'redis',
+#         'PORT': 6379,
+#         'DB': 0,
+#         'DEFAULT_TIMEOUT': 18000,
+#     },
+#     'prediction': {
+#         'HOST': 'redis',
+#         'PORT': 6379,
+#         'DB': 1,
+#         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+#     },
+#     'algorithm_clean': {
+#         'HOST': 'redis',
+#         'PORT': 6379,
+#         'DB': 1,
+#         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
+#     },
+#     'prompt': {
+#         'HOST': 'redis',
+#         'PORT': 6379,
+#         'DB': 1,
+#         'DEFAULT_TIMEOUT': 18000,
+#     },
+# }

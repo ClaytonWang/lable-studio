@@ -20,28 +20,28 @@ SESSION_COOKIE_SECURE = False
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
 
-
+REDIS_HOST = '124.71.161.146'
 RQ_QUEUES = {
     'default': {
-        'HOST': 'redis',
+        'HOST': REDIS_HOST,
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,
     },
     'prediction': {
-        'HOST': 'redis',
+        'HOST': REDIS_HOST,
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
     'algorithm_clean': {
-        'HOST': 'redis',
+        'HOST': REDIS_HOST,
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
     'prompt': {
-        'HOST': 'redis',
+        'HOST': REDIS_HOST,
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 18000,
