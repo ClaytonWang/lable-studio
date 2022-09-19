@@ -42,6 +42,7 @@ from db_ml.services import generate_uuid
 from db_ml.services import get_project_labels
 from db_ml.services import train_failure_delete_train_model
 from db_ml.listener_result import process_algorithm_result, split_project_and_task_id
+from db_ml.listener_result import read_redis_data
 logger = logging.getLogger('db')
 
 """
@@ -274,6 +275,9 @@ def query_task(request):
     project_id = data.get('project_id')
     algorithm_type = data.get('type')
 
+    # 查询redis的结果信息
+    read_redis_data(project_id, algorithm_type)
+
     query = Task.objects.filter(project_id=project_id)
     total_task = query.count()
     task_ids = [item.id for item in query]
@@ -378,42 +382,43 @@ def cancel_job(request):
     #     )
     return Response(data=dict(msg='cancel successfully'))
 
-
+#
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def job_result(request):
-    # data = request.POST.dict()
-    # if not data:
-    data = request.data
-
-    task_status = data.get('status')
-    print(f'ML return message: {data}')
-
-    if task_status in ('PENDING', 'STARTED', 'RETRY'):
-        return
-
-    state, error = 0, ''
-    celery_task_id = data.get('celery_task_id')
-    algorithm_type, project_id, task_id = split_project_and_task_id(celery_task_id)
-    print(' algorithm_type: ', algorithm_type, ' project_id: ', project_id, ' task_id: ', task_id)
-    if algorithm_type == 'train' and task_status == 'FAILURE':
-        state = 1
-        error = 'Task status is failed'
-        train_failure_delete_train_model(project_id)
-        return Response(data={'status': state, 'error': error})
-    elif task_status in ('FAILURE', 'REVOKED'):
-        data['result'] = ''
-
-    result = data.get('result')
-    if not algorithm_type or not project_id:
-        state = 1
-        error = 'Required parameters algorithm_type, project_id task_id'
-
-    try:
-        process_algorithm_result(algorithm_type, project_id, task_id, result)
-    except Exception as e:
-        state = 1
-        error = str(e)
-        print(f'Process algorithm error : {e}')
-
-    return Response(data={'status': state, 'error': error})
+    return Response()
+#     # data = request.POST.dict()
+#     # if not data:
+#     data = request.data
+#
+#     task_status = data.get('status')
+#     print(f'ML return message: {data}')
+#
+#     if task_status in ('PENDING', 'STARTED', 'RETRY'):
+#         return
+#
+#     state, error = 0, ''
+#     celery_task_id = data.get('celery_task_id')
+#     algorithm_type, project_id, task_id = split_project_and_task_id(celery_task_id)
+#     print(' algorithm_type: ', algorithm_type, ' project_id: ', project_id, ' task_id: ', task_id)
+#     if algorithm_type == 'train' and task_status == 'FAILURE':
+#         state = 1
+#         error = 'Task status is failed'
+#         train_failure_delete_train_model(project_id)
+#         return Response(data={'status': state, 'error': error})
+#     elif task_status in ('FAILURE', 'REVOKED'):
+#         data['result'] = ''
+#
+#     result = data.get('result')
+#     if not algorithm_type or not project_id:
+#         state = 1
+#         error = 'Required parameters algorithm_type, project_id task_id'
+#
+#     try:
+#         process_algorithm_result(algorithm_type, project_id, task_id, result)
+#     except Exception as e:
+#         state = 1
+#         error = str(e)
+#         print(f'Process algorithm error : {e}')
+#
+#     return Response(data={'status': state, 'error': error})

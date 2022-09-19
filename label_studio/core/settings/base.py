@@ -143,6 +143,13 @@ LOGGING = {
         'handlers': ['console'],
         'level': get_env('LOG_LEVEL', 'WARNING'),
     },
+    # 'loggers': {
+    #     'django.db.backends': {
+    #         'level': 'DEBUG',
+    #         'propagate': True,
+    #         'handlers': ['console']
+    #     },
+    # }
 }
 
 if get_bool_env('GOOGLE_LOGGING_ENABLED', False):
@@ -291,28 +298,29 @@ TEMPLATES = [
     }
 ]
 
+REDIS_HOST = '124.71.161.146'
 # RQ
 RQ_QUEUES = {
     'default': {
-        'HOST': 'redis',
+        'HOST': REDIS_HOST,
         'PORT': 6379,
         'DB': 0,
         'DEFAULT_TIMEOUT': 18000,
     },
     'prediction': {
-        'HOST': 'redis',
+        'HOST': REDIS_HOST,
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
     'algorithm_clean': {
-        'HOST': 'redis',
+        'HOST': REDIS_HOST,
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 3600 * 24 * 2,
     },
     'prompt': {
-        'HOST': 'redis',
+        'HOST': REDIS_HOST,
         'PORT': 6379,
         'DB': 1,
         'DEFAULT_TIMEOUT': 18000,
