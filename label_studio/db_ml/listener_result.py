@@ -48,6 +48,9 @@ def read_redis_data(project_id, algorithm_type):
             k_result = json.loads(str(k_result, 'utf-8'))
             status = k_result.get('status')
             result = k_result.get('result', '')
+            if status not in ('SUCCESS', 'FAILURE'):
+                continue
+
             print(k_result)
             data = dict(
                 celery_task_id=key,
@@ -58,7 +61,8 @@ def read_redis_data(project_id, algorithm_type):
         except Exception as e:
             print(f'ML Exception: {e} celery_task_id {key}')
         finally:
-            redis_delete(key)
+            if status in ('SUCCESS', 'FAILURE'):
+                redis_delete(key)
             pass
 
 
