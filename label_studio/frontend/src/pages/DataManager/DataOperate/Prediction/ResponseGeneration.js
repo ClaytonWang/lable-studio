@@ -63,7 +63,7 @@ const ResponseGeneration = ({ close, execLabel, models, loading }) => {
           <Space align="end">
             <Button
               size="compact"
-              onClick={close}
+              onClick={(e) => { e.preventDefault(); close();}}
             >
               {t("Cancel")}
             </Button>
