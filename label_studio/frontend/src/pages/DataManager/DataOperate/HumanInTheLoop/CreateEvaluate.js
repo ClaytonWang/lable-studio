@@ -11,7 +11,8 @@ const { Option } = Select;
 const tip_learn = {
   id: 'tip_learn',
   title: "提示学习",
-  model_title:'',
+  model_title: '',
+  version:'',
 };
 
 
@@ -120,7 +121,7 @@ export default ({ onCancel,onSubmit }) => {
                 <Col span={currModel.id === "tip_learn" ? 12 : 24}>
                   <Select defaultValue="tip_learn" onChange={handleChange}>
                     {trainModels.map((model) => (
-                      <Option key={model.id} model={model}>{model.title}</Option>
+                      <Option key={model.id} model={model}>{model.title + model.version}</Option>
                     ))}
                   </Select>
                 </Col>
