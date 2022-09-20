@@ -83,7 +83,6 @@ const IntentResponse = ({ close, execLabel }) => {
 
     if (res.ok) {
       execLabel({ model_id:execModel });
-      close();
       return true;
     }
     const error = await res.json();
