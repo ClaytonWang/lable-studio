@@ -53,6 +53,8 @@ def average_time() -> float:
             redis_set(MODEL_TRAIN_AVERAGE_TIME_KEY, _avg, MODEL_TRAIN_EXPIRE_TIME)
         else:
             _avg = getattr(settings, 'MODEL_TRAIN_INDIVIDUAL_TASK_TIME')
+
+    _avg = getattr(settings, 'MODEL_TRAIN_INDIVIDUAL_TASK_TIME') if _avg == 0 else _avg
     return float(_avg)
 
 
