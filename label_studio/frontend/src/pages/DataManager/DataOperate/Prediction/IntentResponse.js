@@ -92,17 +92,19 @@ const IntentResponse = ({ close, execLabel }) => {
   }, [project, config,execModel]);
 
   const exec = () => {
-    const changedLabels = [];
-    const labels = [];
+    let changedLabels = [];
+    const labels = project?.parsed_label_config?.intent?.labels ?? [];
 
     template.controls.map(ctl => {
-      changedLabels.push(Array.from(ctl.children).map(c => {
+      changedLabels = Array.from(ctl.children).map(c => {
         return c.getAttribute("value");
-      }));
+      });
     });
 
     //判断新旧标签是否相同
-    const isSame = labels.length === changedLabels.length && labels.filter(t => !changedLabels.includes(t));
+    const isSame = labels.length === changedLabels.length
+      && (labels.filter(t => !changedLabels.includes(t))).length === 0
+      && (changedLabels.filter(t => !labels.includes(t))).length === 0;
 
     if (!isSame) {
       confirm({
