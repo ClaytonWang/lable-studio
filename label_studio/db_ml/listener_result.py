@@ -61,7 +61,7 @@ def read_redis_data(project_id, algorithm_type):
         except Exception as e:
             print(f'ML Exception: {e} celery_task_id {key}')
         finally:
-            if status in ('SUCCESS', 'FAILURE'):
+            if status in ('SUCCESS',):
                 redis_delete(key)
             pass
 
