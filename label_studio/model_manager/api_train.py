@@ -31,6 +31,7 @@ from db_ml.services import get_choice_values
 from db_ml.services import train_model
 from db_ml.services import generate_uuid
 from db_ml.services import get_first_version_model
+from db_ml.services import get_project_labels
 from db_ml.services import INTENT_DIALOG_PROMPT_TOKEN
 from db_ml.listener_result import read_redis_data
 from .serializers import ModelManagerCreateSerializer
@@ -258,6 +259,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
                 new_train.save()
 
             # 调用模型服务
+            labels = get_project_labels(data.get('project_id'))
             anno_result, pre_result = self.get_project_label_result(train_task)
             for item in train_task:
                 task_id = item.id
@@ -266,8 +268,14 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
                 if task_id in anno_result:
                     label = get_choice_values(anno_result.get(task_id))
 
-                if not label and task_id in pre_result:
-                    label = get_choice_values(anno_result.get(task_id))
+                if not label and str(task_id) in pre_result:
+                    label = get_choice_values(pre_result.get(str(task_id)))
+
+                if isinstance(label, list):
+                    label = ''.join(label)
+
+                if not label or label not in labels:
+                    raise Exception(f'{task_id}未标注不能训练或标签不在项目标签里。')
 
                 dialogue = item.data.get('dialogue', [])
                 task_data.append(dict(
