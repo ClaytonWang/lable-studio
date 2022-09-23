@@ -38,13 +38,15 @@ const IntentResponse = ({ close, execLabel }) => {
   }, [setConfig, setCurrentTemplate]);
 
   const getModelLabels = useCallback(async (model_id) => {
-    const data = await api.callApi("modelLabel", {
-      params: {
-        model_id,
-      },
-    });
+    if (model_id) {
+      const data = await api.callApi("modelLabel", {
+        params: {
+          model_id,
+        },
+      });
 
-    setModelLabels(data);
+      setModelLabels(data);
+    }
     setExecModel(model_id);
 
   }, []);
