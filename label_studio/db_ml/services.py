@@ -93,7 +93,7 @@ def rollback_prompt(project_id):
         objs = []
         for item in queryset:
             data = dict()
-            for field in PREDICTION_BACKUP_FIELDS:
+            for field in PROMPT_BACKUP_FIELDS:
                 data[field] = getattr(item, field)
             objs.append(PromptResult(**data))
         PromptResult.objects.bulk_create(objs)
