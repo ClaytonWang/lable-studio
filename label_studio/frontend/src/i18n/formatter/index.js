@@ -44,6 +44,8 @@ const validatei18n = {
   non_field_errors: [
     ['These labels still exist in annotations','error_label_still_in'],
     ['annotations', 'annotations'],
+    ['Validation failed on', 'validation_failed_on'],
+    ['is a required property', 'is_required_property'],
   ],
 };
 const formatValidateConfig = (data) => {
