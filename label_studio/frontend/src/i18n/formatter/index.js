@@ -46,6 +46,7 @@ const validatei18n = {
     ['annotations', 'annotations'],
     ['Validation failed on', 'validation_failed_on'],
     ['is a required property', 'is_required_property'],
+    ['Choice', 'validate_Choice'],
   ],
 };
 const formatValidateConfig = (data) => {

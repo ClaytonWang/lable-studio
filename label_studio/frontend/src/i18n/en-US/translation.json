@@ -344,6 +344,7 @@
   "annotations": "annotations",
   "validation_failed_on": "Validation failed on",
   "is_required_property": "is a required property",
+  "validate_Choice": "Choice",
   "Validation error": "Validation error",
   "Intent Classification for Dialog": "Intent Classification for Dialog",
   "Conversational AI - Response Generation": "Conversational AI - Response Generation",
