@@ -20,7 +20,8 @@ const IntentResponse = ({ close, execLabel }) => {
   const { project } = useProject();
   const [template, setCurrentTemplate] = useState(null);
   const [config, _setConfig] = React.useState("");
-  const [execModel, setExecModel] = React.useState(localStorage.getItem('selectedTrainModel'));
+  // const [execModel, setExecModel] = React.useState(localStorage.getItem('selectedTrainModel'));
+  const [execModel, setExecModel] = React.useState();
   const [execModelList, setExecModelList] = React.useState([]);
   const [modelLabels, setModelLabels] = React.useState([]);
   const api = useAPI();
@@ -58,9 +59,9 @@ const IntentResponse = ({ close, execLabel }) => {
     });
 
     setExecModelList(data);
-    const id = localStorage.getItem("selectedTrainModel");
+    // const id = localStorage.getItem("selectedTrainModel");
 
-    id && getModelLabels(id);
+    // id && getModelLabels(id);
 
   }, []);
 
