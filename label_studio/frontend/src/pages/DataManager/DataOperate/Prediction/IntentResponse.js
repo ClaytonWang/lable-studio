@@ -20,8 +20,7 @@ const IntentResponse = ({ close, execLabel }) => {
   const { project } = useProject();
   const [template, setCurrentTemplate] = useState(null);
   const [config, _setConfig] = React.useState("");
-  // const [execModel, setExecModel] = React.useState(localStorage.getItem('selectedTrainModel'));
-  const [execModel, setExecModel] = React.useState();
+  const [execModel, setExecModel] = React.useState('');
   const [execModelList, setExecModelList] = React.useState([]);
   const [modelLabels, setModelLabels] = React.useState([]);
   const api = useAPI();
@@ -44,11 +43,10 @@ const IntentResponse = ({ close, execLabel }) => {
         model_id,
       },
     });
-    // const data = ["升级", "测试"];
 
     setModelLabels(data);
     setExecModel(model_id);
-    localStorage.setItem('selectedTrainModel', model_id);
+
   }, []);
 
   const getModelList = useCallback(async () => {
@@ -58,10 +56,7 @@ const IntentResponse = ({ close, execLabel }) => {
       },
     });
 
-    setExecModelList(data);
-    // const id = localStorage.getItem("selectedTrainModel");
-
-    // id && getModelLabels(id);
+    setExecModelList([{ id:'',title:'请选择模型',version:'',value:'' },...data]);
 
   }, []);
 
@@ -83,13 +78,13 @@ const IntentResponse = ({ close, execLabel }) => {
     });
 
     if (res.ok) {
-      execLabel({ model_id:execModel });
+      execLabel({ model_id: execModel });
       return true;
     }
     const error = await res.json();
 
     return error;
-  }, [project, config,execModel]);
+  }, [project, config, execModel]);
 
   const exec = () => {
     let changedLabels = [];
@@ -100,6 +95,10 @@ const IntentResponse = ({ close, execLabel }) => {
         return c.getAttribute("value");
       });
     });
+
+    if (!execModel) {
+      return;
+    }
 
     //判断新旧标签是否相同
     const isSame = labels.length === changedLabels.length
@@ -137,14 +136,14 @@ const IntentResponse = ({ close, execLabel }) => {
       >
         <Form.Item
           label="选择模型"
+          validateStatus={execModel ? 'success' : 'error'}
+          help={!execModel ? "请选择模型" : ''}
         >
           <div style={{ width: 300 }}>
             <Select
-              value={ localStorage.getItem("selectedTrainModel")}
               options={execModelList?.map(v => {
-                return { label: v.title+v.version, value: v.id };
+                return { label: v.title + v.version, value: v.id };
               })}
-              placeholder={t("Please select Model type")}
               onChange={(e) => {
                 getModelLabels(e.target.value);
               }} />
@@ -163,7 +162,7 @@ const IntentResponse = ({ close, execLabel }) => {
             }
           </Space>
           {
-            modelLabels.length>0 && <div style={{ color: 'red', marginTop: 10 }}>注:所选模型标签和以设置标签</div>
+            modelLabels.length > 0 && <div style={{ color: 'red', marginTop: 10 }}>注:所选模型标签和以设置标签</div>
           }
         </Form.Item>
       </Form>
@@ -191,6 +190,7 @@ const IntentResponse = ({ close, execLabel }) => {
             size="compact"
             look="primary"
             onClick={exec}
+            disabled={!execModel}
           >
             立即标注
           </Button>
