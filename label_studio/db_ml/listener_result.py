@@ -36,7 +36,10 @@ logger = logging.getLogger('db')
 
 
 def read_redis_data(project_id, algorithm_type):
-    fuzzy_key = f'celery-task-meta*_{algorithm_type}_{project_id}*'
+    if algorithm_type == 'train':
+        fuzzy_key = f'celery-task-meta*_{algorithm_type}_*'
+    else:
+        fuzzy_key = f'celery-task-meta*_{algorithm_type}_{project_id}*'
     if not redis_healthcheck():
         print('Redis is disconnect')
         return
@@ -61,7 +64,7 @@ def read_redis_data(project_id, algorithm_type):
         except Exception as e:
             print(f'ML Exception: {e} celery_task_id {key}')
         finally:
-            if status in ('SUCCESS', 'FAILURE'):
+            if status in ('SUCCESS',):
                 redis_delete(key)
             pass
 

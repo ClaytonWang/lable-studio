@@ -1,11 +1,9 @@
-import { useCallback, useState } from "react";
-import { Col, Form, InputNumber, Row } from "antd";
+import { useCallback } from "react";
+import { Form, InputNumber } from "antd";
 import { Modal } from "@/components/Modal/Modal";
 import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";
-// import { TagList } from "@/components/TagList/TagList";
 import { PromptTemplate } from "@/components/PromptTemplate/PromptTemplate";
-import { ProjectTag } from "@/components/ProjectTag/ProjectTag";
 
 const formItemLayout = {
   labelCol: { span: 4 },
@@ -13,7 +11,6 @@ const formItemLayout = {
 };
 
 const ResponseGeneration = ({ loading, close, project, request }) => {
-  // const [tags, setTags] = useState([]);
   const [form] = Form.useForm();
   const onFinish = useCallback(() => {
     form.validateFields()

@@ -35,6 +35,7 @@ const Prediction = forwardRef(({ project, showStatus }, ref) => {
         .then(() => {
           setLoading(false);
           showStatus("prediction");
+          close();
         });
     },
     [project, setLoading],

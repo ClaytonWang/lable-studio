@@ -31,7 +31,7 @@ def average_time() -> float:
     """
     from django.conf import settings
     _avg = redis_get(MODEL_TRAIN_AVERAGE_TIME_KEY)
-    _avg = _avg.decode('utf-8') if _avg and isinstance(_avg, bytes) else _avg
+    _avg = float(_avg.decode('utf-8')) if _avg and isinstance(_avg, bytes) else _avg
     if not _avg:
         if redis_healthcheck():
             query = ModelTrain.objects.filter(state=4, is_train=True).order_by('-created_at')[:10]
@@ -49,10 +49,12 @@ def average_time() -> float:
             if train_average:
                 _avg = round(sum(train_average) / len(train_average), 2)
             else:
-                _avg = getattr(settings, 'MODEL_TRAIN_INDIVIDUAL_TASK_TIME')
+                _avg = settings.MODEL_TRAIN_INDIVIDUAL_TASK_TIME
             redis_set(MODEL_TRAIN_AVERAGE_TIME_KEY, _avg, MODEL_TRAIN_EXPIRE_TIME)
         else:
-            _avg = getattr(settings, 'MODEL_TRAIN_INDIVIDUAL_TASK_TIME')
+            _avg = settings.MODEL_TRAIN_INDIVIDUAL_TASK_TIME
+
+    _avg = settings.MODEL_TRAIN_INDIVIDUAL_TASK_TIME if _avg == 0 else _avg
     return float(_avg)
 
 

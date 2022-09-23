@@ -1,10 +1,9 @@
-import { useCallback, useState } from 'react';
-import { Form, InputNumber, Select, Tag } from 'antd';
+import { useCallback } from 'react';
+import { Form, InputNumber, Select } from 'antd';
 import { map } from 'lodash';
 import { Modal } from "@/components/Modal/Modal";
 import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";
-import { useAPI } from "@/providers/ApiProvider";
 
 const formItemLayout = {
   labelCol: { span: 4 },
@@ -15,23 +14,6 @@ const ResponseGeneration = ({ close, execLabel, models, loading }) => {
   const onFinish = useCallback((values) => {
     execLabel(values);
   }, [execLabel]);
-  // const [tags, setTags] = useState([]);
-  // const api = useAPI();
-  // const onModelChange = useCallback(v => {
-  //   // TEMP
-  //   setTags(
-  //     ['升级', '不知情', '套餐'],
-  //   );
-  //   // api
-  //   //   .callApi("modelLabel", {
-  //   //     params: {
-  //   //       model_id: v,
-  //   //     },
-  //   //   })
-  //   //   .then((res) => {
-  //   //     setTags(res || []);
-  //   //   });
-  // });
 
   return (
     <>
@@ -81,7 +63,7 @@ const ResponseGeneration = ({ close, execLabel, models, loading }) => {
           <Space align="end">
             <Button
               size="compact"
-              onClick={close}
+              onClick={(e) => { e.preventDefault(); close();}}
             >
               {t("Cancel")}
             </Button>
