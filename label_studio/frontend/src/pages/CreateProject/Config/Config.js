@@ -324,11 +324,15 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
     </p>
   );
 
+  const SHOW_BROWSE_TEMPLATE = localStorage.getItem('LABEL_SHOW_BROWSE_TEMPLATE');
+
   return (
     <div className={configClass}>
       <div className={configClass.elem("container")}>
         <header>
-          <button onClick={onBrowse}>{t("Browse Templates")}</button>
+          {
+            SHOW_BROWSE_TEMPLATE && <button onClick={onBrowse}>{t("Browse Templates")}</button>
+          }
           <ToggleItems items={{ code: t("Code"), visual: t("Visual") }} active={configure} onSelect={onSelect} />
         </header>
         <div className={configClass.elem('editor')}>
