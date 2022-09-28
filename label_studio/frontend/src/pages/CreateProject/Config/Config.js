@@ -324,7 +324,8 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
     </p>
   );
 
-  const SHOW_BROWSE_TEMPLATE = localStorage.getItem('LABEL_SHOW_BROWSE_TEMPLATE');
+  // const SHOW_BROWSE_TEMPLATE = localStorage.getItem('LABEL_SHOW_BROWSE_TEMPLATE');
+  const SHOW_BROWSE_TEMPLATE = true;
 
   return (
     <div className={configClass}>
