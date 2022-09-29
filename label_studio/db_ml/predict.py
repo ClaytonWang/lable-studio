@@ -8,7 +8,7 @@ import os
 import torch
 import pandas as pd
 from core.redis import redis_get
-from transformers import BartForSequenceClassification, BertTokenizer
+# from transformers import BartForSequenceClassification, BertTokenizer
 from tasks.models import Prediction, Task
 from db_ml.services import generate_redis_key
 from db_ml.services import AlgorithmState

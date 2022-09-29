@@ -13,9 +13,9 @@ import time
 import json
 import yaml
 import logging
-from torch.nn.utils.rnn import pack_sequence, pad_packed_sequence, pad_sequence
-from transformers import BertTokenizer, BartForConditionalGeneration, \
-    Text2TextGenerationPipeline
+# from torch.nn.utils.rnn import pack_sequence, pad_packed_sequence, pad_sequence
+# from transformers import BertTokenizer, BartForConditionalGeneration, \
+#     Text2TextGenerationPipeline
 
 
 class Inference:
