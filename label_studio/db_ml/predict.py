@@ -5,7 +5,7 @@
 # @Software: PyCharm
 
 import os
-import torch
+# import torch
 import pandas as pd
 from core.redis import redis_get
 # from transformers import BartForSequenceClassification, BertTokenizer
