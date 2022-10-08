@@ -4,6 +4,7 @@ import os
 import re
 import logging
 import pathlib
+import yaml
 from django.conf import settings
 import drf_yasg.openapi as openapi
 from django.db import IntegrityError
@@ -45,7 +46,9 @@ from core.utils.exceptions import LabelStudioValidationErrorSentryIgnored
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
+from core.settings.base import BASE_DIR
 logger = logging.getLogger(__name__)
+TEMP_DIR = os.path.join(os.path.dirname(BASE_DIR), 'annotation_templates', 'digital-brain')
 
 
 _result_schema = openapi.Schema(
@@ -209,11 +212,27 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
     def delete(self, request, *args, **kwargs):
         return super(ProjectAPI, self).delete(request, *args, **kwargs)
 
+    @staticmethod
+    def get_label_config(template_type, filename='config.yml'):
+        """
+        template_type ：
+            conversational-ai-response-generation  对话生成
+            intent-classification-for-dialog       意图分类
+        :param template_type:
+        :param filename:
+        :return:
+        """
+        with open(os.path.join(TEMP_DIR, template_type, filename), 'r') as stream:
+            config = yaml.safe_load(stream)
+            return config.get('config')
+
     @api_webhook(WebhookAction.PROJECT_UPDATED)
     def patch(self, request, *args, **kwargs):
         project = self.get_object()
-        label_config = self.request.data.get('label_config')
+        # label_config = self.request.data.get('label_config')
         set_id = self.request.data.get('set_id')
+        template_type = self.request.data.get('template_type', 'intent-classification-for-dialog')
+        label_config = self.get_label_config(template_type)
 
         # config changes can break view, so we need to reset them
         if label_config:
@@ -229,17 +248,13 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
         req_data = request.POST.dict()
         if not req_data:
             req_data = request.data
+        req_data['label_config'] = label_config
         if label_config:
-            match = re.match('.*template-([^"\s]+)', label_config)
-            if match:
-                template_name = match.group(1)
-                if template_name == 'intent-classification-for-dialog':
-                    req_data['template_type'] = 'intent-dialog'
-                elif template_name == 'conversational-ai-response-generation':
-                    req_data['template_type'] = 'conversational-generation'
-                else:
-                    pass
-            pass
+            if template_type == 'intent-classification-for-dialog':
+                req_data['template_type'] = 'intent-dialog'
+            elif template_type == 'conversational-ai-response-generation':
+                req_data['template_type'] = 'conversational-generation'
+
         if set_id in [-1, "-1"]:
             req_data['set_id'] = None
 
