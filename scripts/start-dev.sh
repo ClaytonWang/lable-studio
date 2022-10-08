@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
+
+export PYTHONPATH="$(cd "$(dirname "${BASH_SOURCE[0]}")/.."  && pwd)"
 export ENV=DEV
-python3 label_studio/manage.py runserver
+python label_studio/manage.py runserver
