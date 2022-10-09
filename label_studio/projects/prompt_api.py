@@ -218,10 +218,10 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
     # create
     def post(self, request, *args, **kwargs):
         params = request.data
-        c = PromptTemplates.objects.create(project_id=params['project'],
-                                           template=params['template']
-                                           )
         try:
+            c = PromptTemplates.objects.create(
+                project_id=params['project'], template=params['template']
+            )
             c.save()
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK
