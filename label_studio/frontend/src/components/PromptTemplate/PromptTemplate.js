@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react';
-import { Button, Input, Space, Tooltip } from 'antd';
+import { Input, message, Space, Tooltip } from 'antd';
+import { startsWith } from 'lodash';
 import { EditableProTable } from "@ant-design/pro-components";
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { useAPI } from "@/providers/ApiProvider";
@@ -27,6 +28,11 @@ const PromptTemplate = ({ project }) => {
           body: {
             project: project.id,
             template,
+          },
+          errorFilter: (res) => {
+            const error = startsWith(res.error, 'duplicate') ? '提示学习模板已存在，请重新输入' : res.error;
+
+            message.error(error);
           },
         });
       },
