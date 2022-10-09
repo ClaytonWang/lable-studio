@@ -22,7 +22,7 @@ from core.utils.params import list_of_strings_from_request, bool_from_request
 from core.utils.exceptions import LabelStudioValidationErrorSentryIgnored
 from projects.models import Project
 from tasks.models import Task, Prediction
-from tasks.tag_services import bulk_create_algorithm_clean
+from tasks.tag_services import created_clean_base_data
 from .uploader import load_tasks
 from .serializers import ImportApiSerializer, FileUploadSerializer, PredictionSerializer
 from .models import FileUpload
@@ -323,16 +323,7 @@ class ReImportAPI(ImportAPI):
             if 'template-intent-classification-for-dialog' in \
                     project.label_config:
                 # 创建清洗的数据基础
-                clean_data = [dict(
-                    source=item.data.get('dialogue', []),
-                    project=self.kwargs['pk'],
-                    task=item.id,
-                    created_by=request.user.id,
-                    # task_id=item.id,
-                    # project_id=self.kwargs['pk'],
-                    # created_by_id=request.user.id
-                ) for item in tasks]
-                bulk_create_algorithm_clean(clean_data)
+                created_clean_base_data(tasks, self.kwargs['pk'], request.user.id)
         duration = time.time() - start
 
         # Update task states if there are related settings in project

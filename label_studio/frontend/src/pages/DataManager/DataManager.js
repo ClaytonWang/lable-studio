@@ -57,15 +57,11 @@ const initializeDataManager = async (root, props, params) => {
     toolbar: "actions columns filters ordering operate label-button loading-possum error-box  | refresh import-button export-button view-toggle",
     projectId: params.id,
     apiGateway: `${window.APP_SETTINGS.hostname}/api/dm`,
-    // apiGateway: `http://124.71.161.146:8080/api/dm`,
     apiVersion: 2,
     project: params.project,
     polling: !window.APP_SETTINGS,
     showPreviews: true,
     apiEndpoints: APIConfig.endpoints,
-    // apiHeaders: {
-    //   Authorization: `Token c1b81ee6d2f3e278aca0b4707f109f4d20facbf6`,
-    // },
     interfaces: {
       backButton: false,
       labelingHeader: false,
@@ -78,12 +74,18 @@ const initializeDataManager = async (root, props, params) => {
     },
     instruments: {
       // 自定义按钮
-      'operate': () => () => (
-        <DataOperate
-          project={params.project}
-          actions={params.actions}
-        />
-      ),
+      'operate': () => (props) => {
+        const { store } = props;
+        const hasData = (store.project?.task_count ?? store.project?.task_number ?? 0) > 0;
+
+        if (!hasData) return null;
+        return (
+          <DataOperate
+            project={params.project}
+            actions={params.actions}
+          />
+        );
+      },
     },
     ...props,
     ...settings,
@@ -272,11 +274,6 @@ DataManagerPage.context = ({ dmRef }) => {
         e.stopPropagation();
         dmRef?.store?.closeLabeling?.();
       });
-      // addCrumb({
-      //   key: "dm-crumb",
-      //   // title: "Labeling",
-      //   title:"(对话-意图分类)",
-      // });
     }
   };
 
@@ -309,6 +306,8 @@ DataManagerPage.context = ({ dmRef }) => {
     };
   }, [dmRef, project]);
 
+  const hasData = (project?.task_count ?? project?.task_number ?? 0) > 0;
+
   return project && project.id ? (
     <Space size="small">
       {(project.expert_instruction && mode !== 'explorer') && (
@@ -326,7 +325,8 @@ DataManagerPage.context = ({ dmRef }) => {
         projectClass === 'intent-classification-for-dialog'
         && !config.user.button?.some((v) => {
           return v.code === "002_001";
-        }) ? (
+        })
+        && hasData  ? (
             <Button
               size="compact"
               data-external
