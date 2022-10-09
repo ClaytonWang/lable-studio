@@ -226,8 +226,8 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK
         except Exception as e:
-            result = {'status': 1, 'error': ''}
-            resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+            result = {'status': 1, 'error': f'{e}'}
+            resp_status = status.HTTP_200_OK
         return Response(result, status=resp_status)
 
     # read
