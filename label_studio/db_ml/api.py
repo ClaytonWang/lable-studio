@@ -26,7 +26,7 @@ from core.redis import redis_set, redis_get
 from tasks.models import Task
 from tasks.models import Prediction, PredictionDraft
 from tasks.models import TaskDbAlgorithm, TaskDbAlgorithmDraft
-from projects.models import PromptResult, PromptTemplates
+from projects.models import PromptResult, PromptTemplates, Project
 from db_ml.services import PREDICTION_BACKUP_FIELDS
 from db_ml.services import CLEAN_ALGORITHM_BACKUP_FIELDS
 from db_ml.services import rollback_prediction
@@ -43,6 +43,7 @@ from db_ml.services import get_project_labels
 from db_ml.services import train_failure_delete_train_model
 from db_ml.listener_result import process_algorithm_result, split_project_and_task_id
 from db_ml.listener_result import read_redis_data
+from tasks.tag_services import created_clean_base_data
 logger = logging.getLogger('db')
 
 """
@@ -74,8 +75,12 @@ def clean(request):
     model_ids = data.get('model_ids', '').split(',')
     model_ids = [int(item) for item in model_ids if item]
     query = TaskDbAlgorithm.objects.filter(project_id=project_id)
-    if not query:
+    project = Project.objects.filter(id=project_id).first()
+    if not project:
         return Response(data=dict(msg='Invalid project id'))
+    if not query:
+        tasks = Task.objects.filter(project_id=project_id).all()
+        created_clean_base_data(tasks, project_id, request.user.id)
 
     redis_key = generate_redis_key('clean', str(project_id))
     p_state = redis_get_json(redis_key)
