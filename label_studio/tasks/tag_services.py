@@ -21,5 +21,18 @@ def bulk_create_algorithm_clean(task_dialog: list):
     logger.debug(f'Success insert count:{len(clean_instances)}')
 
 
+def created_clean_base_data(tasks, project_id, user_id):
+    clean_data = [dict(
+        source=item.data.get('dialogue', []),
+        project=project_id,
+        task=item.id,
+        created_by=user_id,
+        # task_id=item.id,
+        # project_id=self.kwargs['pk'],
+        # created_by_id=request.user.id
+    ) for item in tasks]
+    bulk_create_algorithm_clean(clean_data)
+
+
 def delete_algorithm_clean(task_ids: list):
     TaskDbAlgorithm.objects.filter(id__in=task_ids).delete()
