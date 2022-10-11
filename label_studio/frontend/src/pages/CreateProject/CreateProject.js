@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useHistory } from 'react-router';
+import { get } from 'lodash';
 import { Button, ToggleItems } from '../../components';
 import { Modal } from '../../components/Modal/Modal';
 import { Space } from '../../components/Space/Space';
 import { useAPI } from '../../providers/ApiProvider';
 import { Select } from '@/components/Form';
+import { template } from '../../utils/util';
 import { cn } from '../../utils/bem';
 import { ConfigPage } from './Config/Config';
 import "./CreateProject.styl";
@@ -13,16 +15,16 @@ import { useImportPage } from './Import/useImportPage';
 import { useDraftProject } from './utils/useDraftProject';
 
 // 1期需求：创建项目时，默认的模版
-const DEFAULT_CONFIG = `<View className="template-intent-classification-for-dialog">
-<Paragraphs name="dialogue" value="$dialogue" layout="dialogue" />
-<Choices name="intent" toName="dialogue" choice="multiple" showInLine="true">
-  <Choice value="升级"/>
-  <Choice value="不知情"/>
-  <Choice value="外呼"/>
-</Choices>
-</View>`;
+// const DEFAULT_CONFIG = `<View className="template-intent-classification-for-dialog">
+// <Paragraphs name="dialogue" value="$dialogue" layout="dialogue" />
+// <Choices name="intent" toName="dialogue" choice="multiple" showInLine="true">
+//   <Choice value="升级"/>
+//   <Choice value="不知情"/>
+//   <Choice value="外呼"/>
+// </Choices>
+// </View>`;
 
-const ProjectName = ({ collection, setCollection, collections, name, setName, onSaveName, onSubmit, error, description, setDescription, show = true }) => !show ? null :(
+const ProjectName = ({ templateType, setTemplateType, templateTypes, collection, setCollection, collections, name, setName, onSaveName, onSubmit, error, description, setDescription, show = true }) => !show ? null :(
   <form className={cn("project-name")} onSubmit={e => { e.preventDefault(); onSubmit(); }}>
     <div className="field field--wide">
       <label htmlFor="project_name">{t("Project Name")}</label>
@@ -38,6 +40,19 @@ const ProjectName = ({ collection, setCollection, collections, name, setName, on
         rows="4"
         value={description}
         onChange={e => setDescription(e.target.value)}
+      />
+    </div>
+    <div className="field field--wide">
+      <label htmlFor="template_type">{t("choose_template_type", "选择项目类型")}</label>
+      <Select
+        name="template_type"
+        id="template_type"
+        value={templateType}
+        onChange={e => setTemplateType(e.target.value)}
+        options={templateTypes.map(item => ({
+          label: item.label,
+          value: item.apiKey,
+        }))}
       />
     </div>
     <div className="field field--wide">
@@ -64,12 +79,17 @@ export const CreateProject = ({ onClose }) => {
   const history = useHistory();
   const api = useAPI();
 
+  const [templateType, setTemplateType] = React.useState(get(template.TEMPLATE_TYPES, [0, 'apiKey'], ''));
   const [collections, setCollections] = React.useState([]);
   const [collection, setCollection] = React.useState("-1");
   const [name, setName] = React.useState("");
   const [error, setError] = React.useState();
   const [description, setDescription] = React.useState("");
   const [config, setConfig] = React.useState("<View></View>");
+  
+  const templateConfig = useMemo(() => {
+    return template.getConfigByApikey(templateType);
+  }, [templateType]);
 
   React.useEffect(() => { setError(null); }, [name]);
 
@@ -180,9 +200,12 @@ export const CreateProject = ({ onClose }) => {
           description={description}
           setDescription={setDescription}
           show={step === "name"}
+          templateTypes={template.TEMPLATE_TYPES}
+          templateType={templateType}
+          setTemplateType={setTemplateType}
         />
         <ImportPage project={project} show={step === "import"} {...pageProps} />
-        <ConfigPage project={project} onUpdate={setConfig} show={step === "config"} columns={columns} disableSaveButton={true} config={DEFAULT_CONFIG} />
+        <ConfigPage key={templateType} project={project} onUpdate={setConfig} show={step === "config"} columns={columns} disableSaveButton={true} config={templateConfig} />
       </div>
     </Modal>
   );

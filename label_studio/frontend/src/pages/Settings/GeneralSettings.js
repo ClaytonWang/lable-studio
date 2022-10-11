@@ -4,12 +4,14 @@ import { Form, Input, Select, TextArea } from "../../components/Form";
 import { RadioGroup } from "../../components/Form/Elements/RadioGroup/RadioGroup";
 import { ProjectContext } from "../../providers/ProjectProvider";
 import { Block } from "../../utils/bem";
+import { template } from '../../utils/util';
 import { useAPI } from "@/providers/ApiProvider";
 
 export const GeneralSettings = () => {
   const { project, fetchProject } = useContext(ProjectContext);
   const [collections, setCollections] = useState([]);
   const api = useAPI();
+  const [templateType, setTemplateType] = useState();
 
   useEffect(() => {
     api
@@ -71,6 +73,26 @@ export const GeneralSettings = () => {
           />
 
           <Select
+            disabled
+            name="template_type"
+            label={t("choose_template_type")}
+            labelProps={{ large: true }}
+            onChange={e => setTemplateType(e.target.value)}
+            options={template.TEMPLATE_TYPES.map(item => ({
+              label: item.label,
+              value: item.apiKey,
+            }))}
+          />
+
+          {
+            <Input
+              style={{ display: 'none' }}
+              name="label_config"
+              value={templateType && templateType !== project.template_type ? template.getConfigByApikey(templateType) : project.label_config}
+            />
+          }
+
+          <Select
             name="set_id"
             label={t("choose_project_collection")}
             labelProps={{ large: true }}
@@ -112,7 +134,7 @@ export const GeneralSettings = () => {
 
         <Form.Actions>
           <Form.Indicator>
-            <span case="success">{t("Saved!", "已保存")}</span>
+            <span case="success">{t("Saved!")}</span>
           </Form.Indicator>
           <Button type="submit" look="primary" style={{ width: 120 }}>
             {t("Save")}
