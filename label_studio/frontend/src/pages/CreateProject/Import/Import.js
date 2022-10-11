@@ -274,7 +274,7 @@ export const ImportPage = ({
   return (
     <div className={importClass}>
       {highlightCsvHandling && <div className={importClass.elem("csv-splash")}/>}
-      <input id="file-input" type="file" name="file" multiple onChange={onUpload} style={{ display: "none" }}/>
+      <input id="file-input" type="file" name="file" accept=".txt,.json,.csv,.tsv" multiple onChange={onUpload} style={{ display: "none" }}/>
 
       <header>
         <form className={importClass.elem("url-form") + " inline"} method="POST" onSubmit={onLoadURL}>
@@ -309,11 +309,11 @@ export const ImportPage = ({
                 <header>{t("drag_tips_0")}<br/>{t("drag_tips_1")}</header>
                 <IconUpload height="64" className={dropzoneClass.elem("icon")} />
                 <dl>
-                  <dt>{t("Text", "文本")}</dt><dd>txt</dd>
-                  <dt>{t("Audio", "音频")}</dt><dd>wav, aiff, mp3, au, flac, m4a, ogg</dd>
-                  <dt>{t("Images", "图片")}</dt><dd>jpg, png, gif, bmp, svg, webp</dd>
-                  <dt>{t("HTML", "网页")}</dt><dd>html, htm, xml</dd>
-                  <dt>{t("Time Series", "时间文件")}</dt><dd>csv, tsv</dd>
+                  {/* <dt>{t("Text", "文本")}</dt><dd>txt</dd> */}
+                  {/* <dt>{t("Audio", "音频")}</dt><dd>wav, aiff, mp3, au, flac, m4a, ogg</dd> */}
+                  {/* <dt>{t("Images", "图片")}</dt><dd>jpg, png, gif, bmp, svg, webp</dd> */}
+                  {/* <dt>{t("HTML", "网页")}</dt><dd>html, htm, xml</dd> */}
+                  {/* <dt>{t("Time Series", "时间文件")}</dt><dd>csv, tsv</dd> */}
                   <dt>{t("Common Formats", "常见格式")}</dt><dd>csv, tsv, txt, json</dd>
                 </dl>
               </div>
