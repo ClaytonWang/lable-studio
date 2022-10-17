@@ -164,7 +164,7 @@ const IntentResponse = ({ close, execLabel }) => {
             }
           </Space>
           {
-            modelLabels.length > 0 && <div style={{ color: 'red', marginTop: 10 }}>注:所选模型标签和以设置标签</div>
+            modelLabels.length > 0 && <div style={{ color: 'red', marginTop: 10 }}>注:所选模型标签和已设置标签</div>
           }
         </Form.Item>
       </Form>
