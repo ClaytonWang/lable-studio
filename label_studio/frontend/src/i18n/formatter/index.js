@@ -119,8 +119,15 @@ const formatDMData = (data, apiMethod) => {
           item.manual_label = [].concat(item.manual_label).join(',');
         });
         break;
+      default:
+        each(data?.tasks, item => {
+          item.auto_label = [].concat(item.auto_label).join(',');
+          item.manual_label = [].concat(item.manual_label).join(',');
+        });
+        break;
     }
   }
+
   return data;
 };
 
