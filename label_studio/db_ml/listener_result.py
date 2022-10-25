@@ -246,16 +246,53 @@ def get_prediction_intent_df(algorithm_result, task_id):
     return tag_data
 
 
-def get_prediction_generate_df(algorithm_result, task_id):
-    pre_result = {
-        'origin': 'prediction',
-        'from_name': 'response',
+def conversation_generation_save_template(
+        value_text: list, origin='prediction',
+        from_name: str = 'response'
+) -> dict:
+    """
+    拼接对话生成的保存数据结构
+    :param from_name:
+    :param value_text:
+    :param origin:
+    :return:
+    """
+    result = {
+        'origin': origin,
+        'from_name': from_name,
         'to_name': 'chat',
         "type": "textarea",
         'value': {
-            "text": algorithm_result,
+            "text": value_text if isinstance(value_text, list) else [value_text],
         },
     }
+    return result
+
+
+def get_prediction_generate_df(algorithm_result, task_id):
+    """
+    对话生成的入库数据格式：
+
+    对话生成算法返回结果
+
+    统一返回的算法结果20221025号前的返回结构
+    ['我要升级套餐', '哦，我挂了']
+
+    不同标签对应的算法返回结果
+    {'标签', []}
+    {'升级', ['我要升级套餐', '哦，我挂了']}
+
+    :param algorithm_result:
+    :param task_id:
+    :return:
+    """
+    pre_result = []
+    if isinstance(algorithm_result, dict):
+        for from_name, res in algorithm_result.items():
+            _item_res = conversation_generation_save_template(res, 'prediction', from_name)
+            pre_result.append(_item_res)
+    else:
+        pre_result = conversation_generation_save_template(algorithm_result, 'prediction', 'response')
     tag_data = dict(
         task_id=task_id,
         result=[pre_result],
@@ -306,20 +343,25 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id):
     :param task_id:
     :return:
     """
-    text = []
-    for sub_text in algorithm_result:
-        for _text in sub_text:
-            text.append(_text)
 
-    pre_result = {
-        'origin': 'prediction',
-        'from_name': 'response',
-        'to_name': 'chat',
-        "type": "textarea",
-        'value': {
-            "text": text,
-        },
-    }
+    def join_text(_result):
+        text = []
+        for sub_text in _result:
+            for _text in sub_text:
+                text.append(_text)
+        return text
+
+    pre_result = []
+    if isinstance(algorithm_result, dict):
+        for from_name, res in algorithm_result.items():
+            _res = join_text(res)
+            _item_res = conversation_generation_save_template(_res, 'prediction', from_name)
+            pre_result.append(_item_res)
+    else:
+        pre_result = conversation_generation_save_template(
+            join_text(algorithm_result), 'prediction', 'response'
+        )
+
     tag_data = dict(
         task_id=task_id,
         result=[pre_result],
