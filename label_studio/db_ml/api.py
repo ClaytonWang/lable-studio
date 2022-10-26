@@ -42,7 +42,7 @@ from db_ml.services import generate_uuid
 from db_ml.services import get_project_labels
 from db_ml.services import train_failure_delete_train_model
 from db_ml.listener_result import process_algorithm_result, split_project_and_task_id
-from db_ml.listener_result import read_redis_data
+from db_ml.listener_result import thread_read_redis_celery_result
 from tasks.tag_services import created_clean_base_data
 logger = logging.getLogger('db')
 
@@ -130,7 +130,7 @@ def clean(request):
                 status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
 
         redis_set_json(redis_key, redis_state)
-
+        thread_read_redis_celery_result(project_id, 'clean')
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
 
@@ -270,18 +270,29 @@ def prediction(request):
                 data=dict(message=result)
             )
         redis_set_json(redis_key, redis_state)
+        thread_read_redis_celery_result(project_id, 'prediction')
     return Response(data=dict(msg='Submit success', project_id=project_id))
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def query_task(request):
+    """
+    查询任务计算状态
+    prediction - 预标注
+    prompt     - 提示学习
+    clean      - 清洗
+    algorithm_type
+    :param request:
+    :return:
+    """
     data = request.GET.dict()
     project_id = data.get('project_id')
     algorithm_type = data.get('type')
 
     # 查询redis的结果信息
-    read_redis_data(project_id, algorithm_type)
+    # 10/26 修改获取结果逻辑, 单独通过线程获取
+    # read_redis_data(project_id, algorithm_type)
 
     query = Task.objects.filter(project_id=project_id)
     total_task = query.count()
@@ -348,6 +359,11 @@ def query_task(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def cancel_job(request):
+    """
+    # TODO  修改取消逻辑
+    :param request:
+    :return:
+    """
     data = request.GET.dict()
     project_id = data.get('project_id')
     algorithm_type = data.get('type')
@@ -374,12 +390,13 @@ def cancel_job(request):
     elif algorithm_type == 'prompt':
         rollback_prompt(project_id)
 
-    count = 0
-    for job in get_queue(queue_name).jobs:
-        if project_id != str(job.kwargs.get('project_id', -1)):
-            continue
-        count += 1
-        job.delete()
+    # # 当前是删除django_rq的队列的数据，应该删除算法使用的队列
+    # count = 0
+    # for job in get_queue(queue_name).jobs:
+    #     if project_id != str(job.kwargs.get('project_id', -1)):
+    #         continue
+    #     count += 1
+    #     job.delete()
 
     # if not count:
     #     return Response(

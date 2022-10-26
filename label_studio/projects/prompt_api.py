@@ -23,6 +23,7 @@ from db_ml.services import predict_prompt
 from db_ml.services import generate_uuid
 from db_ml.services import redis_set_json, redis_get_json
 from db_ml.services import get_project_labels
+from db_ml.listener_result import thread_read_redis_celery_result
 
 
 class PromptLearning(APIView):
@@ -132,6 +133,7 @@ class PromptLearning(APIView):
                     username=request.user.username,
                 )
                 redis_set_json(redis_key, redis_state)
+                thread_read_redis_celery_result(project_id, 'prompt')
             else:
                 result = {'status': 1, 'error': result}
                 resp_status = status.HTTP_400_BAD_REQUEST
