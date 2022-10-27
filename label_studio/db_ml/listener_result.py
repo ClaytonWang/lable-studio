@@ -11,6 +11,8 @@
 import datetime
 import json
 import logging
+import time
+from threading import Thread
 from django.db.models import Q
 from core.redis import redis_get
 from projects.models import Project
@@ -35,38 +37,96 @@ logger = logging.getLogger('db')
 """
 
 
-def read_redis_data(project_id, algorithm_type):
-    if algorithm_type == 'train':
-        fuzzy_key = f'celery-task-meta*_{algorithm_type}_*'
-    else:
-        fuzzy_key = f'celery-task-meta*_{algorithm_type}_{project_id}*'
-    if not redis_healthcheck():
-        print('Redis is disconnect')
-        return
-    
-    for key in _redis.scan_iter(fuzzy_key):
-        try:
-            key = key.decode('utf-8')
-            k_result = redis_get(key)
-            k_result = json.loads(str(k_result, 'utf-8'))
-            status = k_result.get('status')
-            result = k_result.get('result', '')
-            if status not in ('SUCCESS', 'FAILURE'):
-                continue
+def thread_read_redis_celery_result(project_id, algorithm_type):
+    """
+    触发调用算法，获取celery的结果线程，当前答案超过30分钟，自动结束线程
+    :return:
+    """
 
-            print(k_result)
-            data = dict(
-                celery_task_id=key,
-                status=status,
-                result=result
+    Thread(target=read_redis_data, args=(project_id, algorithm_type)).start()
+
+
+def read_redis_data(project_id, algorithm_type):
+    """
+    每次循环默认间隔的时间是2秒
+
+    最后一次获取成功数据到下一次获取的间隔超过半小时，设置失败。
+    :param project_id:
+    :param algorithm_type:
+    :return:
+    """
+    last_success_time = time.time()
+
+    interrupt_time = 30 * 60
+    default_sleep_time = 2
+
+    redis_key = generate_redis_key(algorithm_type, str(project_id))
+    p_state = redis_get_json(redis_key)
+
+    while True:
+        time.sleep(default_sleep_time)
+        #
+        if int(time.time() - last_success_time) > interrupt_time:
+            print(f"ML {project_id}  {algorithm_type} timeout.")
+            p_state['state'] = AlgorithmState.FAILED
+            redis_set_json(redis_key, p_state)
+            break
+
+        if algorithm_type == 'train':
+            fuzzy_key = f'celery-task-meta*_{algorithm_type}_*'
+        else:
+            fuzzy_key = f'celery-task-meta*_{algorithm_type}_{project_id}*'
+        if not redis_healthcheck():
+            print('Redis is disconnect')
+            return
+
+        for key in _redis.scan_iter(fuzzy_key):
+            try:
+                key = key.decode('utf-8')
+                k_result = redis_get(key)
+                k_result = json.loads(str(k_result, 'utf-8'))
+                status = k_result.get('status')
+                result = k_result.get('result', '')
+                if status not in ('SUCCESS', 'FAILURE'):
+                    continue
+
+                print(k_result)
+                data = dict(
+                    celery_task_id=key,
+                    status=status,
+                    result=result
+                )
+                process_callback_result(data)
+            except Exception as e:
+                print(f'ML Exception: {e} celery_task_id {key}')
+            finally:
+                if status in ('SUCCESS',):
+                    last_success_time = time.time()
+                    redis_delete(key)
+
+        # 收集结束，退出循环
+        task_query = Task.objects.filter(project_id=project_id)
+        if algorithm_type == 'prediction':
+            finish_task = Prediction.objects.filter(
+                task__in=task_query
+            ).count()
+        elif algorithm_type == 'clean':
+            clean_task_query = TaskDbAlgorithm.objects.filter(
+                project_id=project_id
             )
-            process_callback_result(data)
-        except Exception as e:
-            print(f'ML Exception: {e} celery_task_id {key}')
-        finally:
-            if status in ('SUCCESS',):
-                redis_delete(key)
-            pass
+            success_query = clean_task_query.filter(state=2)
+            failed_query = clean_task_query.filter(state=3)
+            finish_task = success_query.count() + failed_query.count()
+        elif algorithm_type == 'prompt':
+            finish_task = PromptResult.objects.filter(
+                project_id=project_id
+            ).count()
+        else:
+            finish_task = 0
+        if finish_task == task_query.count():
+            p_state['state'] = AlgorithmState.FINISHED
+            redis_set_json(redis_key, p_state)
+            break
 
 
 def process_callback_result(data):
@@ -246,16 +306,53 @@ def get_prediction_intent_df(algorithm_result, task_id):
     return tag_data
 
 
-def get_prediction_generate_df(algorithm_result, task_id):
-    pre_result = {
-        'origin': 'prediction',
-        'from_name': 'response',
+def conversation_generation_save_template(
+        value_text: list, origin='prediction',
+        from_name: str = 'response'
+) -> dict:
+    """
+    拼接对话生成的保存数据结构
+    :param from_name:
+    :param value_text:
+    :param origin:
+    :return:
+    """
+    result = {
+        'origin': origin,
+        'from_name': from_name,
         'to_name': 'chat',
         "type": "textarea",
         'value': {
-            "text": algorithm_result,
+            "text": value_text if isinstance(value_text, list) else [value_text],
         },
     }
+    return result
+
+
+def get_prediction_generate_df(algorithm_result, task_id):
+    """
+    对话生成的入库数据格式：
+
+    对话生成算法返回结果
+
+    统一返回的算法结果20221025号前的返回结构
+    ['我要升级套餐', '哦，我挂了']
+
+    不同标签对应的算法返回结果
+    {'标签', []}
+    {'升级', ['我要升级套餐', '哦，我挂了']}
+
+    :param algorithm_result:
+    :param task_id:
+    :return:
+    """
+    pre_result = []
+    if isinstance(algorithm_result, dict):
+        for from_name, res in algorithm_result.items():
+            _item_res = conversation_generation_save_template(res, 'prediction', from_name)
+            pre_result.append(_item_res)
+    else:
+        pre_result = conversation_generation_save_template(algorithm_result, 'prediction', 'response')
     tag_data = dict(
         task_id=task_id,
         result=[pre_result],
@@ -306,20 +403,25 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id):
     :param task_id:
     :return:
     """
-    text = []
-    for sub_text in algorithm_result:
-        for _text in sub_text:
-            text.append(_text)
 
-    pre_result = {
-        'origin': 'prediction',
-        'from_name': 'response',
-        'to_name': 'chat',
-        "type": "textarea",
-        'value': {
-            "text": text,
-        },
-    }
+    def join_text(_result):
+        text = []
+        for sub_text in _result:
+            for _text in sub_text:
+                text.append(_text)
+        return text
+
+    pre_result = []
+    if isinstance(algorithm_result, dict):
+        for from_name, res in algorithm_result.items():
+            _res = join_text(res)
+            _item_res = conversation_generation_save_template(_res, 'prediction', from_name)
+            pre_result.append(_item_res)
+    else:
+        pre_result = conversation_generation_save_template(
+            join_text(algorithm_result), 'prediction', 'response'
+        )
+
     tag_data = dict(
         task_id=task_id,
         result=[pre_result],
