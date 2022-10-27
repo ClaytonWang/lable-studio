@@ -102,10 +102,10 @@ class PromptLearning(APIView):
             total_count = len(tasks)
             project = Project.objects.filter(id=project_id).first()
             _uuid = generate_uuid('prompt', project_id)
-            if project.template_type == 'intent-dialog':
+            if project.template_type == 'intent-classification':
                 state, result = predict_prompt(
                     project_id, model_id, task_data, _uuid, templates,
-                    prompt_type='intent-dialog',
+                    prompt_type='intent-classification',
                 )
             elif project.template_type == 'conversational-generation':
                 # 对话生产
