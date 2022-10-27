@@ -92,17 +92,7 @@ export const GeneralSettings = () => {
             />
           }
 
-          <Select
-            name="set_id"
-            label={t("choose_project_collection")}
-            labelProps={{ large: true }}
-            options={collections.map((item) => ({
-              label: item.title,
-              value: item.id,
-            }))}
-          />
-
-          <RadioGroup
+          {/* <RadioGroup
             name="color"
             label={t("Color")}
             size="large"
@@ -113,9 +103,9 @@ export const GeneralSettings = () => {
                 <Block name="color" style={{ "--background": color }} />
               </RadioGroup.Button>
             ))}
-          </RadioGroup>
+          </RadioGroup> */}
 
-          <RadioGroup
+          {/* <RadioGroup
             label={t("Task Sampling")}
             labelProps={{ size: "large" }}
             name="sampling"
@@ -129,7 +119,7 @@ export const GeneralSettings = () => {
                 description={description}
               />
             ))}
-          </RadioGroup>
+          </RadioGroup> */}
         </Form.Row>
 
         <Form.Actions>

@@ -421,5 +421,7 @@
   "record_train": "立即训练",
   "tip_human_loop": "用户审核修改自动标注结果后，可通过【+新增评估】功能记录当前准确率。或通过【+新增训练】功能训练更精准的新模型。",
   "Role": "Role",
-  "choose_template_type": "选择项目类型"
+  "choose_template_type": "选择项目类型",
+  "round-correction":"轮次纠正",
+  "intelligent-clean":"智能清洗"
 }

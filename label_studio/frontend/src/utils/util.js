@@ -24,12 +24,22 @@ const RESPONSE_VIEW = `<View className="template-conversational-ai-response-gene
 const TEMPLATE_TYPES = [
   {
     label: t("intention"),
-    apiKey: "intent-dialog",
+    apiKey: "intent-classification",
     config: INTENT_VIEW,
   },
   {
     label: t("generation"),
     apiKey: "conversational-generation",
+    config: RESPONSE_VIEW,
+  },
+  {
+    label: t("round-correction"),
+    apiKey: "round-correction",
+    config: RESPONSE_VIEW,
+  },
+  {
+    label: t("intelligent-clean"),
+    apiKey: "intelligent-clean",
     config: RESPONSE_VIEW,
   },
 ];
@@ -66,7 +76,7 @@ const getTemplate = (config) => {
 };
 const getTemplateLabel = (config, withBracket = false) => {
   const template = getTemplate(config);
-  
+
   if (!template) {
     return '';
   }
