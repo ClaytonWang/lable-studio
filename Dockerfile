@@ -32,6 +32,10 @@ RUN set -eux \
     build-essential postgresql-client libmysqlclient-dev mysql-client python3.8 python3-pip python3.8-dev \
     uwsgi git libxml2-dev libxslt-dev zlib1g-dev
 
+COPY deploy .
+
+COPY docker-compose.yml .
+
 # Copy and install middleware dependencies
 COPY deploy/requirements-mw.txt .
 RUN --mount=type=cache,target=$PIP_CACHE_DIR \
