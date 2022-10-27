@@ -62,6 +62,7 @@ export const DangerZone = () => {
     label: `${t('Delete')} ${project.total_predictions_number} ${t('Predictions')}`,
   }, {
     type: 'tabs',
+    disabled: true, //同时也隐藏这个按钮
     label: t('Drop All Tabs'),
   }, {
     type: 'project',

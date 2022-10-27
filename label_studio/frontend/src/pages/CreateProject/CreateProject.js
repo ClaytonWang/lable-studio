@@ -55,7 +55,7 @@ const ProjectName = ({ templateType, setTemplateType, templateTypes, collection,
         }))}
       />
     </div>
-    <div className="field field--wide">
+    {/* <div className="field field--wide">
       <label htmlFor="project_collection">{t("choose_project_collection", "选择项目集合")}</label>
       <Select
         name="collection"
@@ -67,7 +67,7 @@ const ProjectName = ({ templateType, setTemplateType, templateTypes, collection,
           value: item.id,
         }))}
       />
-    </div>
+    </div> */}
   </form>
 );
 
@@ -86,7 +86,7 @@ export const CreateProject = ({ onClose }) => {
   const [error, setError] = React.useState();
   const [description, setDescription] = React.useState("");
   const [config, setConfig] = React.useState("<View></View>");
-  
+
   const templateConfig = useMemo(() => {
     return template.getConfigByApikey(templateType);
   }, [templateType]);

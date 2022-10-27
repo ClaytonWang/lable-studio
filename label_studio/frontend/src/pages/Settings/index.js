@@ -16,11 +16,11 @@ export const MenuLayout = ({ children, ...routeProps }) => {
       menuItems={[
         GeneralSettings,
         LabelingSettings,
-        InstructionsSettings,
-        RoleSetting,
-        MachineLearningSettings,
-        StorageSettings,
-        WebhookPage,
+        // InstructionsSettings,
+        // RoleSetting,
+        // MachineLearningSettings,
+        // StorageSettings,
+        // WebhookPage,
         DangerZone,
       ]}
       path={routeProps.match.url}
