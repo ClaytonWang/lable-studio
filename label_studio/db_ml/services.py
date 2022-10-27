@@ -255,7 +255,7 @@ def predict_prompt(
     :param prompt_type:
     :return:
     """
-    if prompt_type == 'intent-dialog':
+    if prompt_type == 'intent-classification':
         # 预标注（0样本）
         model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
     elif prompt_type == 'conversational-generation':

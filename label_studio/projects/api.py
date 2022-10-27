@@ -229,17 +229,18 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
         req_data = request.POST.dict()
         if not req_data:
             req_data = request.data
-        if label_config:
-            match = re.match('.*template-([^"\s]+)', label_config)
-            if match:
-                template_name = match.group(1)
-                if template_name == 'intent-classification-for-dialog':
-                    req_data['template_type'] = 'intent-dialog'
-                elif template_name == 'conversational-ai-response-generation':
-                    req_data['template_type'] = 'conversational-generation'
-                else:
-                    pass
-            pass
+        # # 不通过 label-config来判断项目类型（模版类型）
+        # if label_config:
+        #     match = re.match('.*template-([^"\s]+)', label_config)
+        #     if match:
+        #         template_name = match.group(1)
+        #         if template_name == 'intent-classification-for-dialog':
+        #             req_data['template_type'] = 'intent-classification'
+        #         elif template_name == 'conversational-ai-response-generation':
+        #             req_data['template_type'] = 'conversational-generation'
+        #         else:
+        #             pass
+        #     pass
         if set_id in [-1, "-1"]:
             req_data['set_id'] = None
 
