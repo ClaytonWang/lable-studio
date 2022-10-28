@@ -34,12 +34,12 @@ gtag('config', 'UA-129877673-1');
     <h1>人在环路自动化平台</h1>
   </div>
   
-  <div class="toggle">
+  <!-- <div class="toggle">
     {% if not settings.DISABLE_SIGNUP_WITHOUT_LINK %}
         <a href="{{ settings.HOSTNAME }}/user/signup" class="{% if 'signup' in request.path %}active{% endif %}" data-i18n="Sign up">注册</a>
         <a href="{{ settings.HOSTNAME }}/user/login" class="{% if 'login' in request.path %}active{% endif %}" data-i18n="Log in">登陆</a>
     {% endif %}
-  </div>
+  </div> -->
 
   {% block user_content %}
   {% endblock %}
