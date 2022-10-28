@@ -22,7 +22,7 @@ DISPLAY_NAME_LENGTH = 100
 USERNAME_LENGTH_ERR = 'Please enter a username 30 characters or fewer in length'
 DISPLAY_NAME_LENGTH_ERR = 'Please enter a display name 100 characters or fewer in length'
 PASS_LENGTH_ERR = '请输入8-12位长度的密码'
-INVALID_USER_ERROR = 'The email and password you entered don\'t match.'
+INVALID_USER_ERROR = '用户名或者密码不对.'
 
 logger = logging.getLogger(__name__)
 
