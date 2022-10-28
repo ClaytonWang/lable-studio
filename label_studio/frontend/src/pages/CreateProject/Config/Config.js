@@ -49,7 +49,7 @@ const EmptyConfigPlaceholder = () => (
   </div>
 );
 
-const Label = ({ label, template, color }) => {
+const Label = ({ label, template, color ,readOnly }) => {
   const value = label.getAttribute("value");
 
   return (
@@ -63,17 +63,19 @@ const Label = ({ label, template, color }) => {
         />
       </label>
       <span>{value}</span>
-      <button type="button" className={configClass.elem("delete-label")} onClick={() => template.removeLabel(label)}>
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="red" strokeWidth="2" strokeLinecap="square" xmlns="http://www.w3.org/2000/svg">
-          <path d="M2 12L12 2"/>
-          <path d="M12 12L2 2"/>
-        </svg>
-      </button>
+      { !readOnly &&(
+        <button type="button" className={configClass.elem("delete-label")} onClick={() => template.removeLabel(label)}>
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="red" strokeWidth="2" strokeLinecap="square" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 12L12 2"/>
+            <path d="M12 12L2 2"/>
+          </svg>
+        </button>
+      )}
     </li>
   );
 };
 
-export const ConfigureControl = ({ control, template }) => {
+export const ConfigureControl = ({ control, template,disableAddButton }) => {
   const refLabels = React.useRef();
   const tagname = control.tagName;
 
@@ -96,14 +98,15 @@ export const ConfigureControl = ({ control, template }) => {
     <div className={configClass.elem("labels")}>
       <form className={configClass.elem("add-labels")} action="">
         <h4>{tagname === "Choices" ? t("Add choices") : t("Add label names")}</h4>
-        <textarea name="labels" id="" cols="30" rows="5" ref={refLabels} onKeyPress={onKeyPress}></textarea>
-        <input type="button" value={t("Add")} onClick={onAddLabels} />
+        <textarea readOnly={disableAddButton} name="labels" id="" cols="30" rows="5" ref={refLabels} onKeyPress={onKeyPress}></textarea>
+        {!disableAddButton && (<input type="button" value={t("Add")} onClick={onAddLabels} />)}
       </form>
       <div className={configClass.elem("current-labels")}>
         <h3>{tagname === "Choices" ? t("Choices") : t("Labels")} ({control.children.length})</h3>
         <ul>
           {Array.from(control.children).map(label => (
             <Label
+              readOnly={disableAddButton}
               label={label}
               template={template}
               key={label.getAttribute("value")}
@@ -358,12 +361,12 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
             <div className={configClass.elem("visual")} style={{ display: configure === "visual" ? undefined : "none" }}>
               {isEmptyConfig(config) && <EmptyConfigPlaceholder />}
               <ConfigureColumns columns={columns} project={project} template={template} />
-              {template.controls.map(control => <ConfigureControl control={control} template={template} key={control.getAttribute("name")} />)}
+              {template.controls.map(control => <ConfigureControl control={control} template={template} key={control.getAttribute("name")} disableAddButton={ disableSaveButton} />)}
               <ConfigureSettings template={template} />
             </div>
           )}
         </div>
-        {disableSaveButton !== true && onSaveClick && (
+        {!disableSaveButton && onSaveClick && (
           <Form.Actions size="small" extra={configure === "code" && extra} valid>
             <Button look="primary" size="compact" style={{ width: 120 }} onClick={onSave} waiting={waiting}>
               {t("Save")}
