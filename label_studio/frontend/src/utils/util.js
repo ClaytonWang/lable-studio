@@ -21,6 +21,30 @@ const RESPONSE_VIEW = `<View className="template-conversational-ai-response-gene
 <TextArea name="response" toName="chat" rows="4" editable="true" maxSubmissions="100"/>
 </View>`;
 
+const CORRECTION_VIEW = `<View className="template-round-correction">
+<Paragraphs name="chat" value="$dialogue" layout="dialogue"/>
+<Header value="意图标签"/>
+<Choices readonly="true" name="intent" toName="chat" choice="multiple" showInLine="true">
+  <Choice value="升级"/>
+  <Choice value="不知情"/>
+  <Choice value="外呼"/>
+</Choices>
+<Header value="提供对话"/>
+<TextArea name="response" toName="chat" rows="4" editable="true" maxSubmissions="100"/>
+</View>`;
+
+const CLEAN_VIEW = `<View className="template-intelligent-clean">
+<Paragraphs name="chat" value="$dialogue" layout="dialogue"/>
+<Header value="意图标签"/>
+<Choices readonly="true" name="intent" toName="chat" choice="multiple" showInLine="true">
+  <Choice value="升级"/>
+  <Choice value="不知情"/>
+  <Choice value="外呼"/>
+</Choices>
+<Header value="提供对话"/>
+<TextArea name="response" toName="chat" rows="4" editable="true" maxSubmissions="100"/>
+</View>`;
+
 const TEMPLATE_TYPES = [
   {
     label: t("intention"),
@@ -35,12 +59,12 @@ const TEMPLATE_TYPES = [
   {
     label: t("round-correction"),
     apiKey: "round-correction",
-    config: RESPONSE_VIEW,
+    config: CORRECTION_VIEW,
   },
   {
     label: t("intelligent-clean"),
     apiKey: "intelligent-clean",
-    config: RESPONSE_VIEW,
+    config: CLEAN_VIEW,
   },
 ];
 
@@ -48,12 +72,22 @@ const TEMPLATES = [
   {
     class: 'intent-classification-for-dialog',
     label: 'Intent Classification for Dialog',
-    desc: '对话-意图分类',
+    desc: t("intention"),
   },
   {
     class: 'conversational-ai-response-generation',
     label: 'Conversational AI - Response Generation',
-    desc: '对话生成',
+    desc: t("round-correction"),
+  },
+  {
+    class: 'round-correction',
+    label: t("round-correction"),
+    desc: t("round-correction"),
+  },
+  {
+    class: 'intelligent-clean',
+    label: t("intelligent-clean"),
+    desc: t("intelligent-clean"),
   },
 ];
 const getTemplateClass = (config) => {
