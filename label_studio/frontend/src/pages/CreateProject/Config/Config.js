@@ -75,7 +75,7 @@ const Label = ({ label, template, color ,readOnly }) => {
   );
 };
 
-export const ConfigureControl = ({ control, template,disableAddButton }) => {
+export const ConfigureControl = ({ control, template,pageReadonly }) => {
   const refLabels = React.useRef();
   const tagname = control.tagName;
 
@@ -98,15 +98,15 @@ export const ConfigureControl = ({ control, template,disableAddButton }) => {
     <div className={configClass.elem("labels")}>
       <form className={configClass.elem("add-labels")} action="">
         <h4>{tagname === "Choices" ? t("Add choices") : t("Add label names")}</h4>
-        <textarea readOnly={disableAddButton} name="labels" id="" cols="30" rows="5" ref={refLabels} onKeyPress={onKeyPress}></textarea>
-        {!disableAddButton && (<input type="button" value={t("Add")} onClick={onAddLabels} />)}
+        <textarea readOnly={pageReadonly} name="labels" id="" cols="30" rows="5" ref={refLabels} onKeyPress={onKeyPress}></textarea>
+        {!pageReadonly && (<input type="button" value={t("Add")} onClick={onAddLabels} />)}
       </form>
       <div className={configClass.elem("current-labels")}>
         <h3>{tagname === "Choices" ? t("Choices") : t("Labels")} ({control.children.length})</h3>
         <ul>
           {Array.from(control.children).map(label => (
             <Label
-              readOnly={disableAddButton}
+              readOnly={pageReadonly}
               label={label}
               template={template}
               key={label.getAttribute("value")}
@@ -249,7 +249,7 @@ const ConfigureColumns = ({ columns, template }) => {
   );
 };
 
-const Configurator = ({ columns, config, project, template, setTemplate, onBrowse, onSaveClick, onValidate, disableSaveButton }) => {
+const Configurator = ({ columns, config, project, template, setTemplate, onBrowse, onSaveClick, onValidate, pageReadonly }) => {
   const [configure, setConfigure] = React.useState(isEmptyConfig(config) ? "code" : "visual");
   const [visualLoaded, loadVisual] = React.useState(configure === "visual");
   const [waiting, setWaiting] = React.useState(false);
@@ -361,25 +361,25 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
             <div className={configClass.elem("visual")} style={{ display: configure === "visual" ? undefined : "none" }}>
               {isEmptyConfig(config) && <EmptyConfigPlaceholder />}
               <ConfigureColumns columns={columns} project={project} template={template} />
-              {template.controls.map(control => <ConfigureControl control={control} template={template} key={control.getAttribute("name")} disableAddButton={ disableSaveButton} />)}
+              {template.controls.map(control => <ConfigureControl control={control} template={template} key={control.getAttribute("name")} pageReadonly={ pageReadonly} />)}
               <ConfigureSettings template={template} />
             </div>
           )}
         </div>
-        {!disableSaveButton && onSaveClick && (
+        {/* {!pageReadonly && onSaveClick && (
           <Form.Actions size="small" extra={configure === "code" && extra} valid>
             <Button look="primary" size="compact" style={{ width: 120 }} onClick={onSave} waiting={waiting}>
               {t("Save")}
             </Button>
           </Form.Actions>
-        )}
+        )} */}
       </div>
       <Preview config={config} data={data} error={error} />
     </div>
   );
 };
 
-export const ConfigPage = ({ config: initialConfig = "", columns: externalColumns, project, onUpdate, onSaveClick, onValidate, disableSaveButton, show = true }) => {
+export const ConfigPage = ({ config: initialConfig = "", columns: externalColumns, project, onUpdate, onSaveClick, onValidate, pageReadonly, show = true }) => {
   const [config, _setConfig] = React.useState("");
   const [mode, setMode] = React.useState("list"); // view | list
   const [selectedGroup, setSelectedGroup] = React.useState(null);
@@ -469,7 +469,7 @@ export const ConfigPage = ({ config: initialConfig = "", columns: externalColumn
           setTemplate={setTemplate}
           onBrowse={setMode.bind(null, "list")}
           onValidate={onValidate}
-          disableSaveButton={disableSaveButton}
+          pageReadonly={pageReadonly}
           onSaveClick={onSaveClick}
         />
       </Oneof>

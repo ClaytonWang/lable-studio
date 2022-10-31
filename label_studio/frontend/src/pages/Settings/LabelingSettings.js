@@ -77,7 +77,7 @@ export const LabelingSettings = () => {
       onUpdate={onUpdate}
       onSaveClick={onSave}
       onValidate={onValidate}
-      disableSaveButton={true}
+      pageReadonly={true}
     />
   );
 };

@@ -174,7 +174,7 @@ export const CreateProject = ({ onClose }) => {
           setTemplateType={setTemplateType}
         />
         <ImportPage project={project} show={step === "import"} {...pageProps} />
-        <ConfigPage key={templateType} project={project} onUpdate={setConfig} show={step === "config"} columns={columns} disableSaveButton={true} config={templateConfig} />
+        <ConfigPage key={templateType} project={project} onUpdate={setConfig} show={step === "config"} columns={columns} pageReadonly={false} config={templateConfig} />
       </div>
     </Modal>
   );
