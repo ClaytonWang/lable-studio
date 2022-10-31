@@ -141,7 +141,7 @@ class ExportParamSerializer(serializers.Serializer):
                                         required=False)
     exportType = serializers.CharField(help_text='Export file format.',
                                         required=False)
-    download_all_tasks = serializers.BooleanField(default=False,
+    download_all_tasks = serializers.BooleanField(default=True,
                                                   help_text='Download all tasks or only finished.',
                                                   required=False)
 
