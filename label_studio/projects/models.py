@@ -33,8 +33,10 @@ from db_ml.common import DbOrganizationManager
 
 logger = logging.getLogger(__name__)
 TEMPLATE_TYPE = (
-    ('intent-dialog', '对话-意图分类'),
+    ('intent-classification', '对话-意图分类'),
     ('conversational-generation', '对话生成'),
+    ('round-correction', '轮次纠正'),
+    ('intelligent-clean', '智能清洗'),
     ('', '其他'),
 )
 ANNOTATOR_GROUP = 'annotator'
@@ -244,7 +246,7 @@ class Project(ProjectMixin, models.Model):
     )
     set = models.ForeignKey("ProjectSet", on_delete=models.SET_DEFAULT, related_name="project_set", default='', null=True, blank=True)
     template_type = models.CharField(
-        _('template_type'), max_length=50, blank=True, null=True, default='',
+        _('项目类型（名字不好改回去）'), max_length=50, blank=True, null=True, default='',
         # choices=TEMPLATE_TYPE
     )
     # 项目 用户权限关联

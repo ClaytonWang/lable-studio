@@ -248,7 +248,7 @@ def prediction(request):
 
         project = query.first().project
         state, result = None, None
-        if project.template_type == 'intent-dialog':
+        if project.template_type == 'intent-classification':
             state, result = predict_prompt(
                project_id, model_id, task_data, _uuid
             )

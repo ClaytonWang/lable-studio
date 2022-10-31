@@ -214,7 +214,7 @@ def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_resu
         if not project:
             logger.info(f'Invalid project id : {project_id}')
             return
-        if project.template_type == 'intent-dialog':
+        if project.template_type == 'intent-classification':
             if algorithm_type == 'prediction':
                 data = get_prediction_intent_df(algorithm_result, task_id)
                 insert_prediction_value(data, project_id, task_id)
