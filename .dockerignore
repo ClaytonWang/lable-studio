@@ -2,10 +2,7 @@
 **
 
 # Except:
-!deploy/docker-entrypoint.d/**
-!deploy/docker-entrypoint.sh
-!deploy/requirements-mw.txt
-!deploy/requirements.txt
+!deploy/**
 !deploy/heroku_run.sh
 !label_studio/**
 !setup.py
