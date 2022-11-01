@@ -2,7 +2,7 @@ name: " Build & Deploy"
 
 on:
   push:
-    branches: [ "master" , "development", "release/*"]
+    branches: [ "master" , "development", "release/*","MARK-143"]
     paths:
      - deploy/**
      - label_studio/**
@@ -22,82 +22,82 @@ env:
   QAHOST: 124.71.161.146
 
 jobs:
-  docker_build_and_push:
-    name: "Docker build and push"
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
-    outputs:
-      out_docker_tag: ${{ steps.get_docker_tag.outputs.out_docker_tag }}
-    steps:
-      - name: Lowercase image name
-        run: |
-          echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+  # docker_build_and_push:
+  #   name: "Docker build and push"
+  #   timeout-minutes: 60
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     out_docker_tag: ${{ steps.get_docker_tag.outputs.out_docker_tag }}
+  #   steps:
+  #     - name: Lowercase image name
+  #       run: |
+  #         echo "IMAGE_NAME=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
           
-      - name: Create docker tag
-        id: get_docker_tag
-        run: |
-          export strDate=$(date +'%Y-%m-%d').${{ github.run_number }}
-          echo "DOCKER_TAG=$strDate" >> $GITHUB_ENV
-          echo "::set-output name=out_docker_tag::$strDate"
+  #     - name: Create docker tag
+  #       id: get_docker_tag
+  #       run: |
+  #         export strDate=$(date +'%Y-%m-%d').${{ github.run_number }}
+  #         echo "DOCKER_TAG=$strDate" >> $GITHUB_ENV
+  #         echo "::set-output name=out_docker_tag::$strDate"
 
-      - name: Override image tag on 'tag'
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          echo "DOCKER_TAG=$(echo ${GITHUB_REF#refs/tags/})" >> $GITHUB_ENV
+  #     - name: Override image tag on 'tag'
+  #       if: startsWith(github.ref, 'refs/tags/')
+  #       run: |
+  #         echo "DOCKER_TAG=$(echo ${GITHUB_REF#refs/tags/})" >> $GITHUB_ENV
 
-      - name: Override registry 🛎️
-        if: github.repository == 'Shanghai-Digital-Brain-Laboratory/label-studio'
-        run: |
-          echo "REGISTRY=ghcr.io" >> $GITHUB_ENV
+  #     - name: Override registry 🛎️
+  #       if: github.repository == 'Shanghai-Digital-Brain-Laboratory/label-studio'
+  #       run: |
+  #         echo "REGISTRY=ghcr.io" >> $GITHUB_ENV
 
-      - name: Checkout
-        uses: actions/checkout@v3
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
       
-      #- name: Set up QEMU
-      #  uses: docker/setup-qemu-action@v2
+  #     #- name: Set up QEMU
+  #     #  uses: docker/setup-qemu-action@v2
 
-      - name: Set up Docker Buildx 🏗️
-        id: buildx
-        uses: docker/setup-buildx-action@v2
+  #     - name: Set up Docker Buildx 🏗️
+  #       id: buildx
+  #       uses: docker/setup-buildx-action@v2
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Login to GitHub Container Registry
+  #       uses: docker/login-action@v2
+  #       with:
+  #         registry: ${{ env.REGISTRY }}
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set up Python 🔧
-        uses: actions/setup-python@master
-        with:
-          python-version: '3.8'
+  #     - name: Set up Python 🔧
+  #       uses: actions/setup-python@master
+  #       with:
+  #         python-version: '3.8'
 
-      - name: Create version_.py
-        run: |
-          python3 $(pwd)/label_studio/core/version.py
-          cat $(pwd)/label_studio/core/version_.py
-          export replace=VERSIONREPLACE
-          export filename=$(pwd)/label_studio/__init__.py
-          sed -i -e "s/$replace/${{env.DOCKER_TAG}}/g" $filename
-          cat $filename
+  #     - name: Create version_.py
+  #       run: |
+  #         python3 $(pwd)/label_studio/core/version.py
+  #         cat $(pwd)/label_studio/core/version_.py
+  #         export replace=VERSIONREPLACE
+  #         export filename=$(pwd)/label_studio/__init__.py
+  #         sed -i -e "s/$replace/${{env.DOCKER_TAG}}/g" $filename
+  #         cat $filename
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+  #     - name: Extract metadata (tags, labels) for Docker
+  #       id: meta
+  #       uses: docker/metadata-action@v4
+  #       with:
+  #         images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
-      - name: Build and push 🚀
-        uses: docker/build-push-action@v3
-        id: build_and_push
-        with:
-          context: .
-          #platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{env.DOCKER_TAG}}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+  #     - name: Build and push 🚀
+  #       uses: docker/build-push-action@v3
+  #       id: build_and_push
+  #       with:
+  #         context: .
+  #         #platforms: linux/amd64,linux/arm64
+  #         push: true
+  #         tags: ${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{env.DOCKER_TAG}}
+  #         labels: ${{ steps.meta.outputs.labels }}
+  #         cache-from: type=gha
+  #         cache-to: type=gha,mode=max
 
   deploy_dev:
     name: "Deploy DEV"
@@ -116,10 +116,11 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           port: ${{ secrets.PORT }}
           script: |
-            rm -rf dev-env
-            mkdir dev-env && cd dev-env
+            rm -rf ./dev-env
+            mkdir ./dev-env && cd ./dev-env
             echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
-            sudo docker run -v $PWD:/opt/mount --rm -it ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.docker_build_and_push.outputs.out_docker_tag }} bash -c "cp -rf /label-studio/deploy /opt/mount/;cp /label-studio/docker-compose.yml /opt/mount/docker-compose.yml"
+
+            echo `ls`
 
             export ENV=dev
             export NGINX_PORT=8080
@@ -128,6 +129,8 @@ jobs:
             export DB_HOST=192.168.0.92
             export LABEL_STUDIO_HOST=http://124.71.161.146:8080
             export TAG=${{ needs.docker_build_and_push.outputs.out_docker_tag }}
+
+            docker run -v $PWD:/opt/mount --rm -it ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${TAG} bash -c "cp -rf /label-studio/deploy /opt/mount/;cp /label-studio/docker-compose.yml /opt/mount/docker-compose.yml"
 
             docker-compose pull
             docker-compose down
