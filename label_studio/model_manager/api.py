@@ -40,6 +40,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         """
+        模型列表过滤，同时查询多个模型类型，模型类型之间用【半角逗号】隔开
         :param request:
         :param args:
         :param kwargs:
@@ -54,7 +55,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
             for_user_organization(request.user).order_by('-created_at')
         filter_params = dict()
         if _type:
-            filter_params['type'] = _type
+            _type = _type.split(',')
+            filter_params['type__in'] = _type
         if version:
             filter_params['version'] = version
         if model:

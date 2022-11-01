@@ -130,6 +130,7 @@ class PromptLearning(APIView):
                     state=AlgorithmState.ONGOING,
                     total=total_count,
                     project_id=project_id,
+                    model_id=model_id,
                     username=request.user.username,
                 )
                 redis_set_json(redis_key, redis_state)
