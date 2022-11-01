@@ -10,3 +10,4 @@
 !label_studio/**
 !setup.py
 !README.md
+!docker-compose.yml

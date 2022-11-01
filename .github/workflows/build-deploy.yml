@@ -116,14 +116,11 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           port: ${{ secrets.PORT }}
           script: |
-            rm -rf dev
-            mkdir dev && cd dev
-            echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
-            gh release download ${{ env.RELEASEART }} -p '${{ env.ARTFILENAME }}*' -R ${{env.GITHOST}}/${{ github.repository }}
-            tar -xzvf ${{ env.ARTFILENAME }}.tar.gz
-            mv ${{ env.ARTFILENAME }} dev-env && cd dev-env
+            rm -rf dev-env
+            mkdir dev-env && cd dev-env
             echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
-            
+            sudo docker run -v $PWD:/opt/mount --rm -it ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.docker_build_and_push.outputs.out_docker_tag }} bash -c "cp -rf /label-studio/deploy /opt/mount/;cp /label-studio/docker-compose.yml /opt/mount/docker-compose.yml"
+
             export ENV=dev
             export NGINX_PORT=8080
             export DJANGO_DB=default
@@ -153,13 +150,10 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           port: ${{ secrets.PORT }}
           script: |
-            rm -rf qa
-            mkdir qa && cd qa
-            echo ${{ secrets.PAT }} | gh auth login -p https -h ${{env.GITHOST}} --with-token < /dev/stdin
-            gh release download ${{ env.RELEASEART }} -p '${{ env.ARTFILENAME }}*' -R ${{env.GITHOST}}/${{ github.repository }}
-            tar -xzvf ${{ env.ARTFILENAME }}.tar.gz
-            mv ${{ env.ARTFILENAME }} qa-env && cd qa-env
+            rm -rf qa-env
+            mkdir qa-env && cd qa-env
             echo ${{ secrets.PAT }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+            sudo docker run -v $PWD:/opt/mount --rm -it ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.docker_build_and_push.outputs.out_docker_tag }} bash -c "cp -rf /label-studio/deploy /opt/mount/;cp /label-studio/docker-compose.yml /opt/mount/docker-compose.yml"
             
             export ENV=qa
             export NGINX_PORT=80
