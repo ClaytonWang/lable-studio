@@ -126,7 +126,6 @@ jobs:
             export POSTGRE_NAME=label_studio_dev
             export DB_HOST=192.168.0.92
             export LABEL_STUDIO_HOST=http://124.71.161.146:8080
-            #export TAG=${{ needs.docker_build_and_push.outputs.out_docker_tag }}
             export TAG=containers.git.digitalbrain.cn/engineering-group/label-studio:2022-11-01.288
 
             docker run -v $PWD:/opt/mount --rm ${TAG} bash -c "cp -rf /label-studio/deploy /opt/mount/;cp /label-studio/docker-compose.yml /opt/mount/docker-compose.yml"
