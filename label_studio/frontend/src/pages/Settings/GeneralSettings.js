@@ -4,12 +4,14 @@ import { Form, Input, Select, TextArea } from "../../components/Form";
 import { RadioGroup } from "../../components/Form/Elements/RadioGroup/RadioGroup";
 import { ProjectContext } from "../../providers/ProjectProvider";
 import { Block } from "../../utils/bem";
+import { template } from '../../utils/util';
 import { useAPI } from "@/providers/ApiProvider";
 
 export const GeneralSettings = () => {
   const { project, fetchProject } = useContext(ProjectContext);
   const [collections, setCollections] = useState([]);
   const api = useAPI();
+  const [templateType, setTemplateType] = useState();
 
   useEffect(() => {
     api
@@ -71,16 +73,26 @@ export const GeneralSettings = () => {
           />
 
           <Select
-            name="set_id"
-            label={t("choose_project_collection")}
+            disabled
+            name="template_type"
+            label={t("choose_template_type")}
             labelProps={{ large: true }}
-            options={collections.map((item) => ({
-              label: item.title,
-              value: item.id,
+            onChange={e => setTemplateType(e.target.value)}
+            options={template.TEMPLATE_TYPES.map(item => ({
+              label: item.label,
+              value: item.apiKey,
             }))}
           />
 
-          <RadioGroup
+          {
+            <Input
+              style={{ display: 'none' }}
+              name="label_config"
+              value={templateType && templateType !== project.template_type ? template.getConfigByApikey(templateType) : project.label_config}
+            />
+          }
+
+          {/* <RadioGroup
             name="color"
             label={t("Color")}
             size="large"
@@ -91,9 +103,9 @@ export const GeneralSettings = () => {
                 <Block name="color" style={{ "--background": color }} />
               </RadioGroup.Button>
             ))}
-          </RadioGroup>
+          </RadioGroup> */}
 
-          <RadioGroup
+          {/* <RadioGroup
             label={t("Task Sampling")}
             labelProps={{ size: "large" }}
             name="sampling"
@@ -107,12 +119,12 @@ export const GeneralSettings = () => {
                 description={description}
               />
             ))}
-          </RadioGroup>
+          </RadioGroup> */}
         </Form.Row>
 
         <Form.Actions>
           <Form.Indicator>
-            <span case="success">{t("Saved!", "已保存")}</span>
+            <span case="success">{t("Saved!")}</span>
           </Form.Indicator>
           <Button type="submit" look="primary" style={{ width: 120 }}>
             {t("Save")}

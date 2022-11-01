@@ -33,13 +33,17 @@ gtag('config', 'UA-129877673-1');
     <!-- <img src="{{ settings.HOSTNAME }}{% static 'images/nine-day-logo.svg' %}" height="60px" style="margin-right: 10px;" /> -->
     <h1>人在环路自动化平台</h1>
   </div>
-  
+
   <div class="toggle">
+    <p>用户登录</p>
+  </div>
+  
+  <!-- <div class="toggle">
     {% if not settings.DISABLE_SIGNUP_WITHOUT_LINK %}
         <a href="{{ settings.HOSTNAME }}/user/signup" class="{% if 'signup' in request.path %}active{% endif %}" data-i18n="Sign up">注册</a>
         <a href="{{ settings.HOSTNAME }}/user/login" class="{% if 'login' in request.path %}active{% endif %}" data-i18n="Log in">登陆</a>
     {% endif %}
-  </div>
+  </div> -->
 
   {% block user_content %}
   {% endblock %}

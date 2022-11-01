@@ -197,6 +197,7 @@ def get_choice_values(result):
     choices = []
     for item in result:
         _type = item.get('type')
+        tmp_choices = []
         if _type == 'choices':
             tmp_choices = item.get('value', {}).get('choices', [])
         elif _type == 'textarea':
@@ -254,7 +255,7 @@ def predict_prompt(
     :param prompt_type:
     :return:
     """
-    if prompt_type == 'intent-dialog':
+    if prompt_type == 'intent-classification':
         # 预标注（0样本）
         model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
     elif prompt_type == 'conversational-generation':

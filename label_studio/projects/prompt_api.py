@@ -23,6 +23,7 @@ from db_ml.services import predict_prompt
 from db_ml.services import generate_uuid
 from db_ml.services import redis_set_json, redis_get_json
 from db_ml.services import get_project_labels
+from db_ml.listener_result import thread_read_redis_celery_result
 
 
 class PromptLearning(APIView):
@@ -101,10 +102,10 @@ class PromptLearning(APIView):
             total_count = len(tasks)
             project = Project.objects.filter(id=project_id).first()
             _uuid = generate_uuid('prompt', project_id)
-            if project.template_type == 'intent-dialog':
+            if project.template_type == 'intent-classification':
                 state, result = predict_prompt(
                     project_id, model_id, task_data, _uuid, templates,
-                    prompt_type='intent-dialog',
+                    prompt_type='intent-classification',
                 )
             elif project.template_type == 'conversational-generation':
                 # 对话生产
@@ -132,6 +133,7 @@ class PromptLearning(APIView):
                     username=request.user.username,
                 )
                 redis_set_json(redis_key, redis_state)
+                thread_read_redis_celery_result(project_id, 'prompt')
             else:
                 result = {'status': 1, 'error': result}
                 resp_status = status.HTTP_400_BAD_REQUEST
@@ -218,16 +220,16 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
     # create
     def post(self, request, *args, **kwargs):
         params = request.data
-        c = PromptTemplates.objects.create(project_id=params['project'],
-                                           template=params['template']
-                                           )
         try:
+            c = PromptTemplates.objects.create(
+                project_id=params['project'], template=params['template']
+            )
             c.save()
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK
         except Exception as e:
-            result = {'status': 1, 'error': ''}
-            resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+            result = {'status': 1, 'error': f'{e}'}
+            resp_status = status.HTTP_200_OK
         return Response(result, status=resp_status)
 
     # read
@@ -313,6 +315,6 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
             resp_status = status.HTTP_200_OK
         except Exception as e:
             result = {'status': 1, 'error': str(e)}
-            resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR
+            resp_status = status.HTTP_200_OK
         return Response(result, status=resp_status)
 

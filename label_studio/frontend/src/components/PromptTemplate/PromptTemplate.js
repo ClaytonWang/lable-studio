@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react';
-import { Button, Input, Space, Tooltip } from 'antd';
+import { Input, message, Space, Tooltip } from 'antd';
+import { get, startsWith } from 'lodash';
 import { EditableProTable } from "@ant-design/pro-components";
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { useAPI } from "@/providers/ApiProvider";
@@ -28,6 +29,11 @@ const PromptTemplate = ({ project }) => {
             project: project.id,
             template,
           },
+          errorFilter: (res) => {
+            const error = startsWith(res.error, 'duplicate') ? '提示学习模板已存在，请重新输入' : res.error;
+
+            message.error(error);
+          },
         });
       },
       delete: (id) => {
@@ -39,6 +45,11 @@ const PromptTemplate = ({ project }) => {
         return api.callApi("mlPromptTemplateUpdate", {
           params: { id },
           body: { template },
+          errorFilter: (res) => {
+            const error = startsWith(get(res, 'response.error', res.error), 'duplicate') ? '提示学习模板已存在，请重新输入' : res.error;
+
+            message.error(error);
+          },
         });
       },
     };
@@ -51,7 +62,9 @@ const PromptTemplate = ({ project }) => {
           actionRef.current?.reload();
         });
       } else {
-        request.update(data.id, data.template);
+        request.update(data.id, data.template).then(() => {
+          actionRef.current?.reload();
+        });
       }
     }
   };
