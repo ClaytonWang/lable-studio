@@ -21,6 +21,7 @@ const IntentResponse = ({ close, execLabel }) => {
   const [template, setCurrentTemplate] = useState(null);
   const [config, _setConfig] = React.useState("");
   const [execModel, setExecModel] = React.useState('');
+  const [loading, setLoading] = React.useState(false);
   const [execModelList, setExecModelList] = React.useState([]);
   const [modelLabels, setModelLabels] = React.useState([]);
   const api = useAPI();
@@ -70,6 +71,7 @@ const IntentResponse = ({ close, execLabel }) => {
   }, []);
 
   const saveConfig = useCallback(async () => {
+    setLoading(true);
     const res = await api.callApi("updateProjectRaw", {
       params: {
         pk: project.id,
@@ -85,6 +87,7 @@ const IntentResponse = ({ close, execLabel }) => {
     }
     const error = await res.json();
 
+    setLoading(false);
     return error;
   }, [project, config, execModel]);
 
@@ -192,6 +195,7 @@ const IntentResponse = ({ close, execLabel }) => {
             size="compact"
             look="primary"
             onClick={exec}
+            waiting={ loading }
             disabled={!execModel}
           >
             立即标注

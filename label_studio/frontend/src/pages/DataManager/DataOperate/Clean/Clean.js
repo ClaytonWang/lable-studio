@@ -171,7 +171,7 @@ export default forwardRef(({ showStatus }, ref) => {
             </Space>
             <Space>
               <Elem name="buttons">
-                <Button size="compact" onClick={() => modalRef?.current.hide()}>
+                <Button size="compact" waiting={ loading } onClick={() => modalRef?.current.hide()}>
                   {t("Cancel", "取消")}
                 </Button>
               </Elem>
