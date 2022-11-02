@@ -6,13 +6,9 @@ details: <h1>Collect chatbot training data by generating next dialogue response<
 config: |
   <View className="template-conversational-ai-response-generation">
     <Paragraphs name="chat" value="$dialogue" layout="dialogue"/>
-    <Header value="意图标签"/>
-    <Choices readonly="true" name="intent" toName="chat" choice="multiple" showInLine="true">
-      <Choice value="升级"/>
-      <Choice value="不知情"/>
-      <Choice value="外呼"/>
-    </Choices>
-    <Header value="提供对话"/>
-    <TextArea name="response" toName="chat" rows="4" editable="true" maxSubmissions="100"/>
+    <Header value="意图标签" size="4"/>
+    <Header value="升级" size="5"/>
+    <TextArea name="升级" toName="chat" rows="4" editable="true" maxSubmissions="100"/>
+    <Header value="不升级" size="5"/>
+    <TextArea name="不升级" toName="chat" rows="4" editable="true" maxSubmissions="100"/>
   </View>
-
