@@ -225,6 +225,7 @@ def prediction(request):
         state=AlgorithmState.ONGOING,
         total=query.count(),
         project_id=project_id,
+        model_id=model_id,
         username=request.user.username,
         uuid=_uuid,
     )

@@ -19,13 +19,6 @@ except:
     _redis = None
 
 
-def redis_listener():
-    if redis_healthcheck():
-        return RedisSpaceListener(_redis)
-    else:
-        logger.error('Redis connection failed...')
-
-
 def redis_healthcheck():
     if not _redis:
         return False
@@ -132,7 +125,7 @@ class RedisSpaceListener(object):
         """
         celery
         """
-        from db_ml.listener_result import process_celery_result
+        # from db_ml.listener_result import process_celery_result
         while True:
             message = self.pubsub.get_message()
             if message:
@@ -142,7 +135,7 @@ class RedisSpaceListener(object):
                 channel = str(message.get('channel', b''), 'utf-8')
                 try:
                     key_space, key = channel.split('__:')
-                    process_celery_result(key)
+                    # process_celery_result(key)
                 except Exception as e:
                     logger.error(f'Redis monitor error: {e}')
             else:

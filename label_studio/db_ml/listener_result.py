@@ -31,6 +31,8 @@ from model_manager.models import ModelTrain, ModelManager
 from core.redis import _redis, redis_get, redis_set, redis_delete, redis_healthcheck
 logger = logging.getLogger('db')
 
+CELERY_FINISH_STATUS = ('SUCCESS', 'FAILURE')
+
 """
 
 
@@ -80,27 +82,31 @@ def read_redis_data(project_id, algorithm_type):
             print('Redis is disconnect')
             return
 
+        model_id = p_state.get('model_id')
         for key in _redis.scan_iter(fuzzy_key):
+            status = None
             try:
                 key = key.decode('utf-8')
                 k_result = redis_get(key)
                 k_result = json.loads(str(k_result, 'utf-8'))
                 status = k_result.get('status')
                 result = k_result.get('result', '')
-                if status not in ('SUCCESS', 'FAILURE'):
+                if status not in CELERY_FINISH_STATUS:
                     continue
 
-                print(k_result)
+                # 算法失败的结果为空，插入数据的值为空。保留一条空数据
                 data = dict(
                     celery_task_id=key,
                     status=status,
-                    result=result
+                    result=result if status == 'SUCCESS' else '',
+                    model_id=model_id,
                 )
+                print('ML message. status: ', status, ' results:',  data)
                 process_callback_result(data)
             except Exception as e:
                 print(f'ML Exception: {e} celery_task_id {key}')
             finally:
-                if status in ('SUCCESS',):
+                if status in CELERY_FINISH_STATUS:
                     last_success_time = time.time()
                     redis_delete(key)
 
@@ -133,10 +139,6 @@ def process_callback_result(data):
     task_status = data.get('status')
     celery_task_id = data.get('celery_task_id')
     result = data.get('result')
-    print(f'ML return message: {data}')
-    if task_status in ('PENDING', 'STARTED', 'RETRY'):
-        print(f'ML celery task id : {celery_task_id}  status: {task_status}')
-        return
 
     algorithm_type, project_id, task_id = split_project_and_task_id(celery_task_id)
     print(' algorithm_type: ', algorithm_type, ' project_id: ', project_id, ' task_id: ', task_id)
@@ -144,53 +146,51 @@ def process_callback_result(data):
         train_failure_delete_train_model(project_id)
         print(f'ML Train Task status is failed. {celery_task_id}')
     else:
-        if task_status in ['SUCCESS']:
-            process_algorithm_result(algorithm_type, project_id, task_id, result)
-        else:
-            print(f'ML Task status is failed. {celery_task_id}')
+        process_algorithm_result(algorithm_type, project_id, task_id, result)
 
 
-def process_celery_result(key):
-    """
-    celery status
-    CELERY STATE
-    PENDING  等待
-    STARTED  开始
-    RETRY    重试
-
-    SUCCESS  成功
-
-    FAILURE  失败
-    REVOKED  撤销
-
-    :param key:
-    :return:
-    """
-    k_result = redis_get(key)
-    k_result = json.loads(str(k_result, 'utf-8'))
-    # 状态判断 不符合处理的状态丢弃
-
-    logger.info(f'Redis message: {k_result}')
-    task_status = k_result.get('status')
-
-    if task_status in ('PENDING', 'STARTED', 'RETRY'):
-        return
-
-    if task_status in ('FAILURE', 'REVOKED'):
-        k_result['result'] = ''
-
-    # project 和 task ID 是否有效后期判断
-
-    algorithm_type, project_id, task_id = split_project_and_task_id(key)
-    if not task_id or not project_id:
-        logger.warning(
-            f"Invalid project id or task id."
-            f" project:{project_id} task:{task_id}"
-        )
-        return
-
-    algorithm_result = k_result.get('result')
-    process_algorithm_result(algorithm_type, project_id, task_id, algorithm_result)
+# def process_celery_result(key):
+#     """
+#     应该是废弃了，早期用来监听redis
+#     celery status
+#     CELERY STATE
+#     PENDING  等待
+#     STARTED  开始
+#     RETRY    重试
+#
+#     SUCCESS  成功
+#
+#     FAILURE  失败
+#     REVOKED  撤销
+#
+#     :param key:
+#     :return:
+#     """
+#     k_result = redis_get(key)
+#     k_result = json.loads(str(k_result, 'utf-8'))
+#     # 状态判断 不符合处理的状态丢弃
+#
+#     logger.info(f'Redis message: {k_result}')
+#     task_status = k_result.get('status')
+#
+#     if task_status in ('PENDING', 'STARTED', 'RETRY'):
+#         return
+#
+#     if task_status in ('FAILURE', 'REVOKED'):
+#         k_result['result'] = ''
+#
+#     # project 和 task ID 是否有效后期判断
+#
+#     algorithm_type, project_id, task_id = split_project_and_task_id(key)
+#     if not task_id or not project_id:
+#         logger.warning(
+#             f"Invalid project id or task id."
+#             f" project:{project_id} task:{task_id}"
+#         )
+#         return
+#
+#     algorithm_result = k_result.get('result')
+#     process_algorithm_result(algorithm_type, project_id, task_id, algorithm_result)
 
 
 def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_result):
@@ -286,8 +286,7 @@ def insert_prediction_value(data, project_id, task_id):
 
 
 def get_prediction_intent_df(algorithm_result, task_id):
-    annotation = algorithm_result[0]
-    confidence = algorithm_result[1]
+    annotation, confidence = (algorithm_result[0], algorithm_result[1]) if algorithm_result else ('', 0)
     pre_result = {
         'origin': 'prediction',
         'from_name': 'intent',
@@ -368,10 +367,7 @@ def insert_prompt_intent_value(algorithm_result, project_id, task_id):
     :param task_id:
     :return:
     """
-
-    # annotation, confidence = '', 0
-    annotation = algorithm_result[0]
-    confidence = algorithm_result[1]
+    annotation, confidence = (algorithm_result[0], algorithm_result[1]) if algorithm_result else ('', 0)
     result = {
         "task": '',
         "annotation": annotation,

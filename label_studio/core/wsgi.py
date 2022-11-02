@@ -4,12 +4,7 @@
 import os
 
 from django.core.wsgi import get_wsgi_application
-from core.redis import redis_listener
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'label_studio.core.settings.label_studio')
 
 application = get_wsgi_application()
-
-# if 'runserver' in os.sys.argv:
-#     listener = redis_listener()
-#     listener.start()

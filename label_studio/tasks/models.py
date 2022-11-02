@@ -487,6 +487,7 @@ class Prediction(models.Model):
     result = JSONField('result', null=True, default=dict, help_text='Prediction result')
     score = models.FloatField(_('score'), default=None, help_text='Prediction score', null=True)
     model_version = models.TextField(_('model version'), default='', blank=True, null=True)
+    model = models.ForeignKey('model_manager.ModelManager', default=None, blank=True, null=True, on_delete=models.SET_NULL)
     cluster = models.IntegerField(_('cluster'), default=None, help_text='Cluster for the current prediction', null=True)
     neighbors = JSONField('neighbors', null=True, blank=True, help_text='Array of task IDs of the closest neighbors')
     mislabeling = models.FloatField(_('mislabeling'), default=0.0, help_text='Related task mislabeling score')

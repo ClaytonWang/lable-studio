@@ -19,9 +19,11 @@ logger = logging.getLogger(__name__)
 MODEL_TYPE = (
     ('intention', '对话意图分类'),
     ('generation', '对话生成'),
-    ('clean', '清洗模型'),
-    # ('other', '其他'),
+    ('correction', '轮次纠正'),
+    ('intelligent', '智能清洗'),
+    ('rule', '规则清洗'),
 )
+
 
 MODEL_STATE = (
     (1, '初始'),
