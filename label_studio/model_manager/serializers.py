@@ -62,3 +62,14 @@ class ModelManagerUpdateSerializer(ModelManagerCreateSerializer):
 #     Project.validate_label_config(config)
 #     return config
 
+
+class ModelManagerSubDetailSerializer(ModelManagerListSerializer):
+    text = SerializerMethodField()
+
+    @staticmethod
+    def get_text(obj):
+        return f'{obj.title}{obj.version}'
+
+    class Meta:
+        model = ModelManager
+        fields = ['id', 'title', 'version', 'text', 'type']
