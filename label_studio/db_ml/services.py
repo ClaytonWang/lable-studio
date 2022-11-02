@@ -134,7 +134,7 @@ def redis_update_finish_state(redis_key, redis_data, count=0):
     redis_set_json(redis_key, redis_data)
 
 
-def update_prediction_data(task_id, prompt_data=None):
+def update_prediction_data(task_id, prompt_data=None, model_id=None):
     """
     prompt 生成的数据写回 prediction 表
      result = {
@@ -158,6 +158,7 @@ def update_prediction_data(task_id, prompt_data=None):
     }
     :param task_id:
     :param prompt_data:
+    :param model_id:
     :return:
     """
     task = Task.objects.filter(id=task_id).first()
@@ -175,6 +176,7 @@ def update_prediction_data(task_id, prompt_data=None):
         },
     }
     tag_data = dict(
+        model_id=model_id,
         task=task,
         result=[pre_result],
         score=round(confidence, 4),
