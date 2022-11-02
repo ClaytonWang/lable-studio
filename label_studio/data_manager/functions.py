@@ -129,7 +129,7 @@ def get_all_columns(project, *_):
             }
         },
         {
-            'id': 'marked_methode',
+            'id': 'marked_method',
             'title': "Label methode",
             'type': 'String',
             'help': 'Label methode help',

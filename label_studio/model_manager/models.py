@@ -23,6 +23,7 @@ MODEL_TYPE = (
     ('intelligent', '智能清洗'),
     ('rule', '规则清洗'),
 )
+CLEAN_MODEL_FLAG = ('correction', 'intelligent', 'rule')
 
 
 MODEL_STATE = (

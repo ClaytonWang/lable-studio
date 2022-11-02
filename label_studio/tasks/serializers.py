@@ -22,6 +22,7 @@ from tasks.validation import TaskValidator
 from core.utils.common import get_object_with_check_and_log, retry_database_locked
 from core.label_config import replace_task_data_undefined_with_config_field
 from users.serializers import UserSerializer
+from model_manager.serializers import ModelManagerSubDetailSerializer
 from core.utils.common import load_func
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,10 @@ class PredictionSerializer(ModelSerializer):
     class Meta:
         model = Prediction
         fields = '__all__'
+
+
+class PredictionModelSerializer(PredictionSerializer):
+    model = ModelManagerSubDetailSerializer()
 
 
 class ListAnnotationSerializer(serializers.ListSerializer):
