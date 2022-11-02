@@ -99,7 +99,7 @@ def read_redis_data(project_id, algorithm_type):
                     celery_task_id=key,
                     status=status,
                     result=result if status == 'SUCCESS' else '',
-                    model_id=model_id,
+                    model_id=model_id if model_id else None,
                 )
                 print('ML message. status: ', status, ' results:',  data)
                 process_callback_result(data)
@@ -136,6 +136,7 @@ def read_redis_data(project_id, algorithm_type):
 
 
 def process_callback_result(data):
+    model_id = data.get('model_id')
     task_status = data.get('status')
     celery_task_id = data.get('celery_task_id')
     result = data.get('result')
@@ -146,7 +147,7 @@ def process_callback_result(data):
         train_failure_delete_train_model(project_id)
         print(f'ML Train Task status is failed. {celery_task_id}')
     else:
-        process_algorithm_result(algorithm_type, project_id, task_id, result)
+        process_algorithm_result(algorithm_type, project_id, task_id, result, model_id)
 
 
 # def process_celery_result(key):
@@ -193,13 +194,14 @@ def process_callback_result(data):
 #     process_algorithm_result(algorithm_type, project_id, task_id, algorithm_result)
 
 
-def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_result):
+def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_result, model_id):
     """
 
     :param algorithm_type:
     :param project_id:
     :param task_id:
     :param algorithm_result:
+    :param model_id:
     :return:
     """
     if algorithm_type == 'train':
@@ -216,18 +218,18 @@ def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_resu
             return
         if project.template_type == 'intent-classification':
             if algorithm_type == 'prediction':
-                data = get_prediction_intent_df(algorithm_result, task_id)
+                data = get_prediction_intent_df(algorithm_result, task_id, model_id)
                 insert_prediction_value(data, project_id, task_id)
             elif algorithm_type == 'prompt':
-                insert_prompt_intent_value(algorithm_result, project_id, task_id)
+                insert_prompt_intent_value(algorithm_result, project_id, task_id, model_id)
             elif algorithm_type == 'clean':
                 insert_clean_value(algorithm_result, project_id, task_id)
         elif project.template_type == 'conversational-generation':
             if algorithm_type == 'prediction':
-                data = get_prediction_generate_df(algorithm_result, task_id)
+                data = get_prediction_generate_df(algorithm_result, task_id, model_id)
                 insert_prediction_value(data, project_id, task_id)
             elif algorithm_type == 'prompt':
-                insert_prompt_generate_value(algorithm_result, project_id, task_id)
+                insert_prompt_generate_value(algorithm_result, project_id, task_id, model_id)
         else:
             logger.info(f'Invalid algorithm_type: {algorithm_type}')
 
@@ -285,7 +287,7 @@ def insert_prediction_value(data, project_id, task_id):
         print('obj:', obj.id, ' is_ created:', is_created)
 
 
-def get_prediction_intent_df(algorithm_result, task_id):
+def get_prediction_intent_df(algorithm_result, task_id, model_id=None):
     annotation, confidence = (algorithm_result[0], algorithm_result[1]) if algorithm_result else ('', 0)
     pre_result = {
         'origin': 'prediction',
@@ -297,6 +299,7 @@ def get_prediction_intent_df(algorithm_result, task_id):
         },
     }
     tag_data = dict(
+        model_id=model_id,
         task_id=task_id,
         result=[pre_result],
         score=round(confidence, 4),
@@ -328,7 +331,7 @@ def conversation_generation_save_template(
     return result
 
 
-def get_prediction_generate_df(algorithm_result, task_id):
+def get_prediction_generate_df(algorithm_result, task_id, model_id=None):
     """
     对话生成的入库数据格式：
 
@@ -343,6 +346,7 @@ def get_prediction_generate_df(algorithm_result, task_id):
 
     :param algorithm_result:
     :param task_id:
+    :param model_id:
     :return:
     """
     pre_result = []
@@ -353,18 +357,20 @@ def get_prediction_generate_df(algorithm_result, task_id):
     else:
         pre_result = conversation_generation_save_template(algorithm_result, 'prediction', 'response')
     tag_data = dict(
+        model_id=model_id,
         task_id=task_id,
         result=[pre_result],
     )
     return tag_data
 
 
-def insert_prompt_intent_value(algorithm_result, project_id, task_id):
+def insert_prompt_intent_value(algorithm_result, project_id, task_id, model_id=None):
     """
     预标注 0样本
     :param algorithm_result:
     :param project_id:
     :param task_id:
+    :param model_id:
     :return:
     """
     annotation, confidence = (algorithm_result[0], algorithm_result[1]) if algorithm_result else ('', 0)
@@ -378,7 +384,7 @@ def insert_prompt_intent_value(algorithm_result, project_id, task_id):
     redis_key = generate_redis_key('prompt', project_id)
     p_state = redis_get_json(redis_key)
     if p_state and p_state.get('state') == AlgorithmState.ONGOING:
-        update_prediction_data(task_id, result)
+        update_prediction_data(task_id, result, model_id=model_id)
         c = PromptResult(
             project_id=project_id,
             task_id=task_id,
@@ -391,12 +397,13 @@ def insert_prompt_intent_value(algorithm_result, project_id, task_id):
         redis_update_finish_state(redis_key, p_state, count=finish_task_count)
 
 
-def insert_prompt_generate_value(algorithm_result, project_id, task_id):
+def insert_prompt_generate_value(algorithm_result, project_id, task_id, model_id=None):
     """
     对话生成 0样本
     :param algorithm_result:
     :param project_id:
     :param task_id:
+    :param model_id:
     :return:
     """
 
@@ -419,6 +426,7 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id):
         )
 
     tag_data = dict(
+        model_id=model_id,
         task_id=task_id,
         result=[pre_result],
     )
