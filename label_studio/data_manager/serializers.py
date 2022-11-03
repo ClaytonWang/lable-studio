@@ -320,8 +320,9 @@ class DataManagerTaskSerializer(TaskSerializer):
         data = self.pre_data.get(str(obj.id), {})
         if not data or not data.get('result'):
             return ''
+        # 历史记录
         model = data.get('model', {})
-        if model.get('type') not in CLEAN_MODEL_FLAG:
+        if model and model.get('type') not in CLEAN_MODEL_FLAG:
             return model.get('text')
         return ''
 
@@ -339,7 +340,7 @@ class DataManagerTaskSerializer(TaskSerializer):
         if not data or not data.get('result'):
             return ''
         model = data.get('model', {})
-        if model.get('type') in CLEAN_MODEL_FLAG:
+        if model and model.get('type') in CLEAN_MODEL_FLAG:
             return model.get('text')
         return ''
 
