@@ -48,6 +48,7 @@ const formatResponse = (response) => {
     data: results.map((item) => {
       const res = {
         id: item.id,
+        task: item.task,
         origin: jsonToString(item.source),
         cleaning: jsonToString(item.algorithm),
         _manual: jsonToString(item.manual),
@@ -214,7 +215,7 @@ export default forwardRef(({ showStatus }, ref) => {
               columns={[
                 {
                   width: 60,
-                  dataIndex: "id",
+                  dataIndex: "task",
                   title: "ID",
                   editable: false,
                 },
