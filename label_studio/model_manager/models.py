@@ -108,9 +108,9 @@ class ModelTrain(models.Model):
     # new_model_assessment_task = models.IntegerField('', null=True, blank=True, default=None)
 
     # 新模型训练任务
-    train_task = models.ManyToManyField('tasks.Task', related_name='model_train', default=None, blank=True, null=True)
+    train_task = models.ManyToManyField('tasks.Task', related_name='model_train', default=None, blank=True)
     # 新模型评估任务
-    assessment_task = models.ManyToManyField('tasks.Task', related_name='model_assessment', default=None, blank=True, null=True)
+    assessment_task = models.ManyToManyField('tasks.Task', related_name='model_assessment', default=None, blank=True)
 
     # 训练进度
     training_progress = models.FloatField('', null=True, blank=True, default=None)
