@@ -4,9 +4,8 @@ from rest_framework import serializers
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework.serializers import SerializerMethodField
 from users.serializers import UserSimpleSerializer
-
-
 from projects.models import Project, ProjectOnboarding, ProjectSummary
+from model_manager.serializers import ModelManagerDetailSerializer
 
 
 class CreatedByFromContext:
@@ -53,6 +52,8 @@ class ProjectSerializer(FlexFieldsModelSerializer):
     set_id = serializers.IntegerField(required=False, default=None, allow_null=True)
     set_title = SerializerMethodField(default='', read_only=True)
     template_type = serializers.CharField(required=False)
+    model_id = serializers.CharField(required=False)
+    model = ModelManagerDetailSerializer(required=False, read_only=True)
 
     @staticmethod
     def get_set_title(obj):
@@ -91,7 +92,7 @@ class ProjectSerializer(FlexFieldsModelSerializer):
                   'show_overlap_first', 'overlap_cohort_percentage', 'task_data_login', 'task_data_password',
                   'control_weights', 'parsed_label_config', 'evaluate_predictions_automatically',
                   'config_has_control_tags', 'skip_queue', 'reveal_preannotations_interactively',
-                  'set_id', 'set_title', 'template_type'
+                  'set_id', 'set_title', 'template_type', 'model', 'model_id'
                   ]
 
     def validate_label_config(self, value):

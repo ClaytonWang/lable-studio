@@ -211,6 +211,8 @@ class Project(ProjectMixin, models.Model):
     model_version = models.TextField(
         _('model version'), blank=True, null=True, default='', help_text='Machine learning model version'
     )
+    # 默认训练新模型，训练已有模型，需要指定模型ID
+    model = models.ForeignKey('model_manager.ModelManager', default=None, blank=True, null=True, on_delete=models.SET_NULL, related_name='projects')
     data_types = JSONField(_('data_types'), default=dict, null=True)
 
     is_draft = models.BooleanField(
@@ -252,7 +254,7 @@ class Project(ProjectMixin, models.Model):
     # 项目 用户权限关联
     annotator = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="org_project",
-        default=None, null=True, blank=True
+        default=None, blank=True
     )
 
     def __init__(self, *args, **kwargs):
