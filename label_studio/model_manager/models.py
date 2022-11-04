@@ -25,6 +25,13 @@ MODEL_TYPE = (
 )
 CLEAN_MODEL_FLAG = ('correction', 'intelligent', 'rule')
 
+TEMPLATE_MODEL_TYPE_MAPPING = (
+    ('intent-classification', 'intention'),
+    ('conversational-generation', 'generation'),
+    ('round-correction', 'correction'),
+    ('intelligent-clean', 'intelligent'),
+)
+
 
 MODEL_STATE = (
     (1, '初始'),
