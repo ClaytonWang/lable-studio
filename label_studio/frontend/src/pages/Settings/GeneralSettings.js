@@ -1,7 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { Button } from "../../components";
 import { Form, Input, Select, TextArea } from "../../components/Form";
-import { RadioGroup } from "../../components/Form/Elements/RadioGroup/RadioGroup";
 import { ProjectContext } from "../../providers/ProjectProvider";
 import { Block } from "../../utils/bem";
 import { template } from '../../utils/util';
