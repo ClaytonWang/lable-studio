@@ -19,7 +19,7 @@ from model_manager.serializers import ModelManagerDetailSerializer
 from model_manager.serializers import ModelManagerCreateSerializer
 from model_manager.serializers import ModelManagerUpdateSerializer
 from model_manager.models import ModelManager
-from model_manager.models import MODEL_TYPE
+from model_manager.models import MODEL_TYPE, TEMPLATE_MODEL_TYPE_MAPPING
 from model_manager.services import ml_backend_request
 from db_ml.common import DbPageNumberPagination
 from db_ml.common import MultiSerializerViewSetMixin
@@ -48,11 +48,13 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         """
         data = request.GET.dict()
         _type = data.get('type')
+        template_type = data.get('template_type')
         version = data.get('version')
         model = data.get('model_set')
         project = data.get('project_set')
         self.queryset = ModelManager.objects.\
             for_user_organization(request.user).order_by('-created_at')
+        template_type = dict(TEMPLATE_MODEL_TYPE_MAPPING).get(template_type)
         filter_params = dict()
         if _type:
             _type = _type.split(',')
@@ -63,6 +65,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
             filter_params['title'] = model
         if project:
             filter_params['project_set__title'] = project
+        if template_type:
+            filter_params['type'] = template_type
         if filter_params:
             self.queryset = self.queryset.filter(**filter_params)
         return super(ModelManagerViews, self).list(request, *args, **kwargs)
