@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router';
 import { get } from 'lodash';
 import { Button, ToggleItems } from '../../components';
@@ -13,6 +13,7 @@ import "./CreateProject.styl";
 import { ImportPage } from './Import/Import';
 import { useImportPage } from './Import/useImportPage';
 import { useDraftProject } from './utils/useDraftProject';
+import { Radio } from 'antd';
 
 // 1期需求：创建项目时，默认的模版
 // const DEFAULT_CONFIG = `<View className="template-intent-classification-for-dialog">
@@ -24,43 +25,87 @@ import { useDraftProject } from './utils/useDraftProject';
 // </Choices>
 // </View>`;
 
-const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setName, onSaveName, onSubmit, error, description, setDescription, show = true }) => !show ? null :(
-  <form className={cn("project-name")} onSubmit={e => { e.preventDefault(); onSubmit(); }}>
-    <div className="field field--wide">
-      <label htmlFor="project_name">{t("Project Name")}</label>
-      <input name="name" id="project_name" value={name} onChange={e => setName(e.target.value)} onBlur={onSaveName} />
-      {error && <span className="error">{error}</span>}
-    </div>
-    <div className="field field--wide">
-      <label htmlFor="project_description">{t("Description")}</label>
-      <textarea
-        name="description"
-        id="project_description"
-        placeholder={t("create_project_desc", "项目描述")}
-        rows="4"
-        value={description}
-        onChange={e => setDescription(e.target.value)}
-      />
-    </div>
-    <div className="field field--wide">
-      <label htmlFor="template_type">{t("choose_template_type", "选择项目类型")}</label>
-      <Select
-        name="template_type"
-        id="template_type"
-        value={templateType}
-        onChange={e => setTemplateType(e.target.value)}
-        options={templateTypes.map(item => ({
-          label: item.label,
-          value: item.apiKey,
-        }))}
-      />
-    </div>
-  </form>
-);
+const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setName, onSaveName, onSubmit, error, description, setDescription, modelId,setModelId, existModels, getModels, show = true }) => {
+  const [modelTrain, setTodelTrain] = useState('TRAIN_NEW');
+
+  return !show ? null : (
+    <form className={cn("project-name")} onSubmit={e => { e.preventDefault(); onSubmit(); }}>
+      <div className="field field--wide">
+        <label htmlFor="project_name">{t("Project Name")}</label>
+        <input name="name" id="project_name" value={name} onChange={e => setName(e.target.value)} onBlur={onSaveName} />
+        {error && <span className="error">{error}</span>}
+      </div>
+      <div className="field field--wide">
+        <label htmlFor="project_description">{t("Description")}</label>
+        <textarea
+          name="description"
+          id="project_description"
+          placeholder={t("create_project_desc", "项目描述")}
+          rows="4"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+        />
+      </div>
+      <div className="field field--wide">
+        <label htmlFor="template_type">{t("choose_template_type", "选择项目类型")}</label>
+        <Select
+          name="template_type"
+          id="template_type"
+          value={templateType}
+          onChange={e => {
+            setTemplateType(e.target.value);
+            if (modelTrain !== "TRAIN_NEW") {
+              getModels(e.target.value);
+            }
+          }}
+          options={templateTypes.map(item => ({
+            label: item.label,
+            value: item.apiKey,
+          }))}
+        />
+      </div>
+      <div className="field field--wide">
+        <label htmlFor="model_id">模型训练</label>
+        <Radio.Group
+          value={ modelTrain }
+          onChange={(e) => {
+            setTodelTrain(e.target.value);
+            if (e.target.value !== "TRAIN_NEW") {
+              getModels(templateType);
+            }
+          }}
+        >
+          <Space direction="vertical" style={{ justifyContent:"flex-start" }}>
+            <Radio value='TRAIN_NEW'>训练新模型</Radio>
+            <Radio value='TRAIN_EXIST'>训练已有模型</Radio>
+          </Space>
+        </Radio.Group>
+
+      </div>
+      { existModels &&modelTrain==="TRAIN_EXIST" && (
+        <div className="field field--wide">
+          <label htmlFor="model_id">选择模型</label>
+          <Select
+            name="model_id"
+            id="model_id"
+            value={ modelId}
+            onChange={e => setModelId(e.target.value)}
+            options={existModels.map(item => ({
+              label: item.title + " " + item.version,
+              value: item.id,
+            }))}
+          />
+        </div>
+      )}
+    </form>
+  );
+};
 
 export const CreateProject = ({ onClose }) => {
   const [step, setStep] = React.useState("name"); // name | import | config
   const [waiting, setWaitingStatus] = React.useState(false);
+  const [modelId, setModelId] = useState("");
+  const [existModels, setExistModels] = useState(null);
 
   const project = useDraftProject();
   const history = useHistory();
@@ -90,14 +135,35 @@ export const CreateProject = ({ onClose }) => {
 
   // name intentionally skipped from deps:
   // this should trigger only once when we got project loaded
-  React.useEffect(() => project && !name && setName(project.title), [project]);
+  React.useEffect(() => {
+    project && !name && setName(project.title);
+  }, [project]);
 
   const projectBody = React.useMemo(() => ({
     title: name,
     description,
     label_config: config,
-    template_type:templateType,
-  }), [name, description, config,templateType]);
+    template_type: templateType,
+    model_id: modelId,
+  }), [name, description, config, templateType, modelId]);
+
+
+  const getModels = useCallback(async (tpl_type) => {
+    const response = await api.callApi("modelManager", {
+      params: {
+        template_type: tpl_type,
+      },
+    });
+
+    if (response !== null && response.results) {
+      const models = response.results?.filter((i) => { return i.version !== "1.0"; });
+
+      setExistModels(models);
+      if(models.length>0)
+        setModelId(models[0].id);
+    }
+
+  }, []);
 
   const onCreate = React.useCallback(async () => {
     const imported = await finishUpload();
@@ -105,7 +171,7 @@ export const CreateProject = ({ onClose }) => {
     if (!imported) return;
 
     setWaitingStatus(true);
-    const response = await api.callApi('updateProject',{
+    const response = await api.callApi('updateProject', {
       params: {
         pk: project.id,
       },
@@ -172,6 +238,10 @@ export const CreateProject = ({ onClose }) => {
           templateTypes={template.TEMPLATE_TYPES}
           templateType={templateType}
           setTemplateType={setTemplateType}
+          modelId={ modelId}
+          setModelId={setModelId}
+          existModels={existModels}
+          getModels={ getModels}
         />
         <ImportPage project={project} show={step === "import"} {...pageProps} />
         <ConfigPage key={templateType} project={project} onUpdate={setConfig} show={step === "config"} columns={columns} pageReadonly={false} config={templateConfig} />
