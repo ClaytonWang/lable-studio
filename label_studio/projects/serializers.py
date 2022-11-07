@@ -52,8 +52,17 @@ class ProjectSerializer(FlexFieldsModelSerializer):
     set_id = serializers.IntegerField(required=False, default=None, allow_null=True)
     set_title = SerializerMethodField(default='', read_only=True)
     template_type = serializers.CharField(required=False)
-    model_id = serializers.CharField(required=False)
+    model_id = serializers.SerializerMethodField(required=False)
     model = ModelManagerDetailSerializer(required=False, read_only=True)
+
+    def get_model_id(self, obj):
+        if obj.model_id == '' or obj.model_id is None:
+            return None
+        try:
+            return int(obj.model_id)
+        except Exception as e:
+            print(e)
+            return None
 
     @staticmethod
     def get_set_title(obj):
