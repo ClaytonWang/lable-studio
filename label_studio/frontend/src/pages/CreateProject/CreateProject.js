@@ -53,6 +53,7 @@ const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setNa
           id="template_type"
           value={templateType}
           onChange={e => {
+            setModelId('');//清空老的model id
             setTemplateType(e.target.value);
             if (modelTrain !== "TRAIN_NEW") {
               getModels(e.target.value);
