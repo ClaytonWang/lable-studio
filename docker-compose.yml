@@ -58,23 +58,23 @@ services:
         volume:
           nocopy: true
 
-  rqworker:
-    image: containers.git.digitalbrain.cn/engineering-group/label-studio:${TAG:-development}
-    container_name: rqworker-${ENV:-dev}
-    environment:
-      - DJANGO_DB=${DJANGO_DB:-default}
-      - POSTGRE_NAME=${POSTGRE_NAME:-label_studio_dev}
-      - POSTGRE_USER=root
-      - POSTGRE_PASSWORD=linshimima2!
-      - POSTGRE_PORT=5432
-      - POSTGRE_HOST=${DB_HOST:-192.168.0.92}
-      - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
-    depends_on:
-      - app
-    volumes:
-      - /label-data-${ENV:-dev}:/label-studio/data:rw
-      - /label-model-${ENV:-dev}:/label-studio/label_studio/db_ml/models:rw
-    command: [ "python3", "/label-studio/label_studio/manage.py", "rqworker", "prediction" , "algorithm_clean", "prompt" ]
+#  rqworker:
+#    image: containers.git.digitalbrain.cn/engineering-group/label-studio:${TAG:-development}
+#    container_name: rqworker-${ENV:-dev}
+#    environment:
+#      - DJANGO_DB=${DJANGO_DB:-default}
+#      - POSTGRE_NAME=${POSTGRE_NAME:-label_studio_dev}
+#      - POSTGRE_USER=root
+#      - POSTGRE_PASSWORD=linshimima2!
+#      - POSTGRE_PORT=5432
+#      - POSTGRE_HOST=${DB_HOST:-192.168.0.92}
+#      - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
+#    depends_on:
+#      - app
+#    volumes:
+#      - /label-data-${ENV:-dev}:/label-studio/data:rw
+#      - /label-model-${ENV:-dev}:/label-studio/label_studio/db_ml/models:rw
+#    command: [ "python3", "/label-studio/label_studio/manage.py", "rqworker", "prediction" , "algorithm_clean", "prompt" ]
 
 
   redis:
