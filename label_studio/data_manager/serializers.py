@@ -16,7 +16,8 @@ from tasks.serializers import TaskSerializer, AnnotationSerializer, \
     PredictionModelSerializer, AnnotationDraftSerializer
 from projects.models import Project
 from label_studio.core.utils.common import round_floats
-from tasks.models import Annotation, Prediction
+from tasks.models import Annotation, Prediction, TaskLabelHistory
+from tasks.history_serializer import LabelListSerializer
 from projects.models import PromptResult
 from model_manager.models import CLEAN_MODEL_FLAG
 from db_ml.services import get_choice_values
@@ -467,6 +468,16 @@ class DataManagerTaskSerializer(TaskSerializer):
             drafts = drafts.filter(user=user)
 
         return AnnotationDraftSerializer(drafts, many=True, read_only=True, default=True, context=self.context).data
+
+
+class TaskDetailSerializer(DataManagerTaskSerializer):
+
+    history = serializers.SerializerMethodField(required=False)
+
+    @staticmethod
+    def get_history(obj):
+        instance = TaskLabelHistory.objects.filter(task=obj).order_by('-id')
+        return LabelListSerializer(instance=instance, many=True).data
 
 
 class SelectedItemsSerializer(serializers.Serializer):

@@ -31,6 +31,7 @@ from tasks.serializers import (
     TaskSerializer,
     TaskSimpleSerializer,
 )
+from data_manager.serializers import TaskDetailSerializer
 from webhooks.models import WebhookAction
 from webhooks.utils import (
     api_webhook,
@@ -178,7 +179,9 @@ class TaskAPI(generics.RetrieveUpdateDestroyAPIView):
                 and not self.task.predictions.exists():
             evaluate_predictions([self.task])
 
-        serializer = self.get_serializer_class()(self.task, many=False, context=context)
+        # 获取详情使用特定的序列化数据，下面注释的代码适合列表获取使用相同的序列化
+        # serializer = self.get_serializer_class()(self.task, many=False, context=context)
+        serializer = TaskDetailSerializer(self.task, many=False, context=context)
         data = serializer.data
         if 'auto_label' in data:
             data.pop('auto_label')
