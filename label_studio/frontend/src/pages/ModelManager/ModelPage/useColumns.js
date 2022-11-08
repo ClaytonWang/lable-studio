@@ -5,6 +5,14 @@ import { format } from 'date-fns';
 import { useMemo, useState } from 'react';
 
 
+const ModelType = {
+  intention:'对话意图分类',
+  generation: '对话生成',
+  correction: '轮次纠正',
+  intelligent: '智能清洗',
+  rule: '规则清洗',
+};
+
 export const useColumns = () => {
   const [modalExp, setModalExp] = useState(null);
   const [modalEdt, setModaEdt] = useState(null);
@@ -70,7 +78,7 @@ export const useColumns = () => {
         render: (_, record) => {
           return (
             <Elem name="type">
-              { t(record.type) }
+              {ModelType[record.type]}
             </Elem>
           );
         },
