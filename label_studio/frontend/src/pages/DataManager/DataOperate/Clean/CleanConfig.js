@@ -74,7 +74,7 @@ export const CleanConfig = forwardRef(({ cleanRefs }, ref) => {
 
   const getCleanModels = useCallback(async () => {
     return await api.callApi("modelManager", {
-      params: { type: 'clean' },
+      params: { type: 'intelligent,rule' },
     });
   }, []);
 
