@@ -89,6 +89,12 @@ class Task(TaskMixin, models.Model):
             models.Index(fields=['is_labeled'])
         ]
 
+    def has_an_intent_classification(self):
+        """
+        对话意图分类的模版判断
+        """
+        return self.project.template_type == 'intent-classification'
+
     @property
     def file_upload_name(self):
         return os.path.basename(self.file_upload.file.name)
@@ -596,6 +602,25 @@ class PredictionDraft(models.Model):
         return self.task.project.has_permission(user)
 
 
+class TaskLabelHistory(models.Model):
+    """
+    """
+    task = models.ForeignKey('tasks.Task', on_delete=models.CASCADE)
+    model = models.ForeignKey('model_manager.ModelManager', default=None, blank=True, null=True, on_delete=models.SET_NULL)
+
+    result = JSONField('result', null=True, default=dict, help_text='Prediction result')
+    created_at = models.DateTimeField(_('created at'), auto_now_add=True)
+
+    class Meta:
+        db_table = 'prediction_history'
+
+
+@receiver(post_save, sender=Prediction)
+def add_label_record(sender, instance, created, **kwargs):
+    instance.task.has_an_intent_classification() and \
+        add_prediction_history(instance.result, instance.task, instance.model)
+
+
 @receiver(post_delete, sender=Task)
 def update_all_task_states_after_deleting_task(sender, instance, **kwargs):
     """ after deleting_task
@@ -724,6 +749,19 @@ def update_ml_backend(sender, instance, **kwargs):
                 ml_backend.train()
 
 
+@receiver(post_save, sender=Annotation)
+def add_label_record_manual(sender, instance, created, **kwargs):
+    instance.task and instance.task.has_an_intent_classification() and \
+        add_prediction_history(instance.result, instance.task)
+
+
+def add_prediction_history(result, task, model=None):
+    history = TaskLabelHistory(result=result, task=task)
+    if model:
+        history.model = model
+    history.save()
+
+
 def update_task_stats(task, stats=('is_labeled',), save=True):
     """Update single task statistics:
         accuracy
@@ -757,6 +795,7 @@ def bulk_update_stats_project_tasks(tasks):
             update_task_stats(task, save=False)
         # start update query batches
         bulk_update(tasks, update_fields=['is_labeled'], batch_size=settings.BATCH_SIZE)
+
 
 Q_finished_annotations = Q(was_cancelled=False) & Q(result__isnull=False)
 Q_task_finished_annotations = Q(annotations__was_cancelled=False) & \
