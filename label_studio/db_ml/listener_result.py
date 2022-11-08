@@ -127,6 +127,11 @@ def read_redis_data(project_id, algorithm_type):
             finish_task = PromptResult.objects.filter(
                 project_id=project_id
             ).count()
+        elif algorithm_type == 'train':
+            # train时， project_id是model train的ID
+            train = ModelTrain.objects.filter(id=project_id).first()
+            if train and train.category == 'train' and train.state in (4, 5):
+                break
         else:
             finish_task = 0
         if finish_task == task_query.count():

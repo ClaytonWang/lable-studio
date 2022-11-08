@@ -33,7 +33,7 @@ from db_ml.services import generate_uuid
 from db_ml.services import get_first_version_model
 from db_ml.services import get_project_labels
 from db_ml.services import INTENT_DIALOG_PROMPT_TOKEN
-from db_ml.listener_result import read_redis_data
+from db_ml.listener_result import thread_read_redis_celery_result
 from .serializers import ModelManagerCreateSerializer
 from model_manager.serializers_train import ModelTrainUpdateSerializer
 
@@ -78,8 +78,6 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
                 filter_params[key] = value
         if not filter_params.get('project_id'):
             raise Exception('必须指定项目')
-
-        read_redis_data(filter_params.get('project_id'), 'train')
 
         self.queryset = ModelTrain.objects.filter(**filter_params).order_by('-created_at')
         return super(ModelTrainViews, self).list(request, *args, **kwargs)
@@ -293,6 +291,8 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
                 _uuid=_uuid,
                 model_parameter=new_train.model_parameter
             )
+
+            thread_read_redis_celery_result(data.get('project_id'), 'train')
 
         train_serializer = ModelTrainDetailSerializer(instance=new_train)
         headers = self.get_success_headers(train_serializer.data)
