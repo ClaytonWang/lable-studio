@@ -355,6 +355,8 @@
   "Models Management": "模型管理",
   "intention": "对话意图分类",
   "clean": "清洗模型",
+  "rule":"规则清洗",
+  "intelligent":"智能清洗",
   "generation": "对话生成",
   "other": "其他",
   "Please select Model type": "请选择模型类型",

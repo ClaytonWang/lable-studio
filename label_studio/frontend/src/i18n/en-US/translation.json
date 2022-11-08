@@ -423,5 +423,7 @@
   "Role": "Role",
   "choose_template_type": "选择项目类型",
   "round-correction":"轮次纠正",
-  "intelligent-clean":"智能清洗"
+  "intelligent-clean":"智能清洗",
+  "rule":"规则清洗",
+  "intelligent":"智能清洗"
 }
