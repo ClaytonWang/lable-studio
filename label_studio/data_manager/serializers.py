@@ -247,7 +247,7 @@ class DataManagerTaskSerializer(TaskSerializer):
     auto_label = serializers.SerializerMethodField(required=False)
     manual_label = serializers.SerializerMethodField(required=False)
     marked_method = serializers.SerializerMethodField(required=False)
-    clean_method = serializers.SerializerMethodField(required=False)
+    # clean_method = serializers.SerializerMethodField(required=False)
     auto_label_at = serializers.SerializerMethodField(required=False)
 
     CHAR_LIMITS = 500
@@ -323,7 +323,7 @@ class DataManagerTaskSerializer(TaskSerializer):
             return ''
         # 历史记录
         model = data.get('model', {})
-        if model and model.get('type') not in CLEAN_MODEL_FLAG:
+        if model and model.get('type'):
             return model.get('text')
         return ''
 
@@ -335,15 +335,15 @@ class DataManagerTaskSerializer(TaskSerializer):
         #     elif origin == 'prediction':
         #         return '普通'
         # return ''
-
-    def get_clean_method(self, obj):
-        data = self.pre_data.get(str(obj.id), {})
-        if not data or not data.get('result'):
-            return ''
-        model = data.get('model', {})
-        if model and model.get('type') in CLEAN_MODEL_FLAG:
-            return model.get('text')
-        return ''
+    #
+    # def get_clean_method(self, obj):
+    #     data = self.pre_data.get(str(obj.id), {})
+    #     if not data or not data.get('result'):
+    #         return ''
+    #     model = data.get('model', {})
+    #     if model and model.get('type') in CLEAN_MODEL_FLAG:
+    #         return model.get('text')
+    #     return ''
 
     def get_auto_label_at(self, obj):
         data = self.pre_data.get(str(obj.id), [])
