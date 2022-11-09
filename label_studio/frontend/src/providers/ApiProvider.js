@@ -61,6 +61,36 @@ const handleError = async (response, showModal = true) => {
   return isShutdown;
 };
 
+const formatRequest  = (method, params, reset) => {
+  try {
+    switch(method) {
+      // 创建对话项目时，格式化模版
+      case 'updateProject':
+        if (reset?.body?.label_config) {
+          if (reset.body.label_config.includes("template-conversational-ai-response-generation")) {
+            const tags = (() => {
+              const res = [];
+              const reg = /<Choice value="(\S+)"\/>/g;
+              let temp = reg.exec(reset.body.label_config);
+  
+              while (temp) {
+                res.push(temp[1]);
+                temp = reg.exec(reset.body.label_config);
+              }
+              return res;
+            })();
+            const templates = (tags.map(tag => `<Header value="${tag}" size="5"/>\n<TextArea name="${tag}" toName="chat" rows="4" editable="true" maxSubmissions="100"/>`)).join('\n');
+  
+            reset.body.label_config = reset.body.label_config.replace(/<\/Choices>[\s\S]+<\/View>/, `</Choices>\n${templates}\n</View>`);
+          }
+        }
+        break;
+    }
+  } catch (error) {
+    console.log(`callApi.formatRequest.error`, error);
+  }
+};
+
 export const ApiProvider = forwardRef(({ children }, ref) => {
   const [error, setError] = useState(null);
 
@@ -68,6 +98,9 @@ export const ApiProvider = forwardRef(({ children }, ref) => {
     if (apiLocked) return;
 
     setError(null);
+
+    // API拦截，格式化处理数据
+    formatRequest(method, params, rest);
 
     const result = await API[method](params, rest);
 
