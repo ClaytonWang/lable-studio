@@ -425,5 +425,7 @@
   "round-correction":"轮次纠正",
   "intelligent-clean":"智能清洗",
   "rule":"规则清洗",
-  "intelligent":"智能清洗"
+  "intelligent":"智能清洗",
+  "intelligent-clean.marked_method": "自动清洗方法",
+  "round-correction.marked_method": "自动清洗方法"
 }
