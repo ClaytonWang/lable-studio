@@ -22,6 +22,7 @@ const DialogIntentOperate = ({ actions }) => {
 const ResponseGenerateOperate = ({ actions }) => {
   return (
     <>
+      <Button onClick={actions.cleanCfg}>{t("label_clean")}</Button>
       <Button onClick={actions.prompt}>{t.format("with_template", "label_prompt")}</Button>
       <Button onClick={actions.prediction}>{t.format("with_template", "label_prediction")}</Button>
     </>
