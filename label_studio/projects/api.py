@@ -367,8 +367,9 @@ class ProjectLabelConfigValidateAPI(generics.RetrieveAPIView):
 
         old_label_config = project.label_config
         from tasks.models import Annotation, Prediction
-        if has_changed and \
-                'template-intent-classification-for-dialog' in label_config:
+
+        # 对话-意图分类
+        if has_changed and project.template_type in ('intent-classification',):
 
             from core.label_config import parse_config
             from db_ml.services import get_choice_values
