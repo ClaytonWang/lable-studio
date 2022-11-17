@@ -320,8 +320,8 @@ class ReImportAPI(ImportAPI):
             project.remove_tasks_by_file_uploads(file_upload_ids)
             tasks, serializer = self._save(tasks)
 
-            if 'template-intent-classification-for-dialog' in \
-                    project.label_config:
+            # 对话-意图分类  对话生成
+            if project.template_type in ('intent-classification', 'conversational-generation'):
                 # 创建清洗的数据基础
                 created_clean_base_data(tasks, self.kwargs['pk'], request.user.id)
         duration = time.time() - start
