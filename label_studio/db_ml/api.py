@@ -146,10 +146,11 @@ def replace(request):
     data = request.data
     project_id = data.get('project_id')
     query = TaskDbAlgorithm.objects.filter(
-        project_id=project_id, state=2
+        project_id=project_id,
+        # state=2  # 不限制状态
     )
     if not query:
-        return Response(data=dict(msg='Invalid project id'))
+        return Response(status=400, data=dict(msg=f'项目ID{project_id}没有查询到清洗数据'))
 
     for item in query:
         if item.manual:
