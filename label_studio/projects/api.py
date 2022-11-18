@@ -252,6 +252,18 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
         self.perform_update(serializer)
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
+
+        # 新建项目页面导入数据，导入数据的调用接口在更新之前，
+        # 这里清洗的数据就会因项目没有更找不到项目模版类型放弃创建清洗基础数据
+        # 在更新项目做个检查补充
+        if serializer.validated_data.get('template_type', '') \
+                in ('intent-classification', 'conversational-generation'):
+            from tasks.models import TaskDbAlgorithm
+            from tasks.tag_services import created_clean_base_data
+            clean_query = TaskDbAlgorithm.objects.filter(project_id=project.id)
+            if not clean_query:
+                tasks = Task.objects.filter(project_id=project.id).all()
+                created_clean_base_data(tasks, project.id, request.user.id)
         return Response(serializer.data)
 
     def perform_destroy(self, instance):
