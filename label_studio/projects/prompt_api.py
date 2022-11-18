@@ -23,6 +23,7 @@ from db_ml.services import predict_prompt
 from db_ml.services import generate_uuid
 from db_ml.services import redis_set_json, redis_get_json
 from db_ml.services import get_project_labels
+from db_ml.services import cut_task_to_model
 from db_ml.listener_result import thread_read_redis_celery_result
 
 
@@ -91,54 +92,54 @@ class PromptLearning(APIView):
                 PromptResult.objects.filter(project_id=project_id).delete()
 
             task_data = []
-            for task in tasks:
-                dialogue = task.get('data', {}).get('dialogue', [])
-                task_data.append(dict(
-                    task_id=task.get('id'),
-                    dialogue=dialogue
-                ))
-
-            state, result, total_count = None, None, 0
-            total_count = len(tasks)
             project = Project.objects.filter(id=project_id).first()
             _uuid = generate_uuid('prompt', project_id)
-            if project.template_type == 'intent-classification':
-                state, result = predict_prompt(
-                    project_id, model_id, task_data, _uuid, templates,
-                    prompt_type='intent-classification',
-                )
-            elif project.template_type == 'conversational-generation':
-                # 对话生产
-                labels = get_project_labels(project_id)
-                if len(labels):
-                    generate_count = params.get('generate_count', 1)
-                    # total_count = total_count * generate_count
+            state, result, total_count = None, None, 0
+            total_count = len(tasks)
+            for sub_query in cut_task_to_model(tasks):
+                for task in sub_query:
+                    dialogue = task.get('data', {}).get('dialogue', [])
+                    task_data.append(dict(
+                        task_id=task.get('id'),
+                        dialogue=dialogue
+                    ))
+
+                if project.template_type == 'intent-classification':
                     state, result = predict_prompt(
                         project_id, model_id, task_data, _uuid, templates,
-                        return_num=generate_count,
-                        prompt_type='conversational-generation',
+                        prompt_type='intent-classification',
                     )
-                else:
-                    state = False
-                    result = '项目未设置标签'
+                elif project.template_type == 'conversational-generation':
+                    # 对话生产
+                    labels = get_project_labels(project_id)
+                    if len(labels):
+                        generate_count = params.get('generate_count', 1)
+                        state, result = predict_prompt(
+                            project_id, model_id, task_data, _uuid, templates,
+                            return_num=generate_count,
+                            prompt_type='conversational-generation',
+                        )
+                    else:
+                        state = False
+                        result = '项目未设置标签'
 
-            if state:
-                result = {'status': 0, 'error': ''}
-                resp_status = status.HTTP_200_OK
+                if not state:
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={'status': 1, 'error': result}
+                    )
 
-                redis_state = dict(
-                    state=AlgorithmState.ONGOING,
-                    total=total_count,
-                    project_id=project_id,
-                    model_id=model_id,
-                    username=request.user.username,
-                )
-                redis_set_json(redis_key, redis_state)
-                thread_read_redis_celery_result(project_id, 'prompt')
-            else:
-                result = {'status': 1, 'error': result}
-                resp_status = status.HTTP_400_BAD_REQUEST
-
+            result = {'status': 0, 'error': ''}
+            resp_status = status.HTTP_200_OK
+            redis_state = dict(
+                state=AlgorithmState.ONGOING,
+                total=total_count,
+                project_id=project_id,
+                model_id=model_id,
+                username=request.user.username,
+            )
+            redis_set_json(redis_key, redis_state)
+            thread_read_redis_celery_result(project_id, 'prompt')
         except Exception as e:
             result = {'status': 1, 'error': str(e)}
             resp_status = status.HTTP_500_INTERNAL_SERVER_ERROR

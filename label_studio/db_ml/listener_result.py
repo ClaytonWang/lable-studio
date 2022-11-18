@@ -30,7 +30,8 @@ from db_ml.services import train_failure_delete_train_model
 from model_manager.models import ModelTrain, ModelManager
 from core.redis import _redis, redis_get, redis_set, redis_delete, redis_healthcheck
 logger = logging.getLogger('db')
-
+DEFAULT_INTERRUPT_TIME = 5 * 60
+DEFAULT_SLEEP_TIME = 2
 CELERY_FINISH_STATUS = ('SUCCESS', 'FAILURE')
 
 """
@@ -52,25 +53,26 @@ def read_redis_data(project_id, algorithm_type):
     """
     每次循环默认间隔的时间是2秒
 
-    最后一次获取成功数据到下一次获取的间隔超过半小时，设置失败。
+    最后一次获取成功数据到下一次获取的间隔超过5分钟，设置失败。
     :param project_id:
     :param algorithm_type:
     :return:
     """
     last_success_time = time.time()
 
-    interrupt_time = 30 * 60
-    default_sleep_time = 2
-
     redis_key = generate_redis_key(algorithm_type, str(project_id))
     p_state = redis_get_json(redis_key)
 
     while True:
-        time.sleep(default_sleep_time)
-        #
-        if int(time.time() - last_success_time) > interrupt_time:
+        time.sleep(DEFAULT_SLEEP_TIME)
+        if int(time.time() - last_success_time) > DEFAULT_INTERRUPT_TIME:
             print(f"ML {project_id}  {algorithm_type} timeout.")
-            p_state['state'] = AlgorithmState.FAILED
+            finsh, total = statistics_finish_count(algorithm_type, project_id)
+            # TODO 添加空数据
+            if round(finsh/total, 2) < 0.8:
+                p_state['state'] = AlgorithmState.FAILED
+            else:
+                p_state['state'] = AlgorithmState.FINISHED
             redis_set_json(redis_key, p_state)
             break
 
@@ -111,34 +113,43 @@ def read_redis_data(project_id, algorithm_type):
                     redis_delete(key)
 
         # 收集结束，退出循环
-        task_query = Task.objects.filter(project_id=project_id)
-        if algorithm_type == 'prediction':
-            finish_task = Prediction.objects.filter(
-                task__in=task_query
-            ).count()
-        elif algorithm_type == 'clean':
-            clean_task_query = TaskDbAlgorithm.objects.filter(
-                project_id=project_id
-            )
-            success_query = clean_task_query.filter(state=2)
-            failed_query = clean_task_query.filter(state=3)
-            finish_task = success_query.count() + failed_query.count()
-        elif algorithm_type == 'prompt':
-            finish_task = PromptResult.objects.filter(
-                project_id=project_id
-            ).count()
-        elif algorithm_type == 'train':
-            # train时， project_id是model train的ID
-            train = ModelTrain.objects.filter(id=project_id).first()
-            if train and train.category == 'train' and train.state in (4, 5):
-                break
-        else:
-            finish_task = 0
-        if finish_task == task_query.count():
+        finish, total = statistics_finish_count(algorithm_type, project_id)
+        if finish == total:
             p_state['state'] = AlgorithmState.FINISHED
             redis_set_json(redis_key, p_state)
             break
 
+
+def statistics_finish_count(algorithm_type, project_id) -> tuple:
+    """
+    统计结束的任务数 返回（已经结束，总数）
+    """
+    task_query = Task.objects.filter(project_id=project_id)
+    finish_task = 0
+    total_task = task_query.count()
+    if algorithm_type == 'prediction':
+        finish_task = Prediction.objects.filter(
+            task__in=task_query
+        ).count()
+    elif algorithm_type == 'clean':
+        clean_task_query = TaskDbAlgorithm.objects.filter(
+            project_id=project_id
+        )
+        success_query = clean_task_query.filter(state=2)
+        failed_query = clean_task_query.filter(state=3)
+        finish_task = success_query.count() + failed_query.count()
+    elif algorithm_type == 'prompt':
+        finish_task = PromptResult.objects.filter(
+            project_id=project_id
+        ).count()
+    elif algorithm_type == 'train':
+        # train时， project_id是model train的ID
+        train = ModelTrain.objects.filter(id=project_id).first()
+        # 训练模型已经完成，直接返回成功
+        if train and train.category == 'train' and train.state in (4, 5):
+            finish_task = total_task
+
+    return finish_task, total_task
 
 def process_callback_result(data):
     model_id = data.get('model_id')
@@ -221,14 +232,18 @@ def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_resu
         if not project:
             logger.info(f'Invalid project id : {project_id}')
             return
+
+        # 清洗算法结果入库
+        if algorithm_type == 'clean':
+            insert_clean_value(algorithm_result, project_id, task_id)
+            return
+
         if project.template_type == 'intent-classification':
             if algorithm_type == 'prediction':
                 data = get_prediction_intent_df(algorithm_result, task_id, model_id)
                 insert_prediction_value(data, project_id, task_id)
             elif algorithm_type == 'prompt':
                 insert_prompt_intent_value(algorithm_result, project_id, task_id, model_id)
-            elif algorithm_type == 'clean':
-                insert_clean_value(algorithm_result, project_id, task_id)
         elif project.template_type == 'conversational-generation':
             if algorithm_type == 'prediction':
                 data = get_prediction_generate_df(algorithm_result, task_id, model_id)

@@ -8,8 +8,9 @@
   > CreateTime : 2022/7/7 08:44
 """
 import uuid
-from enum import Enum
 import json
+import logging
+from enum import Enum
 from tasks.models import Task
 from core.redis import redis_set, redis_get
 from django.db.transaction import atomic
@@ -21,7 +22,7 @@ from projects.models import Project
 from model_manager.services import ml_backend_request
 from model_manager.models import ModelManager
 from model_manager.services import ml_backend_params
-
+logger = logging.getLogger('db')
 INTENT_DIALOG_PROMPT_TOKEN = '101469da9d088219'
 CONVERSATIONAL_GENERATION_TOKEN = '9e72f8c5aa27811d'
 
@@ -40,6 +41,7 @@ PROMPT_BACKUP_FIELDS = [
 DB_ALGORITHM_EXPIRE_TIME = 5  # 5秒
 DB_ALGORITHM_CANCELED_EXPIRE_TIME = 60 * 2  # 2分钟
 DB_TASK_RUNNING_TIME = 60 * 60 * 12
+SEND_TASK_TO_MODEL_COUNT = 100
 
 
 class AlgorithmState(str, Enum):
@@ -274,6 +276,7 @@ def predict_prompt(
         extra=dict(return_nums=return_num)
     )
 
+    logger.info(f'ML project id:{project_id}, model id {model_id}, count: {len(task_data)}')
     return ml_backend_request(
         model.url, uri=['predict', _uuid], params=_params,
         _json=_json, method="post"
@@ -362,3 +365,8 @@ def train_failure_delete_train_model(model_train_id):
     train.train_task.clear()
     train.new_model and train.new_model.delete()
     train.delete()
+
+
+def cut_task_to_model(query_total, num=SEND_TASK_TO_MODEL_COUNT):
+    for i in range(0, len(query_total), num):
+        yield query_total[i:i + num]

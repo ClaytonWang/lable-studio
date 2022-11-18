@@ -40,6 +40,7 @@ from db_ml.services import predict_prompt
 from db_ml.services import preprocess_clean
 from db_ml.services import generate_uuid
 from db_ml.services import get_project_labels
+from db_ml.services import cut_task_to_model
 from db_ml.services import train_failure_delete_train_model
 from db_ml.listener_result import process_algorithm_result, split_project_and_task_id
 from db_ml.listener_result import thread_read_redis_celery_result
@@ -116,18 +117,20 @@ def clean(request):
             )
 
         task_data = []
-        for item in query:
-            dialogue = item.source
-            task_data.append(dict(
-                task_id=item.id,
-                dialogue=dialogue
-            ))
-        state, result = preprocess_clean(
-            project_id, model_ids, task_data, _uuid
-        )
-        if not state:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
+
+        for sub_query in cut_task_to_model(query):
+            for item in sub_query:
+                dialogue = item.source
+                task_data.append(dict(
+                    task_id=item.id,
+                    dialogue=dialogue
+                ))
+            state, result = preprocess_clean(
+                project_id, model_ids, task_data, _uuid
+            )
+            if not state:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
 
         redis_set_json(redis_key, redis_state)
         thread_read_redis_celery_result(project_id, 'clean')
@@ -162,34 +165,6 @@ def replace(request):
             continue
 
     return Response(data=dict(msg='Replace finished', project_id=project_id))
-
-
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def query_clean_task(request):
-    data = request.GET.dict()
-    project_id = data.get('project_id')
-
-    clean_task_query = TaskDbAlgorithm.objects.filter(
-        project_id=project_id
-    )
-    total = clean_task_query.count()
-    success_query = clean_task_query.filter(state=2)
-    failed_query = clean_task_query.filter(state=3)
-    #     clean_task_query.filter(
-    #     Q(~Q(algorithm= '')) | Q(algorithm__isnull=True)
-    # )
-    success_count = success_query.count()
-    failed_count = failed_query.count()
-    finish = success_count + failed_count
-    return Response(data=dict(
-        total=total,
-        finish=finish,
-        falied=failed_count,
-        success=success_count,
-        state=True if clean_task_query.filter(state=1).count() else False,
-        rate=round(finish / total, 2) if total > 0 else 0
-    ))
 
 
 @api_view(['POST'])
@@ -237,39 +212,42 @@ def prediction(request):
             query_pre.delete()
             # Prediction.objects.filter(task_id__in=task_ids).delete()
 
-        # TODO 多对话判断
         # 异常的信息回滚
-        task_data = []
-        for item in query:
-            dialogue = item.data.get('dialogue', [])
-            task_data.append(dict(
-                task_id=item.id,
-                dialogue=dialogue
-            ))
-
         project = query.first().project
-        state, result = None, None
-        if project.template_type == 'intent-classification':
-            state, result = predict_prompt(
-               project_id, model_id, task_data, _uuid
-            )
-        elif project.template_type == 'conversational-generation':
-            # 对话生产
-            labels = get_project_labels(project_id)
-            if len(labels):
-                generate_count = data.get('generate_count')
+        labels = get_project_labels(project_id)
+        for sub_query in cut_task_to_model(query):
+            task_data = []
+            for item in sub_query:
+                dialogue = item.data.get('dialogue', [])
+                task_data.append(dict(
+                    task_id=item.id,
+                    dialogue=dialogue
+                ))
+
+            state, result = None, None
+            if project.template_type == 'intent-classification':
+                # 意图标注
                 state, result = predict_prompt(
-                    project_id, model_id, task_data, _uuid,
-                    return_num=generate_count,
+                   project_id, model_id, task_data, _uuid
                 )
-            else:
-                state = False
-                result = '项目未设置标签'
-        if not state:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data=dict(message=result)
-            )
+            elif project.template_type == 'conversational-generation':
+                # 对话生产
+                if len(labels):
+                    generate_count = data.get('generate_count')
+                    state, result = predict_prompt(
+                        project_id, model_id, task_data, _uuid,
+                        return_num=generate_count,
+                    )
+                else:
+                    state = False
+                    result = '项目未设置标签'
+
+            if not state:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data=dict(message=result)
+                )
+
         redis_set_json(redis_key, redis_state)
         thread_read_redis_celery_result(project_id, 'prediction')
     return Response(data=dict(msg='Submit success', project_id=project_id))
