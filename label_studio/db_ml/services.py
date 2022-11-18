@@ -20,11 +20,11 @@ from projects.models import PromptResultDraft, PromptResult
 from projects.models import ProjectSummary
 from projects.models import Project
 from model_manager.services import ml_backend_request
-from model_manager.models import ModelManager
+from model_manager.models import ModelManager, ModelTrain
 from model_manager.services import ml_backend_params
 logger = logging.getLogger('db')
-INTENT_DIALOG_PROMPT_TOKEN = '101469da9d088219'
-CONVERSATIONAL_GENERATION_TOKEN = '9e72f8c5aa27811d'
+INTENT_DIALOG_PROMPT_TOKEN = '预标注（0样本）'
+CONVERSATIONAL_GENERATION_TOKEN = '生成对话（0样本）'
 
 PREDICTION_BACKUP_FIELDS = [
     'result', 'score', 'model_version', 'task', 'created_at', 'updated_at'
@@ -116,6 +116,40 @@ def generate_redis_key(algorithm_name: str, project_id: str) -> str:
     return f'DB_ALGORITHM_{algorithm_name}_{project_id}'
 
 
+def query_last_record(project_id):
+    """
+    一个项目同一个时刻运行一个模型
+    """
+    from model_manager.models import ModelTrain
+
+    # state 6 进行中
+    record = ModelTrain.objects.filter(
+        project_id=project_id, state=6
+    ).order_by('-id')
+    return record
+
+
+def create_model_record(model_id: int, project_id, user=None, remark=None) -> (bool, ModelTrain):
+    """
+    创建模型调用记录
+    返回 状态，对象
+    """
+    model = ModelManager.objects.filter(id=model_id).first()
+    if not model:
+        return False, None
+    record = ModelTrain(
+        title=model.title, model=model, project_id=project_id,
+        category='model', state=6  # 运行中
+    )
+    if user:
+        record.created_by = user
+    if remark:
+        record.remark = remark
+
+    record.save()
+    return True, record
+
+
 def redis_set_json(key, data, expire=DB_TASK_RUNNING_TIME):
     redis_set(key, json.dumps(data, ensure_ascii=False), expire)
 
@@ -123,17 +157,6 @@ def redis_set_json(key, data, expire=DB_TASK_RUNNING_TIME):
 def redis_get_json(key):
     data = redis_get(key)
     return json.loads(bytes.decode(data)) if data else {}
-
-
-def redis_update_finish_state(redis_key, redis_data, count=0):
-    finish = int(redis_data.get('finish', 0)) + 1
-    if count != 0 and finish < count:
-        finish = count
-    redis_data['finish'] = finish
-    if finish == int(redis_data.get('total', 0)):
-        # FAILED 结束
-        redis_data['state'] = AlgorithmState.FAILED
-    redis_set_json(redis_key, redis_data)
 
 
 def update_prediction_data(task_id, prompt_data=None, model_id=None):
@@ -238,14 +261,15 @@ def get_project_labels(project_id):
     # return {index: value for index, value in enumerate(labels)}
 
 
-def generate_uuid(algorithm_type, project_id):
+def generate_uuid(algorithm_type, record_id):
     _uuid = uuid.uuid4()
-    return f'{_uuid}_{algorithm_type}_{project_id}'
+    return f'{_uuid}_{algorithm_type}_{record_id}'
 
 
 def predict_prompt(
-        project_id, model_id, task_data, _uuid, template=[], return_num=0,
-        prompt_type=None
+        project_id, model_id, task_data, _uuid,
+        # 提示学习相关参数 因提示学习是使用固定的模型
+        template=[], return_num=0, prompt_type=None
 ):
     """
     预标注（普通）
@@ -283,9 +307,12 @@ def predict_prompt(
     )
 
 
-def get_first_version_model(token, version=1.0):
+def get_first_version_model(
+        title, token=None, version=1.0
+):
+    # 预标注（0样本）
     return ModelManager.objects.filter(
-        token=token, version=version
+        title=title, version=version
     ).order_by('id').first()
 
 

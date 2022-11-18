@@ -8,7 +8,6 @@ from db_ml.api import query_task
 from db_ml.api import clean
 from db_ml.api import replace
 from db_ml.api import cancel_job
-from db_ml.api import job_result
 
 app_name = 'ml'
 
@@ -32,5 +31,4 @@ urlpatterns = [
     path('api/dbml/clean', clean),
     path('api/dbml/replace', replace),
     path('api/dbml/cancel_job', cancel_job),
-    path('api/dbml/result', job_result),
 ]

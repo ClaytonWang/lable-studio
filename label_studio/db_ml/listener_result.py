@@ -21,14 +21,10 @@ from tasks.models import Prediction
 from tasks.models import TaskDbAlgorithm
 from tasks.models import Annotation
 from projects.models import PromptResult
-from db_ml.services import AlgorithmState
-from db_ml.services import generate_redis_key
-from db_ml.services import redis_set_json, redis_get_json
-from db_ml.services import redis_update_finish_state
 from db_ml.services import update_prediction_data
 from db_ml.services import train_failure_delete_train_model
 from model_manager.models import ModelTrain, ModelManager
-from core.redis import _redis, redis_get, redis_set, redis_delete, redis_healthcheck
+from core.redis import _redis, redis_get, redis_delete, redis_healthcheck
 logger = logging.getLogger('db')
 DEFAULT_INTERRUPT_TIME = 5 * 60
 DEFAULT_SLEEP_TIME = 2
@@ -40,51 +36,55 @@ CELERY_FINISH_STATUS = ('SUCCESS', 'FAILURE')
 """
 
 
-def thread_read_redis_celery_result(project_id, algorithm_type):
+def thread_read_redis_celery_result(project_id, algorithm_type: str, record: ModelTrain):
     """
     触发调用算法，获取celery的结果线程，当前答案超过30分钟，自动结束线程
     :return:
     """
 
-    Thread(target=read_redis_data, args=(project_id, algorithm_type)).start()
+    Thread(target=read_redis_data, args=(project_id, algorithm_type, record)).start()
 
 
-def read_redis_data(project_id, algorithm_type):
+def read_redis_data(project_id, algorithm_type, record: ModelTrain):
     """
     每次循环默认间隔的时间是2秒
 
     最后一次获取成功数据到下一次获取的间隔超过5分钟，设置失败。
     :param project_id:
     :param algorithm_type:
+    :param record: 模型执行记录对象
     :return:
     """
     last_success_time = time.time()
 
-    redis_key = generate_redis_key(algorithm_type, str(project_id))
-    p_state = redis_get_json(redis_key)
-
     while True:
         time.sleep(DEFAULT_SLEEP_TIME)
+        record = ModelTrain.objects.get(id=record.id)
+        # 查询状态失败，退出
+        if record.state == 5:
+            break
+
+        # 超时处理
         if int(time.time() - last_success_time) > DEFAULT_INTERRUPT_TIME:
             print(f"ML {project_id}  {algorithm_type} timeout.")
             finsh, total = statistics_finish_count(algorithm_type, project_id)
             # TODO 添加空数据
+            # 先测试没有加空值的影响，如果不影响整体流程，暂不处理
             if round(finsh/total, 2) < 0.8:
-                p_state['state'] = AlgorithmState.FAILED
+                record.state = 5  # 失败
             else:
-                p_state['state'] = AlgorithmState.FINISHED
-            redis_set_json(redis_key, p_state)
+                record.state = 4  # 成功
+            record.save()
             break
 
         if algorithm_type == 'train':
             fuzzy_key = f'celery-task-meta*_{algorithm_type}_*'
         else:
-            fuzzy_key = f'celery-task-meta*_{algorithm_type}_{project_id}*'
+            fuzzy_key = f'celery-task-meta*_{algorithm_type}_{record.id}*'
         if not redis_healthcheck():
             print('Redis is disconnect')
             return
 
-        model_id = p_state.get('model_id')
         for key in _redis.scan_iter(fuzzy_key):
             status = None
             try:
@@ -101,7 +101,8 @@ def read_redis_data(project_id, algorithm_type):
                     celery_task_id=key,
                     status=status,
                     result=result if status == 'SUCCESS' else '',
-                    model_id=model_id if model_id else None,
+                    model_id=record.model.id if record.model else '',
+                    record=record,
                 )
                 print('ML message. status: ', status, ' results:',  data)
                 process_callback_result(data)
@@ -115,9 +116,22 @@ def read_redis_data(project_id, algorithm_type):
         # 收集结束，退出循环
         finish, total = statistics_finish_count(algorithm_type, project_id)
         if finish == total:
-            p_state['state'] = AlgorithmState.FINISHED
-            redis_set_json(redis_key, p_state)
+            record.state = 4  # 成功
+            record.save()
             break
+
+
+def cancel_job_delete_redis_key(algorithm_type, record_id):
+    if algorithm_type == 'train':
+        fuzzy_key = f'celery-task-meta*_{algorithm_type}_*'
+    else:
+        fuzzy_key = f'celery-task-meta*_{algorithm_type}_{record_id}*'
+    if not redis_healthcheck():
+        print('Redis is disconnect')
+        return
+
+    for key in _redis.scan_iter(fuzzy_key):
+        redis_delete(key)
 
 
 def statistics_finish_count(algorithm_type, project_id) -> tuple:
@@ -151,6 +165,7 @@ def statistics_finish_count(algorithm_type, project_id) -> tuple:
 
     return finish_task, total_task
 
+
 def process_callback_result(data):
     model_id = data.get('model_id')
     task_status = data.get('status')
@@ -164,50 +179,6 @@ def process_callback_result(data):
         print(f'ML Train Task status is failed. {celery_task_id}')
     else:
         process_algorithm_result(algorithm_type, project_id, task_id, result, model_id)
-
-
-# def process_celery_result(key):
-#     """
-#     应该是废弃了，早期用来监听redis
-#     celery status
-#     CELERY STATE
-#     PENDING  等待
-#     STARTED  开始
-#     RETRY    重试
-#
-#     SUCCESS  成功
-#
-#     FAILURE  失败
-#     REVOKED  撤销
-#
-#     :param key:
-#     :return:
-#     """
-#     k_result = redis_get(key)
-#     k_result = json.loads(str(k_result, 'utf-8'))
-#     # 状态判断 不符合处理的状态丢弃
-#
-#     logger.info(f'Redis message: {k_result}')
-#     task_status = k_result.get('status')
-#
-#     if task_status in ('PENDING', 'STARTED', 'RETRY'):
-#         return
-#
-#     if task_status in ('FAILURE', 'REVOKED'):
-#         k_result['result'] = ''
-#
-#     # project 和 task ID 是否有效后期判断
-#
-#     algorithm_type, project_id, task_id = split_project_and_task_id(key)
-#     if not task_id or not project_id:
-#         logger.warning(
-#             f"Invalid project id or task id."
-#             f" project:{project_id} task:{task_id}"
-#         )
-#         return
-#
-#     algorithm_result = k_result.get('result')
-#     process_algorithm_result(algorithm_type, project_id, task_id, algorithm_result)
 
 
 def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_result, model_id):
@@ -294,17 +265,10 @@ def insert_prediction_value(data, project_id, task_id):
     """
     tag_data = data
     print(f"results: ....{str(tag_data)}")
-    redis_key = generate_redis_key('prediction', project_id)
-    p_state = redis_get_json(redis_key)
-    if p_state and p_state.get('state') == AlgorithmState.ONGOING:
-        obj, is_created = Prediction.objects.update_or_create(
-            defaults=tag_data, task_id=task_id
-        )
-        finish_task_count = Prediction.objects.filter(
-            task__in=Task.objects.filter(project_id=project_id)
-        ).count()
-        redis_update_finish_state(redis_key, p_state, count=finish_task_count)
-        print('obj:', obj.id, ' is_ created:', is_created)
+    obj, is_created = Prediction.objects.update_or_create(
+        defaults=tag_data, task_id=task_id
+    )
+    print('obj:', obj.id, ' is_ created:', is_created)
 
 
 def get_prediction_intent_df(algorithm_result, task_id, model_id=None):
@@ -401,20 +365,10 @@ def insert_prompt_intent_value(algorithm_result, project_id, task_id, model_id=N
         "average": '',
         "output": []
     }
-    redis_key = generate_redis_key('prompt', project_id)
-    p_state = redis_get_json(redis_key)
-    if p_state and p_state.get('state') == AlgorithmState.ONGOING:
-        update_prediction_data(task_id, result, model_id=model_id)
-        c = PromptResult(
-            project_id=project_id,
-            task_id=task_id,
-            metrics=result
-        )
-        c.save()
-        finish_task_count = PromptResult.objects.filter(
-            project_id=project_id
-        ).count()
-        redis_update_finish_state(redis_key, p_state, count=finish_task_count)
+
+    update_prediction_data(task_id, result, model_id=model_id)
+    obj = PromptResult(project_id=project_id, task_id=task_id, metrics=result)
+    obj.save()
 
 
 def insert_prompt_generate_value(algorithm_result, project_id, task_id, model_id=None):
@@ -445,29 +399,14 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id, model_id
             join_text(algorithm_result), 'prediction', 'response'
         )
 
-    tag_data = dict(
-        model_id=model_id,
-        task_id=task_id,
-        result=[pre_result],
+    tag_data = dict(model_id=model_id, task_id=task_id, result=[pre_result])
+    a, is_created = Prediction.objects.update_or_create(
+        defaults=tag_data, task_id=task_id
     )
-    redis_key = generate_redis_key('prompt', project_id)
-    p_state = redis_get_json(redis_key)
-    if p_state and p_state.get('state') == AlgorithmState.ONGOING:
-        a, is_created = Prediction.objects.update_or_create(
-            defaults=tag_data, task_id=task_id
-        )
-        print(f'prompt Prediction result: {a} {is_created}')
+    print(f'prompt Prediction result: {a} {is_created}')
 
-        c = PromptResult(
-            project_id=project_id,
-            task_id=task_id,
-            metrics=algorithm_result
-        )
-        c.save()
-        finish_task_count = PromptResult.objects.filter(
-            project_id=project_id
-        ).count()
-        redis_update_finish_state(redis_key, p_state, count=finish_task_count)
+    obj = PromptResult(project_id=project_id, task_id=task_id, metrics=algorithm_result)
+    obj.save()
 
 
 def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
@@ -496,20 +435,14 @@ def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
     else:
         dialogue = algorithm_result
     try:
-        redis_key = generate_redis_key('clean', project_id)
-        p_state = redis_get_json(redis_key)
-        if p_state and p_state.get('state') == AlgorithmState.ONGOING:
-            # 传入的是TaskDbAlgorithm的DI
-            query = TaskDbAlgorithm.objects.filter(id=db_algorithm_id).first()
-            print('db_algorithm_id: ', db_algorithm_id, ' query:', query.id, 'result:', dialogue)
-            if query:
-                query.algorithm = dialogue
-                query.state = 2
-                query.remarks = ''
-                query.save(update_fields=['algorithm', 'state', 'remarks'])
-            count = TaskDbAlgorithm.objects.filter(
-                project_id=project_id).filter(~Q(algorithm='')).count()
-            redis_update_finish_state(redis_key, p_state, count=count)
+        # 传入的是TaskDbAlgorithm的DI
+        query = TaskDbAlgorithm.objects.filter(id=db_algorithm_id).first()
+        print('db_algorithm_id: ', db_algorithm_id, ' query:', query.id, 'result:', dialogue)
+        if query:
+            query.algorithm = dialogue
+            query.state = 2
+            query.remarks = ''
+            query.save(update_fields=['algorithm', 'state', 'remarks'])
     except Exception as e:
         TaskDbAlgorithm.objects.filter(task_id=db_algorithm_id).update(
             state=3, remarks=str(e)
