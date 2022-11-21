@@ -138,7 +138,7 @@ def create_model_record(model_id: int, project_id, user=None, remark=None) -> (b
     if not model:
         return False, None
     record = ModelTrain(
-        title=model.title, model=model, project_id=project_id,
+        model_title=model.title, model=model, project_id=project_id,
         category='model', state=6  # 运行中
     )
     if user:
@@ -269,7 +269,7 @@ def generate_uuid(algorithm_type, record_id):
 def predict_prompt(
         project_id, model_id, task_data, _uuid,
         # 提示学习相关参数 因提示学习是使用固定的模型
-        template=[], return_num=0, prompt_type=None
+        template=[], return_num=0, model=None
 ):
     """
     预标注（普通）
@@ -280,15 +280,11 @@ def predict_prompt(
     :param template:
     :param _uuid:
     :param return_num:
-    :param prompt_type:
+    :param model:
     :return:
     """
-    if prompt_type == 'intent-classification':
-        # 预标注（0样本）
-        model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
-    elif prompt_type == 'conversational-generation':
-        # 生成对话（0样本）
-        model = get_first_version_model(CONVERSATIONAL_GENERATION_TOKEN)
+    if not model_id:
+        model = model
     else:
         # 预标注普通   生成对话普通   前端有选择模型
         model = ModelManager.objects.filter(id=model_id).first()

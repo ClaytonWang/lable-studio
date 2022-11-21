@@ -130,7 +130,7 @@ def clean(request):
                 return Response(status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
 
         thread_read_redis_celery_result(project_id, 'clean', record)
-    return Response(data=dict(msg='Submit success', project_id=project_id))
+    return Response(data=dict(msg='Submit success', project_id=project_id, record=record.id))
 
 
 @api_view(['PATCH', 'PUT'])
@@ -179,7 +179,7 @@ def prediction(request):
         return Response(status=400, data=dict(msg='Invalid project id'))
 
     if query_last_record(project_id):
-        return Response(status=400, data=dict(msg='Project is running model.'))
+        return Response(status=400, data=dict(msg='项目有正在运行的模型'))
 
     # 创建模型调用记录
     record_status, record = create_model_record(model_id, project_id, request.user)
@@ -234,7 +234,9 @@ def prediction(request):
                 return Response(status=400, data=dict(message=result))
 
         thread_read_redis_celery_result(project_id, 'prediction', record)
-    return Response(data=dict(msg='Submit success', project_id=project_id))
+    return Response(data=dict(
+        msg='Submit success', project_id=project_id, record_id=record.id
+    ))
 
 
 @api_view(['GET'])
@@ -263,11 +265,9 @@ def query_task(request):
     state = False
 
     # 状态从redis改成数据库记录
-    record = ModelTrain.objects.filter(
-        project_id=project_id, category='model', state=6  # 运行中
-    ).order_by('-id').first()
+    record = ModelTrain.objects.filter(project_id=project_id, category='model').order_by('-id').first()
     if not record:
-        return Response(status=400, data=dict(msg="没有查询到模型运行记录"))
+        return Response(data=dict(total=total_task, finish=0, state=5, rate=1))
 
     if algorithm_type == 'prediction':
         finish_task = Prediction.objects.filter(

@@ -13,13 +13,9 @@ import json
 import logging
 import time
 from threading import Thread
-from django.db.models import Q
-from core.redis import redis_get
-from projects.models import Project
 from tasks.models import Task
 from tasks.models import Prediction
 from tasks.models import TaskDbAlgorithm
-from tasks.models import Annotation
 from projects.models import PromptResult
 from db_ml.services import update_prediction_data
 from db_ml.services import train_failure_delete_train_model
@@ -172,25 +168,31 @@ def process_callback_result(data):
     celery_task_id = data.get('celery_task_id')
     result = data.get('result')
 
-    algorithm_type, project_id, task_id = split_project_and_task_id(celery_task_id)
-    print(' algorithm_type: ', algorithm_type, ' project_id: ', project_id, ' task_id: ', task_id)
+    algorithm_type, record_id, task_id = split_project_and_task_id(celery_task_id)
+    print(' algorithm_type: ', algorithm_type, ' project_id: ', record_id, ' task_id: ', task_id)
     if algorithm_type == 'train' and task_status == 'FAILURE':
-        train_failure_delete_train_model(project_id)
+        train_failure_delete_train_model(record_id)
         print(f'ML Train Task status is failed. {celery_task_id}')
     else:
-        process_algorithm_result(algorithm_type, project_id, task_id, result, model_id)
+        process_algorithm_result(algorithm_type, record_id, task_id, result, model_id)
 
 
-def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_result, model_id):
+def process_algorithm_result(algorithm_type, record_id, task_id, algorithm_result, model_id):
     """
 
     :param algorithm_type:
-    :param project_id:
+    :param record_id:
     :param task_id:
     :param algorithm_result:
     :param model_id:
     :return:
     """
+    project = ModelTrain.objects.filter(id=record_id).first().project
+    if not project:
+        logger.info(f'Invalid record id : {record_id}')
+        return
+    project_id = project.id
+
     if algorithm_type == 'train':
         #
         """
@@ -199,10 +201,7 @@ def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_resu
         """
         insert_train_model(algorithm_result, project_id)
     else:
-        project = Project.objects.filter(id=project_id).first()
-        if not project:
-            logger.info(f'Invalid project id : {project_id}')
-            return
+        # project = Project.objects.filter(id=project_id).first()
 
         # 清洗算法结果入库
         if algorithm_type == 'clean':
@@ -212,13 +211,13 @@ def process_algorithm_result(algorithm_type, project_id, task_id, algorithm_resu
         if project.template_type == 'intent-classification':
             if algorithm_type == 'prediction':
                 data = get_prediction_intent_df(algorithm_result, task_id, model_id)
-                insert_prediction_value(data, project_id, task_id)
+                insert_prediction_value(data, task_id)
             elif algorithm_type == 'prompt':
                 insert_prompt_intent_value(algorithm_result, project_id, task_id, model_id)
         elif project.template_type == 'conversational-generation':
             if algorithm_type == 'prediction':
                 data = get_prediction_generate_df(algorithm_result, task_id, model_id)
-                insert_prediction_value(data, project_id, task_id)
+                insert_prediction_value(data, task_id)
             elif algorithm_type == 'prompt':
                 insert_prompt_generate_value(algorithm_result, project_id, task_id, model_id)
         else:
@@ -246,7 +245,7 @@ def split_project_and_task_id(celery_task_id) -> list:
     return [algorithm_type, project_id, task_id]
 
 
-def insert_prediction_value(data, project_id, task_id):
+def insert_prediction_value(data, task_id):
     """
     celery result
     {
@@ -258,7 +257,6 @@ def insert_prediction_value(data, project_id, task_id):
         "task_id":"uuid_test-460"
     }
 
-    :param project_id:
     :param task_id:
     :param data:
     :return:

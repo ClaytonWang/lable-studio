@@ -26,6 +26,8 @@ from db_ml.services import get_project_labels
 from db_ml.services import cut_task_to_model
 from db_ml.services import query_last_record
 from db_ml.services import create_model_record
+from db_ml.services import get_first_version_model
+from db_ml.services import INTENT_DIALOG_PROMPT_TOKEN, CONVERSATIONAL_GENERATION_TOKEN
 from db_ml.listener_result import thread_read_redis_celery_result
 
 
@@ -80,7 +82,15 @@ class PromptLearning(APIView):
             if PromptResultDraft.objects.filter(project_id=project_id).exists():
                 PromptResultDraft.objects.filter(project_id=project_id).delete()
 
-            record_status, record = create_model_record(model_id, project_id, request.user)
+            model = None
+            project = Project.objects.filter(id=project_id).first()
+            if project.template_type == 'intent-classification':
+                # 预标注（0样本）
+                model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
+            elif project.template_type == 'conversational-generation':
+                # 生成对话（0样本）
+                model = get_first_version_model(CONVERSATIONAL_GENERATION_TOKEN)
+            record_status, record = create_model_record(model.id, project_id, request.user)
             if not record_status:
                 return Response(status=400, data=dict(msg='Invalid model id.'))
 
@@ -90,7 +100,6 @@ class PromptLearning(APIView):
                 save_raw_data(c, PromptResultDraft, PROMPT_BACKUP_FIELDS)
                 PromptResult.objects.filter(project_id=project_id).delete()
 
-            project = Project.objects.filter(id=project_id).first()
             _uuid = generate_uuid('prompt', record.id)
             state, result = None, None
             for sub_query in cut_task_to_model(tasks):
@@ -104,8 +113,7 @@ class PromptLearning(APIView):
 
                 if project.template_type == 'intent-classification':
                     state, result = predict_prompt(
-                        project_id, model_id, task_data, _uuid, templates,
-                        prompt_type='intent-classification',
+                        project_id, model_id, task_data, _uuid, templates, model=model
                     )
                 elif project.template_type == 'conversational-generation':
                     # 对话生产
@@ -114,8 +122,7 @@ class PromptLearning(APIView):
                         generate_count = params.get('generate_count', 1)
                         state, result = predict_prompt(
                             project_id, model_id, task_data, _uuid, templates,
-                            return_num=generate_count,
-                            prompt_type='conversational-generation',
+                            return_num=generate_count, model=model
                         )
                     else:
                         state = False
