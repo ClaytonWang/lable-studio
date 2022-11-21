@@ -127,6 +127,8 @@ def clean(request):
                 project_id, model_ids, task_data, _uuid
             )
             if not state:
+                record.state = 5
+                record.save()
                 return Response(status=status.HTTP_400_BAD_REQUEST, data=dict(message=result))
 
         thread_read_redis_celery_result(project_id, 'clean', record)
@@ -231,6 +233,8 @@ def prediction(request):
                     result = '项目未设置标签'
 
             if not state:
+                record.state = 5
+                record.save()
                 return Response(status=400, data=dict(message=result))
 
         thread_read_redis_celery_result(project_id, 'prediction', record)

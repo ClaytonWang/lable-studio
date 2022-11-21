@@ -241,12 +241,16 @@ def get_project_labels(project_id):
     labels = []
     if project and project.parsed_label_config:
         parsed_label_config = project.parsed_label_config
-        intent = parsed_label_config.get('intent', {})
-        labels = intent.get('labels', {})
-        if isinstance(labels, list):
-            return labels
-        elif isinstance(labels, dict):
-            return list(labels.keys())
+        if project.template_type == 'intent-classification':
+            intent = parsed_label_config.get('intent', {})
+            labels = intent.get('labels', {})
+            if isinstance(labels, list):
+                return labels
+            elif isinstance(labels, dict):
+                return list(labels.keys())
+        elif project.template_type == 'conversational-generation':
+            if isinstance(parsed_label_config, dict):
+                return list(parsed_label_config.keys())
     return labels
 
     # summary = ProjectSummary.objects.filter(project_id=project_id).first()

@@ -129,6 +129,8 @@ class PromptLearning(APIView):
                         result = '项目未设置标签'
 
                 if not state:
+                    record.state = 5
+                    record.save()
                     return Response(status=status.HTTP_400_BAD_REQUEST, data={'status': 1, 'error': result})
 
             result = {'status': 0, 'error': ''}
