@@ -38,13 +38,16 @@ MODEL_STATE = (
     (2, '评估'),
     (3, '训练'),
     (4, '完成'),
-    (5, '异常'),
+    (5, '失败'),
+    (6, '运行中'),
 )
 
 
 MODEL_TRAIN_TYPE = (
     ('train', '训练'),
     ('assessment', '评估'),
+    # 算法执行记录 记录所有算法调用的记录
+    ('model', '模型'),
 )
 
 
@@ -85,6 +88,7 @@ class ModelManager(DummyModelMixin, models.Model):
 class ModelTrain(models.Model):
     """
     人在环路-训练记录
+    训练模型记录和执行模型记录表
     """
     objects = DbOrganizationManager()
 
@@ -130,6 +134,7 @@ class ModelTrain(models.Model):
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
     updated_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='updated_project_record', on_delete=models.SET_NULL, null=True, verbose_name=_('updated by'))
 
+    remark = models.CharField(max_length=200, verbose_name='备注/说明', null=True, blank=True, default=None)
     # 模型参数 模型调用参数和标签都放在这里
     state = models.IntegerField(_('model state'), choices=MODEL_STATE, default=1, null=True)
     model_parameter = JSONField(_('run model parameter'), null=True, default=dict, help_text='模型入参数')
