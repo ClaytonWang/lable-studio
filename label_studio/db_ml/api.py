@@ -95,8 +95,9 @@ def clean(request):
         TaskDbAlgorithmDraft.objects.filter(project_id=project_id).delete()
 
     first_model_id = model_ids[0]
+    remark = ','.join([str(i) for i in model_ids])
     record_status, record = create_model_record(
-        first_model_id, project_id, request.user, remark=','.join(model_ids)
+        first_model_id, project_id, request.user, remark=remark
     )
     if not record_status:
         return Response(status=400, data=dict(msg='Invalid model id.'))
