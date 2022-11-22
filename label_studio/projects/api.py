@@ -10,6 +10,7 @@ from django.db import IntegrityError
 from drf_yasg.utils import swagger_auto_schema
 
 from django.http import Http404
+from rest_framework.decorators import action
 from django.utils.decorators import method_decorator
 from rest_framework import generics, status, filters
 from rest_framework.exceptions import NotFound, ValidationError as RestValidationError
@@ -158,6 +159,11 @@ class ProjectListAPI(generics.ListCreateAPIView):
                 raise ProjectExistException('Project with the same name already exists: {}'.
                                             format(ser.validated_data.get('title', '')))
             raise LabelStudioDatabaseException('Database error during project creation. Try again.')
+
+    @action(['GET'], detail=False)
+    def label(self, request):
+        from db_ml.services import get_project_labels
+        return get_project_labels(request.query_params.get('project_id'))
 
     def get(self, request, *args, **kwargs):
         return super(ProjectListAPI, self).get(request, *args, **kwargs)
