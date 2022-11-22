@@ -160,10 +160,6 @@ class ProjectListAPI(generics.ListCreateAPIView):
                                             format(ser.validated_data.get('title', '')))
             raise LabelStudioDatabaseException('Database error during project creation. Try again.')
 
-    @action(['GET'], detail=False)
-    def label(self, request):
-        from db_ml.services import get_project_labels
-        return get_project_labels(request.query_params.get('project_id'))
 
     def get(self, request, *args, **kwargs):
         return super(ProjectListAPI, self).get(request, *args, **kwargs)
@@ -612,3 +608,15 @@ def project_set_user(request, pk):
         project.annotator.add(a_user)
 
     return Response(data=dict(message='提交成功'))
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def project_label(request, pk):
+    """
+    :param request:
+    :return:
+    """
+
+    from db_ml.services import get_project_labels
+    return Response(data=get_project_labels(pk))
