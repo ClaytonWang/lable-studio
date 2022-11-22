@@ -56,6 +56,7 @@ export default forwardRef((props, ref) => {
           return {
             ...data,
             type: item,
+            state: data.state === 6,
           };
         }));
         const running = find(list, { state: true });
