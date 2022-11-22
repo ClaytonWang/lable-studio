@@ -22,11 +22,14 @@ def get_template(project_id):
     if 'intent-classification' == template_type:
         result = dict()
         for item in template_list:
-            label = item.get('label')
-            if label not in result:
-                result[label] = [item['template']]
-            else:
-                result[label] = result[label] + [item['template']]
+            label_str = item.get('label', '')
+            labels = label_str.split('|||')
+            tmp = item['template']
+            for label in labels:
+                if label not in result:
+                    result[label] = [tmp]
+                else:
+                    result[label] = result[label] + [tmp]
         return result
     else:
         return [item['template'] for item in template_list]
