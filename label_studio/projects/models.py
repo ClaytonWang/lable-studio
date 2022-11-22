@@ -1050,6 +1050,7 @@ class PromptTemplates(models.Model):
 
     # 模版
     template = models.JSONField(verbose_name='模版',  max_length=1000, null=True, blank=True)
+    label = models.CharField(verbose_name='标签',  max_length=30, null=True, blank=True, default=None)
 
     created_at = models.DateTimeField(_('created at'), auto_now_add=True, help_text='Time a task was created')
     updated_at = models.DateTimeField(_('updated at'), auto_now=True, help_text='Last time a task was updated')
@@ -1062,7 +1063,7 @@ class PromptTemplates(models.Model):
 
     # 设立联合主键
     class Meta:
-        unique_together = ("project_id", "template")
+        unique_together = ("project_id", "template", "label")
 
     # def has_permission(self, user):
     #     return self.project.has_permission(user)
