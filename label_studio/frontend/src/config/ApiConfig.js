@@ -83,6 +83,7 @@ export const API_CONFIG = {
     mlInteractive: "POST:/ml/:pk/interactive-annotating",
     mlPreLabelProgress: "GET:/dbml/query_task",
     mlPredictProcess: "POST:/dbml/predict",
+    mlProjectLabels: "GET:/projects/:pk/label",
 
     // Prompt Learning
     mlPromptPredict: 'POST:/projects/prompt-learning/predict',

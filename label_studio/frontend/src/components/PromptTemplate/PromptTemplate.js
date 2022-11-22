@@ -1,5 +1,5 @@
-import { useMemo, useRef } from 'react';
-import { Input, message, Space, Tooltip } from 'antd';
+import { useEffect, useMemo,useRef,useState } from 'react';
+import { Input, message, Select, Space, Tooltip } from 'antd';
 import { get, startsWith } from 'lodash';
 import { EditableProTable } from "@ant-design/pro-components";
 import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
@@ -9,6 +9,7 @@ import "./PromptTemplate.less";
 const PromptTemplate = ({ project }) => {
   const actionRef = useRef();
   const api = useAPI();
+  const [labelsData,setLabelsData] = useState([]);
 
   const request = useMemo(() => {
     return {
@@ -20,6 +21,17 @@ const PromptTemplate = ({ project }) => {
             data: res.templates || [],
             success: true,
           };
+        });
+      },
+      labels: () => {
+        return api.callApi("mlProjectLabels", {
+          params: { pk: project.id },
+        }).then(res => {
+          return {
+            data: res.template || [],
+            success:true,
+          };
+
         });
       },
       create: (template) => {
@@ -68,11 +80,30 @@ const PromptTemplate = ({ project }) => {
       }
     }
   };
+
   const handleDelete = (id) => {
     request.delete(id).then(() => {
       actionRef.current?.reload();
     });
   };
+
+  const options = [];
+
+  for (let i = 10; i < 36; i++) {
+    options.push({
+      label: i.toString(36) + i,
+      value: i.toString(36) + i,
+    });
+  }
+
+  const labelStatus = useMemo(() => labelsData.length > 0 ? "" : "error", [labelsData]);
+
+  useEffect(() => {
+    request.labels().then(data => {
+      console.log(data);
+    });
+  }, []);
+
 
   return (
     <div className='prompt-template'>
@@ -87,7 +118,7 @@ const PromptTemplate = ({ project }) => {
                 type: 'add',
               });
             }}
-            // icon={<PlusOutlined />}
+          // icon={<PlusOutlined />}
           >{t("Insert")}<PlusOutlined /></a>
         </Space>
       </div>
@@ -122,7 +153,28 @@ const PromptTemplate = ({ project }) => {
               </Tooltip>
             </Space>,
             renderFormItem: (_, { isEditable }) => {
-              return isEditable ? <Input.TextArea placeholder={t("help_prompt_template", "请输入提示学习模板,例:[dlg]你的心情很[mask]")} /> : <span />;
+              return isEditable ? (
+                <>
+                  <Input.TextArea placeholder={t("help_prompt_template", "请输入提示学习模板,例:[dlg]你的心情很[mask]")} />
+                  <Select
+                    labelInValue
+                    status={labelStatus}
+                    mode="multiple"
+                    allowClear
+                    style={{
+                      width: '100%',
+                      marginTop:5,
+                    }}
+                    placeholder="请选择标签"
+                    value={labelsData}
+                    defaultValue={['']}
+                    onChange={(newValue) => {
+                      setLabelsData(newValue);
+                    }}
+                    options={options}
+                  />
+                </>
+              ) : <span />;
             },
             formItemProps: {
               rules: [
