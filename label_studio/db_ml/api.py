@@ -46,6 +46,7 @@ from db_ml.services import create_model_record
 from db_ml.listener_result import cancel_job_delete_redis_key
 from db_ml.listener_result import thread_read_redis_celery_result
 from model_manager.models import ModelTrain
+from projects.services import get_template
 from tasks.tag_services import created_clean_base_data
 
 
@@ -226,9 +227,10 @@ def prediction(request):
                 # 对话生产
                 if len(labels):
                     generate_count = data.get('generate_count')
+                    templates = get_template(project_id)
                     state, result = predict_prompt(
                         project_id, model_id, task_data, _uuid,
-                        return_num=generate_count,
+                        return_num=generate_count, template=templates
                     )
                 else:
                     state = False

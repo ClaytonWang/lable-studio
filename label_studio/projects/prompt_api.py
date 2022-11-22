@@ -29,6 +29,7 @@ from db_ml.services import create_model_record
 from db_ml.services import get_first_version_model
 from db_ml.services import INTENT_DIALOG_PROMPT_TOKEN, CONVERSATIONAL_GENERATION_TOKEN
 from db_ml.listener_result import thread_read_redis_celery_result
+from .services import get_template
 
 
 class PromptLearning(APIView):
@@ -71,9 +72,7 @@ class PromptLearning(APIView):
 
         try:
             # 获取templates
-            template_list = PromptTemplates.objects.filter(project_id=project_id).values()
-            # print('template_list', template_list)
-            templates = [item['template'] for item in template_list]
+            templates = get_template(project_id)
             # 获取tasks
             tasks = Task.objects.filter(project_id=project_id).values()
             if not tasks:
@@ -219,10 +218,11 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
     def post(self, request, *args, **kwargs):
         params = request.data
         try:
-            c = PromptTemplates.objects.create(
-                project_id=params['project'], template=params['template']
-            )
-            c.save()
+            pt = PromptTemplates(project_id=params['project'], template=params['template'])
+            label = params.get('label')
+            if label:
+                pt.label = label
+            pt.save()
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK
         except Exception as e:
