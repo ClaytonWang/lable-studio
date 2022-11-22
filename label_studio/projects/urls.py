@@ -32,6 +32,7 @@ _api_urlpatterns = [
     path('', api.ProjectListAPI.as_view(), name='project-list'),
     path('<int:pk>/', api.ProjectAPI.as_view(), name='project-detail'),
     path('<int:pk>/user', api.project_set_user, name='project-set-name'),
+    path('<int:pk>/label', api.project_label, name='project-label'),
 
     # Get next task
     path('<int:pk>/next/', api.ProjectNextTaskAPI.as_view(), name='project-next'),
