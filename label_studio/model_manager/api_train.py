@@ -292,7 +292,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
                 model_parameter=new_train.model_parameter
             )
 
-            thread_read_redis_celery_result(data.get('project_id'), 'train')
+            thread_read_redis_celery_result(data.get('project_id'), 'train', new_train)
 
         train_serializer = ModelTrainDetailSerializer(instance=new_train)
         headers = self.get_success_headers(train_serializer.data)
