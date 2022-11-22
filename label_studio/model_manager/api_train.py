@@ -273,7 +273,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
                     label = ''.join(label)
 
                 if not label or label not in labels:
-                    raise Exception(f'{task_id}未标注不能训练或标签不在项目标签里。')
+                    return Response(status=400, data=dict(msg=f'{task_id}未标注不能训练或标签不在项目标签里。'))
 
                 dialogue = item.data.get('dialogue', [])
                 task_data.append(dict(
