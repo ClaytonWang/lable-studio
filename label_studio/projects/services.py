@@ -19,11 +19,11 @@ def get_template(project_id):
 
     template_type = template_list[0]['project__template_type']
 
-    if 'intent-classification' == template_type:
+    if 'conversational-generation' == template_type:
         result = dict()
         for item in template_list:
             label_str = item.get('label', '')
-            labels = label_str.split('|||')
+            labels = label_str.split('|||') if label_str else ''
             tmp = item['template']
             for label in labels:
                 if label not in result:
