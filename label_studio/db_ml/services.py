@@ -223,16 +223,23 @@ def get_choice_values(result):
     """
     choices = []
     for item in result:
-        _type = item.get('type')
-        tmp_choices = []
-        if _type == 'choices':
-            tmp_choices = item.get('value', {}).get('choices', [])
-        elif _type == 'textarea':
-            tmp_choices = item.get('value', {}).get('text', [])
+        if isinstance(item, dict):
+            _type = item.get('type')
+            tmp_choices = []
+            if _type == 'choices':
+                tmp_choices = item.get('value', {}).get('choices', [])
+            elif _type == 'textarea':
+                tmp_choices = item.get('value', {}).get('text', [])
 
-        if not tmp_choices:
-            continue
-        choices += tmp_choices
+            if not tmp_choices:
+                continue
+            choices += tmp_choices
+
+        elif isinstance(item, list):
+            for sub_item in item:
+                label = sub_item.get('from_name')
+                label and choices.append(label)
+
     return choices
 
 
