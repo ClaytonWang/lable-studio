@@ -4,13 +4,14 @@ import { map } from 'lodash';
 import { Modal } from "@/components/Modal/Modal";
 import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";
+import { PromptTemplate } from "@/components/PromptTemplate/PromptTemplate";
 
 const formItemLayout = {
   labelCol: { span: 4 },
   wrapperCol: { span: 20 },
 };
 
-const ResponseGeneration = ({ close, execLabel, models, loading }) => {
+const ResponseGeneration = ({ close, execLabel, models, loading, project }) => {
   const onFinish = useCallback((values) => {
     execLabel(values);
   }, [execLabel]);
@@ -48,17 +49,11 @@ const ResponseGeneration = ({ close, execLabel, models, loading }) => {
             }
           </Select>
         </Form.Item>
-        {/* <Form.Item
-          label="所选标签模型"
-        >
-          <Space size="small">
-            {
-              map(tags, item => {
-                return <Tag key={item}>{item}</Tag>;
-              })
-            }
-          </Space>
-        </Form.Item> */}
+        <Form.Item
+          name="templates"
+          label="提示学习">
+          <PromptTemplate project={project} tag />
+        </Form.Item>
         <Modal.Footer>
           <Space align="end">
             <Button
