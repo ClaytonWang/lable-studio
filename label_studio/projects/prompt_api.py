@@ -240,7 +240,7 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
         # print('ts', ts)
         # transform
         # result = [item['template'] for item in ts]
-        result = [{'template': item['template'], 'id': item['id']} for item in ts]
+        result = [{'template': item['template'], 'id': item['id'], 'label': item['label']} for item in ts]
         print('result', result)
         # return Response(result, status=status.HTTP_200_OK)
         return Response({'templates': result}, status=status.HTTP_200_OK)
