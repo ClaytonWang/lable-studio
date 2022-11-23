@@ -38,7 +38,7 @@ const ResponseGeneration = ({ loading, close, project, request }) => {
           <InputNumber max={100} min={1} />
         </Form.Item>
         <Form.Item label="提示学习">
-          <PromptTemplate project={project} />
+          <PromptTemplate project={project} tag />
         </Form.Item>
       </Form>
       {/* <Row>

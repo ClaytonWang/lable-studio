@@ -1,4 +1,4 @@
-import { useEffect, useMemo,useRef,useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Input, message, Select, Space, Tag, Tooltip } from 'antd';
 import { get, startsWith } from 'lodash';
 import { EditableProTable } from "@ant-design/pro-components";
@@ -6,7 +6,7 @@ import { PlusOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { useAPI } from "@/providers/ApiProvider";
 import "./PromptTemplate.less";
 
-const PromptTemplate = ({ project }) => {
+const PromptTemplate = ({ project, tag }) => {
   const actionRef = useRef();
   const api = useAPI();
   const [labelOptions, setLabelOptions] = useState([]);
@@ -17,8 +17,12 @@ const PromptTemplate = ({ project }) => {
         return api.callApi("mlPromptTemplateQuery", {
           params: { project: project.id },
         }).then(res => {
+          const templates = res.templates.map(i => {
+            return { ...i, label: i.label?.split('|||') };
+          });
+
           return {
-            data: res.templates,
+            data: templates,
             success: true,
           };
         });
@@ -29,12 +33,12 @@ const PromptTemplate = ({ project }) => {
         }).then(res => {
           return {
             data: res || [],
-            success:true,
+            success: true,
           };
 
         });
       },
-      create: ({ template,label }) => {
+      create: ({ template, label }) => {
         return api.callApi("mlPromptTemplateCreate", {
           params: { id: project.id },
           body: {
@@ -54,10 +58,10 @@ const PromptTemplate = ({ project }) => {
           body: { id },
         });
       },
-      update: (id, template,label) => {
+      update: (id, template, label) => {
         return api.callApi("mlPromptTemplateUpdate", {
           params: { id },
-          body: { template ,label },
+          body: { template, label },
           errorFilter: (res) => {
             const error = startsWith(get(res, 'response.error', res.error), 'duplicate') ? '提示学习模板已存在，请重新输入' : res.error;
 
@@ -71,11 +75,11 @@ const PromptTemplate = ({ project }) => {
   const handleSave = (key, data) => {
     if (data.template) {
       if (data.type === 'add') {
-        request.create({ template:data.template, label:data.tags.join('|||') }).then(() => {
+        request.create({ template: data.template, label: data.label? data.label.join('|||'):'' }).then(() => {
           actionRef.current?.reload();
         });
       } else {
-        request.update(data.id, data.template, data.tags.join('|||')).then(() => {
+        request.update(data.id, data.template, data.label? data.label.join('|||'):'').then(() => {
           actionRef.current?.reload();
         });
       }
@@ -102,6 +106,86 @@ const PromptTemplate = ({ project }) => {
     });
   }, []);
 
+  const tblcolumns = useMemo(() => {
+    const rslt = [{
+      dataIndex: "template",
+      width: tag ? "60%" : "80%",
+      title: <Space>
+        <span>{t('prompt_template', "提示学习模版")}</span>
+        <Tooltip title={t('tip_prompt_template', "[dlg]代表整个对话，[dlg1]代表对话第一行，[dlg2]代表对话第二行，[dlgx]代表对话第x行，[mask]代表被遮罩的内容。")} overlayInnerStyle={{ borderRadius: 5 }}>
+          <QuestionCircleOutlined />
+        </Tooltip>
+      </Space>,
+      renderFormItem: (_, { isEditable }) => {
+        return isEditable ? (
+          <Input.TextArea placeholder={t("help_prompt_template", "请输入提示学习模板,例:[dlg]你的心情很[mask]")} />
+        ) : <span />;
+      },
+      formItemProps: {
+        rules: [
+          {
+            required: true,
+            message: t("tip_please_complete"),
+          },
+        ],
+      },
+    }];
+
+    if (tag) {
+      rslt.push({
+        dataIndex: "label",
+        title: "标签",
+        width: "40%",
+        renderFormItem: (_, { isEditable }) => {
+          return isEditable ? (
+            <Select
+              mode="multiple"
+              allowClear
+              style={{
+                width: '100%',
+                marginTop: 5,
+              }}
+              placeholder="请选择标签"
+              options={labelOptions}
+            />
+          ) : <span />;
+        },
+        render: (_, row) => {
+          return row?.label?.map((item) => <Tag key={item}>{item}</Tag>);
+        },
+        formItemProps: {
+          rules: [
+            {
+              required: true,
+              message: t("tip_please_complete"),
+            },
+          ],
+        },
+      });
+    }
+    rslt.push({
+      width: 100,
+      title: t("Operate"),
+      valueType: "option",
+      render: (text, record, _, action) => [
+        <a
+          key="editable"
+          onClick={() => {
+            action?.startEditable?.(record.id);
+          }}
+        >
+          {t("Edit", "编辑")}
+        </a>,
+        <a
+          key="delete"
+          onClick={() => handleDelete(record.id)}
+        >
+          {t("Delete")}
+        </a>,
+      ],
+    });
+    return rslt;
+  }, [tag,labelOptions]);
 
   return (
     <div className='prompt-template'>
@@ -129,6 +213,7 @@ const PromptTemplate = ({ project }) => {
         }}
         style={{
           whiteSpace: "pre-wrap",
+          marginLeft: tag ? 0 : 20,
         }}
         request={request.list}
         pagination={false}
@@ -141,81 +226,7 @@ const PromptTemplate = ({ project }) => {
           onSave: handleSave,
         }}
         dataSource={[]}
-        columns={[
-          {
-            dataIndex: "template",
-            width:"60%",
-            title: <Space>
-              <span>{t('prompt_template', "提示学习模版")}</span>
-              <Tooltip title={t('tip_prompt_template', "[dlg]代表整个对话，[dlg1]代表对话第一行，[dlg2]代表对话第二行，[dlgx]代表对话第x行，[mask]代表被遮罩的内容。")} overlayInnerStyle={{ borderRadius: 5 }}>
-                <QuestionCircleOutlined />
-              </Tooltip>
-            </Space>,
-            renderFormItem: (_, { isEditable }) => {
-              return isEditable ? (
-                <Input.TextArea placeholder={t("help_prompt_template", "请输入提示学习模板,例:[dlg]你的心情很[mask]")} />
-              ) : <span />;
-            },
-            formItemProps: {
-              rules: [
-                {
-                  required: true,
-                  message: t("tip_please_complete"),
-                },
-              ],
-            },
-          },
-          {
-            dataIndex: "tags",
-            title: "标签",
-            width:"40%",
-            renderFormItem: (_, { isEditable , record }) =>{
-              return isEditable ? (
-                <Select
-                  mode="multiple"
-                  allowClear
-                  style={{
-                    width: '100%',
-                    marginTop:5,
-                  }}
-                  placeholder="请选择标签"
-                  options={labelOptions}
-                />
-              ) : record.tags?.map(i => {
-                return <Tag key={i}>{i}</Tag>;
-              });
-            },
-            formItemProps: {
-              rules: [
-                {
-                  required: true,
-                  message: t("tip_please_complete"),
-                },
-              ],
-            },
-          },
-          {
-            width: 100,
-            title: t("Operate"),
-            valueType: "option",
-            render: (text, record, _, action) => [
-              <a
-                key="editable"
-                onClick={() => {
-                  action?.startEditable?.(record.id);
-                }}
-              >
-                {t("Edit", "编辑")}
-              </a>,
-              <a
-                key="delete"
-                onClick={() => handleDelete(record.id)}
-              >
-                {t("Delete")}
-              </a>,
-            ],
-          },
-        ]}
+        columns={tblcolumns}
       />
     </div>
   );
