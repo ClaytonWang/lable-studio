@@ -199,7 +199,7 @@ def process_algorithm_result(algorithm_type, record_id, task_id, algorithm_resul
         train 时，project_id带的是modelTrain的主键
          {port: 100010}
         """
-        insert_train_model(algorithm_result, project_id)
+        insert_train_model(algorithm_result, record_id)
     else:
         # project = Project.objects.filter(id=project_id).first()
 
