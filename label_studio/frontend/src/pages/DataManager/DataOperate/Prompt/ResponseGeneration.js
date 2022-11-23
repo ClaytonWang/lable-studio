@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback,useRef } from "react";
 import { Form, InputNumber } from "antd";
 import { Modal } from "@/components/Modal/Modal";
 import { Space } from "@/components/Space/Space";
@@ -12,6 +12,7 @@ const formItemLayout = {
 
 const ResponseGeneration = ({ loading, close, project, request }) => {
   const [form] = Form.useForm();
+  const comRef = useRef();
   const onFinish = useCallback(() => {
     form.validateFields()
       .then(values => {
@@ -38,7 +39,7 @@ const ResponseGeneration = ({ loading, close, project, request }) => {
           <InputNumber max={100} min={1} />
         </Form.Item>
         <Form.Item label="提示学习">
-          <PromptTemplate project={project} tag />
+          <PromptTemplate project={project} tag ref={ comRef } />
         </Form.Item>
       </Form>
       {/* <Row>
@@ -51,7 +52,10 @@ const ResponseGeneration = ({ loading, close, project, request }) => {
       </Row> */}
       <Modal.Footer>
         <Space align="end">
-          <Button size="compact" onClick={close}>
+          <Button size="compact" onClick={() => {
+            close();
+            console.log(comRef);
+          }}>
             {t("Cancel")}
           </Button>
           <Button onClick={onFinish} size="compact" look="primary" waiting={loading}>

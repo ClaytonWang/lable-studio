@@ -11,7 +11,7 @@ import { get } from "lodash";
 import { Modal } from "@/components/Modal/Modal";
 import { useAPI } from "@/providers/ApiProvider";
 import { template } from "@/utils/util";
-import ResponseGeneration from "./ResponseGeneration";
+import ResponseGeneration from './ResponseGeneration';
 import IntentResponse from "./IntentResponse";
 import "./index.less";
 
