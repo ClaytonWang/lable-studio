@@ -58,7 +58,7 @@ const Prompt = forwardRef(({ project, showStatus }, ref) => {
   }));
 
   return (
-    <Modal className="prompt-zone" bare ref={modalRef} style={{ width:800 }}>
+    <Modal className="prompt-zone" bare ref={modalRef} style={{ width:800 }} closeOnClickOutside={false}>
       {
         Comp ? <Comp loading={loading} close={close} request={request} project={project} /> : null
       }
