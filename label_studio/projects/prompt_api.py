@@ -240,7 +240,7 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
         # print('ts', ts)
         # transform
         # result = [item['template'] for item in ts]
-        result = [{'template': item['template'], 'id': item['id']} for item in ts]
+        result = [{'template': item['template'], 'id': item['id'], 'label': item['label']} for item in ts]
         print('result', result)
         # return Response(result, status=status.HTTP_200_OK)
         return Response({'templates': result}, status=status.HTTP_200_OK)
@@ -308,7 +308,12 @@ class PromptAPI(generics.RetrieveUpdateDestroyAPIView):
         try:
             c = self.get_queryset(request.GET.dict().get('id'))
             if c:
-                c.update(template=params['template'])
+                update_data = dict(template=params['template'])
+                label = params.get('label')
+                if label:
+                    update_data['label'] = label
+                c.update(**update_data)
+
             result = {'status': 0, 'error': ''}
             resp_status = status.HTTP_200_OK
         except Exception as e:
