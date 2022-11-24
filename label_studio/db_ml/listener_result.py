@@ -12,6 +12,8 @@ import datetime
 import json
 import logging
 import time
+import random
+import string
 from threading import Thread
 from tasks.models import Task
 from tasks.models import Prediction
@@ -272,6 +274,7 @@ def insert_prediction_value(data, task_id):
 def get_prediction_intent_df(algorithm_result, task_id, model_id=None):
     annotation, confidence = (algorithm_result[0], algorithm_result[1]) if algorithm_result else ('', 0)
     pre_result = {
+        'id': ''.join(random.sample(string.ascii_lowercase + string.ascii_uppercase, 10)),
         'origin': 'prediction',
         'from_name': 'intent',
         'to_name': 'dialogue',
@@ -302,6 +305,7 @@ def conversation_generation_save_template(
     :return:
     """
     result = {
+        'id': ''.join(random.sample(string.ascii_lowercase + string.ascii_uppercase, 10)),
         'origin': origin,
         'from_name': from_name,
         'to_name': 'chat',
