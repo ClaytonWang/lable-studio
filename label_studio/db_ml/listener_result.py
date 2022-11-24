@@ -360,7 +360,8 @@ def insert_prompt_intent_value(algorithm_result, project_id, task_id, model_id=N
     :param model_id:
     :return:
     """
-    annotation, confidence = (algorithm_result[0], algorithm_result[1]) if algorithm_result else ('', 0)
+    # annotation, confidence = (algorithm_result[0], algorithm_result[1]) if algorithm_result else ('', 0)
+    annotation, confidence = (algorithm_result[0][0], 0) if algorithm_result else ('', 0)
     result = {
         "task": '',
         "annotation": annotation,
