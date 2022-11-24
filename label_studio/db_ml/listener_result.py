@@ -113,6 +113,7 @@ def read_redis_data(project_id, algorithm_type, record: ModelTrain):
 
         # 收集结束，退出循环
         finish, total = statistics_finish_count(algorithm_type, project_id)
+        print('finish:', finish, '   total:', total)
         if finish == total:
             record.state = 4  # 成功
             record.save()
