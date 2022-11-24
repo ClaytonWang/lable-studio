@@ -345,7 +345,7 @@ def get_prediction_generate_df(algorithm_result, task_id, model_id=None):
     tag_data = dict(
         model_id=model_id,
         task_id=task_id,
-        result=[pre_result],
+        result=pre_result,
     )
     return tag_data
 
