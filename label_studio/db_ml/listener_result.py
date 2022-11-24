@@ -401,7 +401,7 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id, model_id
             join_text(algorithm_result), 'prediction', 'response'
         )
 
-    tag_data = dict(model_id=model_id, task_id=task_id, result=[pre_result])
+    tag_data = dict(model_id=model_id, task_id=task_id, result=pre_result)
     a, is_created = Prediction.objects.update_or_create(
         defaults=tag_data, task_id=task_id
     )
