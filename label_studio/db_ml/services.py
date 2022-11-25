@@ -257,7 +257,12 @@ def get_project_labels(project_id):
                 return list(labels.keys())
         elif project.template_type == 'conversational-generation':
             if isinstance(parsed_label_config, dict):
-                return list(parsed_label_config.keys())
+                labels = parsed_label_config.get('intent', {}).get('labels', [])
+                if not labels:
+                    labels = list(parsed_label_config.keys())
+                    if 'intent' in labels:
+                        labels.remove('intent')
+                return labels
     return labels
 
     # summary = ProjectSummary.objects.filter(project_id=project_id).first()
