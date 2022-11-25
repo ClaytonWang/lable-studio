@@ -273,7 +273,15 @@ def query_task(request):
     state = False
 
     # 状态从redis改成数据库记录
-    record = ModelTrain.objects.filter(project_id=project_id, category='model').order_by('-id').first()
+    record = ModelTrain.objects.filter(project_id=project_id, category='model')
+    if algorithm_type == 'prediction':
+        record = record.filter(model__type='intention', model__title__icontains='普通')
+    elif algorithm_type == 'prompt':
+        record = record.filter(model__type='intention', model__title__icontains='0样本')
+    elif algorithm_type == 'clean':
+        record = record.filter(model__type__in=['correction', 'intelligent', 'rule'])
+
+    record = record.order_by('-id').first()
     if not record:
         return Response(data=dict(total=total_task, finish=0, state=5, rate=1))
 
