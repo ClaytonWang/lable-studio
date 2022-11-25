@@ -7,10 +7,9 @@ import "./SearchBar.less";
 import { useFilter } from "./useFilter";
 
 const getFilters = (filters) => {
-  const model_types = ["none"].concat(Object.keys(filters?.type ?? []));
-  const model_versions = ["none"].concat(filters.version ?? []);
-  const model_set = ["none"].concat(filters?.model_set ?? []);
-  const project_set = ["none"].concat(filters?.project_set ?? []);
+  const model_types = ["none"].concat(Object.keys(filters?.type ?? []).sort());
+  const model_versions = ["none"].concat((filters.version ?? []).sort());
+  const model_set = ["none"].concat((filters?.model_set ?? []).sort());
 
   return [
     {
@@ -82,29 +81,6 @@ const getFilters = (filters) => {
         );
       },
     },
-    {
-      key: "project_set",
-      label: "项目集合",
-      value: "none",
-      data: project_set,
-      render: (col) => {
-        return (
-          <Select
-            value={col.value}
-            options={col.data.map((v) => {
-              if (v === "none") {
-                return { label: "不限", value: v };
-              } else {
-                return { label: t(v), value: v };
-              }
-            })}
-            onChange={(e) => {
-              col.value = e.target.value;
-            }}
-          />
-        );
-      },
-    },
   ];
 };
 
@@ -124,7 +100,6 @@ export const SearchBar = React.memo((props) => {
         type: obj["type"],
         version: obj["version"],
         mdoel_set: obj["model_set"],
-        project_set: obj["project_set"],
       });
     }
   };
