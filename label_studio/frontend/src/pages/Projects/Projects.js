@@ -52,8 +52,9 @@ export const ProjectsPage = () => {
     setNetworkState("loaded");
   };
 
-  const loadNextPage = async (page) => {
+  const loadNextPage = async (page,pageSize) => {
     setCurrentPage(page);
+    await fetchProjects(page, pageSize);
   };
 
   React.useEffect(() => {
