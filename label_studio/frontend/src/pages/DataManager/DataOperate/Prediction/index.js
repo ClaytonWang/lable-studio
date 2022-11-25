@@ -94,7 +94,7 @@ const Prediction = forwardRef(({ project, showStatus }, ref) => {
       {projectType === "intent" ? (
         <IntentResponse close={close} loading={loading} execLabel={request} project={project} models={models} />
       ) : projectType === "response-generation" ? (
-        <ResponseGeneration close={close} loading={loading} execLabel={request} project={project} models={models} />
+        <ResponseGeneration close={close} loading={loading} execLabel={request} project={project} />
       ) : null}
     </Modal>
   );

@@ -11,7 +11,7 @@ const formItemLayout = {
   wrapperCol: { span: 20 },
 };
 
-const ResponseGeneration = ({ close, execLabel, models, loading, project }) => {
+const ResponseGeneration = ({ close, execLabel, loading, project }) => {
   const onFinish = useCallback((values) => {
     execLabel(values);
   }, [execLabel]);
@@ -31,23 +31,6 @@ const ResponseGeneration = ({ close, execLabel, models, loading, project }) => {
           rules={[{ required: true, message: t('tip_please_complete') }]}
         >
           <InputNumber max={100} min={1} />
-        </Form.Item>
-        <Form.Item
-          name="model_id"
-          label="选择模型"
-          rules={[{ required: true, message: t('tip_please_complete') }]}
-        >
-          <Select>
-            {
-              map(models, item => {
-                return (
-                  <Select.Option key={item.id} value={item.id}>
-                    {item.title}
-                  </Select.Option>
-                );
-              })
-            }
-          </Select>
         </Form.Item>
         <Form.Item
           name="templates"
