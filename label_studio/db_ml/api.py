@@ -45,7 +45,7 @@ from db_ml.services import query_last_record
 from db_ml.services import create_model_record
 from db_ml.listener_result import cancel_job_delete_redis_key
 from db_ml.listener_result import thread_read_redis_celery_result
-from model_manager.models import ModelTrain
+from model_manager.models import ModelTrain, ModelManager
 from projects.services import get_template
 from tasks.tag_services import created_clean_base_data
 
@@ -177,7 +177,7 @@ def prediction(request):
     """
     data = request.data
     project_id = data.get('project_id')
-    model_id = data.get('model_id')
+    model_id = data.get('model_id', '')
     query = Task.objects.filter(project_id=project_id)
 
     if not query:
@@ -185,6 +185,13 @@ def prediction(request):
 
     if query_last_record(project_id):
         return Response(status=400, data=dict(msg='项目有正在运行的模型'))
+
+    project = query.first().project
+    # 生成对话普通 取消模型选择，
+    # 后端自动添加模型 普通模型
+    if project.template_type == 'conversational-generation':
+        model = ModelManager.objects.filter(type='generation', title__icontains='普通').first()
+        model_id = model.id
 
     # 创建模型调用记录
     record_status, record = create_model_record(model_id, project_id, request.user)
@@ -206,7 +213,6 @@ def prediction(request):
             # Prediction.objects.filter(task_id__in=task_ids).delete()
 
         # 异常的信息回滚
-        project = query.first().project
         labels = get_project_labels(project_id)
         for sub_query in cut_task_to_model(query):
             task_data = []
@@ -275,9 +281,9 @@ def query_task(request):
     # 状态从redis改成数据库记录
     record = ModelTrain.objects.filter(project_id=project_id, category='model')
     if algorithm_type == 'prediction':
-        record = record.filter(model__type='intention', model__title__icontains='普通')
+        record = record.filter(model__type__in=['intention', 'generation'], model__title__icontains='普通')
     elif algorithm_type == 'prompt':
-        record = record.filter(model__type='intention', model__title__icontains='0样本')
+        record = record.filter(model__type=['intention', 'generation'], model__title__icontains='0样本')
     elif algorithm_type == 'clean':
         record = record.filter(model__type__in=['correction', 'intelligent', 'rule'])
 
