@@ -87,7 +87,7 @@ def ml_backend_request(
     :return:
     """
     ml_url = ml_backend_url(host, uri=uri, version=version)
-    logger.info(f'ML Request url:, {ml_url} {method} \nparams: {params}\ndata:{data}')
+    logger.info(f'ML Request url:, {ml_url} {method} \nparams: {params}\ndata:{data}\njson:{_json}')
     session = getattr(requests, method)
     # ml_url = 'http://127.0.0.1:5000/api/v1/train'
     # print(_json['extra']['labels'])
