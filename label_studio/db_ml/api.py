@@ -283,7 +283,7 @@ def query_task(request):
     if algorithm_type == 'prediction':
         record = record.filter(model__type__in=['intention', 'generation'], model__title__icontains='普通')
     elif algorithm_type == 'prompt':
-        record = record.filter(model__type=['intention', 'generation'], model__title__icontains='0样本')
+        record = record.filter(model__type__in=['intention', 'generation'], model__title__icontains='0样本')
     elif algorithm_type == 'clean':
         record = record.filter(model__type__in=['correction', 'intelligent', 'rule'])
 

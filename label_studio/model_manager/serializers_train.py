@@ -168,12 +168,12 @@ class ModelTrainAccuracySerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_model_title(obj):
-        return obj.model.title
+        return obj.model.title if obj.model else ''
         pass
 
     @staticmethod
     def get_model_version(obj):
-        return obj.model.version
+        return obj.model.version if obj.model else ''
 
     @staticmethod
     def get_project_title(obj):
