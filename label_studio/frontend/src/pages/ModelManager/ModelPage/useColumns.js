@@ -93,15 +93,6 @@ export const useColumns = () => {
         },
       },
       {
-        title: '项目集合',
-        dataIndex: 'project_set',
-        key: 'project_set',
-        render: (_,record) => {
-          if (!record.project_set) return '/';
-          return record.project_set?.title;
-        },
-      },
-      {
         title: '操作',
         dataIndex: 'action',
         key: 'action',
