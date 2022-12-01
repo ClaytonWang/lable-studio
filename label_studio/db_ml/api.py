@@ -46,6 +46,7 @@ from db_ml.services import create_model_record
 from db_ml.listener_result import cancel_job_delete_redis_key
 from db_ml.listener_result import thread_read_redis_celery_result
 from model_manager.models import ModelTrain, ModelManager
+from model_manager.serializers_train import ModelTrainDetailSerializer
 from projects.services import get_template
 from tasks.tag_services import created_clean_base_data
 
@@ -268,6 +269,7 @@ def query_task(request):
     data = request.GET.dict()
     project_id = data.get('project_id')
     algorithm_type = data.get('type')
+    category = data.get('category', 'model')
 
     # 查询redis的结果信息
     # 10/26 修改获取结果逻辑, 单独通过线程获取
@@ -279,7 +281,7 @@ def query_task(request):
     state = False
 
     # 状态从redis改成数据库记录
-    record = ModelTrain.objects.filter(project_id=project_id, category='model')
+    record = ModelTrain.objects.filter(project_id=project_id, category=category)
     if algorithm_type == 'prediction':
         record = record.filter(model__type__in=['intention', 'generation'], model__title__icontains='普通')
     elif algorithm_type == 'prompt':
@@ -291,6 +293,7 @@ def query_task(request):
     if not record:
         return Response(data=dict(total=total_task, finish=0, state=5, rate=1))
 
+    finish_task = 0
     if algorithm_type == 'prediction':
         finish_task = Prediction.objects.filter(
             task_id__in=task_ids
@@ -317,17 +320,19 @@ def query_task(request):
         ).count()
         if 0 < finish_task < total_task:
             state = True
-    else:
-        return Response(dict(rate=0, state=False))
 
-    rate = round(finish_task / total_task, 2) if total_task > 0 else 0
+    if algorithm_type == 'train':
+        train_data = ModelTrainDetailSerializer(record).data
+        rate = train_data.get('training_progress', 1)
+    else:
+        rate = round(finish_task / total_task, 2) if total_task > 0 else 0
 
     return Response(data=dict(
         total=total_task,
         finish=finish_task,
         # true 是进行中  false是结束或未开始
         # state=state if int(rate) != 1 else False,
-        state=record.state,  # (4, '完成'), (5, '失败'), (6, '运行中'),
+        state=record.state,  # (3, '训练'), (4, '完成'), (5, '失败'), (6, '运行中'),
         rate=rate
     ))
 
