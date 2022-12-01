@@ -59,7 +59,7 @@ export default forwardRef((props, ref) => {
           return {
             ...data,
             type: item,
-            state: data.state === 6,
+            state: data.state === 6 || data.state === 3,
           };
         }));
         const running = find(list, { state: true });
@@ -154,7 +154,9 @@ export default forwardRef((props, ref) => {
                 '100%': '#87d068',
               }} type="circle" percent={progress} />
               <Space style={{ marginTop: 8 }}>
-                <Button onClick={handleCancel}>{t('Cancel')}</Button>
+                {
+                  task.type==="train"?null:<Button onClick={handleCancel}>{t('Cancel')}</Button>
+                }
                 <Button style={{ marginLeft: 24 }} onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</Button>
               </Space>
             </Space>
