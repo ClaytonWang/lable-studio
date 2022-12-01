@@ -83,6 +83,20 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         return super(ModelTrainViews, self).list(request, *args, **kwargs)
 
     @action(methods=['GET'], detail=False)
+    def ltrain(self, request):
+        project_id = request.GET.dict().get('project_id')
+        category = request.GET.dict().get('category', 'train')
+        query = ModelTrain.objects.filter(
+            project_id=project_id, category=category
+        ).order_by('-id').first()
+        if query:
+            serializer = ModelTrainDetailSerializer(query)
+            data = serializer.data
+            return Response(data)
+        else:
+            return Response({})
+
+    @action(methods=['GET'], detail=False)
     def select(self, request, *args, **kwargs):
         project_id = request.GET.dict().get('project_id')
         model_query = self.get_model_of_project(project_id)
