@@ -4,19 +4,16 @@ import "codemirror/mode/javascript/javascript.js";
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import { Col, Form, Input, Row, Select, Tag } from "antd";
-import { CodepenCircleOutlined, PlusOutlined } from "@ant-design/icons";
 import { Modal } from "@/components/Modal/Modal";
 import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";
 import { useProject } from "@/providers/ProjectProvider";
 import { ApiContext } from '@/providers/ApiProvider';
-import { Template } from '@/pages/CreateProject/Config/Template';
-import { ConfigureControl } from '@/pages/CreateProject/Config/Config';
 const { Option } = Select;
 
 const tip_learn = {
-  id: 'tip_learn',
-  title: "提示学习",
+  id: '',
+  title: "请选择模型",
   model_title: '',
   version:'',
 };
@@ -34,26 +31,10 @@ export default ({ onCancel,onSubmit }) => {
   const [trainModalData, setTrainModalData] = useState({});
   const [trainModels, setTrainModels] = useState([]);
   const [ipnutStatus, setIpnutStatus] = useState('');
-  const [template, setCurrentTemplate] = useState(null);
-  const [config, _setConfig] = useState("");
   const [modelLabels, setModelLabels] = React.useState([]);
   const [modelConfig, setModelConfig] = React.useState('');
 
   const { project } = useProject();
-
-  const formatNumber = (value) => {
-    if (!value)
-      value = 0;
-    try {
-      value = parseFloat(value) * 100;
-    } catch (e) {
-      value = 0;
-    }
-    return new Intl.NumberFormat('en', {
-      style: 'unit',
-      unit: 'percent',
-    }).format(value);
-  };
 
   const getTrainModel = useCallback(
     async () => {
@@ -91,33 +72,25 @@ export default ({ onCancel,onSubmit }) => {
     if (option.model.id !== tip_learn.id) {
       getModelLabels(option.model.id);
     }
+    if (option.model.id) {
+      setIpnutStatus("");
+    } else {
+      setIpnutStatus("error");
+    }
+
   };
 
   useEffect(() => {
     getTrainModel().then(data => {
-      const rlst = data ?? [];
+      let rlst = data ?? [];
 
+      rlst = rlst.filter(v => v.title.indexOf("普通") !== -1).sort((a, b) => { return a.id-b.id; });
       rlst.unshift(tip_learn);
-      setTrainModels(data ?? []);
+      setTrainModels(rlst ?? []);
     });
   }, []);
 
-  const setConfig = useCallback(config => {
-    _setConfig(config);
-  }, [_setConfig]);
-
-  const setTemplate = useCallback(config => {
-    const tpl = new Template({ config });
-
-    tpl.onConfigUpdate = setConfig;
-    setConfig(config);
-    setCurrentTemplate(tpl);
-  }, [setConfig, setCurrentTemplate]);
-
   useEffect(() => {
-    // if (project.label_config) {
-    //   setTemplate(project.label_config);
-    // }
     getModelConfig().then(data => {
       setModelConfig(data);
     });
@@ -127,27 +100,15 @@ export default ({ onCancel,onSubmit }) => {
   }, [currModel]);
 
   const submitData = () => {
-    if (currModel.id === "tip_learn" && !currModel.model_title) {
+    if (!currModel.id && !currModel.model_title) {
       setIpnutStatus('error');
       return;
     }
-    trainModalData.model_id = currModel.id === 'tip_learn' ? null : currModel.id;
+    trainModalData.model_id = !currModel.id ? null : currModel.id;
     let model_params = modelConfig;
 
     if (newModelConfig) model_params = newModelConfig;
     onSubmit('train',{ ...trainModalData,model_title:currModel.model_title,model_params });
-  };
-
-  const handleInput = (e) => {
-    const { value: inputValue } = e.target;
-
-    if (inputValue) {
-      setIpnutStatus('');
-    } else {
-      setIpnutStatus('error');
-    }
-    tip_learn.model_title = inputValue;
-    setCurrModel(tip_learn);
   };
 
   const getModelLabels = useCallback(async (model_id) => {
@@ -164,7 +125,7 @@ export default ({ onCancel,onSubmit }) => {
   return (
     <div className="evaluate">
       <Modal.Header>
-        <span><PlusOutlined />新增训练</span>
+        <span>人在环路</span>
       </Modal.Header>
       <Form
         initialValues={trainModalData}
@@ -173,18 +134,11 @@ export default ({ onCancel,onSubmit }) => {
         <Row>
           <Col span={8}>
             <Form.Item label="模型集名称">
-              <Row>
-                <Col span={currModel.id==="tip_learn"?12:24}>
-                  <Select defaultValue="tip_learn" onChange={handleChange}>
-                    {trainModels.map((model) => (
-                      <Option key={model.id} model={ model}>{model.title + model.version}</Option>
-                    ))}
-                  </Select>
-                </Col>
-                <Col span={currModel.id==="tip_learn"?12:0}>
-                  <Input placeholder='请输入新模型名称' title='请输入新模型名称' status={ipnutStatus} onChange={ handleInput}/>
-                </Col>
-              </Row>
+              <Select defaultValue="" status={ipnutStatus} onChange={handleChange}>
+                {trainModels.map((model) => (
+                  <Option key={model.id} model={ model}>{model.title + model.version}</Option>
+                ))}
+              </Select>
             </Form.Item>
           </Col>
           <Col span={8}>
@@ -195,40 +149,6 @@ export default ({ onCancel,onSubmit }) => {
           <Col span={8}>
             <Form.Item label="新模型版本">
               <Input disabled value={trainModalData.new_version}/>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row>
-          <Col span={8}>
-            <Form.Item label="总任务数">
-              <Input disabled value={trainModalData.total_count}/>
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item label="当前正确任务数">
-              <Input disabled value={trainModalData.exactness_count}/>
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item label="当前准确率">
-              <Input disabled value={formatNumber(trainModalData.accuracy_rate)}/>
-            </Form.Item>
-          </Col>
-        </Row>
-        <Row>
-          <Col span={8}>
-            <Form.Item label="项目名称">
-              <Input disabled value={trainModalData.project_title}/>
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item label="新模型训练任务数" tooltip={{ title: t('next_train_task_count', '前80%的任务将参与新模型训练') }}>
-              <Input disabled value={trainModalData.new_model_train_task}/>
-            </Form.Item>
-          </Col>
-          <Col span={8}>
-            <Form.Item label="新模型评估任务数" tooltip={{ title: t('next_evaluate_task_count', '后20%的任务将参与新模型准确率评估') }}>
-              <Input disabled value={trainModalData.new_model_assessment_task}/>
             </Form.Item>
           </Col>
         </Row>

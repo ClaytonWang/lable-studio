@@ -1,6 +1,5 @@
 import { useCallback } from 'react';
-import { Form, InputNumber, Select } from 'antd';
-import { map } from 'lodash';
+import { Form, InputNumber } from 'antd';
 import { Modal } from "@/components/Modal/Modal";
 import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";

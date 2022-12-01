@@ -8,9 +8,6 @@ import { Modal } from "../../components/Modal/Modal";
 import { Button } from '../../components';
 
 const TASK_TYPE = [
-  'prediction',
-  'clean',
-  'prompt',
   'train',
 ];
 
@@ -32,12 +29,10 @@ export default forwardRef((props, ref) => {
       if (!project.id) {
         return {};
       }
-
       return api.callApi("mlPreLabelProgress", {
         params: {
           project_id: project.id,
           type,
-          category: type === 'train' ? 'train' : 'model',
         },
       });
     };
@@ -59,7 +54,7 @@ export default forwardRef((props, ref) => {
           return {
             ...data,
             type: item,
-            state: data.state === 6 || data.state === 3,
+            state: data.state === 6,
           };
         }));
         const running = find(list, { state: true });
@@ -91,6 +86,7 @@ export default forwardRef((props, ref) => {
         if (props.onFinish?.[visible]) {
           props.onFinish?.[visible]();
         } else {
+          // window.location.reload();
           dataReload();
         }
 
@@ -111,6 +107,7 @@ export default forwardRef((props, ref) => {
           if (props.onFinish?.[taskType]) {
             props.onFinish?.[taskType]();
           } else {
+            // window.location.reload();
             dataReload();
           }
         }
@@ -121,14 +118,6 @@ export default forwardRef((props, ref) => {
   const handleBack = useCallback(() => {
     history.push('/projects');
   }, []);
-
-  const handleCancel = useCallback(() => {
-    if (task?.type) {
-      request.cancelJob(task?.type).then(() => {
-        setTask(null);
-      });
-    }
-  }, [task?.type]);
 
   const progress = useMemo(() => {
     if (task?.rate) {
@@ -154,10 +143,7 @@ export default forwardRef((props, ref) => {
                 '100%': '#87d068',
               }} type="circle" percent={progress} />
               <Space style={{ marginTop: 8 }}>
-                {
-                  task.type==="train"?null:<Button onClick={handleCancel}>{t('Cancel')}</Button>
-                }
-                <Button style={{ marginLeft: 24 }} onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</Button>
+                <Button style={{ marginLeft:24 }} onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</Button>
               </Space>
             </Space>
           </div>
