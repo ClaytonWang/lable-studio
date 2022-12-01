@@ -4,7 +4,6 @@ import "codemirror/mode/javascript/javascript.js";
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import { Col, Form, Input, Row, Select, Tag } from "antd";
-import { PlusOutlined } from "@ant-design/icons";
 import { Modal } from "@/components/Modal/Modal";
 import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";
@@ -126,7 +125,7 @@ export default ({ onCancel,onSubmit }) => {
   return (
     <div className="evaluate">
       <Modal.Header>
-        <span><PlusOutlined />人在环路</span>
+        <span>人在环路</span>
       </Modal.Header>
       <Form
         initialValues={trainModalData}

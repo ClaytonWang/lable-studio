@@ -137,7 +137,7 @@ export default forwardRef(({ showStatus }, ref) => {
   const handleExec = () => {
     setLoading(true);
     request.clExecClean().then(() => {
-      showStatus();
+      showStatus('clean');
       setLoading(false);
     });
   };

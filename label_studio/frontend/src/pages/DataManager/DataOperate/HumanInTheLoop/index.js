@@ -2,27 +2,17 @@ import {
   forwardRef,
   useCallback,
   useContext,
-  useEffect,
   useImperativeHandle,
-  useMemo,
-  useRef,
-  useState
+  useRef
 } from "react";
-import { message } from 'antd';
 import { Modal } from "@/components/Modal/Modal";
 import { ApiContext } from '@/providers/ApiProvider';
-import CreateEvaluate from "./CreateEvaluate";
 import CreateTrain from "./CreateTrain";
-import ModelAccuracy from "./ModelAccuracy";
-import List from "./List";
 import "./index.less";
 
-export default forwardRef(({ project }, ref) => {
+export default forwardRef(({ project,showStatus }, ref) => {
   const api = useContext(ApiContext);
   const modalRef = useRef();
-  const [type, setType] = useState("train");
-  const [modelId, setModelId] = useState('');
-  const [evalId, setEvalId] = useState('');
 
   useImperativeHandle(ref, () => ({
     show: () => {
@@ -42,23 +32,9 @@ export default forwardRef(({ project }, ref) => {
         ...params,
       },
     });
-    message.success('添加成功!');
-    // modalRef.current?.hide();
-    setType("list");
-  },[modalRef,setType]);
-
-  const handler = useMemo(() => {
-    return {
-      onCancel: () => setType("list"),
-      onTrain: () => setType("train"),
-      onEvaluate: () => setType("evaluate"),
-      onAccuracy: (eval_id,model_id) => {
-        setModelId(model_id);
-        setEvalId(eval_id);
-        setType("accuracy");
-      },
-    };
-  }, [setType]);
+    showStatus('train');
+    modalRef.current?.hide();
+  },[modalRef]);
 
   return (
     <>
@@ -68,20 +44,13 @@ export default forwardRef(({ project }, ref) => {
         className="human-zone"
         closeOnClickOutside={false}
         style={
-          type === "evaluate" || type==="accuracy"
-            ? {
-              minWidth: 800,
-            }
-            : {
-              width: "calc(100vw - 96px)",
-              minWidth: 1000,
-            }
+          {
+            width: "calc(100vw - 96px)",
+            minWidth: 1000,
+          }
         }
       >
-        {type === "list" && <List onCancel={onCancel} onEvaluate={handler.onEvaluate} onTrain={handler.onTrain} onAccuracy={handler.onAccuracy } />}
-        {type === "evaluate" && <CreateEvaluate onCancel={handler.onCancel} onSubmit={ onSubmit } />}
-        {type === "train" && <CreateTrain onCancel={handler.onCancel} onSubmit={ onSubmit } />}
-        {type === "accuracy" && <ModelAccuracy onCancel={handler.onCancel} modelId={ modelId } />}
+        <CreateTrain onCancel={onCancel} onSubmit={onSubmit} />
       </Modal>
     </>
   );
