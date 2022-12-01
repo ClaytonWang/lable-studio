@@ -20,7 +20,7 @@ import "./index.less";
 export default forwardRef(({ project }, ref) => {
   const api = useContext(ApiContext);
   const modalRef = useRef();
-  const [type, setType] = useState("list");
+  const [type, setType] = useState("train");
   const [modelId, setModelId] = useState('');
   const [evalId, setEvalId] = useState('');
 
