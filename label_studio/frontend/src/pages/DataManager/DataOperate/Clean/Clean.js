@@ -1,7 +1,7 @@
 import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { message } from 'antd';
 import { EditableProTable } from "@ant-design/pro-components";
-import { compact, trim } from "lodash";
+import { compact, some, trim } from "lodash";
 import { Block, Elem } from "@/utils/bem";
 import { Button } from "@/components/Button/Button";
 import { Modal } from "@/components/Modal/Modal";
@@ -62,17 +62,25 @@ const formatResponse = (response) => {
   };
 };
 
+const getModelIds = () => {
+  const ids = window.__CLEAN_MODEL_VALUE;
+
+  return ids.join(',');
+};
+
 export default forwardRef(({ showStatus }, ref) => {
   const api = useAPI();
   const { project } = useProject();
   const tableRef = useRef();
   const modalRef = useRef();
   const [loading, setLoading] = useState(false);
+  const [cleaned, setCleaned] = useState(false);
 
   const request = useMemo(() => {
     return {
       clExecClean: () => {
-        let model_ids = localStorage.getItem('selectedCleanModel');
+        // let model_ids = localStorage.getItem('selectedCleanModel');
+        const model_ids = getModelIds();
 
         return api.callApi("clExecClean", {
           body: {
@@ -94,6 +102,11 @@ export default forwardRef(({ showStatus }, ref) => {
             project_id: project.id,
             ...params,
           },
+        }).then(res => {
+          const hasCleaned = some(res?.results, item => !!item.algorithm || !!item.manual);
+
+          setCleaned(hasCleaned);
+          return res;
         });
       },
       clQueryStatus: () => {
@@ -144,6 +157,7 @@ export default forwardRef(({ showStatus }, ref) => {
   const handleReplace = () => {
     setLoading(true);
     request.clReplace().then(() => {
+      message.info('已替换');
       setLoading(false);
     });
   };
@@ -173,7 +187,7 @@ export default forwardRef(({ showStatus }, ref) => {
             <Space>
               <Elem name="buttons">
                 <Button size="compact" waiting={ loading } onClick={() => modalRef?.current.hide()}>
-                  {t("Cancel", "取消")}
+                  {t("Close")}
                 </Button>
               </Elem>
               <Elem name="buttons">
@@ -181,7 +195,7 @@ export default forwardRef(({ showStatus }, ref) => {
                   <Button size="compact" waiting={ loading } look="primary" onClick={handleExec}>
                   开始清洗
                   </Button>
-                  <Button size="compact" waiting={ loading } look="primary" onClick={handleReplace}>
+                  <Button disabled={!cleaned} size="compact" waiting={ loading } look="primary" onClick={handleReplace}>
                     {t("clean_replace_data", "替换原对话")}
                   </Button>
                 </Space>
