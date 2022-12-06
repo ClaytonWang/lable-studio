@@ -114,7 +114,6 @@ def clean(request):
             )
             TaskDbAlgorithm.objects.filter(project_id=project_id).update(
                 algorithm='',
-                manual='',
                 state=1,
             )
 
