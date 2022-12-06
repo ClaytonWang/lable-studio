@@ -208,6 +208,29 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             # item['created_by'] = UserSimpleSerializer(instance=)
         return Response(data=list(data))
 
+    def check_task_label_in_project(self, project_id, task_query):
+        # 有手动标注取手动标注的值，没有取自动标注的值
+        labels = get_project_labels(project_id)
+        anno_result, pre_result = self.get_project_label_result(task_query)
+        task_label = {}
+        for item in task_query:
+            task_id = item.id
+            label = ''
+            if task_id in anno_result:
+                label = get_choice_values(anno_result.get(task_id))
+
+            if not label and str(task_id) in pre_result:
+                label = get_choice_values(pre_result.get(str(task_id)))
+
+            if isinstance(label, list):
+                label = ''.join(label)
+
+            if not label or label not in labels:
+                return False, task_id
+
+            task_label[task_id] = label
+        return True, task_label
+
     @action(methods=['POST'], detail=False)
     def train(self, request, *args, **kwargs):
         """
@@ -228,9 +251,14 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         data['version'] = version
         data['new_version'] = new_version
 
+        # 判断标签是否一致
+        task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
+        is_success, task_label = self.check_task_label_in_project(data.get('project_id'), task_query)
+        if not is_success:
+            return Response(status=400, data=dict(msg=f'{task_label}未标注不能训练或标签不在项目标签里。'))
+
         with atomic():
             # train_count 前端在init接口拿到数据，训练模型带回来
-            task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
             data['total_count'] = task_query.count()
             new_train = self.created_train(data)
 
@@ -261,33 +289,16 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             new_model = ModelManager.objects.create(**model_data)
             if new_model and new_train:
                 new_train.new_model = new_model
-                # 训练关联任务
                 new_train.save()
 
             # 调用模型服务
-            labels = get_project_labels(data.get('project_id'))
-            anno_result, pre_result = self.get_project_label_result(task_query)
             for item in task_query:
                 task_id = item.id
-                # 有手动标注取手动标注的值，没有取自动标注的值
-                label = ''
-                if task_id in anno_result:
-                    label = get_choice_values(anno_result.get(task_id))
-
-                if not label and str(task_id) in pre_result:
-                    label = get_choice_values(pre_result.get(str(task_id)))
-
-                if isinstance(label, list):
-                    label = ''.join(label)
-
-                if not label or label not in labels:
-                    return Response(status=400, data=dict(msg=f'{task_id}未标注不能训练或标签不在项目标签里。'))
-
                 dialogue = item.data.get('dialogue', [])
                 task_data.append(dict(
                     task_id=task_id,
                     dialogue=dialogue,
-                    label=label,
+                    label=task_label[task_id],
                 ))
 
             obj_id = new_train.id
