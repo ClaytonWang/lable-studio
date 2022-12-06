@@ -1,4 +1,4 @@
-import { each, get, isArray, map } from 'lodash';
+import { each, get, has, isArray, map, set } from 'lodash';
 
 const Formatter = {
   trans: window.t,
@@ -21,6 +21,8 @@ const format = (key, data, ...options) => {
         return formatDMColumns(data, ...options);
       case 'dm_data':
         return formatDMData(data, ...options);
+      case 'dm_views':
+        return formatDMViews(data, ...options);
       case 'ls_export_formats':
         return formatExportFormats(data, ...options);
       case 'dm_actions':
@@ -100,6 +102,13 @@ const formatDMColumns = (data) => {
         item.help = formatWithTemplate(`${item.id}_help`, '');
       }
     });
+  }
+  return data;
+};
+
+const formatDMViews = (data) => {
+  if (has(data, [0, 'data', 'columnsWidth'])) {
+    set(data, [0, 'data', 'columnsWidth', 'tasks:data.dialogue'], 400);
   }
   return data;
 };
