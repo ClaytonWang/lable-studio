@@ -109,6 +109,8 @@ class ModelTrain(models.Model):
     total_count = models.IntegerField(_('total task'), default=0, null=True)
     # 是否训练
     is_train = models.BooleanField(_('train'), default=False)
+
+    # 取消评估和准确率校验，废弃accuracy_rate、new_accuracy_rate、train_task、assessment_task字段
     # 准确率
     accuracy_rate = models.FloatField(_('accuracy rate'), null=True, blank=True, default=0)
     # 新模型准确率

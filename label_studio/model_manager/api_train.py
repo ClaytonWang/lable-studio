@@ -182,12 +182,9 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         )
 
         if operate == 'train':
-            train_task = math.floor(task_count * 0.8)
             version, new_version = self.get_model_version(model_id)
             result['version'] = version
             result['new_version'] = new_version
-            result['new_model_train_task'] = train_task
-            result['new_model_assessment_task'] = task_count - train_task
 
         return Response(data=result)
 
@@ -232,14 +229,13 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         data['new_version'] = new_version
 
         with atomic():
+            # train_count 前端在init接口拿到数据，训练模型带回来
+            task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
+            data['total_count'] = task_query.count()
             new_train = self.created_train(data)
 
             # 拼接模型服务参数
             task_data = []
-            task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
-            train_count = math.floor(task_query.count() * 0.8)
-            train_task = task_query[:train_count]
-            check_task = task_query[train_count:]
 
             # 模型管理建记录
             if model_id:
@@ -266,14 +262,12 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             if new_model and new_train:
                 new_train.new_model = new_model
                 # 训练关联任务
-                new_train.train_task.add(*train_task)
-                new_train.assessment_task.add(*check_task)
                 new_train.save()
 
             # 调用模型服务
             labels = get_project_labels(data.get('project_id'))
-            anno_result, pre_result = self.get_project_label_result(train_task)
-            for item in train_task:
+            anno_result, pre_result = self.get_project_label_result(task_query)
+            for item in task_query:
                 task_id = item.id
                 # 有手动标注取手动标注的值，没有取自动标注的值
                 label = ''
