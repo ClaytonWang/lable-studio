@@ -24,6 +24,7 @@ export default forwardRef((props, ref) => {
   const api = useAPI();
   const { project } = useProject();
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [task, setTask] = useState(null);
   const history = useHistory();
 
@@ -44,7 +45,7 @@ export default forwardRef((props, ref) => {
 
     return {
       cancelJob: async (jobType) => {
-        return api.callApi("cancelJob", {
+        return await api.callApi("cancelJob", {
           params: {
             project_id: project.id,
             type: jobType,
@@ -124,8 +125,10 @@ export default forwardRef((props, ref) => {
 
   const handleCancel = useCallback(() => {
     if (task?.type) {
+      setLoading(true);
       request.cancelJob(task?.type).then(() => {
         setTask(null);
+        setLoading(false);
       });
     }
   }, [task?.type]);
@@ -155,7 +158,7 @@ export default forwardRef((props, ref) => {
               }} type="circle" percent={progress} />
               <Space style={{ marginTop: 8 }}>
                 {
-                  task.type==="train"?null:<Button onClick={handleCancel}>{t('Cancel')}</Button>
+                  task.type === "train" ? null : <Button waiting={loading} onClick={handleCancel}>{t('Cancel')}</Button>
                 }
                 <Button style={{ marginLeft: 24 }} onClick={handleBack} look="primary">{t('back_pm_page', '返回项目管理页')}</Button>
               </Space>
