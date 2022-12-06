@@ -37,12 +37,12 @@ def average_time() -> float:
             query = ModelTrain.objects.filter(state=4, is_train=True).order_by('-created_at')[:10]
             train_average = []
             for item in query:
-                if item.train_task.count() == 0:
+                if item.total_count == 0:
                     continue
 
                 finished = item.train_finished_at if item.train_finished_at else item.updated_at
                 time_dt = finished - item.created_at
-                avg_time = round(time_dt.seconds / item.train_task.count(), 2)
+                avg_time = round(time_dt.seconds / item.total_count, 2)
                 if avg_time < 0:
                     continue
                 train_average.append(avg_time)
@@ -66,8 +66,6 @@ class ModelTrainListSerializer(serializers.ModelSerializer):
     new_model_title_version = SerializerMethodField()
     project_title = SerializerMethodField()
     project_set = SerializerMethodField()
-    new_model_train_task = SerializerMethodField()
-    new_model_assessment_task = SerializerMethodField()
     training_progress = SerializerMethodField()
 
     @staticmethod
@@ -75,7 +73,7 @@ class ModelTrainListSerializer(serializers.ModelSerializer):
         if obj.state == 3:
             avg = average_time()
             dt = datetime.datetime.now(tz=utc) - obj.created_at
-            total_time = avg * obj.train_task.count()
+            total_time = avg * obj.total_count
             if total_time <= 0:
                 return None
             else:
@@ -86,14 +84,6 @@ class ModelTrainListSerializer(serializers.ModelSerializer):
             return 1
         else:
             return None
-
-    @staticmethod
-    def get_new_model_train_task(obj):
-        return obj.train_task.count()
-
-    @staticmethod
-    def get_new_model_assessment_task(obj):
-        return obj.assessment_task.count()
 
     @staticmethod
     def get_project_set(obj):
