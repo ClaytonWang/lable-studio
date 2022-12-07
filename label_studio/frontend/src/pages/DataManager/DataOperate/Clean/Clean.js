@@ -1,4 +1,4 @@
-import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { message } from 'antd';
 import { EditableProTable } from "@ant-design/pro-components";
 import { compact, some, trim } from "lodash";
@@ -154,11 +154,15 @@ export default forwardRef(({ showStatus }, ref) => {
       setLoading(false);
     });
   };
+  const close = useCallback(() => {
+    modalRef?.current.hide();
+  }, []);
   const handleReplace = () => {
     setLoading(true);
     request.clReplace().then(() => {
       message.info('已替换');
       setLoading(false);
+      close();
     });
   };
   const handleRowDataChange = (id, data) => {
@@ -186,7 +190,7 @@ export default forwardRef(({ showStatus }, ref) => {
             </Space>
             <Space>
               <Elem name="buttons">
-                <Button size="compact" waiting={ loading } onClick={() => modalRef?.current.hide()}>
+                <Button size="compact" waiting={ loading } onClick={close}>
                   {t("Close")}
                 </Button>
               </Elem>
