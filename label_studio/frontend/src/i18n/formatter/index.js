@@ -107,7 +107,9 @@ const formatDMColumns = (data) => {
 };
 
 const formatDMViews = (data) => {
-  if (has(data, [0, 'data', 'columnsWidth'])) {
+  if (has(data, ['body', 'data', 'columnsWidth'])) {
+    set(data, ['body', 'data', 'columnsWidth', 'tasks:data.dialogue'], 400);
+  } else if (has(data, [0, 'data', 'columnsWidth'])) {
     set(data, [0, 'data', 'columnsWidth', 'tasks:data.dialogue'], 400);
   }
   return data;

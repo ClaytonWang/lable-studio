@@ -4,6 +4,7 @@ import "codemirror/mode/javascript/javascript.js";
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import { Col, Form, Input, Row, Select, Tag } from "antd";
+import { get } from "lodash";
 import { Modal } from "@/components/Modal/Modal";
 import { Space } from "@/components/Space/Space";
 import { Button } from "@/components/Button/Button";
@@ -43,7 +44,13 @@ export default ({ onCancel,onSubmit }) => {
       }
       return await api.callApi("modelTrainModel", {
         params: {
-          project_id:project.id,
+          project_id: project.id,
+          type: (() => {
+            return get({
+              'intent-classification-for-dialog': 'intention',
+              'conversational-ai-response-generation': 'generation',
+            }, window._projectClass, null);
+          })(),
         },
       });
     }, [project,currModel]);
