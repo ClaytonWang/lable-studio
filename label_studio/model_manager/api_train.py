@@ -354,7 +354,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
     @staticmethod
     def get_model_of_project(project_id, _type=None):
         if isinstance(_type, str) and _type:
-            _type = [type]
+            _type = [_type]
         else:
             _type = ('intention', 'generation')
 
