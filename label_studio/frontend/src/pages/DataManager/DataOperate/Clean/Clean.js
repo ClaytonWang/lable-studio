@@ -12,6 +12,11 @@ import { useProject } from "@/providers/ProjectProvider";
 
 const PADDING = 32;
 
+const dataReload = () => {
+  window.dataManager.store.fetchProject({ force: true, interaction: 'refresh' });
+  window.dataManager.store.currentView?.reload();
+};
+
 const jsonToString = (value) => {
   try {
     if (value && typeof value === "object") {
@@ -163,6 +168,7 @@ export default forwardRef(({ showStatus }, ref) => {
       message.info('已替换');
       setLoading(false);
       close();
+      dataReload();
     });
   };
   const handleRowDataChange = (id, data) => {
