@@ -64,7 +64,7 @@ class DbTaskTagCleanViews(ModelViewSet):
 
         self.queryset = TaskDbAlgorithm.objects.filter(
             project_id=request.GET.dict().get('project_id', '')
-        ).order_by('id').all()
+        ).order_by('task__id').all()
         return super(DbTaskTagCleanViews, self).list(request, *args, **kwargs)
 
     def retrieve(self, request, *args, **kwargs):
