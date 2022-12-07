@@ -126,7 +126,8 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         :return:
         """
         project_id = request.GET.dict().get('project_id')
-        data = self.get_model_of_project(project_id)
+        _type = request.GET.dict().get('type')
+        data = self.get_model_of_project(project_id, _type)
         return Response(data=list(data))
 
     @action(methods=['GET'], detail=False)
@@ -320,6 +321,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
     @action(methods=['POST'], detail=False)
     def assessment(self, request, *args, **kwargs):
         """
+        废弃 评估功能废弃（2022-12-17）
         新增评估接口
         :param request:
         :param args:
@@ -350,9 +352,14 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         return anno_result, pre_result
 
     @staticmethod
-    def get_model_of_project(project_id):
+    def get_model_of_project(project_id, _type=None):
+        if isinstance(_type, str) and _type:
+            _type = [type]
+        else:
+            _type = ('intention', 'generation')
+
         queryset = ModelManager.objects.filter(
-            Q(type__in=('intention', 'generation'), project_id__isnull=True) |
+            Q(type__in=_type, project_id__isnull=True) |
             Q(project_id__id=project_id)
         ).values('id', 'title', 'version')
         return queryset
