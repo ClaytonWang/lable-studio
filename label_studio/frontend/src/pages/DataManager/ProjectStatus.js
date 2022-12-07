@@ -126,9 +126,12 @@ export default forwardRef((props, ref) => {
   const handleCancel = useCallback(() => {
     if (task?.type) {
       setLoading(true);
-      request.cancelJob(task?.type).then(() => {
+      request.cancelJob(task.type).then(() => {
         setTask(null);
         setLoading(false);
+        if (props.onCancel?.[task.type]) {
+          props.onCancel?.[task.type]();
+        }
       });
     }
   }, [task?.type]);

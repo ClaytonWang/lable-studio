@@ -236,6 +236,9 @@ export const DataManagerPage = ({ ...props }) => {
         onFinish={{
           clean: () => refs.clean.current?.reload(),
         }}
+        onCancel={{
+          clean: () => refs.clean.current?.reload(),
+        }}
       />
       <HumanInTheLoop ref={refs.human} showStatus={showStatus} project={project} />
       <Block ref={root} name="datamanager"/>
