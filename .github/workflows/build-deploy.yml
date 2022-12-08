@@ -173,7 +173,7 @@ jobs:
 
   deploy_prod:
     name: "Deploy PROD"
-    needs: deploy_qa
+    needs: [docker_build_and_push,deploy_qa]
     runs-on: ubuntu-latest
     environment: 
       name: production
