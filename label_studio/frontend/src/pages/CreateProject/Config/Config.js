@@ -2,8 +2,7 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/mode/xml/xml';
 import React from 'react';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
-import { Button, ToggleItems } from '../../../components';
-import { Form } from '../../../components/Form';
+import { ToggleItems } from '../../../components';
 import { Oneof } from '../../../components/Oneof/Oneof';
 import { cn } from '../../../utils/bem';
 import { Palette } from '../../../utils/colors';
@@ -13,6 +12,8 @@ import { Preview } from './Preview';
 import { DEFAULT_COLUMN, EMPTY_CONFIG, isEmptyConfig, Template } from './Template';
 import { TemplatesList } from './TemplatesList';
 import { useAPI } from '../../../providers/ApiProvider';
+import { Tag } from 'antd';
+import { Space } from "@/components/Space/Space";
 
 // don't do this, kids
 const formatXML = (xml) => {
@@ -249,7 +250,7 @@ const ConfigureColumns = ({ columns, template }) => {
   );
 };
 
-const Configurator = ({ columns, config, project, template, setTemplate, onBrowse, onSaveClick, onValidate, pageReadonly }) => {
+const Configurator = ({ columns, config, project, template, setTemplate, onBrowse, onSaveClick, onValidate, pageReadonly, modelId }) => {
   const [configure, setConfigure] = React.useState(isEmptyConfig(config) ? "code" : "visual");
   const [visualLoaded, loadVisual] = React.useState(configure === "visual");
   const [waiting, setWaiting] = React.useState(false);
@@ -257,13 +258,31 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
   const [configToCheck, setConfigToCheck] = React.useState();
   const [data, setData] = React.useState();
   const debounceTimer = React.useRef();
+  const [modelLabels, setModelLabels] = React.useState([]);
   const api = useAPI();
+
+  const getModelLabels = React.useCallback(async (model_id) => {
+    if (model_id) {
+      const data = await api.callApi("modelLabel", {
+        params: {
+          model_id,
+        },
+      });
+
+      setModelLabels(data);
+    }
+
+  }, []);
 
   React.useEffect(() => {
     // config may change during init, so wait for that, but for a very short time only
     debounceTimer.current = window.setTimeout(() => setConfigToCheck(config), configToCheck ? 500 : 30);
     return () => window.clearTimeout(debounceTimer.current);
   }, [config]);
+
+  React.useEffect(() => {
+    getModelLabels(modelId);
+  },[modelId]);
 
   React.useEffect(async () => {
     if (!configToCheck) return;
@@ -329,57 +348,76 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
 
   return (
     <div className={configClass}>
-      <div className={configClass.elem("container")}>
-        <header>
-          {
-            configure === 'code' ? (
-              <span style={{
-                width: '2em',
-                height: '1em',
-                display: 'inline-block',
-                cursor: 'pointer',
-              }} onClick={onBrowse}></span>
-            ) : null
-          }
-          {/* <button onClick={onBrowse}>{t("Browse Templates")}</button> */}
-          <ToggleItems items={{ code: t("Code"), visual: t("Visual") }} active={configure} onSelect={onSelect} />
-        </header>
-        <div className={configClass.elem('editor')}>
-          {configure === "code" && (
-            <div className={configClass.elem("code")} style={{ display: configure === "code" ? undefined : "none" }}>
-              <CodeMirror
-                name="code"
-                id="edit_code"
-                value={formatXML(config)}
-                detach
-                options={{ mode: "xml", theme: "default", lineNumbers: true }}
-                onChange={(editor, data, value) => setTemplate(value)}
-              />
+      {
+        !modelId?(
+          <div className={configClass.elem("container")}>
+            <header>
+              {
+                configure === 'code' ? (
+                  <span style={{
+                    width: '2em',
+                    height: '1em',
+                    display: 'inline-block',
+                    cursor: 'pointer',
+                  }} onClick={onBrowse}></span>
+                ) : null
+              }
+              {/* <button onClick={onBrowse}>{t("Browse Templates")}</button> */}
+              <ToggleItems items={{ code: t("Code"), visual: t("Visual") }} active={configure} onSelect={onSelect} />
+            </header>
+            <div className={configClass.elem('editor')}>
+              {configure === "code" && (
+                <div className={configClass.elem("code")} style={{ display: configure === "code" ? undefined : "none" }}>
+                  <CodeMirror
+                    name="code"
+                    id="edit_code"
+                    value={formatXML(config)}
+                    detach
+                    options={{ mode: "xml", theme: "default", lineNumbers: true }}
+                    onChange={(editor, data, value) => setTemplate(value)}
+                  />
+                </div>
+              )}
+              {visualLoaded && (
+                <div className={configClass.elem("visual")} style={{ display: configure === "visual" ? undefined : "none" }}>
+                  {isEmptyConfig(config) && <EmptyConfigPlaceholder />}
+                  <ConfigureColumns columns={columns} project={project} template={template} />
+                  {template.controls.map(control => <ConfigureControl control={control} template={template} key={control.getAttribute("name")} pageReadonly={ pageReadonly} />)}
+                  <ConfigureSettings template={template} />
+                </div>
+              )}
             </div>
-          )}
-          {visualLoaded && (
-            <div className={configClass.elem("visual")} style={{ display: configure === "visual" ? undefined : "none" }}>
-              {isEmptyConfig(config) && <EmptyConfigPlaceholder />}
-              <ConfigureColumns columns={columns} project={project} template={template} />
-              {template.controls.map(control => <ConfigureControl control={control} template={template} key={control.getAttribute("name")} pageReadonly={ pageReadonly} />)}
-              <ConfigureSettings template={template} />
-            </div>
-          )}
-        </div>
-        {/* {!pageReadonly && onSaveClick && (
+            {/* {!pageReadonly && onSaveClick && (
           <Form.Actions size="small" extra={configure === "code" && extra} valid>
             <Button look="primary" size="compact" style={{ width: 120 }} onClick={onSave} waiting={waiting}>
               {t("Save")}
             </Button>
           </Form.Actions>
         )} */}
-      </div>
+          </div>
+        ) : (
+          <div className={configClass.elem("container")}>
+            <h3>项目标签</h3>
+            <div>
+              <Space size="small">
+                {
+                  modelLabels && modelLabels.map(tag => {
+                    return (
+                      <Tag key={tag}>{tag}</Tag>
+                    );
+                  })
+                }
+              </Space>
+            </div>
+          </div>
+        )
+      }
       <Preview config={config} data={data} error={error} />
     </div>
   );
 };
 
-export const ConfigPage = ({ config: initialConfig = "", columns: externalColumns, project, onUpdate, onSaveClick, onValidate, pageReadonly, show = true }) => {
+export const ConfigPage = ({ config: initialConfig = "", columns: externalColumns, project, onUpdate, onSaveClick, onValidate, pageReadonly, modelId, show = true }) => {
   const [config, _setConfig] = React.useState("");
   const [mode, setMode] = React.useState("list"); // view | list
   const [selectedGroup, setSelectedGroup] = React.useState(null);
@@ -471,6 +509,7 @@ export const ConfigPage = ({ config: initialConfig = "", columns: externalColumn
           onValidate={onValidate}
           pageReadonly={pageReadonly}
           onSaveClick={onSaveClick}
+          modelId={modelId}
         />
       </Oneof>
     </div>

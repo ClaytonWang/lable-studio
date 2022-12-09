@@ -25,7 +25,7 @@ import { Radio } from 'antd';
 // </Choices>
 // </View>`;
 
-const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setName, onSaveName, onSubmit, error, description, setDescription, modelId,setModelId, existModels, getModels, show = true }) => {
+const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setName, onSaveName, onSubmit, error, description, setDescription, modelId, setModelId, existModels, getModels, show = true }) => {
   const [modelTrain, setTodelTrain] = useState('TRAIN_NEW');
 
   return !show ? null : (
@@ -68,7 +68,7 @@ const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setNa
       <div className="field field--wide">
         <label htmlFor="model_id">模型训练</label>
         <Radio.Group
-          value={ modelTrain }
+          value={modelTrain}
           onChange={(e) => {
             setTodelTrain(e.target.value);
             if (e.target.value !== "TRAIN_NEW") {
@@ -76,20 +76,20 @@ const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setNa
             }
           }}
         >
-          <Space direction="vertical" style={{ justifyContent:"flex-start" }}>
+          <Space direction="vertical" style={{ justifyContent: "flex-start" }}>
             <Radio value='TRAIN_NEW'>训练新模型</Radio>
             <Radio value='TRAIN_EXIST'>训练已有模型</Radio>
           </Space>
         </Radio.Group>
 
       </div>
-      { existModels &&modelTrain==="TRAIN_EXIST" && (
+      {existModels && modelTrain === "TRAIN_EXIST" && (
         <div className="field field--wide">
           <label htmlFor="model_id">选择模型</label>
           <Select
             name="model_id"
             id="model_id"
-            value={ modelId}
+            value={modelId}
             onChange={e => setModelId(e.target.value)}
             options={existModels.map(item => ({
               label: item.title + " " + item.version,
@@ -140,13 +140,15 @@ export const CreateProject = ({ onClose }) => {
     project && !name && setName(project.title);
   }, [project]);
 
-  const projectBody = React.useMemo(() => ({
-    title: name,
-    description,
-    label_config: config,
-    template_type: templateType,
-    model_id: modelId,
-  }), [name, description, config, templateType, modelId]);
+  const projectBody = React.useMemo(() => {
+    return {
+      title: name,
+      description,
+      label_config: config,
+      template_type: templateType,
+      model_id: modelId,
+    };
+  }, [name, description, config, templateType, modelId]);
 
 
   const getModels = useCallback(async (tpl_type) => {
@@ -160,7 +162,7 @@ export const CreateProject = ({ onClose }) => {
       const models = response.results?.filter((i) => { return i.version !== "1.0"; });
 
       setExistModels(models);
-      if(models.length>0)
+      if (models.length > 0)
         setModelId(models[0].id);
     }
 
@@ -239,13 +241,13 @@ export const CreateProject = ({ onClose }) => {
           templateTypes={template.TEMPLATE_TYPES}
           templateType={templateType}
           setTemplateType={setTemplateType}
-          modelId={ modelId}
+          modelId={modelId}
           setModelId={setModelId}
           existModels={existModels}
-          getModels={ getModels}
+          getModels={getModels}
         />
         <ImportPage project={project} show={step === "import"} {...pageProps} />
-        <ConfigPage key={templateType} project={project} onUpdate={setConfig} show={step === "config"} columns={columns} pageReadonly={false} config={templateConfig} />
+        <ConfigPage key={templateType} project={project} onUpdate={setConfig} show={step === "config"} columns={columns} pageReadonly={false} config={templateConfig} modelId={modelId} />
       </div>
     </Modal>
   );
