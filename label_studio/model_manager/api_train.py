@@ -254,9 +254,10 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         # 判断标签是否一致
         task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
-        is_success, task_label = self.check_task_label_in_project(data.get('project_id'), task_query)
-        if not is_success:
-            return Response(status=400, data=dict(msg=f'{task_label}未标注不能训练或标签不在项目标签里。'))
+        if not (len(task_query) and task_query[0].project.template_type == 'conversational-generation'):
+            is_success, task_label = self.check_task_label_in_project(data.get('project_id'), task_query)
+            if not is_success:
+                return Response(status=400, data=dict(msg=f'{task_label}未标注不能训练或标签不在项目标签里。'))
 
         with atomic():
             # train_count 前端在init接口拿到数据，训练模型带回来
