@@ -151,8 +151,8 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         operate = params.get('operate', 'assessment')
 
         project = Project.objects.filter(id=project_id).first()
-        if project.template_type != 'intent-classification':
-            raise Exception('项目模版类型错误，支持模版是对话意图识别。')
+        if project.template_type not in ('intent-classification', 'conversational-generation'):
+            raise Exception('项目模版类型错误，支持模版是对话意图识别&对话生成。')
 
         tasks = Task.objects.filter(project_id=project_id)
         anno_result, pre_result = self.get_project_label_result(tasks)
