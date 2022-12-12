@@ -46,6 +46,8 @@ from core.utils.exceptions import LabelStudioValidationErrorSentryIgnored
 from rest_framework.decorators import api_view
 from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
+from db_ml.services import get_project_labels
+from projects.services import conversational_generation_add_template
 logger = logging.getLogger(__name__)
 
 
@@ -266,6 +268,11 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
             if not clean_query:
                 tasks = Task.objects.filter(project_id=project.id).all()
                 created_clean_base_data(tasks, project.id, request.user.id)
+
+        if instance.template_type == 'conversational-generation':
+            labels = get_project_labels(instance.id)
+            conversational_generation_add_template(project_id=instance.id, label=labels[0] if len(labels) else '')
+
         return Response(serializer.data)
 
     def perform_destroy(self, instance):
