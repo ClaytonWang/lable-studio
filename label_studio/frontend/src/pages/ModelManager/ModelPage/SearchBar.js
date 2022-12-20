@@ -9,7 +9,6 @@ import { useFilter } from "./useFilter";
 const getFilters = (filters) => {
   const model_types = ["none"].concat(Object.keys(filters?.type ?? []).sort());
   const model_versions = ["none"].concat((filters.version ?? []).sort());
-  const model_set = ["none"].concat((filters?.model_set ?? []).sort());
 
   return [
     {
@@ -40,29 +39,6 @@ const getFilters = (filters) => {
       label: "版本号",
       value: "none",
       data: model_versions,
-      render: (col) => {
-        return (
-          <Select
-            value={col.value}
-            options={col.data.map((v) => {
-              if (v === "none") {
-                return { label: "不限", value: v };
-              } else {
-                return { label: t(v), value: v };
-              }
-            })}
-            onChange={(e) => {
-              col.value = e.target.value;
-            }}
-          />
-        );
-      },
-    },
-    {
-      key: "model_set",
-      label: "模型集",
-      value: "none",
-      data: model_set,
       render: (col) => {
         return (
           <Select

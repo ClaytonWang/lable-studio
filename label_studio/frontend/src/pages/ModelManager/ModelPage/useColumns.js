@@ -16,6 +16,7 @@ const ModelType = {
 export const useColumns = () => {
   const [modalExp, setModalExp] = useState(null);
   const [modalEdt, setModaEdt] = useState(null);
+  const [modalDel, setModaDel] = useState(null);
   const [modalAccuracy, setModalAccuracy] = useState(null);
 
   const columns = useMemo(() => {
@@ -84,12 +85,21 @@ export const useColumns = () => {
         },
       },
       {
-        title: '模型集',
-        dataIndex: 'title',
-        key: 'title',
+        title: '项目',
+        dataIndex: 'project',
+        key: 'project',
         render: (_,record) => {
-          if (!record.title) return '/';
-          return record.title;
+          if (!record.project) return '/';
+          return record.project;
+        },
+      },
+      {
+        title: '状态',
+        dataIndex: 'state',
+        key: 'state',
+        render: (_,record) => {
+          if (!record.state) return '/';
+          return record.state;
         },
       },
       {
@@ -98,8 +108,9 @@ export const useColumns = () => {
         key: 'action',
         render: (_, record) => (
           <Space size="middle">
-            <a onClick={() => { setModaEdt(record);}}>编辑</a>
-            <a onClick={() => { setModalExp(record);}}>导出</a>
+            <a onClick={() => { setModalExp(record); }}>导出</a>
+            <a style={{ color:'red' }} onClick={() => { setModaDel(record); }}>删除</a>
+            <a onClick={() => { setModaEdt(record);}}>编辑参数</a>
           </Space>
         ),
       },
@@ -112,6 +123,8 @@ export const useColumns = () => {
     setModalExp,
     modalEdt,
     setModaEdt,
+    modalDel,
+    setModaDel,
     modalAccuracy,
     setModalAccuracy,
   };

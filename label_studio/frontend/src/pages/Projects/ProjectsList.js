@@ -49,12 +49,6 @@ export const ProjectsList = ({
         ]);
       });
   }, []);
-  const updateCollection = useCallback(
-    (v) => {
-      setCurrent(v);
-    },
-    [setCurrent],
-  );
 
   useEffect(() => {
     if (current) {
@@ -81,7 +75,6 @@ export const ProjectsList = ({
           <ProjectCard
             key={project.id}
             project={project}
-            updateCollection={updateCollection}
           />
         ))}
       </Elem>
@@ -165,7 +158,7 @@ export const EmptyProjectsList = ({ openModal }) => {
   );
 };
 
-const ProjectCard = ({ project, updateCollection }) => {
+const ProjectCard = ({ project }) => {
 
   const color = useMemo(() => {
     return project.color === "#FFFFFF" ? null : project.color;
@@ -204,16 +197,6 @@ const ProjectCard = ({ project, updateCollection }) => {
               { t("Labels")}
             </Elem>),
           key: '2',
-        },
-        {
-          label: (
-            <Elem
-              name="link"
-              data-external
-              onClick={() => { updateCollection(project); }}>
-              { t("label_collection", "集合") }
-            </Elem>),
-          key: '3',
         },
       ]}
     />
