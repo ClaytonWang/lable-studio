@@ -63,8 +63,6 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
             filter_params['version'] = version
         if model:
             filter_params['title'] = model
-        if project:
-            filter_params['project_set__title'] = project
         if template_type:
             filter_params['type'] = template_type
         if filter_params:
