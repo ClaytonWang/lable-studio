@@ -17,9 +17,11 @@ logger = logging.getLogger(__name__)
 
 
 MODEL_TYPE = (
-    ('intention', '对话意图分类'),
-    ('generation', '对话生成'),
-    ('correction', '轮次纠正'),
+    ('intention', '预标注-0样本'),  # 意图分类
+    ('annotation', '预标注-普通'),
+    ('dialogue', '对话生成-普通'),
+    ('dialogue_prompt', '对话生成-0样本'),
+    ('bart_for_turn', '轮次纠正'),
     ('intelligent', '智能清洗'),
     ('rule', '规则清洗'),
 )
@@ -57,9 +59,9 @@ class ModelManager(DummyModelMixin, models.Model):
 
     # title 模型集名称，模型名称是模型集名称 + 版本
     title = models.CharField(_('title'), max_length=20, help_text='Model set name. ')
-    url = models.TextField(_('url'), help_text='URL for the machine learning model server')
-    description = models.TextField(_('description'), blank=True, null=True, default='', help_text='model configer description')
-    token = models.CharField(_('token'), max_length=65, default=create_hash, null=True, blank=True)
+    url = models.TextField(_('url'), help_text='URL for the machine learning model server', null=True, blank=True)
+    labels = models.TextField(_('labels'), blank=True, null=True, default='', help_text='')
+    hash_id = models.CharField(_('hash_id'), max_length=60, null=True, blank=True)
 
     organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE, related_name='model_configer', null=True)
     version = models.TextField(_('model version'), blank=True, null=True, default='1.0', help_text='Machine learning model version')
@@ -72,8 +74,6 @@ class ModelManager(DummyModelMixin, models.Model):
     model = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, help_text='训练用的基础模型', related_name='model_config')
     # 项目预留外建，追溯模型训练的项目信息
     project = models.ForeignKey('projects.Project', on_delete=models.SET_NULL, null=True, blank=True, help_text='训练用的项目', related_name='model_config_project')
-    # 项目集
-    project_set = models.ForeignKey('projects.ProjectSet', on_delete=models.SET_NULL, null=True, blank=True, help_text='项目集合', related_name='model_config_project_set')
 
     # 模型参数 模型调用参数和标签都放在这里
     # 这仨个放这作用不是很大，先不删了。
