@@ -59,7 +59,10 @@ const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setNa
               getModels(e.target.value);
             }
           }}
-          options={templateTypes.map(item => ({
+          options={templateTypes.filter(item => {
+            return item.apiKey === 'intent-classification'
+              || item.apiKey === 'conversational-generation';
+          }).map(item => ({
             label: item.label,
             value: item.apiKey,
           }))}

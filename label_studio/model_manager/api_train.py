@@ -151,8 +151,8 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         operate = params.get('operate', 'assessment')
 
         project = Project.objects.filter(id=project_id).first()
-        if project.template_type != 'intent-classification':
-            raise Exception('项目模版类型错误，支持模版是对话意图识别。')
+        if project.template_type not in ('intent-classification', 'conversational-generation'):
+            raise Exception('项目模版类型错误，支持模版是对话意图识别&对话生成。')
 
         tasks = Task.objects.filter(project_id=project_id)
         anno_result, pre_result = self.get_project_label_result(tasks)
@@ -255,7 +255,11 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         # 判断标签是否一致
         task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
         is_success, task_label = self.check_task_label_in_project(data.get('project_id'), task_query)
-        if not is_success:
+
+        template_type = None
+        if len(task_query):
+            template_type = task_query[0].project.template_type
+        if not (template_type and template_type == 'conversational-generation') and not is_success:
             return Response(status=400, data=dict(msg=f'{task_label}未标注不能训练或标签不在项目标签里。'))
 
         with atomic():
@@ -299,7 +303,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
                 task_data.append(dict(
                     task_id=task_id,
                     dialogue=dialogue,
-                    label=task_label[task_id],
+                    label=task_label[task_id] if template_type == 'intent-classification' else '',
                 ))
 
             obj_id = new_train.id

@@ -112,9 +112,6 @@ const PromptTemplate = ({ project, tag }) => {
       width: tag ? "60%" : "80%",
       title: <Space>
         <span>{t('prompt_template', "提示学习模版")}</span>
-        <Tooltip title={t('tip_prompt_template', "[dlg]代表整个对话，[dlg1]代表对话第一行，[dlg2]代表对话第二行，[dlgx]代表对话第x行，[mask]代表被遮罩的内容。")} overlayInnerStyle={{ borderRadius: 5 }}>
-          <QuestionCircleOutlined />
-        </Tooltip>
       </Space>,
       renderFormItem: (_, { isEditable }) => {
         return isEditable ? (

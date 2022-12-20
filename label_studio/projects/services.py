@@ -35,3 +35,16 @@ def get_template(project_id):
         return [item['template'] for item in template_list]
 
 
+def conversational_generation_add_template(project_id, label):
+    """
+    [dlg]请生成[lb]相关回复
+    [dlg]你可以咨询[lb]相关问题
+    """
+
+    objects = []
+    template = ['[dlg]请生成[lb]相关回复', '[dlg]你可以咨询[lb]相关问题']
+    for tmp in template:
+        obj = PromptTemplates(project_id=project_id, template=tmp, label=label)
+        objects.append(obj)
+
+    PromptTemplates.objects.bulk_create(objects)
