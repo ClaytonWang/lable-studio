@@ -309,7 +309,7 @@ def predict_prompt(
         data=task_data,
         labels=get_project_labels(project_id),
         templates=template,
-        extra=dict(return_nums=return_num, version_id=model.hasd_id)
+        extra=dict(return_nums=return_num, version_id=model.hasd_id, uuid=uuid)
     )
 
     logger.info(f'ML project id:{project_id}, model id {model_id}, count: {len(task_data)}')

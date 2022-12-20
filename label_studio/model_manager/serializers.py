@@ -24,7 +24,6 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ModelManager
-        exclude = ['token']
         ordering = ['-created_at']
         # fields = '__all__'
 
