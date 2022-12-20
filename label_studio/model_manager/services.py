@@ -10,6 +10,7 @@
 import os
 import logging
 import requests
+from typing import Optional, List
 from django.conf import settings
 logger = logging.getLogger('db')
 
@@ -27,27 +28,8 @@ def ml_backend_params(
     )
 
 
-def ml_backend_url(host, version, uri: list = [], **kwargs) -> \
-        str:
-    """
-    拼接ml backend请求链接
-    'import': '/api/ml_backend/import',            # 导入
-    'export': '/api/ml_backend/export/',           # 导出
-    'preprocess': '/api/ml_backend/preprocess',    # 清洗
-    'predict': '/api/ml_backend/predict',          # 预标注普通/0样本
-    'training': '/api/ml_backend/training',        # 训练
-    'cancel': '/api/ml_backend/cancel',            # 训练
-    :param version:
-    :param uri:
-    :param host:
-    :param kwargs:
-    :return:
-    """
-    return os.path.join(host, 'api', version, *uri)
-
-
 def ml_backend_request(
-        host: str, uri: list, version='v1', method: str = 'get',
+        uri: list, version='v3', method: str = 'get',
         params={}, data={}, _json={}
 ):
     """
@@ -86,7 +68,7 @@ def ml_backend_request(
     :param _json:
     :return:
     """
-    ml_url = ml_backend_url(host, uri=uri, version=version)
+    ml_url = os.path.join(settings.MODEL_SERVING_HOST, version, *uri)
     logger.info(f'ML Request url:, {ml_url} {method} \nparams: {params}\ndata:{data}\njson:{_json}')
     session = getattr(requests, method)
     # ml_url = 'http://127.0.0.1:5000/api/v1/train'

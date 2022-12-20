@@ -16,7 +16,7 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
 
     title_version = SerializerMethodField()
     created_by = UserSimpleSerializer(default={}, help_text='created owner')
-    project_set = ProjectSetDetailSerializer(default={})
+    # project_set = ProjectSetDetailSerializer(default={})
 
     @staticmethod
     def get_title_version(obj):
