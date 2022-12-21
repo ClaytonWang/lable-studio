@@ -87,7 +87,3 @@ export const ModelManagerPage = () => {
 ModelManagerPage.title= t("Models Management");
 ModelManagerPage.path="/model-manager";
 ModelManagerPage.exact = true;
-
-ModelManagerPage.context = ({ openModal }) => {
-  return <Button onClick={openModal} look="primary" size="compact" icon={<CloudUploadOutlined style={{ width:20,height:20,marginLeft:-10 }} />}>{t("Import Model")}</Button>;
-};

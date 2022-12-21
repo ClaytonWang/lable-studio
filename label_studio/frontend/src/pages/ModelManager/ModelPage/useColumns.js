@@ -37,7 +37,6 @@ export const useColumns = () => {
   const [modalExp, setModalExp] = useState(null);
   const [modalEdt, setModaEdt] = useState(null);
   const [modalDel, setModaDel] = useState(null);
-  const [modalAccuracy, setModalAccuracy] = useState(null);
 
   const columns = useMemo(() => {
     return [
@@ -53,7 +52,7 @@ export const useColumns = () => {
               </Elem>
             );
           else
-            return (<a onClick={() => { setModalAccuracy(record); }}>{record.title}</a>);
+            return record.title;
         },
       },
       {
@@ -151,7 +150,5 @@ export const useColumns = () => {
     setModaEdt,
     modalDel,
     setModaDel,
-    modalAccuracy,
-    setModalAccuracy,
   };
 };
