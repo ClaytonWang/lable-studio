@@ -21,7 +21,7 @@ from model_manager.serializers import ModelManagerDetailSerializer
 from model_manager.serializers import ModelManagerCreateSerializer
 from model_manager.serializers import ModelManagerUpdateSerializer
 from model_manager.models import ModelManager
-from model_manager.models import MODEL_TYPE, TEMPLATE_MODEL_TYPE_MAPPING
+from model_manager.models import MODEL_TYPE, TEMPLATE_MODEL_TYPE_MAPPING, ALGORITHM_TYPE
 from model_manager.services import ml_backend_request
 from db_ml.common import DbPageNumberPagination
 from db_ml.common import MultiSerializerViewSetMixin
@@ -125,14 +125,11 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
     @action(methods=['GET'], detail=False)
     def select(self, request, *args, **kwargs):
         query = ModelManager.objects.values('version').distinct()
-        model_set_query = ModelManager.objects.values('title').distinct()
-        project_set_query = ProjectSet.objects.values('title').distinct()
 
         result = dict(
-            type=dict(MODEL_TYPE),
+            model_type=dict(MODEL_TYPE),
+            type=dict(ALGORITHM_TYPE),
             version=[item['version'] for item in query],
-            model_set=[item['title'] for item in model_set_query],
-            project_set=[item['title'] for item in project_set_query],
         )
 
         return Response(status=status.HTTP_201_CREATED, data=result)
