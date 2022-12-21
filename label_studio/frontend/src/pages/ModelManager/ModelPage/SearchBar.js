@@ -7,12 +7,12 @@ import "./SearchBar.less";
 import { useFilter } from "./useFilter";
 
 const getFilters = (filters) => {
-  const model_types = ["none"].concat(Object.keys(filters?.type ?? []).sort());
+  const model_types = ["none"].concat(Object.keys(filters?.model_type ?? []).sort());
   const model_versions = ["none"].concat((filters.version ?? []).sort());
 
   return [
     {
-      key: "type",
+      key: "model_type",
       label: "模型类型",
       value: "none",
       data: model_types,
@@ -73,9 +73,8 @@ export const SearchBar = React.memo((props) => {
         obj[v.key] = v.value === "none" ? "" : v.value;
       });
       await props.onSearch(props.pageSize, {
-        type: obj["type"],
+        model_type: obj["model_type"],
         version: obj["version"],
-        mdoel_set: obj["model_set"],
       });
     }
   };

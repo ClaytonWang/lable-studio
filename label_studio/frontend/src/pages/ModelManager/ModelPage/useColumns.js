@@ -99,7 +99,7 @@ export const useColumns = () => {
         dataIndex: 'project',
         key: 'project',
         render: (_, record) => {
-          if (!record.project) return '/';
+          if (!record.project) return '';
           return record.project;
         },
       },
