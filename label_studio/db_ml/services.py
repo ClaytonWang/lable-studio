@@ -330,26 +330,15 @@ def get_first_version_model(
 
 def preprocess_clean(project_id, model_ids, task_data, _uuid):
     if model_ids:
-        model_query = ModelManager.objects.filter(id__in=model_ids).values(
-            'id', 'url', 'title')
-    else:
-        tokens = ['130a104f9fd7d257', '71da5487bb41d24c', '5c69636f596635f3']
         model_query = ModelManager.objects.filter(
-            token__in=tokens
-        ).values('id', 'url', 'title', 'token')
-        model_ids = []
-        for token in tokens:
-            for model in model_query:
-                if token != model['token']:
-                    continue
-                model_ids.append(model['id'])
-                break
+            id__in=model_ids
+        ).values('id', 'url', 'title', 'hash_id')
 
     if len(model_ids) != len(model_query):
         return False, f'{str(model_ids)}模型没有查询到模型'
 
-    model_data = {item['id']: item['url'] for item in model_query}
-    urls = [model_data[_id] for _id in model_ids]
+    model_data = {item['id']: item['hash_id'] for item in model_query}
+    hash_ids = [model_data[_id] for _id in model_ids]
     first_url = urls.pop(0)
 
     # _params = dict(uuid=_uuid)
@@ -358,11 +347,11 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
         data=task_data,
         labels=get_project_labels(project_id),
         extra=dict(
-            pipelines=urls
+            pipelines=hash_ids, uuid=_uuid, version_id='',
         )
     )
     return ml_backend_request(
-        first_url, uri=['pipeline', _uuid], params=_params, _json=_json,
+        uri=['pipeline', _uuid], params=_params, _json=_json,
         method='post',
     )
 
