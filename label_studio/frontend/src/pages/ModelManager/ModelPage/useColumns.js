@@ -6,15 +6,6 @@ import { useMemo, useState } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
 
-
-const ModelType = {
-  intention: '对话意图分类',
-  generation: '对话生成',
-  correction: '轮次纠正',
-  intelligent: '智能清洗',
-  rule: '规则清洗',
-};
-
 const ModelState = {
   1: "初始",
   2: "评估",
@@ -98,7 +89,7 @@ export const useColumns = () => {
         render: (_, record) => {
           return (
             <Elem name="type">
-              {ModelType[record.type]}
+              {record.model_type}
             </Elem>
           );
         },
