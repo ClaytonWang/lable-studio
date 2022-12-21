@@ -25,6 +25,17 @@ MODEL_TYPE = (
     ('intelligent', '智能清洗'),
     ('rule', '规则清洗'),
 )
+
+MODEL_TYPE_CATEGORY = (
+    ('intention', '对话意图分类'),
+    ('annotation', '对话意图分类'),
+    ('dialogue', '对话生成'),
+    ('dialogue_prompt', '对话生成'),
+    ('bart_for_turn', '轮次纠正'),
+    ('intelligent', '智能清洗'),
+    ('rule', '规则清洗'),
+)
+
 CLEAN_MODEL_FLAG = ('correction', 'intelligent', 'rule')
 
 TEMPLATE_MODEL_TYPE_MAPPING = (
@@ -68,6 +79,7 @@ class ModelManager(DummyModelMixin, models.Model):
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_model', on_delete=models.SET_NULL, null=True, verbose_name=_('created by'))
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
+    is_delete = models.BooleanField(_('delete'), default=False)
 
     # 基于 指定模型的训练
     model = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, help_text='训练用的基础模型', related_name='model_config')
