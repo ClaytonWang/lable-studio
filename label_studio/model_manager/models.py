@@ -16,7 +16,7 @@ from db_ml.common import DbOrganizationManager
 logger = logging.getLogger(__name__)
 
 
-MODEL_TYPE = (
+ALGORITHM_TYPE = (
     ('intention', '预标注-0样本'),  # 意图分类
     ('annotation', '预标注-普通'),
     ('dialogue', '对话生成-普通'),
@@ -26,12 +26,11 @@ MODEL_TYPE = (
     ('rule', '规则清洗'),
 )
 
-MODEL_TYPE_CATEGORY = (
+
+MODEL_TYPE = (
     ('intention', '对话意图分类'),
-    ('annotation', '对话意图分类'),
-    ('dialogue', '对话生成'),
-    ('dialogue_prompt', '对话生成'),
-    ('bart_for_turn', '轮次纠正'),
+    ('generation', '对话生成'),
+    ('correction', '轮次纠正'),
     ('intelligent', '智能清洗'),
     ('rule', '规则清洗'),
 )
@@ -75,7 +74,8 @@ class ModelManager(DummyModelMixin, models.Model):
 
     organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE, related_name='model_configer', null=True)
     version = models.TextField(_('model version'), blank=True, null=True, default='1.0', help_text='Machine learning model version')
-    type = models.CharField(_('model type'), choices=MODEL_TYPE, default=None, null=True, max_length=50)
+    type = models.CharField(_('算法类型说明'), choices=ALGORITHM_TYPE, default=None, null=True, max_length=50)
+    model_type = models.CharField(_('模型类型（产品）说明'), choices=MODEL_TYPE, default=None, null=True, max_length=50)
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='created_model', on_delete=models.SET_NULL, null=True, verbose_name=_('created by'))
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)

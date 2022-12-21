@@ -6,7 +6,7 @@ from rest_framework.serializers import SerializerMethodField
 from users.serializers import UserSimpleSerializer
 from projects.serializers_set import ProjectSetDetailSerializer
 from model_manager.models import ModelManager
-from model_manager.models import MODEL_TYPE_CATEGORY
+from model_manager.models import MODEL_TYPE
 
 
 class ModelManagerListSerializer(serializers.ModelSerializer):
@@ -14,15 +14,19 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
     模型导入名称，对应数据表的模型集
     实际模型名字通过【模型集】+ 【版本输出】
     """
-
     title_version = SerializerMethodField()
     created_by = UserSimpleSerializer(default={}, help_text='created owner')
+    project = SerializerMethodField()
     model_type = SerializerMethodField()
     # project_set = ProjectSetDetailSerializer(default={})
 
     @staticmethod
+    def get_project(obj):
+        return obj.project.title if obj.project else None
+
+    @staticmethod
     def get_model_type(obj):
-        return dict(MODEL_TYPE_CATEGORY).get(obj.type, '')
+        return dict(MODEL_TYPE).get(obj.model_type, '')
 
     @staticmethod
     def get_title_version(obj):
