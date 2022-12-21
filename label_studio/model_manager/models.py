@@ -84,6 +84,7 @@ class ModelManager(DummyModelMixin, models.Model):
     # 基于 指定模型的训练
     model = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, help_text='训练用的基础模型', related_name='model_config')
     # 项目预留外建，追溯模型训练的项目信息
+    # 用户创建的迭代模型需要显示的项目名称（只有在人在环路新建模型基于的创建项目）
     project = models.ForeignKey('projects.Project', on_delete=models.SET_NULL, null=True, blank=True, help_text='训练用的项目', related_name='model_config_project')
 
     # 模型参数 模型调用参数和标签都放在这里

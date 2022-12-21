@@ -35,7 +35,8 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
     class Meta:
         model = ModelManager
         ordering = ['-created_at']
-        fields = '__all__'
+        exclude = ['is_delete']
+        # fields = '__all__'
 
 
 class ModelManagerDetailSerializer(ModelManagerListSerializer):

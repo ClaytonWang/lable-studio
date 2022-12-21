@@ -61,6 +61,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         base = data.get('base')
         if base:
             filter_params['base'] = distutils.util.strtobool(base)
+        if data.get('model_type'):
+            filter_params['model_type'] = data.get('model_type')
         if _type:
             _type = _type.split(',')
             filter_params['type__in'] = _type
@@ -139,12 +141,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         # model = self.get_model(request)
         # url = request.GET.dict('url')
         query = ModelManager.objects.filter(pk=kwargs.get('pk')).first()
-        url = query.url
-        if not url:
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data=dict(error="Invalid ID")
-            )
+
         # 测试
         # return Response(data={"download": url})
         # 调用算法服务
