@@ -28,18 +28,16 @@ MODEL_TYPE = (
 CLEAN_MODEL_FLAG = ('correction', 'intelligent', 'rule')
 
 TEMPLATE_MODEL_TYPE_MAPPING = (
-    ('intent-classification', 'intention'),
-    ('conversational-generation', 'generation'),
-    ('round-correction', 'correction'),
-    ('intelligent-clean', 'intelligent'),
+    ('intent-classification', 'annotation'),
+    ('conversational-generation', 'dialogue'),
 )
 
 
 MODEL_STATE = (
     (1, '初始'),
     (2, '评估'),
-    (3, '训练'),
-    (4, '完成'),
+    (3, '训练中'),
+    (4, '已完成'),
     (5, '失败'),
     (6, '运行中'),
 )
@@ -62,6 +60,7 @@ class ModelManager(DummyModelMixin, models.Model):
     url = models.TextField(_('url'), help_text='URL for the machine learning model server', null=True, blank=True)
     labels = models.TextField(_('labels'), blank=True, null=True, default='', help_text='')
     hash_id = models.CharField(_('hash_id'), max_length=60, null=True, blank=True)
+    base = models.BooleanField(_('base'), default=False)
 
     organization = models.ForeignKey('organizations.Organization', on_delete=models.CASCADE, related_name='model_configer', null=True)
     version = models.TextField(_('model version'), blank=True, null=True, default='1.0', help_text='Machine learning model version')
