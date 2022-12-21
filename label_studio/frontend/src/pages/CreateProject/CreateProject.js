@@ -45,7 +45,7 @@ const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setNa
           onChange={e => {
             setModelId('');//清空老的model id
             setTemplateType(e.target.value);
-            getModels(e.target.value,false);
+            getModels(e.target.value, false);
           }}
           options={templateTypes.filter(item => {
             return item.apiKey === 'intent-classification'
@@ -65,20 +65,18 @@ const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setNa
             if (e.target.value === "TRAIN_NEW") {
               setModelId('');//清空老的model id
             } else {
-              getModels(templateType,true);
+              getModels(templateType, true);
             }
           }}
         >
           <Space direction="vertical" style={{ justifyContent: "flex-start" }}>
             <Radio value='TRAIN_NEW'>训练新模型</Radio>
-            {
-              existModels && existModels.length>0 &&  <Radio value='TRAIN_EXIST'>训练已有模型</Radio>
-            }
+            <Radio value='TRAIN_EXIST' disabled={existModels && existModels.length === 0}>训练已有模型</Radio>
           </Space>
         </Radio.Group>
 
       </div>
-      {existModels && existModels.length>0 && modelTrain === "TRAIN_EXIST" && (
+      {existModels && existModels.length > 0 && modelTrain === "TRAIN_EXIST" && (
         <div className="field field--wide">
           <label htmlFor="model_id">选择模型</label>
           <Select
@@ -146,11 +144,11 @@ export const CreateProject = ({ onClose }) => {
   }, [name, description, config, templateType, modelId]);
 
 
-  const getModels = useCallback(async (tpl_type,isSetModelId=false) => {
+  const getModels = useCallback(async (tpl_type, isSetModelId = false) => {
     const response = await api.callApi("modelManager", {
       params: {
         template_type: tpl_type,
-        base:false,
+        base: false,
       },
     });
 

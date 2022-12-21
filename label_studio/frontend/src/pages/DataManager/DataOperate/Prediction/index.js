@@ -1,13 +1,11 @@
 import {
   forwardRef,
   useCallback,
-  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
   useState
 } from "react";
-import { get } from "lodash";
 import { Modal } from "@/components/Modal/Modal";
 import { useAPI } from "@/providers/ApiProvider";
 import { template } from "@/utils/util";
@@ -43,20 +41,12 @@ const Prediction = forwardRef(({ project, showStatus }, ref) => {
 
   const onShow = useMemo(() => {
     const projectClass = template.class(project);
-    const modelType = get(
-      {
-        "intent-classification-for-dialog": "intention",
-        "conversational-ai-response-generation": "generation",
-      },
-      projectClass,
-    );
 
-    api
-      .callApi("modelList", {
-        params: {
-          type: modelType,
-        },
-      })
+    api.callApi("modelList", {
+      params: {
+        project_id: project.id,
+      },
+    })
       .then((res) => {
         setModels(res || []);
       });

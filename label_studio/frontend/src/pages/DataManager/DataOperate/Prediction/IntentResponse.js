@@ -23,7 +23,7 @@ const IntentResponse = ({ close, execLabel, loading }) => {
   const getModelList = useCallback(async () => {
     const data = await api.callApi("modelList", {
       params: {
-        type: 'intention',
+        project_id: project.id,
       },
     });
 

@@ -42,15 +42,9 @@ export default ({ onCancel, onSubmit }) => {
       if (!project.id) {
         return {};
       }
-      return await api.callApi("modelTrainModel", {
+      return await api.callApi("modelList", {
         params: {
           project_id: project.id,
-          type: (() => {
-            return get({
-              'intent-classification-for-dialog': 'intention',
-              'conversational-ai-response-generation': 'generation',
-            }, window._projectClass, null);
-          })(),
         },
       });
     }, [project, currModel]);
