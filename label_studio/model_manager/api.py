@@ -2,9 +2,11 @@
 """
 import logging
 import pathlib
+import distutils
 from urllib import parse
 from drf_yasg.utils import swagger_auto_schema
 from django.http import Http404
+from django.db.models import Q
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import exception_handler
@@ -56,6 +58,9 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
             for_user_organization(request.user).order_by('-created_at')
         template_type = dict(TEMPLATE_MODEL_TYPE_MAPPING).get(template_type)
         filter_params = dict()
+        base = data.get('base')
+        if base:
+            filter_params['base'] = distutils.util.strtobool(base)
         if _type:
             _type = _type.split(',')
             filter_params['type__in'] = _type
