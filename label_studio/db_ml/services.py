@@ -304,17 +304,17 @@ def predict_prompt(
     else:
         # 预标注普通   生成对话普通   前端有选择模型
         model = ModelManager.objects.filter(id=model_id).first()
-    _params = dict()
+    _params = dict(hash_id=model.hasd_id)
     _json = ml_backend_params(
         data=task_data,
         labels=get_project_labels(project_id),
         templates=template,
-        extra=dict(return_nums=return_num, version_id=model.hasd_id)
+        extra=dict(return_nums=return_num, version_id=model.hasd_id, uuid=uuid)
     )
 
     logger.info(f'ML project id:{project_id}, model id {model_id}, count: {len(task_data)}')
     return ml_backend_request(
-        model.url, uri=['predict', _uuid], params=_params,
+        uri=['/v3/predict'], params=_params,
         _json=_json, method="post"
     )
 
@@ -376,8 +376,8 @@ def train_model(
     else:
         model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
 
-    _params = dict()
-    extra = dict(return_nums=return_num)
+    _params = dict(hash_id=model.hash_id)
+    extra = dict(return_nums=return_num, uuid=_uuid)
     if kwargs.get('model_parameter'):
         extra.update(**kwargs.get('model_parameter', {}))
     _json = ml_backend_params(
@@ -388,7 +388,7 @@ def train_model(
     )
 
     return ml_backend_request(
-        model.url, uri=['train', _uuid], params=_params,
+        uri=['train'], params=_params,
         _json=_json, method="post"
     )
 

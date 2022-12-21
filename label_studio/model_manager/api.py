@@ -142,8 +142,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         # return Response(data={"download": url})
         # 调用算法服务
         state, rsp = ml_backend_request(
-            url, ['export'], method='get',
-            params=dict(url=url)
+            ['export'], method='get',
+            params=dict(hash_id=query.hash_id)
         )
         rsp_data = {"download": rsp}
         return self.return_ml_response(state, rsp_data)
@@ -151,13 +151,12 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
     @action(methods=['GET'], detail=False)
     def label(self, request, *args, **kwargs):
         model = self.get_model(request)
-        # return self.return_ml_response(True, ['label1', 'label2'])
         if not model:
             raise Exception('未查询到模型')
 
         state, rsp = ml_backend_request(
-            model.url, uri=['getLabels'], method='get',
-            # params=dict(url=model.url)
+            uri=['getLabels'], method='get',
+            params=dict(hasd_id=model.hash_id)
         )
         if state:
             return Response(data=rsp.values())

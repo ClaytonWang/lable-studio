@@ -78,6 +78,7 @@ MODEL_TRAIN_INDIVIDUAL_TASK_TIME = 0.25
 SIGNUP_INVITE_EXPIRE_TIME = 60 * 60 * 24 * 2
 # 系统分组，不能进行删除和编辑
 SYSTEM_GROUP = ['admin', 'user', 'annotator']
+MODEL_SERVING_HOST = 'http://124.71.161.146:12000'
 # 增加配置文件
 ENV = os.getenv('ENV', '').upper()
 if 'DEV' == ENV:

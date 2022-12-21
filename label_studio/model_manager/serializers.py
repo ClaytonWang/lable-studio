@@ -16,7 +16,7 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
 
     title_version = SerializerMethodField()
     created_by = UserSimpleSerializer(default={}, help_text='created owner')
-    project_set = ProjectSetDetailSerializer(default={})
+    # project_set = ProjectSetDetailSerializer(default={})
 
     @staticmethod
     def get_title_version(obj):
@@ -24,9 +24,8 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ModelManager
-        exclude = ['token']
         ordering = ['-created_at']
-        # fields = '__all__'
+        fields = '__all__'
 
 
 class ModelManagerDetailSerializer(ModelManagerListSerializer):
@@ -46,7 +45,7 @@ class ModelManagerCreateSerializer(serializers.ModelSerializer):
         model = ModelManager
         fields = (
             'title', 'model', 'organization_id', 'created_by_id',
-            'version', 'project', 'url', 'type', 'description',
+            'version', 'project', 'url', 'type',
         )
 
 
