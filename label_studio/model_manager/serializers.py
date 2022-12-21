@@ -6,6 +6,7 @@ from rest_framework.serializers import SerializerMethodField
 from users.serializers import UserSimpleSerializer
 from projects.serializers_set import ProjectSetDetailSerializer
 from model_manager.models import ModelManager
+from model_manager.models import MODEL_TYPE_CATEGORY
 
 
 class ModelManagerListSerializer(serializers.ModelSerializer):
@@ -16,7 +17,12 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
 
     title_version = SerializerMethodField()
     created_by = UserSimpleSerializer(default={}, help_text='created owner')
+    model_type = SerializerMethodField()
     # project_set = ProjectSetDetailSerializer(default={})
+
+    @staticmethod
+    def get_model_type(obj):
+        return dict(MODEL_TYPE_CATEGORY).get(obj.type, '')
 
     @staticmethod
     def get_title_version(obj):

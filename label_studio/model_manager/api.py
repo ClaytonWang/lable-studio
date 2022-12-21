@@ -57,7 +57,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         self.queryset = ModelManager.objects.\
             for_user_organization(request.user).order_by('-created_at')
         template_type = dict(TEMPLATE_MODEL_TYPE_MAPPING).get(template_type)
-        filter_params = dict()
+        filter_params = dict(is_delete=False)
         base = data.get('base')
         if base:
             filter_params['base'] = distutils.util.strtobool(base)
@@ -112,10 +112,15 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
             request, *args,**kwargs)
 
     def destroy(self, request, *args, **kwargs):
-        self.queryset = ModelManager.objects.filter(
-            pk=kwargs.get('pk'), )
-        super(ModelManagerViews, self).destroy(request, *args, **kwargs)
-        return Response(status=200, data=dict(message='删除成功'))
+        """
+        删除接口
+        """
+        self.queryset = ModelManager.objects.filter(pk=kwargs.get('pk'), base=False)
+        if not self.queryset:
+            return Response(status=400, data=dict(message='未查询到非基础模型'))
+        else:
+            self.queryset.update(is_delete=True)
+            return Response(status=200, data=dict(message='删除成功'))
 
     @action(methods=['GET'], detail=False)
     def select(self, request, *args, **kwargs):
