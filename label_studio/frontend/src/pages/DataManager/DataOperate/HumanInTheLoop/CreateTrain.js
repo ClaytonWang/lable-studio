@@ -16,7 +16,7 @@ const tip_learn = {
   id: '',
   title: "请选择模型",
   model_title: '',
-  version:'',
+  version: '',
 };
 
 const formatJSON = (json) => {
@@ -26,7 +26,7 @@ const formatJSON = (json) => {
 
 let newModelConfig = null;
 
-export default ({ onCancel,onSubmit }) => {
+export default ({ onCancel, onSubmit }) => {
   const api = useContext(ApiContext);
   const [currModel, setCurrModel] = useState(tip_learn);
   const [trainModalData, setTrainModalData] = useState({});
@@ -53,7 +53,7 @@ export default ({ onCancel,onSubmit }) => {
           })(),
         },
       });
-    }, [project,currModel]);
+    }, [project, currModel]);
 
   const getTrainInit = useCallback(
     async () => {
@@ -63,15 +63,15 @@ export default ({ onCancel,onSubmit }) => {
       return await api.callApi("modelTrainInit", {
         params: {
           project_id: project.id,
-          model_id: currModel.id===tip_learn.id?'':currModel.id,
-          operate:'train',
+          model_id: currModel.id === tip_learn.id ? '' : currModel.id,
+          operate: 'train',
         },
       });
     }, [project, currModel]);
 
   const getModelConfig = useCallback(async () => {
     return await api.callApi("modelConfig", {});
-  },[]);
+  }, []);
 
 
   const handleChange = (value, option) => {
@@ -91,7 +91,7 @@ export default ({ onCancel,onSubmit }) => {
     getTrainModel().then(data => {
       let rlst = data ?? [];
 
-      rlst = rlst.filter(v => v.title.indexOf("普通") !== -1).sort((a, b) => { return a.id-b.id; });
+      rlst = rlst.filter(v => v.title.indexOf("普通") !== -1).sort((a, b) => { return a.id - b.id; });
       rlst.unshift(tip_learn);
       setTrainModels(rlst ?? []);
     });
@@ -115,11 +115,11 @@ export default ({ onCancel,onSubmit }) => {
     let model_params = modelConfig;
 
     if (newModelConfig) model_params = newModelConfig;
-    onSubmit('train',{ ...trainModalData,model_title:currModel.model_title,model_params });
+    onSubmit('train', { ...trainModalData, model_title: currModel.model_title, model_params });
   };
 
   const getModelLabels = useCallback(async (model_id) => {
-    if(!model_id) return [];
+    if (!model_id) return [];
     const data = await api.callApi("modelLabel", {
       params: {
         model_id,
@@ -140,27 +140,27 @@ export default ({ onCancel,onSubmit }) => {
         className="content">
         <Row>
           <Col span={8}>
-            <Form.Item label="模型集名称">
+            <Form.Item label="选择模型">
               <Select defaultValue="" status={ipnutStatus} onChange={handleChange}>
                 {trainModels.map((model) => (
-                  <Option key={model.id} model={ model}>{model.title + model.version}</Option>
+                  <Option key={model.id} model={model}>{model.title + model.version}</Option>
                 ))}
               </Select>
             </Form.Item>
           </Col>
           <Col span={8}>
             <Form.Item label="当前版本" >
-              <Input disabled value={trainModalData.version}/>
+              <Input disabled value={trainModalData.version} />
             </Form.Item>
           </Col>
           <Col span={8}>
             <Form.Item label="新模型版本">
-              <Input disabled value={trainModalData.new_version}/>
+              <Input disabled value={trainModalData.new_version} />
             </Form.Item>
           </Col>
         </Row>
         {
-          modelLabels.length>0  && (
+          modelLabels.length > 0 && (
             <Row>
               <Col span={24}>
                 <Form.Item label="当前模型标签">
@@ -186,11 +186,12 @@ export default ({ onCancel,onSubmit }) => {
                   name="code"
                   id="model_edit_code"
                   value={formatJSON(modelConfig)}
-                  options={{ mode: {
-                    name: "javascript",
-                    json: true,
-                    statementIndent: 2,
-                  }, theme: "default", lineNumbers: true,
+                  options={{
+                    mode: {
+                      name: "javascript",
+                      json: true,
+                      statementIndent: 2,
+                    }, theme: "default", lineNumbers: true,
                   }}
                   onChange={(editor, data, value) => {
                     newModelConfig = value;
@@ -204,7 +205,7 @@ export default ({ onCancel,onSubmit }) => {
       <Modal.Footer>
         <Space align="end">
           <Button size="compact" onClick={onCancel}>{t("Cancel")}</Button>
-          <Button size="compact" look="primary" onClick={ submitData}>
+          <Button size="compact" look="primary" onClick={submitData}>
             {t("record_train", "立即训练")}
           </Button>
         </Space>

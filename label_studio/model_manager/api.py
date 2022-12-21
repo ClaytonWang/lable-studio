@@ -157,6 +157,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
 
     @action(methods=['GET'], detail=False)
     def label(self, request, *args, **kwargs):
+        return Response(data=['a','b'])
         model = self.get_model(request)
         if not model:
             raise Exception('未查询到模型')

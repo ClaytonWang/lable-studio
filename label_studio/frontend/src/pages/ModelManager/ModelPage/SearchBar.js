@@ -7,13 +7,12 @@ import "./SearchBar.less";
 import { useFilter } from "./useFilter";
 
 const getFilters = (filters) => {
-  const model_types = ["none"].concat(Object.keys(filters?.type ?? []).sort());
+  const model_types = ["none"].concat(Object.keys(filters?.model_type ?? []).sort());
   const model_versions = ["none"].concat((filters.version ?? []).sort());
-  const model_set = ["none"].concat((filters?.model_set ?? []).sort());
 
   return [
     {
-      key: "type",
+      key: "model_type",
       label: "模型类型",
       value: "none",
       data: model_types,
@@ -58,29 +57,6 @@ const getFilters = (filters) => {
         );
       },
     },
-    {
-      key: "model_set",
-      label: "模型集",
-      value: "none",
-      data: model_set,
-      render: (col) => {
-        return (
-          <Select
-            value={col.value}
-            options={col.data.map((v) => {
-              if (v === "none") {
-                return { label: "不限", value: v };
-              } else {
-                return { label: t(v), value: v };
-              }
-            })}
-            onChange={(e) => {
-              col.value = e.target.value;
-            }}
-          />
-        );
-      },
-    },
   ];
 };
 
@@ -97,9 +73,8 @@ export const SearchBar = React.memo((props) => {
         obj[v.key] = v.value === "none" ? "" : v.value;
       });
       await props.onSearch(props.pageSize, {
-        type: obj["type"],
+        model_type: obj["model_type"],
         version: obj["version"],
-        mdoel_set: obj["model_set"],
       });
     }
   };

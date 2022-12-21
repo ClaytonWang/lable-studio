@@ -3,20 +3,31 @@ import { Elem } from '../../../utils/bem';
 import { Userpic } from '../../../components';
 import { format } from 'date-fns';
 import { useMemo, useState } from 'react';
+import { LoadingOutlined } from '@ant-design/icons';
+import { Spin } from 'antd';
 
-
-const ModelType = {
-  intention:'对话意图分类',
-  generation: '对话生成',
-  correction: '轮次纠正',
-  intelligent: '智能清洗',
-  rule: '规则清洗',
+const ModelState = {
+  1: "初始",
+  2: "评估",
+  3: "训练中...",
+  4: "已完成",
+  5: "失败",
+  6: "运行中",
 };
+
+const loadingIcon = (
+  <LoadingOutlined
+    style={{
+      fontSize: 24,
+    }}
+    spin
+  />
+);
 
 export const useColumns = () => {
   const [modalExp, setModalExp] = useState(null);
   const [modalEdt, setModaEdt] = useState(null);
-  const [modalAccuracy, setModalAccuracy] = useState(null);
+  const [modalDel, setModaDel] = useState(null);
 
   const columns = useMemo(() => {
     return [
@@ -28,11 +39,11 @@ export const useColumns = () => {
           if (record.type === 'clean')
             return (
               <Elem name="title_version">
-                { _ }
+                {_}
               </Elem>
             );
           else
-            return (<a onClick={() => { setModalAccuracy(record);}}>{record.title}</a>);
+            return record.title;
         },
       },
       {
@@ -54,7 +65,7 @@ export const useColumns = () => {
         render: (_, record) => {
           return (
             <Elem name="created-by">
-              <Userpic src="#" user={record.created_by} showUsername/>
+              <Userpic src="#" user={record.created_by} showUsername />
             </Elem>
           );
         },
@@ -66,7 +77,7 @@ export const useColumns = () => {
         render: (_, record) => {
           return (
             <Elem name="version">
-              { record.version }
+              {record.version}
             </Elem>
           );
         },
@@ -78,18 +89,27 @@ export const useColumns = () => {
         render: (_, record) => {
           return (
             <Elem name="type">
-              {ModelType[record.type]}
+              {record.model_type}
             </Elem>
           );
         },
       },
       {
-        title: '模型集',
-        dataIndex: 'title',
-        key: 'title',
-        render: (_,record) => {
-          if (!record.title) return '/';
-          return record.title;
+        title: '项目',
+        dataIndex: 'project',
+        key: 'project',
+        render: (_, record) => {
+          if (!record.project) return '';
+          return record.project;
+        },
+      },
+      {
+        title: '状态',
+        dataIndex: 'state',
+        key: 'state',
+        render: (_, record) => {
+          if (!record.state) return '/';
+          return ModelState[record.state];
         },
       },
       {
@@ -98,13 +118,20 @@ export const useColumns = () => {
         key: 'action',
         render: (_, record) => (
           <Space size="middle">
-            <a onClick={() => { setModaEdt(record);}}>编辑</a>
-            <a onClick={() => { setModalExp(record);}}>导出</a>
+            {
+              (() => {
+                return [
+                  record.state === 3 ? <Spin indicator={loadingIcon} /> : <a key="export" onClick={() => { setModalExp(record); }}>导出</a>,
+                  record.version === "1.0" && record.state === 4 ? null : (<a key="del" style={{ color: 'red' }} onClick={() => { setModaDel(record); }}>删除</a>),
+                  record.type === "rule" && record.state === 4 ? (<a key="edit" onClick={() => { setModaEdt(record); }}>编辑参数</a>) : null,
+                ];
+              })()
+            }
           </Space>
         ),
       },
     ];
-  },[]);
+  }, []);
 
   return {
     columns,
@@ -112,7 +139,7 @@ export const useColumns = () => {
     setModalExp,
     modalEdt,
     setModaEdt,
-    modalAccuracy,
-    setModalAccuracy,
+    modalDel,
+    setModaDel,
   };
 };
