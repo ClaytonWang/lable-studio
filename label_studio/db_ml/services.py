@@ -11,6 +11,8 @@ import uuid
 import json
 import logging
 from enum import Enum
+from datetime import datetime
+from datetime import timezone
 from tasks.models import Task
 from core.redis import redis_set, redis_get
 from django.db.transaction import atomic
@@ -126,7 +128,17 @@ def query_last_record(project_id):
     record = ModelTrain.objects.filter(
         project_id=project_id, state=6
     ).order_by('-id')
-    return record
+    # record没有查出来会进入else在查询一次并返回状态
+    for item in record:
+        interval = datetime.now(timezone.utc) - item.created_at
+        if interval.days >= 1:
+            item.state = 5
+            item.remark = '超时'
+            item.save()
+    else:
+        return ModelTrain.objects.filter(
+            project_id=project_id, state=6
+        ).order_by('-id')
 
 
 def create_model_record(model_id: int, project_id, user=None, remark=None) -> (bool, ModelTrain):
@@ -304,17 +316,17 @@ def predict_prompt(
     else:
         # 预标注普通   生成对话普通   前端有选择模型
         model = ModelManager.objects.filter(id=model_id).first()
-    _params = dict(hash_id=model.hasd_id)
+    _params = dict(hash_id=model.hash_id)
     _json = ml_backend_params(
         data=task_data,
         labels=get_project_labels(project_id),
         templates=template,
-        extra=dict(return_nums=return_num, version_id=model.hasd_id, uuid=uuid)
+        extra=dict(return_nums=return_num, version_id=model.hash_id, uuid=_uuid)
     )
 
     logger.info(f'ML project id:{project_id}, model id {model_id}, count: {len(task_data)}')
     return ml_backend_request(
-        uri=['/v3/predict'], params=_params,
+        uri='predict', params=_params,
         _json=_json, method="post"
     )
 
@@ -339,8 +351,7 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
 
     model_data = {item['id']: item['hash_id'] for item in model_query}
     hash_ids = [model_data[_id] for _id in model_ids]
-    first_url = urls.pop(0)
-
+    # first_url = urls.pop(0)
     # _params = dict(uuid=_uuid)
     _params = {}
     _json = ml_backend_params(
@@ -351,7 +362,7 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
         )
     )
     return ml_backend_request(
-        uri=['pipeline', _uuid], params=_params, _json=_json,
+        uri='pipeline', params=_params, _json=_json,
         method='post',
     )
 
@@ -377,7 +388,7 @@ def train_model(
     )
 
     return ml_backend_request(
-        uri=['train'], params=_params,
+        uri='train', params=_params,
         _json=_json, method="post"
     )
 

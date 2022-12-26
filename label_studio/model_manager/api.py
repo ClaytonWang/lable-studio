@@ -146,7 +146,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         # return Response(data={"download": url})
         # 调用算法服务
         state, rsp = ml_backend_request(
-            ['export'], method='get',
+            'export', method='get',
             params=dict(hash_id=query.hash_id)
         )
         rsp_data = {"download": rsp}
@@ -160,7 +160,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
             raise Exception('未查询到模型')
 
         state, rsp = ml_backend_request(
-            uri=['getLabels'], method='get',
+            uri='getLabels', method='get',
             params=dict(hasd_id=model.hash_id)
         )
         if state:
