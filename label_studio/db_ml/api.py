@@ -184,6 +184,7 @@ def prediction(request):
         return Response(status=400, data=dict(msg='Invalid project id'))
 
     if query_last_record(project_id):
+        # TODO 如纪录的时间已经很长，需要手动设置失效状态
         return Response(status=400, data=dict(msg='项目有正在运行的模型'))
 
     project = query.first().project

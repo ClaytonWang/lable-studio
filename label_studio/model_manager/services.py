@@ -29,7 +29,7 @@ def ml_backend_params(
 
 
 def ml_backend_request(
-        uri: list, version='v3', method: str = 'get',
+        uri: str, version='v3', method: str = 'get',
         params={}, data={}, _json={}
 ):
     """
@@ -68,7 +68,7 @@ def ml_backend_request(
     :param _json:
     :return:
     """
-    ml_url = os.path.join(settings.MODEL_SERVING_HOST, version, *uri)
+    ml_url = os.path.join(settings.MODEL_SERVING_HOST, version, uri)
     logger.info(f'ML Request url:, {ml_url} {method} \nparams: {params}\ndata:{data}\njson:{_json}')
     session = getattr(requests, method)
     # ml_url = 'http://127.0.0.1:5000/api/v1/train'

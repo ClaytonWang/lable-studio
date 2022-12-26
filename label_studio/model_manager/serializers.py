@@ -1,5 +1,7 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+import os
+from django.conf import settings
 from rest_framework import serializers
 from rest_flex_fields import FlexFieldsModelSerializer
 from rest_framework.serializers import SerializerMethodField
@@ -14,11 +16,16 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
     模型导入名称，对应数据表的模型集
     实际模型名字通过【模型集】+ 【版本输出】
     """
+    url = SerializerMethodField()
     title_version = SerializerMethodField()
     created_by = UserSimpleSerializer(default={}, help_text='created owner')
     project = SerializerMethodField()
     model_type = SerializerMethodField()
     # project_set = ProjectSetDetailSerializer(default={})
+
+    @staticmethod
+    def get_url(obj):
+        return settings.MODEL_SERVING_HOST
 
     @staticmethod
     def get_project(obj):
