@@ -5,6 +5,8 @@ import { format } from 'date-fns';
 import { useMemo, useState } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
+import { confirm } from "@/components/Modal/Modal";
+import { useAPI } from "@/providers/ApiProvider";
 
 const ModelState = {
   1: "初始",
@@ -27,7 +29,29 @@ const loadingIcon = (
 export const useColumns = () => {
   const [modalExp, setModalExp] = useState(null);
   const [modalEdt, setModaEdt] = useState(null);
-  const [modalDel, setModaDel] = useState(null);
+  const api = useAPI();
+
+  const handlDel = (model) => {
+    confirm({
+      title: "删除模型",
+      body: "是否要删除模型？",
+      buttonLook: "destructive",
+      onOk: () => delModel(model),
+      okText: "删除",
+      cancelText: t("Cancel"),
+    });
+  };
+
+  const delModel = (model) => {
+    api.callApi("deleteModel", {
+      params: {
+        pk: model.id,
+      },
+    })
+      .then((res) => {
+        location.reload();
+      });
+  };
 
   const columns = useMemo(() => {
     return [
@@ -122,7 +146,7 @@ export const useColumns = () => {
               (() => {
                 return [
                   record.state === 3 ? <Spin indicator={loadingIcon} /> : <a key="export" onClick={() => { setModalExp(record); }}>导出</a>,
-                  record.version === "1.0" && record.state === 4 ? null : (<a key="del" style={{ color: 'red' }} onClick={() => { setModaDel(record); }}>删除</a>),
+                  (record.version === "1.0" && record.state === 4) || record.state === 3 ? null : (<a key="del" style={{ color: 'red' }} onClick={() => { handlDel(record); }}>删除</a>),
                   record.type === "rule" && record.state === 4 ? (<a key="edit" onClick={() => { setModaEdt(record); }}>编辑参数</a>) : null,
                 ];
               })()
@@ -139,7 +163,5 @@ export const useColumns = () => {
     setModalExp,
     modalEdt,
     setModaEdt,
-    modalDel,
-    setModaDel,
   };
 };
