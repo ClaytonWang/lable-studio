@@ -2,7 +2,6 @@
 """
 import logging
 import pathlib
-import distutils
 from urllib import parse
 from drf_yasg.utils import swagger_auto_schema
 from django.http import Http404
@@ -25,7 +24,9 @@ from model_manager.models import MODEL_TYPE, TEMPLATE_MODEL_TYPE_MAPPING, ALGORI
 from model_manager.services import ml_backend_request
 from db_ml.common import DbPageNumberPagination
 from db_ml.common import MultiSerializerViewSetMixin
-from projects.models import ProjectSet
+from model_manager.services import str2bool
+from db_ml.services import get_project_labels
+from projects.models import Project
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,12 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
     def list(self, request, *args, **kwargs):
         """
         模型列表过滤，同时查询多个模型类型，模型类型之间用【半角逗号】隔开
+
+        传有project id的优先级最高，直接处理对应逻辑
+        (project 新模型不保存 模型ID，)
+        - 训练新模型：显示1.0版本模型，不可更改
+        - 训练已有模型：默认选择创建项目时选择的模型，可切换为与当前项目标签一致的所有同类型模型，不显示1.0版本模型
+
         :param request:
         :param args:
         :param kwargs:
@@ -53,25 +60,46 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         template_type = data.get('template_type')
         version = data.get('version')
         model = data.get('model_set')
-        project = data.get('project_set')
+        project_id = data.get('project_id')
+
         self.queryset = ModelManager.objects.\
             for_user_organization(request.user).order_by('-created_at')
         template_type = dict(TEMPLATE_MODEL_TYPE_MAPPING).get(template_type)
         filter_params = dict(is_delete=False)
         base = data.get('base')
-        if base:
-            filter_params['base'] = distutils.util.strtobool(base)
-        if data.get('model_type'):
-            filter_params['model_type'] = data.get('model_type')
-        if _type:
-            _type = _type.split(',')
-            filter_params['type__in'] = _type
-        if version:
-            filter_params['version'] = version
-        if model:
-            filter_params['title'] = model
-        if template_type:
-            filter_params['type'] = template_type
+
+        # 人在环路会带project id来查询
+        if project_id:
+            project = Project.objects.filter(id=project_id).first()
+            if not project:
+                return Response(status=400, data=dict(message='未查询到项目ID'))
+            labels = get_project_labels(project_id=project_id)
+            filter_params['type'] = dict(TEMPLATE_MODEL_TYPE_MAPPING).get(project.template_type)
+            # 新模型必须使用基础模型训练
+            if not project.model:
+                filter_params['version'] = '1.0'
+                filter_params['base'] = True
+            else:
+                filter_params['base'] = False
+                filter_params['labels'] = ','.join(labels)
+
+        # 非人在环路的模型列表过滤
+        else:
+            if base:
+                # python3.10 distutils 已经被废弃
+                filter_params['base'] = str2bool(base)
+            if data.get('model_type'):
+                filter_params['model_type'] = data.get('model_type')
+            if _type:
+                _type = _type.split(',')
+                filter_params['type__in'] = _type
+            if version:
+                filter_params['version'] = version
+            if model:
+                filter_params['title'] = model
+            if template_type:
+                filter_params['type'] = template_type
+
         if filter_params:
             self.queryset = self.queryset.filter(**filter_params)
         return super(ModelManagerViews, self).list(request, *args, **kwargs)
