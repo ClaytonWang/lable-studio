@@ -377,7 +377,7 @@ def train_model(
         model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
 
     _params = dict(hash_id=model.hash_id)
-    extra = dict(return_nums=return_num, uuid=_uuid)
+    extra = dict(return_nums=return_num, uuid=_uuid, train_id=model.hash_id, version_id=model.hash_id)
     if kwargs.get('model_parameter'):
         extra.update(**kwargs.get('model_parameter', {}))
     _json = ml_backend_params(
