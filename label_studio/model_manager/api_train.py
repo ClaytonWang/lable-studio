@@ -30,6 +30,7 @@ from db_ml.common import MultiSerializerViewSetMixin
 from db_ml.services import get_choice_values
 from db_ml.services import train_model
 from db_ml.services import generate_uuid
+from core.utils.common import create_hash
 from db_ml.services import get_first_version_model
 from db_ml.services import get_project_labels
 from db_ml.services import INTENT_DIALOG_PROMPT_TOKEN
@@ -126,8 +127,8 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         :return:
         """
         project_id = request.GET.dict().get('project_id')
-        _type = request.GET.dict().get('type')
-        data = self.get_model_of_project(project_id, _type)
+        # _type = request.GET.dict().get('type')
+        data = self.get_model_of_project(project_id)
         return Response(data=list(data))
 
     @action(methods=['GET'], detail=False)
@@ -155,22 +156,22 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             raise Exception('项目模版类型错误，支持模版是对话意图识别&对话生成。')
 
         tasks = Task.objects.filter(project_id=project_id)
-        anno_result, pre_result = self.get_project_label_result(tasks)
 
-        # TODO 手动标注和自动标注，历史数据引起的错误
-        exactness_count, error_count, total_count, accuracy_rate = 0, 0, 0, 0
-        for task_id, result in pre_result.items():
-            if task_id not in anno_result:
-                exactness_count += 1
-                continue
-
-            pre_labels = get_choice_values(result)
-            ann_labels = get_choice_values(anno_result[task_id])
-            if ann_labels == pre_labels:
-                exactness_count += 1
-                continue
-
-            error_count += 1
+        # anno_result, pre_result = self.get_project_label_result(tasks)
+        # # TODO 手动标注和自动标注，历史数据引起的错误
+        # exactness_count, error_count, total_count, accuracy_rate = 0, 0, 0, 0
+        # for task_id, result in pre_result.items():
+        #     if task_id not in anno_result:
+        #         exactness_count += 1
+        #         continue
+        #
+        #     pre_labels = get_choice_values(result)
+        #     ann_labels = get_choice_values(anno_result[task_id])
+        #     if ann_labels == pre_labels:
+        #         exactness_count += 1
+        #         continue
+        #
+        #     error_count += 1
 
         task_count = tasks.count()
         result = dict(
@@ -178,12 +179,12 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             project_id=project_id,
             project_title=project.title,
             total_count=task_count,
-            exactness_count=exactness_count,
-            accuracy_rate=round(exactness_count/task_count, 2),
+            exactness_count=0,  # exactness_count,
+            accuracy_rate=0,  # round(exactness_count/task_count, 2),
         )
 
         if operate == 'train':
-            version, new_version = self.get_model_version(model_id)
+            version, new_version = self.get_model_version(project, is_init=True)
             result['version'] = version
             result['new_version'] = new_version
 
@@ -211,7 +212,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
     def check_task_label_in_project(self, project_id, task_query):
         # 有手动标注取手动标注的值，没有取自动标注的值
-        labels = get_project_labels(project_id)
+        # labels = get_project_labels(project_id)
         anno_result, pre_result = self.get_project_label_result(task_query)
         task_label = {}
         for item in task_query:
@@ -225,9 +226,6 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
             if isinstance(label, list):
                 label = ''.join(label)
-
-            if not label or label not in labels:
-                return False, task_id
 
             task_label[task_id] = label
         return True, task_label
@@ -243,9 +241,14 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         """
         data = self.get_train_assessment_params(request)
         model_id = data.get('model_id')
+        project_id = data.get('project_id')
+        project = Project.objects.filter(id=project_id).first()
+        model = ModelManager.objects.filter(id=model_id).first()
+        if not model:
+            return Response(status=400, data=dict(message='未查询到有效模型'))
 
         # train
-        version, new_version = self.get_model_version(model_id)
+        version, new_version = self.get_model_version(project=project, is_init=False, model=model)
         data['state'] = 3
         data['category'] = 'train'
         data['is_train'] = True
@@ -254,13 +257,11 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         # 判断标签是否一致
         task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
-        is_success, task_label = self.check_task_label_in_project(data.get('project_id'), task_query)
+        _, task_label = self.check_task_label_in_project(data.get('project_id'), task_query)
 
         template_type = None
         if len(task_query):
             template_type = task_query[0].project.template_type
-        if not (template_type and template_type == 'conversational-generation') and not is_success:
-            return Response(status=400, data=dict(msg=f'{task_label}未标注不能训练或标签不在项目标签里。'))
 
         with atomic():
             # train_count 前端在init接口拿到数据，训练模型带回来
@@ -270,24 +271,20 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             # 拼接模型服务参数
             task_data = []
 
-            # 模型管理建记录
-            if model_id:
-                model = ModelManager.objects.filter(id=model_id).first()
-            else:
-                model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
-
             # 建模型管理记录
             serializer = ModelManagerDetailSerializer(instance=model)
             model_data = dict()
             model_data['model'] = model
             model_data['state'] = 3
+            model_data['base'] = False
             model_data['version'] = new_version
+            model_data['hash_id'] = create_hash()
             model_data['title'] = data.get('model_title')
             model_data['created_by'] = request.user
 
             for field in [
-                'url', 'token', 'type',
-                'organization', 'project', 'project_set'
+                'url', 'type', 'labels',
+                'organization', 'project', 'model_type',
             ]:
                 model_data[field] = getattr(serializer.instance, field)
 
@@ -360,7 +357,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         if isinstance(_type, str) and _type:
             _type = [_type]
         else:
-            _type = ('intention', 'generation')
+            _type = ('intention', 'generation', 'annotation')
 
         queryset = ModelManager.objects.filter(
             Q(type__in=_type, project_id__isnull=True) |
@@ -382,16 +379,31 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
         return Response(data)
 
     @staticmethod
-    def get_model_version(model_id):
-        version, new_version = '0.0', '1.0'
-        if model_id:
-            model = ModelManager.objects.filter(id=model_id).first()
-            max_version_model = ModelManager.objects.filter(
-                token=model.token, project=model.project
-            ).values('version')
+    def get_model_version(project, is_init=False, model=None):
+        """
+            - 同一项目中，根据迭代前的模型版本号，每触发一次人在环路迭代，版本号+1，如：
+            - 创建项目时选择“训练新模型”，即1.0版本的基础模型。触发第一次人在环路后，迭代的模型版本号为2.0。触发第二次人在环路后（不论选择的是1.0版还是2.0版），迭代的模型版本号为3.0。
+            - 创建项目时选择“训练已有模型”，如某个4.0版本的模型。触发第一次人在环路后，迭代的模型版本号为5.0。触发第二次人在环路后（不论选择的是2.0~5.0的哪个版本），迭代的模型版本号为6.0。
+        """
+        # 训练新模型：
+        if not project.model:
+            return '1.0', '2.0'
+
+        if is_init and project:
+            version = project.model.version
+            new_version = str(format(float(version) + 1, '.1f'))
+            return version, new_version
+
+        if not is_init and project:
+
+            max_version_model = ModelManager.objects.filter(project=project).values('version')
             max_version_model = list(max_version_model)
-            max_version_model.sort(key=lambda k: int(float(k['version'])), reverse=True)
-            version = max_version_model[0]['version']
+            if max_version_model:
+                max_version_model.sort(key=lambda k: int(float(k['version'])), reverse=True)
+                version = max_version_model[0]['version']
+            else:
+                # 训练已经有模型，没有纪录取关联模型，新版本在当前版本加1
+                version = project.model.version
             new_version = str(format(float(version) + 1, '.1f'))
         return version, new_version
 
