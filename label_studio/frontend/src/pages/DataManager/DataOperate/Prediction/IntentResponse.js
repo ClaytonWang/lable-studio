@@ -21,11 +21,13 @@ const IntentResponse = ({ close, execLabel, loading }) => {
   const projectLabels = project?.parsed_label_config?.intent?.labels ?? [];
 
   const getModelList = useCallback(async () => {
-    const data = await api.callApi("modelList", {
+    const rslt = await api.callApi("modelManager", {
       params: {
         project_id: project.id,
       },
     });
+
+    const data = rslt?.results ?? [];
 
     setExecModelList([{ id:'',title:'请选择模型',version:'',value:'' },...data]);
 
