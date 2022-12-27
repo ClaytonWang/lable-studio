@@ -85,10 +85,10 @@ class PromptLearning(APIView):
             project = Project.objects.filter(id=project_id).first()
             if project.template_type == 'intent-classification':
                 # 预标注（0样本）
-                model = get_first_version_model(INTENT_DIALOG_PROMPT_TOKEN)
+                model = get_first_version_model(_type='intention')
             elif project.template_type == 'conversational-generation':
                 # 生成对话（0样本）
-                model = get_first_version_model(CONVERSATIONAL_GENERATION_TOKEN)
+                model = get_first_version_model(_type='dialogue_prompt')
             record_status, record = create_model_record(model.id, project_id, request.user)
             if not record_status:
                 return Response(status=400, data=dict(msg='Invalid model id.'))

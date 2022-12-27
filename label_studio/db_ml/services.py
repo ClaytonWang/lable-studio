@@ -332,11 +332,11 @@ def predict_prompt(
 
 
 def get_first_version_model(
-        title, token=None, version=1.0
+    _type, base=True, version='1.0'
 ):
     # 预标注（0样本）
     return ModelManager.objects.filter(
-        title=title, version=version
+        type=_type, base=base, version=version
     ).order_by('id').first()
 
 
