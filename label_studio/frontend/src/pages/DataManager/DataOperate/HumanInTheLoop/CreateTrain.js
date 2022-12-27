@@ -42,7 +42,7 @@ export default ({ onCancel, onSubmit }) => {
       if (!project.id) {
         return {};
       }
-      return await api.callApi("modelList", {
+      return await api.callApi("modelManager", {
         params: {
           project_id: project.id,
         },
@@ -83,7 +83,7 @@ export default ({ onCancel, onSubmit }) => {
 
   useEffect(() => {
     getTrainModel().then(data => {
-      let rlst = data ?? [];
+      let rlst = data?.results ?? [];
 
       rlst = rlst.filter(v => v.title.indexOf("普通") !== -1).sort((a, b) => { return a.id - b.id; });
       rlst.unshift(tip_learn);

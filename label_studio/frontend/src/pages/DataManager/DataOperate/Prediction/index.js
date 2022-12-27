@@ -42,7 +42,9 @@ const Prediction = forwardRef(({ project, showStatus }, ref) => {
   const onShow = useMemo(() => {
     const projectClass = template.class(project);
 
-    api.callApi("modelList", {
+    if (!project.id) return;
+
+    api.callApi("modelManager", {
       params: {
         project_id: project.id,
       },
