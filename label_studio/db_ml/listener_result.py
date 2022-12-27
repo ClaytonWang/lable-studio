@@ -57,9 +57,9 @@ def read_redis_data(project_id, algorithm_type, record: ModelTrain):
 
     while True:
         time.sleep(DEFAULT_SLEEP_TIME)
-        record = ModelTrain.objects.get(id=record.id)
+        record = ModelTrain.objects.filter(id=record.id).first()
         # 查询状态失败，退出
-        if record.state == 5:
+        if not record or record.state == 5:
             break
 
         # 超时处理
