@@ -93,8 +93,8 @@ class ModelManager(DummyModelMixin, models.Model):
     model_parameter = JSONField(_('run model parameter'), null=True, default=dict, help_text='模型入参数')
     model_result = models.CharField(_('run model result url'), null=True, default='', max_length=140, help_text='模型入参数')
 
-    class Meta:
-        unique_together = ("organization_id", "title", "version")
+    # class Meta:
+    #     unique_together = ("organization_id", "title", "version", "hash_id")
 
 
 class ModelTrain(models.Model):

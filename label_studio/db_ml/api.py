@@ -188,11 +188,10 @@ def prediction(request):
         return Response(status=400, data=dict(msg='项目有正在运行的模型'))
 
     project = query.first().project
-    # # 生成对话普通 取消模型选择，
-    # # 后端自动添加模型 普通模型
-    # if project.template_type == 'conversational-generation':
-    #     model = ModelManager.objects.filter(type='generation', title__icontains='普通').first()
-    #     model_id = model.id
+    # # 生成对话普通 取消模型选择(没有模型选择，后端自动添加模型 普通模型)，
+    if project.template_type == 'conversational-generation':
+        model = ModelManager.objects.filter(type='dialogue', version='1.0', base=True).first()
+        model_id = model.id
 
     # 创建模型调用记录
     record_status, record = create_model_record(model_id, project_id, request.user)
