@@ -253,11 +253,9 @@ DataManagerPage.pages = {
   ImportModal,
 };
 DataManagerPage.context = ({ dmRef }) => {
-  const config = useConfig();
   const location = useFixedLocation();
   const { project } = useProject();
   const [mode, setMode] = useState(dmRef?.mode ?? "explorer");
-  const projectClass = useMemo(() => template.class(project), [project]);
 
   const links = {
     '/settings': t("Settings"),
@@ -308,7 +306,8 @@ DataManagerPage.context = ({ dmRef }) => {
     };
   }, [dmRef, project]);
 
-  const hasData = (project?.task_count ?? project?.task_number ?? 0) > 0;
+  const isShowCycl = project.show_cycle_human_btn && ((project?.task_count ?? project?.task_number ?? 0) > 0);
+
 
   return project && project.id ? (
     <Space size="small">
@@ -324,18 +323,15 @@ DataManagerPage.context = ({ dmRef }) => {
       )}
 
       {
-        // projectClass === 'intent-classification-for-dialog' && 
-        !config.user.button?.some((v) => {
-          return v.code === "002_001";
-        }) && hasData ? (
-            <Button
-              size="compact"
-              data-external
-              onClick={actions.human}
-            >
-              {t('on_the_road', '人在环路')}
-            </Button>
-          ) : null
+        isShowCycl ? (
+          <Button
+            size="compact"
+            data-external
+            onClick={actions.human}
+          >
+            {t('on_the_road', '人在环路')}
+          </Button>
+        ) : null
       }
 
       {Object.entries(links).map(([path, label]) => (

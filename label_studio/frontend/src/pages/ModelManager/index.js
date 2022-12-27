@@ -1,10 +1,8 @@
 import React, { useContext, useEffect,useState } from 'react';
 import { ModelList } from "./ModelPage/ModelList";
-import { Button } from '../../components';
 import { useContextProps } from '../../providers/RoutesProvider';
 import { ModelImport } from "./ModelPage/ModelImport";
 import { Block, Elem } from '../../utils/bem';
-import { CloudUploadOutlined } from '@ant-design/icons';
 import { ApiContext } from '../../providers/ApiProvider';
 import "./index.styl";
 
