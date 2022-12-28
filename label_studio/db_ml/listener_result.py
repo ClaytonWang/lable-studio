@@ -475,6 +475,7 @@ def insert_train_model(algorithm_result, model_train_id):
     train.train_finished_at = datetime.datetime.now()
     train.save()
 
+    time.sleep(2)
     state, rsp = ml_backend_request(
         uri='getLabels', method='get',
         params=dict(hash_id=new_model.hash_id)
