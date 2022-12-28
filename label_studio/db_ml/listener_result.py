@@ -22,6 +22,7 @@ from projects.models import PromptResult
 from db_ml.services import update_prediction_data
 from db_ml.services import train_failure_delete_train_model
 from model_manager.models import ModelTrain, ModelManager
+from model_manager.services import ml_backend_request
 from core.redis import _redis, redis_get, redis_delete, redis_healthcheck
 logger = logging.getLogger('db')
 DEFAULT_INTERRUPT_TIME = 5 * 60
@@ -456,10 +457,7 @@ def insert_clean_value(algorithm_result, project_id, db_algorithm_id):
 def insert_train_model(algorithm_result, model_train_id):
     # port = algorithm_result.get('port')
     print('result :::::', algorithm_result, ' train_id: ', model_train_id)
-    port = algorithm_result
     # TODO 训练结果返回，返回模型标签
-    if not port:
-        logger.error('训练模型未返回端口')
     train = ModelTrain.objects.filter(id=model_train_id).first()
     if train.category != 'train':
         logger.error(f'训练记录类型错误，train id :{model_train_id}')
@@ -469,13 +467,19 @@ def insert_train_model(algorithm_result, model_train_id):
     if not new_model:
         print('model train id is :', model_train_id, ' Not new_model.')
         return
-    if ':' in new_model.url:
-        domain = ':'.join(new_model.url.split(':')[:-1])
-        new_model.url = f'{domain}:{port}'
-        new_model.state = 4
+
+    new_model.state = 4
+    new_model.save()
+
+    train.state = 4
+    train.train_finished_at = datetime.datetime.now()
+    train.save()
+
+    state, rsp = ml_backend_request(
+        uri='getLabels', method='get',
+        params=dict(hash_id=new_model.hash_id)
+    )
+    if state:
+        labels = rsp.values()
+        new_model.labels = ','.join(labels)
         new_model.save()
-        train.state = 4
-        train.train_finished_at = datetime.datetime.now()
-        train.save()
-    else:
-        print('Model url is invalid. model id :', new_model.id)
