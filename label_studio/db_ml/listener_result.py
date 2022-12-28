@@ -457,6 +457,7 @@ def insert_train_model(algorithm_result, model_train_id):
     # port = algorithm_result.get('port')
     print('result :::::', algorithm_result, ' train_id: ', model_train_id)
     port = algorithm_result
+    # TODO 训练结果返回，返回模型标签
     if not port:
         logger.error('训练模型未返回端口')
     train = ModelTrain.objects.filter(id=model_train_id).first()
