@@ -305,15 +305,21 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
             obj_id = new_train.id
             _uuid = generate_uuid('train', obj_id)
-            train_model(
+        _state, text = train_model(
                 project_id=data.get('project_id'),
-                model_id=model.id,
+                model=model,
+                new_model=new_model,
                 task_data=task_data,
                 _uuid=_uuid,
                 model_parameter=new_train.model_parameter
             )
 
-        thread_read_redis_celery_result(data.get('project_id'), 'train', new_train)
+        if not _state:
+            new_train.delete()
+            new_model.delete()
+        else:
+            thread_read_redis_celery_result(data.get('project_id'), 'train', new_train)
+
         train_serializer = ModelTrainDetailSerializer(instance=new_train)
         headers = self.get_success_headers(train_serializer.data)
         return Response(train_serializer.data, status=status.HTTP_201_CREATED, headers=headers)

@@ -282,11 +282,11 @@ def query_task(request):
     # 状态从redis改成数据库记录
     record = ModelTrain.objects.filter(project_id=project_id, category=category)
     if algorithm_type == 'prediction':
-        record = record.filter(model__type__in=['intention', 'generation'], model__title__icontains='普通')
+        record = record.filter(model__type__in=['annotation', 'dialogue'], model__title__icontains='普通')
     elif algorithm_type == 'prompt':
-        record = record.filter(model__type__in=['intention', 'generation'], model__title__icontains='0样本')
+        record = record.filter(model__type__in=['intention', 'dialogue_prompt'], model__title__icontains='0样本')
     elif algorithm_type == 'clean':
-        record = record.filter(model__type__in=['correction', 'intelligent', 'rule'])
+        record = record.filter(model__type__in=['bart_for_turn', 'intelligent', 'rule'])
 
     record = record.order_by('-id').first()
     if not record:

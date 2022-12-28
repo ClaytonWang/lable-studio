@@ -188,8 +188,11 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         state, rsp = ml_backend_request(
             uri='getLabels', method='get',
-            params=dict(hasd_id=model.hash_id)
+            params=dict(hash_id=model.hash_id)
         )
+        # rsp = {'0': '套餐', '1': '语音', '2': '流量', '3': '办理', '4': '否定', '5': '默认', '6': '肯定', '7': '不办理',
+        #  '8': '返回主屏幕'}
+        # return Response(data=rsp.values())
         if state:
             return Response(data=rsp.values())
         return self.return_ml_response(state, rsp)
