@@ -407,7 +407,10 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             max_version = max_version_model[0]['version']
         else:
             # 训练已经有模型，没有纪录取关联模型，新版本在当前版本加1
-            max_version = project.model.version
+            if project.model:
+                max_version = project.model.version
+            else:
+                max_version = version
         new_version = str(format(float(max_version) + 1, '.1f'))
 
         # 训练新模型：
