@@ -48,6 +48,7 @@ services:
       - POSTGRE_HOST=${DB_HOST:-192.168.0.92}
       - LABEL_STUDIO_HOST=${LABEL_STUDIO_HOST:-}
       - LABEL_STUDIO_COPY_STATIC_DATA=true
+      - ENV=${ENV:-dev}
     volumes:
       - /label-data-${ENV:-dev}:/label-studio/data:rw
       - /label-model-${ENV:-dev}:/label-studio/label_studio/db_ml/models:rw

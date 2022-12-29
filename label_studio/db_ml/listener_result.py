@@ -116,6 +116,9 @@ def read_redis_data(project_id, algorithm_type, record: ModelTrain):
         finish, total = statistics_finish_count(algorithm_type, project_id)
         print('finish:', finish, '   total:', total)
         if finish == total:
+            if algorithm_type != 'train':
+                record.state = 4  # 成功
+                record.save()
             break
 
 
