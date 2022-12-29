@@ -26,7 +26,7 @@ from model_manager.services import ml_backend_request
 from core.redis import _redis, redis_get, redis_delete, redis_healthcheck
 logger = logging.getLogger('db')
 DEFAULT_INTERRUPT_TIME = 5 * 60
-DEFAULT_SLEEP_TIME = 2
+DEFAULT_SLEEP_TIME = 0.5
 CELERY_FINISH_STATUS = ('SUCCESS', 'FAILURE')
 
 """
@@ -60,11 +60,11 @@ def read_redis_data(project_id, algorithm_type, record: ModelTrain):
         time.sleep(DEFAULT_SLEEP_TIME)
         record = ModelTrain.objects.filter(id=record.id).first()
         # 查询状态失败，退出
-        if not record or record.state == 5:
+        if record.state == 5:
             break
 
         # 超时处理
-        if int(time.time() - last_success_time) > DEFAULT_INTERRUPT_TIME:
+        if int(time.time() - last_success_time) > DEFAULT_INTERRUPT_TIME or not record:
             print(f"ML {project_id}  {algorithm_type} timeout.")
             finsh, total = statistics_finish_count(algorithm_type, project_id)
             # TODO 添加空数据

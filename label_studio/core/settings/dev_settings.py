@@ -8,6 +8,7 @@
   > CreateTime : 2022/6/20 08:41
 """
 
+MODEL_SERVING_HOST = 'http://124.71.161.146:12000'
 DATABASES = {
     'default':  {
         'ENGINE': 'django.db.backends.postgresql',
