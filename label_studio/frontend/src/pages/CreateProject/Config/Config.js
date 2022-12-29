@@ -12,8 +12,6 @@ import { Preview } from './Preview';
 import { DEFAULT_COLUMN, EMPTY_CONFIG, isEmptyConfig, Template } from './Template';
 import { TemplatesList } from './TemplatesList';
 import { useAPI } from '../../../providers/ApiProvider';
-import { Tag } from 'antd';
-import { Space } from "@/components/Space/Space";
 
 // don't do this, kids
 const formatXML = (xml) => {
@@ -258,7 +256,6 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
   const [configToCheck, setConfigToCheck] = React.useState();
   const [data, setData] = React.useState();
   const debounceTimer = React.useRef();
-  const [modelLabels, setModelLabels] = React.useState([]);
   const api = useAPI();
 
   const getModelLabels = React.useCallback(async (model_id) => {
@@ -269,7 +266,9 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
         },
       });
 
-      setModelLabels(data);
+      template.controls.map(c => {
+        template.addLabels(c,data);
+      });
     }
 
   }, []);
@@ -326,91 +325,54 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
     if (value === "visual") loadVisual(true);
   };
 
-  const onSave = async () => {
-    setError(null);
-    setWaiting(true);
-    const res = await onSaveClick();
-
-    setWaiting(false);
-    if (res !== true) {
-      setError(res);
-    }
-  };
-
-  const extra = (
-    <p className={configClass.elem('tags-link')}>
-      Configure the labeling interface with tags.
-      <br/>
-      <a href="https://labelstud.io/tags/" target="_blank">See all available tags</a>
-      .
-    </p>
-  );
-
   return (
     <div className={configClass}>
       {
-        !modelId?(
-          <div className={configClass.elem("container")}>
-            <header>
-              {
-                configure === 'code' ? (
-                  <span style={{
-                    width: '2em',
-                    height: '1em',
-                    display: 'inline-block',
-                    cursor: 'pointer',
-                  }} onClick={onBrowse}></span>
-                ) : null
-              }
-              {/* <button onClick={onBrowse}>{t("Browse Templates")}</button> */}
-              <ToggleItems items={{ code: t("Code"), visual: t("Visual") }} active={configure} onSelect={onSelect} />
-            </header>
-            <div className={configClass.elem('editor')}>
-              {configure === "code" && (
-                <div className={configClass.elem("code")} style={{ display: configure === "code" ? undefined : "none" }}>
-                  <CodeMirror
-                    name="code"
-                    id="edit_code"
-                    value={formatXML(config)}
-                    detach
-                    options={{ mode: "xml", theme: "default", lineNumbers: true }}
-                    onChange={(editor, data, value) => setTemplate(value)}
-                  />
-                </div>
-              )}
-              {visualLoaded && (
-                <div className={configClass.elem("visual")} style={{ display: configure === "visual" ? undefined : "none" }}>
-                  {isEmptyConfig(config) && <EmptyConfigPlaceholder />}
-                  <ConfigureColumns columns={columns} project={project} template={template} />
-                  {template.controls.map(control => <ConfigureControl control={control} template={template} key={control.getAttribute("name")} pageReadonly={ pageReadonly} />)}
-                  <ConfigureSettings template={template} />
-                </div>
-              )}
-            </div>
-            {/* {!pageReadonly && onSaveClick && (
+        <div className={configClass.elem("container")}>
+          <header>
+            {
+              configure === 'code' ? (
+                <span style={{
+                  width: '2em',
+                  height: '1em',
+                  display: 'inline-block',
+                  cursor: 'pointer',
+                }} onClick={onBrowse}></span>
+              ) : null
+            }
+            {/* <button onClick={onBrowse}>{t("Browse Templates")}</button> */}
+            <ToggleItems items={{ code: t("Code"), visual: t("Visual") }} active={configure} onSelect={onSelect} />
+          </header>
+          <div className={configClass.elem('editor')}>
+            {configure === "code" && (
+              <div className={configClass.elem("code")} style={{ display: configure === "code" ? undefined : "none" }}>
+                <CodeMirror
+                  name="code"
+                  id="edit_code"
+                  value={formatXML(config)}
+                  detach
+                  options={{ mode: "xml", theme: "default", lineNumbers: true }}
+                  onChange={(editor, data, value) => setTemplate(value)}
+                />
+              </div>
+            )}
+            {visualLoaded && (
+              <div className={configClass.elem("visual")} style={{ display: configure === "visual" ? undefined : "none" }}>
+                {isEmptyConfig(config) && <EmptyConfigPlaceholder />}
+                <ConfigureColumns columns={columns} project={project} template={template} />
+                {template.controls.map(control => <ConfigureControl control={control} template={template} key={control.getAttribute("name")} pageReadonly={ pageReadonly} />)}
+                <ConfigureSettings template={template} />
+              </div>
+            )}
+          </div>
+          {/* {!pageReadonly && onSaveClick && (
           <Form.Actions size="small" extra={configure === "code" && extra} valid>
             <Button look="primary" size="compact" style={{ width: 120 }} onClick={onSave} waiting={waiting}>
               {t("Save")}
             </Button>
           </Form.Actions>
         )} */}
-          </div>
-        ) : (
-          <div className={configClass.elem("container")}>
-            <h3>项目标签</h3>
-            <div>
-              <Space size="small">
-                {
-                  modelLabels && modelLabels.map(tag => {
-                    return (
-                      <Tag key={tag}>{tag}</Tag>
-                    );
-                  })
-                }
-              </Space>
-            </div>
-          </div>
-        )
+        </div>
       }
       <Preview config={config} data={data} error={error} />
     </div>

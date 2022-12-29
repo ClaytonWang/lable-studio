@@ -245,7 +245,7 @@ export const CreateProject = ({ onClose }) => {
           getModels={getModels}
         />
         <ImportPage project={project} show={step === "import"} {...pageProps} />
-        <ConfigPage key={templateType} project={project} onUpdate={setConfig} show={step === "config"} columns={columns} pageReadonly={false} config={templateConfig} modelId={modelId} />
+        <ConfigPage key={templateType} project={project} onUpdate={setConfig} show={step === "config"} columns={columns} pageReadonly={!!modelId} config={templateConfig} modelId={modelId} />
       </div>
     </Modal>
   );
