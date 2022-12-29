@@ -249,11 +249,14 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         # train
         version, new_version = self.get_model_version(project=project, is_init=False, model=model)
-        data['state'] = 3
-        data['category'] = 'train'
-        data['is_train'] = True
-        data['version'] = version
-        data['new_version'] = new_version
+        train_data = dict()
+        train_data['state'] = 3
+        train_data['category'] = 'train'
+        train_data['is_train'] = True
+        train_data['project_id'] = project_id
+        train_data['model_id'] = model_id
+        train_data['created_by_id'] = request.user.id
+        train_data['model_title'] = model.title
 
         # 判断标签是否一致
         task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
@@ -265,8 +268,8 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         with atomic():
             # train_count 前端在init接口拿到数据，训练模型带回来
-            data['total_count'] = task_query.count()
-            new_train = self.created_train(data)
+            train_data['total_count'] = task_query.count()
+            new_train = self.created_train(train_data)
 
             # 拼接模型服务参数
             task_data = []
@@ -279,7 +282,8 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             model_data['base'] = False
             model_data['version'] = new_version
             model_data['hash_id'] = create_hash()
-            model_data['title'] = data.get('model_title')
+            model_data['title'] = model.title
+            model_data['model_parameter'] = data.get('model_params')
             model_data['created_by'] = request.user
 
             for field in [
