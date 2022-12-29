@@ -285,10 +285,11 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             model_data['title'] = model.title
             model_data['model_parameter'] = data.get('model_params')
             model_data['created_by'] = request.user
+            model_data['project_id'] = project_id
 
             for field in [
                 'url', 'type', 'labels',
-                'organization', 'project', 'model_type',
+                'organization', 'model_type',
             ]:
                 model_data[field] = getattr(serializer.instance, field)
 
@@ -394,26 +395,41 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             - 创建项目时选择“训练新模型”，即1.0版本的基础模型。触发第一次人在环路后，迭代的模型版本号为2.0。触发第二次人在环路后（不论选择的是1.0版还是2.0版），迭代的模型版本号为3.0。
             - 创建项目时选择“训练已有模型”，如某个4.0版本的模型。触发第一次人在环路后，迭代的模型版本号为5.0。触发第二次人在环路后（不论选择的是2.0~5.0的哪个版本），迭代的模型版本号为6.0。
         """
-        # 训练新模型：
-        if not project.model:
-            return '1.0', '2.0'
 
-        if is_init and project:
+        version, new_version = '1.0', '2.0'
+        if project.model:
             version = project.model.version
-            new_version = str(format(float(version) + 1, '.1f'))
-            return version, new_version
 
-        if not is_init and project:
+        max_version_model = ModelManager.objects.filter(project=project).values('version')
+        max_version_model = list(max_version_model)
+        if max_version_model:
+            max_version_model.sort(key=lambda k: int(float(k['version'])), reverse=True)
+            max_version = max_version_model[0]['version']
+        else:
+            # 训练已经有模型，没有纪录取关联模型，新版本在当前版本加1
+            max_version = project.model.version
+        new_version = str(format(float(max_version) + 1, '.1f'))
 
-            max_version_model = ModelManager.objects.filter(project=project).values('version')
-            max_version_model = list(max_version_model)
-            if max_version_model:
-                max_version_model.sort(key=lambda k: int(float(k['version'])), reverse=True)
-                version = max_version_model[0]['version']
-            else:
-                # 训练已经有模型，没有纪录取关联模型，新版本在当前版本加1
-                version = project.model.version
-            new_version = str(format(float(version) + 1, '.1f'))
+        # 训练新模型：
+        # if not project.model:
+        #     return '1.0', '2.0'
+        #
+        # if is_init and project:
+        #     version = project.model.version
+        #     new_version = str(format(float(version) + 1, '.1f'))
+        #     return version, new_version
+        #
+        # if not is_init and project:
+        #
+        #     max_version_model = ModelManager.objects.filter(project=project).values('version')
+        #     max_version_model = list(max_version_model)
+        #     if max_version_model:
+        #         max_version_model.sort(key=lambda k: int(float(k['version'])), reverse=True)
+        #         version = max_version_model[0]['version']
+        #     else:
+        #         # 训练已经有模型，没有纪录取关联模型，新版本在当前版本加1
+        #         version = project.model.version
+        #     new_version = str(format(float(version) + 1, '.1f'))
         return version, new_version
 
     def created_train(self, data):
