@@ -116,8 +116,6 @@ def read_redis_data(project_id, algorithm_type, record: ModelTrain):
         finish, total = statistics_finish_count(algorithm_type, project_id)
         print('finish:', finish, '   total:', total)
         if finish == total:
-            record.state = 4  # 成功
-            record.save()
             break
 
 
@@ -157,10 +155,9 @@ def statistics_finish_count(algorithm_type, project_id) -> tuple:
             project_id=project_id
         ).count()
     elif algorithm_type == 'train':
-        # train时， project_id是model train的ID
-        train = ModelTrain.objects.filter(id=project_id).first()
+        _train = ModelTrain.objects.filter(project_id=project_id).order_by('-id').first()
         # 训练模型已经完成，直接返回成功
-        if train and train.category == 'train' and train.state in (4, 5):
+        if _train and _train.category == 'train' and _train.state in (4, 5):
             finish_task = total_task
 
     return finish_task, total_task
@@ -473,6 +470,7 @@ def insert_train_model(algorithm_result, model_train_id):
 
     train.state = 4
     train.train_finished_at = datetime.datetime.now()
+    # train.train_finished_at = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
     train.save()
 
     time.sleep(2)
