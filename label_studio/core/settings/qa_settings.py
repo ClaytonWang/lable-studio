@@ -19,7 +19,8 @@ DATABASES = {
     }
 }
 
-REDIS_HOST = '192.168.0.216'
+# REDIS_HOST = '192.168.0.216'
+REDIS_HOST = 'redis-prod'
 RQ_QUEUES = {
     'default': {
         'HOST': REDIS_HOST,
