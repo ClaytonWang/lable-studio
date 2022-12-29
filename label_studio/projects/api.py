@@ -274,6 +274,10 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
         )
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
+        if req_data.get('model_id'):
+            instance.model_id = req_data.get('model_id')
+            instance.save()
+
         if getattr(instance, '_prefetched_objects_cache', None):
             instance._prefetched_objects_cache = {}
 
