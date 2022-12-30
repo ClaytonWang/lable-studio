@@ -15,8 +15,9 @@ const TASK_TYPE = [
 ];
 
 const dataReload = () => {
-  window.dataManager.store.fetchProject({ force: true, interaction: 'refresh' });
-  window.dataManager.store.currentView?.reload();
+  // window.dataManager.store.fetchProject({ force: true, interaction: 'refresh' });
+  // window.dataManager.store.currentView?.reload();
+  window.location.reload();
 };
 
 export default forwardRef((props, ref) => {
