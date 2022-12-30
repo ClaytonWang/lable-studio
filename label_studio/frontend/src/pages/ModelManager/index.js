@@ -32,6 +32,7 @@ export const ModelManagerPage = () => {
     setNetworkState(true);
     const data = await api.callApi("modelManager", {
       params: {
+        state:'',
         page,
         page_size: pageSize,
         ...searchFields,
