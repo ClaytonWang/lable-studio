@@ -344,7 +344,7 @@ def get_prediction_generate_df(algorithm_result, task_id, model_id=None):
             _item_res = conversation_generation_save_template(res, 'prediction', from_name)
             pre_result.append(_item_res)
     else:
-        pre_result = conversation_generation_save_template(algorithm_result, 'prediction', 'response')
+        pre_result.append(conversation_generation_save_template(algorithm_result, 'prediction', 'response'))
     tag_data = dict(
         model_id=model_id,
         task_id=task_id,
@@ -401,9 +401,9 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id, model_id
             _item_res = conversation_generation_save_template(_res, 'prediction', from_name)
             pre_result.append(_item_res)
     else:
-        pre_result = conversation_generation_save_template(
+        pre_result.append(conversation_generation_save_template(
             join_text(algorithm_result), 'prediction', 'response'
-        )
+        ))
 
     tag_data = dict(model_id=model_id, task_id=task_id, result=pre_result)
     a, is_created = Prediction.objects.update_or_create(
