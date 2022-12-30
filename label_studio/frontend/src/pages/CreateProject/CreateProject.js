@@ -85,7 +85,7 @@ const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setNa
             value={modelId}
             onChange={e => setModelId(e.target.value)}
             options={existModels.map(item => ({
-              label: item.title + " " + item.version,
+              label: item.title_version,
               value: item.id,
             }))}
           />
