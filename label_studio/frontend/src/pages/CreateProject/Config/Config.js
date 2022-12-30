@@ -41,6 +41,7 @@ const formatXML = (xml) => {
 
 const wizardClass = cn("wizard");
 const configClass = cn("configure");
+let oldTemplateCtrls = [];
 
 const EmptyConfigPlaceholder = () => (
   <div className={configClass.elem("empty-config")}>
@@ -48,7 +49,7 @@ const EmptyConfigPlaceholder = () => (
   </div>
 );
 
-const Label = ({ label, template, color ,readOnly }) => {
+const Label = ({ label, template, color, readOnly }) => {
   const value = label.getAttribute("value");
 
   return (
@@ -62,11 +63,11 @@ const Label = ({ label, template, color ,readOnly }) => {
         />
       </label>
       <span>{value}</span>
-      { !readOnly &&(
+      {!readOnly && (
         <button type="button" className={configClass.elem("delete-label")} onClick={() => template.removeLabel(label)}>
           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="red" strokeWidth="2" strokeLinecap="square" xmlns="http://www.w3.org/2000/svg">
-            <path d="M2 12L12 2"/>
-            <path d="M12 12L2 2"/>
+            <path d="M2 12L12 2" />
+            <path d="M12 12L2 2" />
           </svg>
         </button>
       )}
@@ -74,7 +75,7 @@ const Label = ({ label, template, color ,readOnly }) => {
   );
 };
 
-export const ConfigureControl = ({ control, template,pageReadonly }) => {
+export const ConfigureControl = ({ control, template, pageReadonly }) => {
   const refLabels = React.useRef();
   const tagname = control.tagName;
 
@@ -243,15 +244,15 @@ const ConfigureColumns = ({ columns, template }) => {
               )}
             </select>
           </p>
-        );})}
+        );
+      })}
     </div>
   );
 };
 
-const Configurator = ({ columns, config, project, template, setTemplate, onBrowse, onSaveClick, onValidate, pageReadonly, modelId }) => {
+const Configurator = ({ columns, config, project, template, setTemplate, onBrowse, onValidate, pageReadonly, modelId }) => {
   const [configure, setConfigure] = React.useState(isEmptyConfig(config) ? "code" : "visual");
   const [visualLoaded, loadVisual] = React.useState(configure === "visual");
-  const [waiting, setWaiting] = React.useState(false);
   const [error, setError] = React.useState();
   const [configToCheck, setConfigToCheck] = React.useState();
   const [data, setData] = React.useState();
@@ -266,8 +267,21 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
         },
       });
 
+      oldTemplateCtrls = data;
       template.controls.map(c => {
-        template.addLabels(c,data);
+        template.addLabels(c, data);
+      });
+    } else {
+      template.controls.map(c => {
+        Array.from(c.children).map(label => {
+          const v = label.getAttribute("value");
+
+          if (oldTemplateCtrls.indexOf(v) !== -1 && (
+            v !== '升级' && v !== "不知情" && v !== "外呼"
+          )) {
+            template.removeLabel(label);
+          }
+        });
       });
     }
 
@@ -281,7 +295,7 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
 
   React.useEffect(() => {
     getModelLabels(modelId);
-  },[modelId]);
+  }, [modelId]);
 
   React.useEffect(async () => {
     if (!configToCheck) return;
@@ -360,7 +374,7 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
               <div className={configClass.elem("visual")} style={{ display: configure === "visual" ? undefined : "none" }}>
                 {isEmptyConfig(config) && <EmptyConfigPlaceholder />}
                 <ConfigureColumns columns={columns} project={project} template={template} />
-                {template.controls.map(control => <ConfigureControl control={control} template={template} key={control.getAttribute("name")} pageReadonly={ pageReadonly} />)}
+                {template.controls.map(control => <ConfigureControl control={control} template={template} key={control.getAttribute("name")} pageReadonly={pageReadonly} />)}
                 <ConfigureSettings template={template} />
               </div>
             )}

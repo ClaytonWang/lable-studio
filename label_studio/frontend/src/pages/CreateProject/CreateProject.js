@@ -13,7 +13,7 @@ import "./CreateProject.styl";
 import { ImportPage } from './Import/Import';
 import { useImportPage } from './Import/useImportPage';
 import { useDraftProject } from './utils/useDraftProject';
-import { Radio } from 'antd';
+import { Badge,Radio } from 'antd';
 
 const ProjectName = ({ templateType, setTemplateType, templateTypes, name, setName, onSaveName, onSubmit, error, description, setDescription, modelId, setModelId, existModels, getModels, show = true }) => {
   const [modelTrain, setTodelTrain] = useState('TRAIN_NEW');
@@ -110,12 +110,15 @@ export const CreateProject = ({ onClose }) => {
   const [error, setError] = React.useState();
   const [description, setDescription] = React.useState("");
   const [config, setConfig] = React.useState("<View></View>");
+  const [showDot, setShowDot] = React.useState(false);
 
   const templateConfig = useMemo(() => {
     return template.getConfigByApikey(templateType);
   }, [templateType]);
 
   React.useEffect(() => { setError(null); }, [name]);
+
+  React.useEffect(() => { setShowDot(!!modelId); }, [modelId]);
 
   const { columns, uploading, uploadDisabled, finishUpload, pageProps } = useImportPage(project);
 
@@ -124,7 +127,7 @@ export const CreateProject = ({ onClose }) => {
   const steps = {
     name: <span className={tabClass.mod({ disabled: !!error })}>{t("Project Name")}</span>,
     import: <span className={tabClass.mod({ disabled: uploadDisabled })}>{t("Data Import", "数据导入")}</span>,
-    config: t("Labeling Setup", "标注设置"),
+    config: <Badge dot={showDot}> { t("Labeling Setup", "标注设置")} </Badge>,
   };
 
   // name intentionally skipped from deps:
@@ -145,6 +148,7 @@ export const CreateProject = ({ onClose }) => {
 
 
   const getModels = useCallback(async (tpl_type, isSetModelId = false) => {
+    setWaitingStatus(true);
     const response = await api.callApi("modelManager", {
       params: {
         template_type: tpl_type,
@@ -159,7 +163,7 @@ export const CreateProject = ({ onClose }) => {
       if (models.length > 0 && isSetModelId)
         setModelId(models[0].id);
     }
-
+    setWaitingStatus(false);
   }, []);
 
   React.useEffect(() => {
@@ -215,16 +219,21 @@ export const CreateProject = ({ onClose }) => {
     onClose?.();
   }, [project]);
 
+  const onSelect = React.useCallback((item) => {
+    setShowDot(false);
+    setStep(item);
+  });
+
   return (
     <Modal onHide={onDelete} fullscreen visible bare closeOnClickOutside={false}>
       <div className={rootClass}>
         <Modal.Header>
           <h1>{t("Create Project")}</h1>
-          <ToggleItems items={steps} active={step} onSelect={setStep} />
+          <ToggleItems items={steps} active={step} onSelect={onSelect} />
 
           <Space>
             <Button look="danger" size="compact" onClick={onDelete} waiting={waiting}>{t('Delete')}</Button>
-            <Button look="primary" size="compact" onClick={onCreate} waiting={waiting || uploading} disabled={!project || uploadDisabled || error}>{t("Save")}</Button>
+            <Button look="primary" size="compact" onClick={onCreate} waiting={waiting || uploading} disabled={!project || uploadDisabled || error || showDot || waiting}>{t("Save")}</Button>
           </Space>
         </Modal.Header>
         <ProjectName
