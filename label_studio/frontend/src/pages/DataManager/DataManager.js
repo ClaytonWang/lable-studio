@@ -322,17 +322,14 @@ DataManagerPage.context = ({ dmRef }) => {
         </Button>
       )}
 
-      {
-        isShowCycl ? (
-          <Button
-            size="compact"
-            data-external
-            onClick={actions.human}
-          >
-            {t('on_the_road', '人在环路')}
-          </Button>
-        ) : null
-      }
+      <Button
+        disabled={ !isShowCycl}
+        size="compact"
+        data-external
+        onClick={actions.human}
+      >
+        {t('on_the_road', '人在环路')}
+      </Button>
 
       {Object.entries(links).map(([path, label]) => (
         <Button
