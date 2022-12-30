@@ -28,6 +28,7 @@ from data_manager.managers import get_fields_for_evaluation
 from data_manager.serializers import ViewSerializer, DataManagerTaskSerializer, \
     SelectedItemsSerializer, ViewResetSerializer, CustomViewSerializer
 from data_manager.actions import get_all_actions, perform_action
+from projects.services import check_annotation
 
 
 logger = logging.getLogger(__name__)
@@ -291,6 +292,7 @@ class ProjectStateAPI(APIView):
 
         data.update(
             {
+                "show_cycle_human_btn": check_annotation(pk),
                 "can_delete_tasks": True,
                 "can_manage_annotations": True,
                 "can_manage_tasks": True,
