@@ -320,6 +320,14 @@ def conversation_generation_save_template(
     return result
 
 
+def join_text(_result):
+    text = []
+    for sub_text in _result:
+        for _text in sub_text:
+            text.append(_text)
+    return text
+
+
 def get_prediction_generate_df(algorithm_result, task_id, model_id=None):
     """
     对话生成的入库数据格式：
@@ -344,7 +352,9 @@ def get_prediction_generate_df(algorithm_result, task_id, model_id=None):
             _item_res = conversation_generation_save_template(res, 'prediction', from_name)
             pre_result.append(_item_res)
     else:
-        pre_result.append(conversation_generation_save_template(algorithm_result, 'prediction', 'response'))
+        pre_result.append(conversation_generation_save_template(
+            join_text(algorithm_result), 'prediction', 'response')
+        )
     tag_data = dict(
         model_id=model_id,
         task_id=task_id,
@@ -386,13 +396,6 @@ def insert_prompt_generate_value(algorithm_result, project_id, task_id, model_id
     :param model_id:
     :return:
     """
-
-    def join_text(_result):
-        text = []
-        for sub_text in _result:
-            for _text in sub_text:
-                text.append(_text)
-        return text
 
     pre_result = []
     if isinstance(algorithm_result, dict):
