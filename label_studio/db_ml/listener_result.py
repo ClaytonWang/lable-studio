@@ -102,6 +102,7 @@ def read_redis_data(project_id, algorithm_type, record: ModelTrain):
                     result=result if status == 'SUCCESS' else '',
                     model_id=record.model.id if record.model else '',
                     record=record,
+                    traceback=k_result.get('traceback', ''),
                 )
                 print('ML message. status: ', status, ' results:',  data)
                 process_callback_result(data)
@@ -175,7 +176,7 @@ def process_callback_result(data):
     algorithm_type, record_id, task_id = split_project_and_task_id(celery_task_id)
     print(' algorithm_type: ', algorithm_type, ' project_id: ', record_id, ' task_id: ', task_id)
     if algorithm_type == 'train' and task_status == 'FAILURE':
-        train_failure_delete_train_model(record_id)
+        train_failure_delete_train_model(record_id, data.get('traceback'))
         print(f'ML Train Task status is failed. {celery_task_id}')
     else:
         process_algorithm_result(algorithm_type, record_id, task_id, result, model_id)
