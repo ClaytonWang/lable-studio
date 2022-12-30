@@ -61,11 +61,14 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         version = data.get('version')
         model = data.get('model_set')
         project_id = data.get('project_id')
+        state = data.get('state', 4)
 
         self.queryset = ModelManager.objects.\
             for_user_organization(request.user).order_by('-created_at')
         template_type = dict(TEMPLATE_MODEL_TYPE_MAPPING).get(template_type)
         filter_params = dict(is_delete=False)
+        if state:
+            filter_params = dict(state=state)
         base = data.get('base')
 
         # 人在环路会带project id来查询
@@ -75,6 +78,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
                 return Response(status=400, data=dict(message='未查询到项目ID'))
             labels = get_project_labels(project_id=project_id)
             filter_params['type'] = dict(TEMPLATE_MODEL_TYPE_MAPPING).get(project.template_type)
+            filter_params['state'] = 4
             # 新模型必须使用基础模型训练
             if not project.model:
                 filter_params['version'] = '1.0'
