@@ -389,15 +389,18 @@ def train_model(
     )
 
 
-def train_failure_delete_train_model(model_train_id):
+def train_failure_delete_train_model(model_train_id, traceback=''):
     from model_manager.models import ModelTrain, ModelManager
 
     train = ModelTrain.objects.filter(id=model_train_id).first()
-    if not train:
-        return
+    if train:
+        train.state = 5
+        train.remark = traceback
+        train.save()
 
-    train.new_model and train.new_model.delete()
-    train.delete()
+    if train and train.new_model:
+        train.new_model.state = 5
+        train.new_model.save()
 
 
 def cut_task_to_model(query_total, num=SEND_TASK_TO_MODEL_COUNT):
