@@ -76,7 +76,7 @@ const IntentResponse = ({ close, execLabel, loading }) => {
         <Form.Item
           label="项目标签"
         >
-          <Space size="small">
+          <Space size="small" style={{ display:"block" }}>
             {
               projectLabels && projectLabels.map(tag => {
                 return (
