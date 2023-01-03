@@ -31,6 +31,7 @@ from db_ml.services import get_choice_values
 from db_ml.services import train_model
 from db_ml.services import generate_uuid
 from core.utils.common import create_hash
+from projects.services import get_template
 from db_ml.services import get_first_version_model
 from db_ml.services import get_project_labels
 from db_ml.services import INTENT_DIALOG_PROMPT_TOKEN
@@ -219,7 +220,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
             task_id = item.id
             label = ''
             if task_id in anno_result:
-                label = get_choice_values(anno_result.get(task_id))
+                label = get_choice_values(anno_result.get(str(task_id)))
 
             if not label and str(task_id) in pre_result:
                 label = get_choice_values(pre_result.get(str(task_id)))
@@ -229,6 +230,33 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
             task_label[task_id] = label
         return True, task_label
+
+    def get_dialogue_data(self, task_query):
+
+        anno_result, pre_result = self.get_project_label_result(task_query)
+        task_label = []
+        for task in task_query:
+
+            _index = 0
+            result = []
+            task_id = str(task.id)
+            if task_id in anno_result:
+                result = anno_result.get(task_id, [])
+            if not result and task_id in pre_result:
+                result = pre_result.get(task_id, [])
+
+            for item in result:
+                text = item.get('value', {}).get('text', [])
+                if not text:
+                    continue
+                item = dict(
+                    task_id=f'{task_id}_{_index}',
+                    dialogue=text,
+                    label=item.get('from_name')
+                )
+                task_label.append(item)
+                _index += 1
+        return task_label
 
     @action(methods=['POST'], detail=False)
     def train(self, request, *args, **kwargs):
@@ -260,7 +288,6 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
 
         # 判断标签是否一致
         task_query = Task.objects.filter(project_id=data.get('project_id')).order_by('-id')
-        _, task_label = self.check_task_label_in_project(data.get('project_id'), task_query)
 
         template_type = None
         if len(task_query):
@@ -299,23 +326,32 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
                 new_train.save()
 
             # 调用模型服务
-            for item in task_query:
-                task_id = item.id
-                dialogue = item.data.get('dialogue', [])
-                task_data.append(dict(
-                    task_id=task_id,
-                    dialogue=dialogue,
-                    label=task_label[task_id] if template_type == 'intent-classification' else '',
-                ))
+            if template_type == 'intent-classification':
+                # 意图标注
+                _, task_label = self.check_task_label_in_project(data.get('project_id'), task_query)
+                for item in task_query:
+                    task_id = item.id
+                    dialogue = item.data.get('dialogue', [])
+                    task_data.append(dict(
+                        task_id=task_id,
+                        dialogue=dialogue,
+                        label=task_label[task_id],
+                    ))
+            else:
+                # 对话生成
+                task_data = self.get_dialogue_data(task_query)
 
             obj_id = new_train.id
             _uuid = generate_uuid('train', obj_id)
+
+        templates = get_template(project_id)
         _state, text = train_model(
                 project_id=data.get('project_id'),
                 model=model,
                 new_model=new_model,
                 task_data=task_data,
                 _uuid=_uuid,
+                template=templates,
                 model_parameter=new_train.model_parameter
             )
 
