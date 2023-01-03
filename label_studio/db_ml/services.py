@@ -321,7 +321,10 @@ def predict_prompt(
         data=task_data,
         labels=get_project_labels(project_id),
         templates=template,
-        extra=dict(return_nums=return_num, version_id=model.hash_id, uuid=_uuid)
+        extra=dict(
+            return_nums=return_num, version_id=model.hash_id, uuid=_uuid,
+            parameter=model.model_parameter
+        )
     )
 
     logger.info(f'ML project id:{project_id}, model id {model_id}, count: {len(task_data)}')
@@ -344,12 +347,13 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
     if model_ids:
         model_query = ModelManager.objects.filter(
             id__in=model_ids
-        ).values('id', 'url', 'title', 'hash_id')
+        ).values('id', 'url', 'title', 'hash_id', 'model_parameter')
 
     if len(model_ids) != len(model_query):
         return False, f'{str(model_ids)}模型没有查询到模型'
 
     model_data = {item['id']: item['hash_id'] for item in model_query}
+    model_parameter = {item['id']: item['model_parameter'] for item in model_query}
     hash_ids = [model_data[_id] for _id in model_ids]
     # first_url = urls.pop(0)
     # _params = dict(uuid=_uuid)
@@ -359,6 +363,7 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
         labels=get_project_labels(project_id),
         extra=dict(
             pipelines=hash_ids, uuid=_uuid, version_id='',
+            parameter=model_parameter,
         )
     )
     return ml_backend_request(
