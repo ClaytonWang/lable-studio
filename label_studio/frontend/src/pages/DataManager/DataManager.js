@@ -1,4 +1,4 @@
-import React,{ createRef, useCallback, useEffect, useMemo,useRef, useState } from 'react';
+import React,{ createRef, useCallback, useEffect,useRef, useState } from 'react';
 import { generatePath, useHistory } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import { Loading } from '../../components';
@@ -15,11 +15,9 @@ import { isDefined } from '../../utils/helpers';
 import { ImportModal } from '../CreateProject/Import/ImportModal';
 import { ExportPage } from '../ExportPage/ExportPage';
 import { APIConfig } from './api-config';
-import { useConfig } from "@/providers/ConfigProvider";
 import ProjectStatus from './ProjectStatus';
 import DataOperate, { Clean, HumanInTheLoop, Prediction, Prompt } from './DataOperate';
 import { CleanConfig } from "./DataOperate/Clean/CleanConfig";
-import { template } from '@/utils/util';
 import "./DataManager.styl";
 
 // 按钮相关操作

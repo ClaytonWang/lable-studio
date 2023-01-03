@@ -46,7 +46,7 @@ export const CleanConfig = forwardRef(({ cleanRefs }, ref) => {
       intelligent: 1,
       correction: 2,
     };
-    
+
     const sortedValue = orderBy(value, item => {
       return get(indexMap, find(cleanModels, { id: item })?.type, 0);
     }, 'asc');
@@ -94,7 +94,7 @@ export const CleanConfig = forwardRef(({ cleanRefs }, ref) => {
 
   const getCleanModels = useCallback(async () => {
     return await api.callApi("modelManager", {
-      params: { type: 'intelligent,rule,correction' },
+      params: { type: 'intelligent,rule,bart_for_turn' },
     });
   }, []);
 
