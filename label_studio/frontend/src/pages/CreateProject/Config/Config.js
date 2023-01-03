@@ -267,21 +267,24 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
         },
       });
 
+
       oldTemplateCtrls = data;
+
       template.controls.map(c => {
+        //clear label
+        Array.from(c.children).map(label => {
+          template.removeLabel(label);
+        });
+
+        //add new label
         template.addLabels(c, data);
       });
     } else {
       template.controls.map(c => {
         Array.from(c.children).map(label => {
-          const v = label.getAttribute("value");
-
-          if (oldTemplateCtrls.indexOf(v) !== -1 && (
-            v !== '升级' && v !== "不知情" && v !== "外呼"
-          )) {
-            template.removeLabel(label);
-          }
+          template.removeLabel(label);
         });
+        template.addLabels(c, ['升级','不知情','外呼']);
       });
     }
 
