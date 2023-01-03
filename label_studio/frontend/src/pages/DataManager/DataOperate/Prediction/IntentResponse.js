@@ -80,7 +80,7 @@ const IntentResponse = ({ close, execLabel, loading }) => {
             {
               projectLabels && projectLabels.map(tag => {
                 return (
-                  <Tag key={tag}>{tag}</Tag>
+                  <Tag style={{ marginTop:5 }} key={tag}>{tag}</Tag>
                 );
               })
             }
