@@ -251,7 +251,7 @@ class ModelTrainViews(MultiSerializerViewSetMixin, ModelViewSet):
                     continue
                 item = dict(
                     task_id=f'{task_id}_{_index}',
-                    dialogue=text,
+                    dialogue=[{'text': item, 'author': ''} for item in text],
                     label=item.get('from_name')
                 )
                 task_label.append(item)

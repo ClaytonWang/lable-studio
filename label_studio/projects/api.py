@@ -281,7 +281,7 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
 
         if instance.template_type == 'conversational-generation':
             labels = get_project_labels(instance.id)
-            conversational_generation_add_template(project_id=instance.id, label=labels[0] if len(labels) else '')
+            conversational_generation_add_template(project_id=instance.id, label=labels)
 
         return Response(serializer.data)
 
