@@ -49,6 +49,7 @@ from rest_framework.permissions import IsAuthenticated
 from db_ml.services import get_project_labels
 from projects.services import conversational_generation_add_template
 from tasks.models import Annotation, Prediction
+from .services import check_annotation
 logger = logging.getLogger(__name__)
 
 
@@ -209,23 +210,8 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
 
     def get(self, request, *args, **kwargs):
         result = super(ProjectAPI, self).get(request, *args, **kwargs)
-
-        task_ids = [item[0] for item in Task.objects.filter(project_id=kwargs.get('pk')).values_list('id')]
-
-        pre_ids = [item[0] for item in Prediction.objects.filter(task_id__in=task_ids).values_list('task_id')]
-        cha_ids = list(set(task_ids).difference(set(pre_ids)))
         data = result.data
-        data['show_cycle_human_btn'] = False
-        if cha_ids:
-            # 自动标注 没有检查手动标注
-            # TODO 是否需要检查标注空值
-            cha_ann_ids = Annotation.objects.filter(task_id__in=cha_ids)
-            _ids = list(set(cha_ids).difference(set(cha_ann_ids)))
-            if not _ids:
-                data['show_cycle_human_btn'] = True
-        else:
-            data['show_cycle_human_btn'] = True
-
+        data['show_cycle_human_btn'] = check_annotation(kwargs.get('pk'))
         result.data = data
         return result
 

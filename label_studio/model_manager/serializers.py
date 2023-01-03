@@ -36,7 +36,8 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_title_version(obj):
-        return obj.title + obj.version + ' ' + obj.project.title if obj.project else ""
+        tv = obj.title + obj.version
+        return tv + ' ' + obj.project.title if obj.project else tv
 
     class Meta:
         model = ModelManager

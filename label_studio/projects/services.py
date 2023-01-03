@@ -5,7 +5,7 @@
     >Mail    : jindu.yin@digitalbrain.cn
     >Time    : 2022/11/22 13:41
 """
-
+from tasks.models import Task, Prediction, Annotation
 from projects.models import PromptTemplates
 
 
@@ -48,3 +48,23 @@ def conversational_generation_add_template(project_id, label):
         objects.append(obj)
 
     PromptTemplates.objects.bulk_create(objects)
+
+
+def check_annotation(project_id):
+
+    task_ids = [item[0] for item in Task.objects.filter(project_id=project_id).values_list('id')]
+    pre_ids = [item[0] for item in Prediction.objects.filter(task_id__in=task_ids).values_list('task_id')]
+    cha_ids = list(set(task_ids).difference(set(pre_ids)))
+
+    show_cycle_human_btn = False
+    if cha_ids:
+        # 自动标注 没有检查手动标注
+        # TODO 是否需要检查标注空值
+        cha_ann_ids = Annotation.objects.filter(task_id__in=cha_ids)
+        _ids = list(set(cha_ids).difference(set(cha_ann_ids)))
+        if not _ids:
+            show_cycle_human_btn = True
+    else:
+        show_cycle_human_btn = True
+
+    return show_cycle_human_btn
