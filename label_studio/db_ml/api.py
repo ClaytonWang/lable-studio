@@ -189,7 +189,7 @@ def prediction(request):
 
     project = query.first().project
     # # 生成对话普通 取消模型选择(没有模型选择，后端自动添加模型 普通模型)，
-    if project.template_type == 'conversational-generation':
+    if project.template_type == 'conversational-generation' and not model_id:
         model = ModelManager.objects.filter(type='dialogue', version='1.0', base=True).first()
         model_id = model.id
 

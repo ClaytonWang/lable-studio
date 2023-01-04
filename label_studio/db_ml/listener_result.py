@@ -69,11 +69,14 @@ def read_redis_data(project_id, algorithm_type, record: ModelTrain):
             finsh, total = statistics_finish_count(algorithm_type, project_id)
             # TODO 添加空数据
             # 先测试没有加空值的影响，如果不影响整体流程，暂不处理
+            state = 4  # 成功
             if round(finsh/total, 2) < 0.8:
-                record.state = 5  # 失败
-            else:
-                record.state = 4  # 成功
+                state = 5  # 失败
+            record.state = state
             record.save()
+            if record.category == 'train' and record.new_model:
+                record.new_model = state
+                record.save()
             break
 
         if algorithm_type == 'train':
