@@ -63,7 +63,7 @@ class ModelManagerCreateSerializer(serializers.ModelSerializer):
         model = ModelManager
         fields = (
             'title', 'model', 'organization_id', 'created_by_id',
-            'version', 'project', 'url', 'type',
+            'version', 'project', 'url', 'type', 'model_parameter',
         )
 
 
