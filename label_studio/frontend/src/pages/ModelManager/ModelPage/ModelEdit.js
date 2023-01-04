@@ -17,19 +17,19 @@ const formatJSON = (json) => {
 };
 
 export const ModelEdit = ({ data, onClose }) => {
+  let modelParams = formatJSON(data?.model_parameter ?? "");
   const api = useContext(ApiContext);
   const history = useHistory();
   const [waiting, setWaiting] = useState(false);
-  const [modelParams, setModelParams] = useState(formatJSON(data?.model_parameter ?? ""));
 
   const onHide = useCallback(async (force) => {
     history.replace("/model-manager");
     onClose?.(force, "edit");
   }, []);
 
-  const onFinish = useCallback(async () => {
+  const onFinish = useCallback(async (parama) => {
     setWaiting(true);
-    const body = { ...data,model_parameter:modelParams };
+    const body = { ...data,model_parameter: parama };
 
     await api.callApi("editModel", {
       body,
@@ -38,8 +38,8 @@ export const ModelEdit = ({ data, onClose }) => {
       },
     });
     setWaiting(false);
-    onHide();
-  }, [modelParams]);
+    onHide(true);
+  }, []);
 
   return (
     <Modal
@@ -66,7 +66,7 @@ export const ModelEdit = ({ data, onClose }) => {
             placeholder:"请输入正则表达式。。。",
           }}
           onChange={(editor, data, value) => {
-            setModelParams(value);
+            modelParams = value;
           }}
         />
       </div>
@@ -81,7 +81,7 @@ export const ModelEdit = ({ data, onClose }) => {
         >
             取消
         </Button>
-        <Button size="compact" disabled={!modelParams} type="primary" waiting={waiting} onClick={onFinish}>
+        <Button size="compact" disabled={!modelParams} type="primary" waiting={waiting} onClick={() => { onFinish(modelParams);}}>
             确定
         </Button>
       </div>
