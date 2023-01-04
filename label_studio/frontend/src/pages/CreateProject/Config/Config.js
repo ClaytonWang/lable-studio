@@ -41,7 +41,6 @@ const formatXML = (xml) => {
 
 const wizardClass = cn("wizard");
 const configClass = cn("configure");
-let oldTemplateCtrls = [];
 
 const EmptyConfigPlaceholder = () => (
   <div className={configClass.elem("empty-config")}>
@@ -267,24 +266,29 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
         },
       });
 
-
-      oldTemplateCtrls = data;
-
       template.controls.map(c => {
-        //clear label
-        Array.from(c.children).map(label => {
-          template.removeLabel(label);
-        });
-
-        //add new label
-        template.addLabels(c, data);
+        if (c.tagName === 'Choices') {
+          //clear label
+          Array.from(c.children).map(label => {
+            template.removeLabel(label);
+          });
+          //add new label
+          template.addLabels(c, data);
+        }
       });
     } else {
       template.controls.map(c => {
-        Array.from(c.children).map(label => {
-          template.removeLabel(label);
-        });
-        template.addLabels(c, ['升级','不知情','外呼']);
+        if (c.tagName === 'Choices') {
+          Array.from(c.children).map(label => {
+            template.removeLabel(label);
+          });
+          //对话生成模板
+          if (template.config.indexOf('template-conversational-ai-response-generation') !== -1) {
+            template.addLabels(c, ['升级','不升级']);
+          } else {
+            template.addLabels(c, ['升级','不知情','外呼']);
+          }
+        }
       });
     }
 
