@@ -1,5 +1,6 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+import json
 from django.conf import settings
 from rest_framework import serializers
 from rest_flex_fields import FlexFieldsModelSerializer
@@ -20,7 +21,19 @@ class ModelManagerListSerializer(serializers.ModelSerializer):
     created_by = UserSimpleSerializer(default={}, help_text='created owner')
     project = SerializerMethodField()
     model_type = SerializerMethodField()
+    model_parameter = SerializerMethodField()
     # project_set = ProjectSetDetailSerializer(default={})
+
+    @staticmethod
+    def get_model_parameter(obj):
+        if obj.model_parameter:
+            try:
+                return json.loads(obj.model_parameter)
+            except Exception as e:
+                print(e)
+                return obj.model_parameter
+        else:
+            return None
 
     @staticmethod
     def get_url(obj):
