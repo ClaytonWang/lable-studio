@@ -42,14 +42,6 @@ const ResponseGeneration = ({ loading, close, project, request }) => {
           <PromptTemplate project={project} tag ref={ comRef } />
         </Form.Item>
       </Form>
-      {/* <Row>
-        <Col className="label-wrapper" span={4}>
-          <label>标签</label>
-        </Col>
-        <Col className="item-wrapper" span={20}>
-          <ProjectTag value={tags} onChange={onChangeTag} />
-        </Col>
-      </Row> */}
       <Modal.Footer>
         <Space align="end">
           <Button size="compact" onClick={() => {
