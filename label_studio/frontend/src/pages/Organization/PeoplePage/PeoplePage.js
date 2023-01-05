@@ -159,11 +159,10 @@ const createCode = () => {
 
 export const PeoplePage = () => {
   const api = useAPI();
-  const history = useHistory();
+
   const inviteModal = useRef();
   const config = useConfig();
   const [selectedUser, setSelectedUser] = useState(null);
-
   const [link, setLink] = useState();
   const [roleList, setRoleList] = useState([]);
   const [orgList, setOrgList] = useState([]);
@@ -261,10 +260,6 @@ export const PeoplePage = () => {
     inviteModal.current?.update(inviteModalProps(link, roleList, orgList, validateCode, roleId, orgId,inviteId));
   }, [link, roleList, orgList, validateCode, roleId, orgId,inviteId]);
 
-  const changeOrganization = () => {
-    history.push('organization/list');
-  };
-
   return (
     <Block name="people">
       <Elem name="controls">
@@ -275,15 +270,6 @@ export const PeoplePage = () => {
             <Button icon={<LsPlus />} primary onClick={showInvitationModal}>
               {t("Add People", "添加用户")}
             </Button>
-            {
-              !config.user.noauth_button?.some((v) => {
-                return v.code === "001_001";
-              }) && (
-                <Button icon={<SwapOutlined rotate={90} />} primary onClick={changeOrganization}>
-                  {t("Change Organization", "切换组织")}
-                </Button>
-              )
-            }
           </Space>
         </Space>
       </Elem>

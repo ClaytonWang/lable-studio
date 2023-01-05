@@ -6,12 +6,9 @@ import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { Popconfirm } from 'antd';
 import { ExclamationCircleOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import { ApiContext } from '../../../providers/ApiProvider';
-import { useHistory } from "react-router";
-
 
 export const useColumns = (reload) => {
   const api = useContext(ApiContext);
-  const history = useHistory();
   const [modalAddEdit, setModalAddEdit] = useState(null);
   const [modalEdt, setModaEdt] = useState(null);
 
