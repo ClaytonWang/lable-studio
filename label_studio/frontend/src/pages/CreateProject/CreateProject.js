@@ -220,7 +220,9 @@ export const CreateProject = ({ onClose }) => {
   }, [project]);
 
   const onSelect = React.useCallback((item) => {
-    setShowDot(false);
+    if (item === 'config') {
+      setShowDot(false);
+    }
     setStep(item);
   });
 
