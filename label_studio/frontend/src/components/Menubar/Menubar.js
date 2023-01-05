@@ -194,7 +194,7 @@ export const Menubar = ({
                     return v.name === "organization";
                   }) && (
                     <Menu.Item
-                      label={t("Organization")}
+                      label={t("People")}
                       to="/organization"
                       icon={<IconPersonInCircle/>}
                       data-external
