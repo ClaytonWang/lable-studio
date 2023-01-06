@@ -59,9 +59,10 @@ export const PeopleList = ({ onSelect, selectedUser, defaultSelected }) => {
           {usersList ? (
             <Elem name="users">
               <Elem name="header">
-                <Elem name="column" mix="avatar"/>
+                <Elem name="column" mix="avatar" />
                 <Elem name="column" mix="email">{t("Email")}</Elem>
                 <Elem name="column" mix="name">{t("Name")}</Elem>
+                <Elem name="column" mix="name">权限</Elem>
                 <Elem name="column" mix="last-activity">{t("Last Activity")}</Elem>
               </Elem>
               <Elem name="body">
@@ -72,7 +73,7 @@ export const PeopleList = ({ onSelect, selectedUser, defaultSelected }) => {
                     <Elem key={`user-${user.id}`} name="user" mod={{ active }} onClick={() => selectUser(user)}>
                       <Elem name="field" mix="avatar">
                         <CopyableTooltip title={'User ID: ' + user.id} textForCopy={user.id}>
-                          <Userpic user={user} style={{ width: 28, height: 28 }}/>
+                          <Userpic user={user} style={{ width: 28, height: 28 }} />
                         </CopyableTooltip>
                       </Elem>
                       <Elem name="field" mix="email">
@@ -80,6 +81,9 @@ export const PeopleList = ({ onSelect, selectedUser, defaultSelected }) => {
                       </Elem>
                       <Elem name="field" mix="name">
                         {user.last_name}{user.first_name}
+                      </Elem>
+                      <Elem name="field" mix="name">
+                        {user.role}
                       </Elem>
                       <Elem name="field" mix="last-activity">
                         {formatDistance(new Date(user.last_activity), new Date(), { addSuffix: true, locale: window?.i18next?.datefnsLocale })}
@@ -91,7 +95,7 @@ export const PeopleList = ({ onSelect, selectedUser, defaultSelected }) => {
             </Elem>
           ) : (
             <Elem name="loading">
-              <Spinner size={36}/>
+              <Spinner size={36} />
             </Elem>
           )}
         </Elem>
