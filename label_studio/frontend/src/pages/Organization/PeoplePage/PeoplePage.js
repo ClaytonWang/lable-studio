@@ -12,8 +12,6 @@ import "./PeopleInvitation.styl";
 import { PeopleList } from "./PeopleList";
 import "./PeoplePage.styl";
 import { SelectedUser } from "./SelectedUser";
-import { useHistory } from 'react-router';
-import { SwapOutlined } from '@ant-design/icons';
 import { Form } from 'antd';
 
 const layout = {
