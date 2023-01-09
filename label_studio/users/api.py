@@ -1,5 +1,6 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+import copy
 import logging
 from rest_framework import status
 import drf_yasg.openapi as openapi
@@ -22,6 +23,8 @@ from core.permissions import all_permissions, ViewClassPermission
 from users.models import User
 from users.serializers import UserSerializer
 from users.functions import check_avatar
+from django.contrib.auth.models import Group
+from organizations.models import Organization
 
 
 logger = logging.getLogger(__name__)
@@ -127,7 +130,42 @@ class UserAPI(viewsets.ModelViewSet):
         return super(UserAPI, self).list(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-        return super(UserAPI, self).create(request, *args, **kwargs)
+        if request.user.group != 'admin':
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=dict(error=f'普通用户没有权限创建用户')
+            )
+
+        data = copy.deepcopy(request.data)
+        role = data.get('role')
+        email = data.get('email')
+
+        group = Group.objects.filter(name=role).first()
+        if not group or not email:
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=dict(error=f'指定角色或邮箱错误')
+            )
+
+        data['username'] = data.get('email').split('@')[0]
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+
+        password = data.get('password')
+        serializer.instance.set_password(password)
+        # 用户添加角色
+        serializer.instance.groups.add(group)
+        serializer.instance.save()
+        # 添加组织成员
+        org = Organization.objects.filter(title='Label Studio').first()
+        if org:
+            serializer.instance.active_organization_id = org.id
+            serializer.instance.save()
+            org.users.add(serializer.instance)
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def retrieve(self, request, *args, **kwargs):
         return super(UserAPI, self).retrieve(request, *args, **kwargs)
