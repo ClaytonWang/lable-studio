@@ -130,6 +130,12 @@ class UserAPI(viewsets.ModelViewSet):
         return super(UserAPI, self).list(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
+        if request.user.group != 'admin':
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data=dict(error=f'普通用户没有权限创建用户')
+            )
+
         data = copy.deepcopy(request.data)
         role = data.get('role')
         email = data.get('email')
