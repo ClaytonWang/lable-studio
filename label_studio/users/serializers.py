@@ -6,11 +6,23 @@ from django.conf import settings
 from .models import User
 from core.utils.common import load_func
 
+ROLE_TEXT = {
+    'admin': '管理员',
+    'user': '普通用户',
+}
+
 
 class BaseUserSerializer(serializers.ModelSerializer):
     # short form for user presentation
     initials = serializers.SerializerMethodField(default='?', read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
+    role = serializers.SerializerMethodField(read_only=True)
+
+    def get_role(self, obj):
+        group = obj.groups.first()
+        if group:
+            return ROLE_TEXT.get(group.name, '')
+        return ''
 
     def get_avatar(self, user):
         return user.avatar_url
@@ -44,6 +56,7 @@ class BaseUserSerializer(serializers.ModelSerializer):
             'initials',
             'phone',
             'active_organization',
+            'role',
         )
 
 
