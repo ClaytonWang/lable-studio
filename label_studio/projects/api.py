@@ -137,17 +137,9 @@ class ProjectListAPI(generics.ListCreateAPIView):
     pagination_class = ProjectListPagination
 
     def get_queryset(self):
-        set_id=self.request.query_params.get('set_id')
-        queryset = Project.objects.for_user(self.request.user)
+        projects = Project.objects.for_user(self.request.user)
         # query_params = dict(organization=self.request.user.active_organization)
-        query_params = dict()
-        if set_id in [-1, "-1"]:
-            query_params['set_id__isnull'] = True
-        elif set_id:
-            query_params['set_id'] = set_id
-        else:
-            pass
-        projects = queryset.filter(**query_params)
+        # if request.user.group != 'admin':
         return ProjectManager.with_counts_annotate(projects).prefetch_related('members', 'created_by')
 
     def get_serializer_context(self):
@@ -163,7 +155,6 @@ class ProjectListAPI(generics.ListCreateAPIView):
                 raise ProjectExistException('Project with the same name already exists: {}'.
                                             format(ser.validated_data.get('title', '')))
             raise LabelStudioDatabaseException('Database error during project creation. Try again.')
-
 
     def get(self, request, *args, **kwargs):
         return super(ProjectListAPI, self).get(request, *args, **kwargs)
