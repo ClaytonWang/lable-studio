@@ -46,10 +46,11 @@ class ProjectManager(models.Manager):
     def for_user(self, user):
         group = user.groups.first()
         query = self.filter(organization=user.active_organization)
-        if group and group.name == ANNOTATOR_GROUP:
-            return query.filter(
-                Q(annotator=user) | Q(created_by=user)
-            )
+        if group and group.name != 'admin':
+            return query.filter(created_by=user)
+            # return query.filter(
+            #     Q(annotator=user) | Q(created_by=user)
+            # )
         return query
 
     COUNTER_FIELDS = [
