@@ -16,9 +16,9 @@ class BaseUserSerializer(serializers.ModelSerializer):
     # short form for user presentation
     initials = serializers.SerializerMethodField(default='?', read_only=True)
     avatar = serializers.SerializerMethodField(read_only=True)
-    role = serializers.SerializerMethodField(read_only=True)
+    group = serializers.SerializerMethodField(read_only=True)
 
-    def get_role(self, obj):
+    def get_group(self, obj):
         group = obj.groups.first()
         if group:
             return ROLE_TEXT.get(group.name, '')
@@ -56,7 +56,7 @@ class BaseUserSerializer(serializers.ModelSerializer):
             'initials',
             'phone',
             'active_organization',
-            'role',
+            'group',
         )
 
 

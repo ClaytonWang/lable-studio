@@ -137,10 +137,9 @@ class UserAPI(viewsets.ModelViewSet):
             )
 
         data = copy.deepcopy(request.data)
-        role = data.get('role')
         email = data.get('email')
 
-        group = Group.objects.filter(name=role).first()
+        group = Group.objects.filter(name=data.get('group', '')).first()
         if not group or not email:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
