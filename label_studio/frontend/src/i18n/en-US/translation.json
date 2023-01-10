@@ -428,5 +428,8 @@
   "rule":"规则清洗",
   "intelligent":"智能清洗",
   "intelligent-clean.marked_method": "自动清洗方法",
-  "round-correction.marked_method": "自动清洗方法"
+  "round-correction.marked_method": "自动清洗方法",
+  "Password":"Password",
+  "OldPassword":"Old Password",
+  "NewPassword":"New Password"
 }

@@ -1,25 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LsPlus } from "../../../assets/icons";
-import { Button } from "../../../components";
-import { Input, Select } from "../../../components/Form";
 import { modal } from "../../../components/Modal/Modal";
 import { Space } from "../../../components/Space/Space";
 import { useAPI } from "../../../providers/ApiProvider";
-import { useConfig } from "../../../providers/ConfigProvider";
 import { Block, Elem } from "../../../utils/bem";
-import { copyText } from "../../../utils/helpers";
 import "./PeopleInvitation.styl";
 import { PeopleList } from "./PeopleList";
 import "./PeoplePage.styl";
 import { SelectedUser } from "./SelectedUser";
-import { Form } from 'antd';
+import { Button, Form ,Input,Select } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 
 const layout = {
   labelCol: {
     span: 5,
   },
   wrapperCol: {
-    span: 19,
+    span: 15,
   },
 };
 
@@ -29,28 +25,28 @@ const groupName = (name) => {
       return '管理员';
     case 'user':
       return '普通用户';
-    case 'annotator':
-      return '标注员';
   }
 };
 
 const InvitationModal = (props) => {
-  const config = useConfig();
-  const [copiedCode, setCopiedCode] = useState(false);
-  const [copiedLink, setCopiedLink] = useState(false);
-  const [form] = Form.useForm();
-  const { link, roles, orgs, code, roleId, orgId, onUpdate ,inviteId } = props;
-  const copyTxt = useCallback((txt, type) => {
-    if (type === 'code')
-      setCopiedCode(true);
-    else
-      setCopiedLink(true);
+  const api = useAPI();
+  const { roles,onClose } = props;
+  const [waiting, setWaiting] = useState(false);
 
-    copyText(txt);
-    if (type === 'code')
-      setTimeout(() => setCopiedCode(false), 2000);
-    else
-      setTimeout(() => setCopiedLink(false), 2000);
+  const tailLayout = {
+    wrapperCol: {
+      offset: 4,
+      span: 16,
+    },
+  };
+  const onFinish = useCallback((values) => {
+    setWaiting(true);
+    api.callApi("createUser",{
+      body: values,
+    }).then(() => {
+      setWaiting(false);
+      onClose();
+    });
 
   }, []);
 
@@ -59,115 +55,115 @@ const InvitationModal = (props) => {
       <Form
         style={{ marginTop: 20 }}
         {...layout}
-        form={form}
-        initialValues={{ group_id: roleId, organization_id: orgId, code, link }}
+        onFinish={onFinish}
         layout="horizontal"
-        name="form_in_org"
+        autoComplete="off"
         colon={false}>
         <Form.Item
-          name="group_id"
+          rules={[
+            {
+              required: true,
+              message: '请选择权限',
+            },
+          ]}
+          name="role"
           label="角色">
-          <div style={{ width: 250 }}>
-            <Select
-              value={roleId}
-              options={roles?.map(v => {
-                return { label: groupName(v.name), value: v.id, name: v.name };
-              })}
-              onChange={(e) => {
-                form.setFieldsValue({ group_id: e.target.value });
-                let organization_id = form.getFieldValue('organization_id');
-
-                if (!organization_id) {
-                  organization_id = config.user.orgnazition.id;
-                }
-
-                onUpdate({
-                  inviteId,
-                  code,
-                  group_id: e.target.value,
-                  organization_id,
-                });
-              }}
-            />
-          </div>
+          <Select
+            placeholder="请选择权限"
+            options={roles?.map(v => {
+              return { label: groupName(v.name), value: v.id, name: v.name };
+            })}
+          />
         </Form.Item>
         <Form.Item
-          name="organization_id"
-          label="组织">
-          <div style={{ width: 250 }}>
-            <Select
-              value={orgId}
-              options={orgs?.map(v => {
-                return { label: v.title, value: v.id };
-              })}
-              onChange={(e) => {
-                form.setFieldsValue({ organization_id: e.target.value });
-                let group_id = form.getFieldValue('group_id');
-
-                if (!group_id) {
-                  [{ id: group_id }] = roles?.filter((v) => { return v.name === 'user'; });
-                }
-                onUpdate({
-                  inviteId,
-                  code,
-                  group_id,
-                  organization_id: e.target.value,
-                });
-              }}
-            />
-          </div>
+          name="email"
+          label="邮箱"
+          rules={[
+            {
+              required: true,
+              message: '请输入邮箱',
+            },
+            {
+              type: 'email',
+              message: '请输入正确的邮箱',
+            },
+          ]}>
+          <Input placeholder="请输入邮箱" />
         </Form.Item>
         <Form.Item
-          name="code"
-          label="注册验证码"
+          label="姓名"
+          required={true}
+          style={{
+            marginBottom: 0,
+          }}
         >
-          <>
-            <Input style={{ width: 250 }} value={code} readOnly />
-            <Button primary onClick={() => { copyTxt(code, 'code'); }} >
-              {copiedCode ? t("Copied!", "已复制！") : '复制验证码'}</Button>
-          </>
+          <Form.Item
+            name="last_name"
+            rules={[
+              {
+                required: true,
+                message: '请输入姓',
+              },
+            ]}
+            style={{
+              display: 'inline-block',
+              width: 'calc(50% - 8px)',
+            }}
+          >
+            <Input placeholder="请输入姓" />
+          </Form.Item>
+          <Form.Item
+            name="first_name"
+            rules={[
+              {
+                required: true,
+                message: '请输入名',
+              },
+            ]}
+            style={{
+              display: 'inline-block',
+              width: 'calc(50% - 8px)',
+              margin: '0 8px',
+            }}
+          >
+            <Input placeholder="请输入名" />
+          </Form.Item>
         </Form.Item>
+
         <Form.Item
-          name="link"
-          label="注册链接"
+          name="password"
+          label="密码"
+          rules={[
+            {
+              required: true,
+              message: '请输入密码',
+            },
+          ]}
         >
-          <>
-            <Input style={{ width: 330 }} value={link} readOnly />
-            <Button primary onClick={() => { copyTxt(link, 'link'); }}>
-              {copiedLink ? t("Copied!", "已复制！") : t("Copy link", "复制链接")}</Button>
-          </>
+          <Input.Password placeholder="请输入密码" autoComplete="false" />
+        </Form.Item>
+        <Form.Item label=" " {...tailLayout}>
+          <Space>
+            <Button htmlType="button" onClick={() => { onClose();}}>
+            取消
+            </Button>
+            <Button type="primary" htmlType="submit" loading={waiting}>
+            提交
+            </Button>
+          </Space>
         </Form.Item>
       </Form>
     </Block>
   );
 };
 
-const createCode = () => {
-  let code = "";
-  var codeLength = 6;//验证码的长度，可变
-  var selectChar = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];//所有候选组成验证码的字符
-
-  for (var i = 0; i < codeLength; i++) {
-    var charIndex = Math.floor(Math.random() * 10);
-
-    code += selectChar[charIndex];
-  }
-  return code;
-};
 
 export const PeoplePage = () => {
   const api = useAPI();
 
   const inviteModal = useRef();
-  const config = useConfig();
   const [selectedUser, setSelectedUser] = useState(null);
-  const [link, setLink] = useState();
   const [roleList, setRoleList] = useState([]);
-  const [orgList, setOrgList] = useState([]);
-  const [validateCode, setValidateCode] = useState(createCode());
-  const [roleId, setRoleId] = useState();
-  const [orgId, setOrgId] = useState();
-  const [inviteId, setInviteId] = useState();
 
   const selectUser = useCallback((user) => {
     setSelectedUser(user);
@@ -175,97 +171,44 @@ export const PeoplePage = () => {
     localStorage.setItem('selectedUser', user?.id);
   }, [setSelectedUser]);
 
-  const setInviteLink = useCallback(() => {
-    const hostname = config.hostname || location.origin;
-
-    setLink(`${hostname}${'/user/signup'}`);
-  }, [config, setLink]);
-
-  const updateInviteCode = (values) => {
-    api.callApi("updateInvite", {
-      params: {
-        pk: values.inviteId,
-      },
-      body: values,
-    });
-  };
-
-  const updateLink = useCallback((values) => {
-    values.code = createCode();
-    if (values.inviteId) {
-      updateInviteCode(values);
-    } else {
-      api.callApi("signInvite", { body: values, errorFilter: () => true }).then((data) => {
-        if (data?.status === 400) {
-          //code duplicated
-          values.code = createCode();
-          api.callApi("signInvite", { body: values, errorFilter: () => true }).then((rsp) => {
-            if (rsp.status === 400) {
-              console.log(rsp);
-            } else {
-              setInviteId(rsp?.id);
-            }
-          });
-        } else {
-          setInviteId(data?.id);
-        }
-      });
-    }
-
-    setValidateCode(values.code);
-    setOrgId(values.organization_id);
-    setRoleId(values.group_id);
-  }, [setInviteLink]);
-
-  const inviteModalProps = useCallback((link, roles, orgs, code, roleId, orgId, inviteId) => ({
+  const inviteModalProps = useCallback((roles) => ({
     title: t("Invite people", "邀请加入"),
-    style: { width: 640, height: 472 },
+    style: { width: 600, height: 450 },
+    closeOnClickOutside: false,
     body: () => (
-      <InvitationModal
-        link={link}
-        roles={roles}
-        orgs={orgs}
-        code={code}
-        roleId={roleId}
-        orgId={orgId}
-        inviteId={inviteId}
-        onUpdate={updateLink} />
+      <InvitationModal roles={roles} onClose={closeInvitationModal} />
     ),
   }), []);
 
-  const showInvitationModal = useCallback(() => {
-    const [{ id: group_id }] = roleList?.filter((v) => { return v.name === 'user'; });
+  const closeInvitationModal = useCallback(() => {
+    inviteModal.current?.close();
+  });
 
-    updateLink({ group_id, organization_id: config.user.orgnazition.id });
-    inviteModal.current = modal(inviteModalProps(link, roleList, orgList, validateCode, roleId, orgId, inviteId));
-  }, [inviteModalProps, link, roleList, orgList, validateCode, roleId, orgId,inviteId]);
+  const showInvitationModal = useCallback(() => {
+    inviteModal.current = modal(inviteModalProps(roleList));
+  }, [inviteModalProps, roleList]);
 
   const defaultSelected = useMemo(() => {
     return localStorage.getItem('selectedUser');
   }, []);
 
   useEffect(async () => {
-
     const data = await api.callApi("roleList");
 
     setRoleList(data?.group);
-    setOrgList(data?.organization);
-    setInviteLink();
-
   }, []);
 
   useEffect(() => {
-    inviteModal.current?.update(inviteModalProps(link, roleList, orgList, validateCode, roleId, orgId,inviteId));
-  }, [link, roleList, orgList, validateCode, roleId, orgId,inviteId]);
+    inviteModal.current?.update(inviteModalProps(roleList));
+  }, [roleList]);
 
   return (
     <Block name="people">
       <Elem name="controls">
         <Space spread>
           <Space></Space>
-
           <Space>
-            <Button icon={<LsPlus />} primary onClick={showInvitationModal}>
+            <Button icon={<PlusOutlined />} type="primary" onClick={showInvitationModal}>
               {t("Add People", "添加用户")}
             </Button>
           </Space>

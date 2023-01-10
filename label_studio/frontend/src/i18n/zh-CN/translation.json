@@ -428,5 +428,8 @@
   "correction":"轮次纠正",
   "intelligent-clean":"智能清洗",
   "intelligent-clean.marked_method": "自动清洗方法",
-  "round-correction.marked_method": "自动清洗方法"
+  "round-correction.marked_method": "自动清洗方法",
+  "Password":"密码",
+  "OldPassword":"旧密码",
+  "NewPassword":"新密码"
 }
