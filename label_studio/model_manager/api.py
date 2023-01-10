@@ -27,6 +27,7 @@ from db_ml.common import MultiSerializerViewSetMixin
 from model_manager.services import str2bool
 from db_ml.services import get_project_labels
 from projects.models import Project
+from .services import check_model_state
 
 logger = logging.getLogger(__name__)
 
@@ -55,6 +56,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         :param kwargs:
         :return: dict
         """
+        check_model_state()
         data = request.GET.dict()
         _type = data.get('type')
         template_type = data.get('template_type')

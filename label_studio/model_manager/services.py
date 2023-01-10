@@ -11,8 +11,9 @@ import os
 import sys
 import logging
 import requests
-from typing import Optional, List
+from datetime import datetime, timezone
 from django.conf import settings
+from model_manager.models import ModelManager
 logger = logging.getLogger('db')
 
 
@@ -105,3 +106,20 @@ def str2bool(value, raise_exc=False):
     if raise_exc:
         raise ValueError('Expected "%s"' % '", "'.join(_true_set | _false_set))
     return None
+
+
+def check_model_state():
+    """
+    检查模型状态是否有进行中的状态，有并且启动时间超过12小时，把状态置成失败
+    (3, '训练中'),
+    (4, '已完成'),
+    (5, '失败'),
+    (6, '运行中'),
+    """
+
+    running = ModelManager.objects.filter(state__in=(3, 6)).all()
+    for item in running:
+        interval = datetime.now(timezone.utc) - item.created_at
+        if interval.days >= 1:
+            item.state = 5
+            item.save()
