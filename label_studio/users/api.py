@@ -139,7 +139,7 @@ class UserAPI(viewsets.ModelViewSet):
         data = copy.deepcopy(request.data)
         email = data.get('email')
 
-        group = Group.objects.filter(name=data.get('group', '')).first()
+        group = Group.objects.filter(id=data.get('group', -1)).first()
         if not group or not email:
             return Response(
                 status=status.HTTP_400_BAD_REQUEST,
