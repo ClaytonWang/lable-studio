@@ -286,7 +286,7 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
           if (template.config.indexOf('template-conversational-ai-response-generation') !== -1) {
             template.addLabels(c, ['升级','不升级']);
           } else {
-            template.addLabels(c, ['升级','不知情','外呼']);
+            template.addLabels(c, ['套餐','语音','流量',"办理","否定","默认","肯定","不办理","返回主屏幕"]);
           }
         }
       });
