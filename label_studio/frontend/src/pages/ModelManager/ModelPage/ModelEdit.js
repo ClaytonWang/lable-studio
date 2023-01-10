@@ -21,6 +21,7 @@ export const ModelEdit = ({ data, onClose }) => {
   const api = useContext(ApiContext);
   const history = useHistory();
   const [waiting, setWaiting] = useState(false);
+  const [hasValue, setHasValue] = useState(false);
 
   const onHide = useCallback(async (force) => {
     history.replace("/model-manager");
@@ -67,6 +68,12 @@ export const ModelEdit = ({ data, onClose }) => {
           }}
           onChange={(editor, data, value) => {
             modelParams = value;
+            if (value) {
+              setHasValue(true);
+            } else {
+              setHasValue(false);
+            }
+
           }}
         />
       </div>
@@ -81,7 +88,7 @@ export const ModelEdit = ({ data, onClose }) => {
         >
             取消
         </Button>
-        <Button size="compact" disabled={!modelParams} type="primary" waiting={waiting} onClick={() => { onFinish(modelParams);}}>
+        <Button size="compact" disabled={!hasValue} type="primary" waiting={waiting} onClick={() => { onFinish(modelParams);}}>
             确定
         </Button>
       </div>
