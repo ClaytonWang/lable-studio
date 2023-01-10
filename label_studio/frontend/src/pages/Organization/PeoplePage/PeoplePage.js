@@ -1,24 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { LsPlus } from "../../../assets/icons";
-import { Button } from "../../../components";
-import { Input, Select } from "../../../components/Form";
 import { modal } from "../../../components/Modal/Modal";
 import { Space } from "../../../components/Space/Space";
 import { useAPI } from "../../../providers/ApiProvider";
-import { useConfig } from "../../../providers/ConfigProvider";
 import { Block, Elem } from "../../../utils/bem";
 import "./PeopleInvitation.styl";
 import { PeopleList } from "./PeopleList";
 import "./PeoplePage.styl";
 import { SelectedUser } from "./SelectedUser";
-import { Form } from 'antd';
+import { Button, Form ,Input,Select } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 
 const layout = {
   labelCol: {
     span: 5,
   },
   wrapperCol: {
-    span: 19,
+    span: 15,
   },
 };
 
@@ -32,42 +29,70 @@ const groupName = (name) => {
 };
 
 const InvitationModal = (props) => {
-  const [form] = Form.useForm();
-  const { link, roles, roleId } = props;
+  const api = useAPI();
+  const { roles,onClose } = props;
+  const [waiting, setWaiting] = useState(false);
+
+  const tailLayout = {
+    wrapperCol: {
+      offset: 4,
+      span: 16,
+    },
+  };
+  const onFinish = useCallback((values) => {
+    setWaiting(true);
+    api.callApi("createUser",{
+      body: values,
+    }).then(() => {
+      setWaiting(false);
+      onClose();
+    });
+
+  }, []);
 
   return (
     <Block name="invite">
       <Form
         style={{ marginTop: 20 }}
         {...layout}
-        form={form}
-        initialValues={{ group_id: roleId, link }}
+        onFinish={onFinish}
         layout="horizontal"
-        name="form_in_org"
+        autoComplete="off"
         colon={false}>
         <Form.Item
+          rules={[
+            {
+              required: true,
+              message: '请选择权限',
+            },
+          ]}
           name="role"
           label="角色">
-          <div style={{ width: 150 }}>
-            <Select
-              options={roles?.map(v => {
-                return { label: groupName(v.name), value: v.id, name: v.name };
-              })}
-              onChange={(e) => {
-                form.setFieldsValue({ role: e.target.value });
-              }}
-            />
-          </div>
+          <Select
+            placeholder="请选择权限"
+            options={roles?.map(v => {
+              return { label: groupName(v.name), value: v.id, name: v.name };
+            })}
+          />
         </Form.Item>
         <Form.Item
           name="email"
-          label="邮箱">
-          <div style={{ width: 350 }}>
-            <Input />
-          </div>
+          label="邮箱"
+          rules={[
+            {
+              required: true,
+              message: '请输入邮箱',
+            },
+            {
+              type: 'email',
+              message: '请输入正确的邮箱',
+            },
+          ]}>
+          <Input placeholder="请输入邮箱" />
         </Form.Item>
         <Form.Item
           label="姓名"
+          required={true}
           style={{
             marginBottom: 0,
           }}
@@ -82,7 +107,7 @@ const InvitationModal = (props) => {
             ]}
             style={{
               display: 'inline-block',
-              width: 'calc(50% - 38px)',
+              width: 'calc(50% - 8px)',
             }}
           >
             <Input placeholder="请输入姓" />
@@ -97,8 +122,8 @@ const InvitationModal = (props) => {
             ]}
             style={{
               display: 'inline-block',
-              width: 'calc(50% - 50px)',
-              margin: '0 38px',
+              width: 'calc(50% - 8px)',
+              margin: '0 8px',
             }}
           >
             <Input placeholder="请输入名" />
@@ -108,10 +133,24 @@ const InvitationModal = (props) => {
         <Form.Item
           name="password"
           label="密码"
+          rules={[
+            {
+              required: true,
+              message: '请输入密码',
+            },
+          ]}
         >
-          <div style={{ width: 350 }} >
-            <Input />
-          </div>
+          <Input.Password placeholder="请输入密码" autoComplete="false" />
+        </Form.Item>
+        <Form.Item label=" " {...tailLayout}>
+          <Space>
+            <Button htmlType="button" onClick={() => { onClose();}}>
+            取消
+            </Button>
+            <Button type="primary" htmlType="submit" loading={waiting}>
+            提交
+            </Button>
+          </Space>
         </Form.Item>
       </Form>
     </Block>
@@ -123,11 +162,8 @@ export const PeoplePage = () => {
   const api = useAPI();
 
   const inviteModal = useRef();
-  const config = useConfig();
   const [selectedUser, setSelectedUser] = useState(null);
-  const [link, setLink] = useState();
   const [roleList, setRoleList] = useState([]);
-  const [orgList, setOrgList] = useState([]);
 
   const selectUser = useCallback((user) => {
     setSelectedUser(user);
@@ -135,59 +171,44 @@ export const PeoplePage = () => {
     localStorage.setItem('selectedUser', user?.id);
   }, [setSelectedUser]);
 
-  const setInviteLink = useCallback(() => {
-    const hostname = config.hostname || location.origin;
-
-    setLink(`${hostname}${'/user/signup'}`);
-  }, [config, setLink]);
-
-  const inviteModalProps = useCallback((link, roles, orgs, code, roleId, orgId, inviteId) => ({
+  const inviteModalProps = useCallback((roles) => ({
     title: t("Invite people", "邀请加入"),
-    style: { width: 640, height: 472 },
+    style: { width: 600, height: 450 },
+    closeOnClickOutside: false,
     body: () => (
-      <InvitationModal
-        link={link}
-        roles={roles}
-        orgs={orgs}
-        code={code}
-        roleId={roleId}
-        orgId={orgId}
-        inviteId={inviteId} />
+      <InvitationModal roles={roles} onClose={closeInvitationModal} />
     ),
   }), []);
 
-  const showInvitationModal = useCallback(() => {
-    const [{ id: role }] = roleList?.filter((v) => { return v.name === 'user'; });
+  const closeInvitationModal = useCallback(() => {
+    inviteModal.current?.close();
+  });
 
-    inviteModal.current = modal(inviteModalProps(link, roleList, orgList));
-  }, [inviteModalProps, link, roleList, orgList]);
+  const showInvitationModal = useCallback(() => {
+    inviteModal.current = modal(inviteModalProps(roleList));
+  }, [inviteModalProps, roleList]);
 
   const defaultSelected = useMemo(() => {
     return localStorage.getItem('selectedUser');
   }, []);
 
   useEffect(async () => {
-
     const data = await api.callApi("roleList");
 
     setRoleList(data?.group);
-    setOrgList(data?.organization);
-    setInviteLink();
-
   }, []);
 
   useEffect(() => {
-    inviteModal.current?.update(inviteModalProps(link, roleList, orgList, roleId, orgId,inviteId));
-  }, [link, roleList, orgList, roleId, orgId,inviteId]);
+    inviteModal.current?.update(inviteModalProps(roleList));
+  }, [roleList]);
 
   return (
     <Block name="people">
       <Elem name="controls">
         <Space spread>
           <Space></Space>
-
           <Space>
-            <Button icon={<LsPlus />} primary onClick={showInvitationModal}>
+            <Button icon={<PlusOutlined />} type="primary" onClick={showInvitationModal}>
               {t("Add People", "添加用户")}
             </Button>
           </Space>

@@ -4,6 +4,7 @@ export const API_CONFIG = {
   endpoints: {
     // Users
     users: "/users",
+    createUser:"POST:/users",
     usersList:"GET:/users/all",
     me: "/current-user/whoami",
 
