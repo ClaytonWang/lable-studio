@@ -149,6 +149,8 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         """
         删除接口
         """
+        if request.user.group != 'admin':
+            return Response(status=400, data=dict(message='没有删除权限'))
         self.queryset = ModelManager.objects.filter(pk=kwargs.get('pk'), base=False)
         if not self.queryset:
             return Response(status=400, data=dict(message='未查询到非基础模型'))
