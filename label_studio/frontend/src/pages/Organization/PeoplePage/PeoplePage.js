@@ -45,7 +45,7 @@ const InvitationModal = (props) => {
       body: values,
     }).then(() => {
       setWaiting(false);
-      onClose();
+      onClose(true);
     });
 
   }, []);
@@ -66,7 +66,7 @@ const InvitationModal = (props) => {
               message: '请选择权限',
             },
           ]}
-          name="role"
+          name="group"
           label="角色">
           <Select
             placeholder="请选择权限"
@@ -180,8 +180,11 @@ export const PeoplePage = () => {
     ),
   }), []);
 
-  const closeInvitationModal = useCallback(() => {
+  const closeInvitationModal = useCallback((force) => {
     inviteModal.current?.close();
+    if (force) {
+      window.location.reload();
+    }
   });
 
   const showInvitationModal = useCallback(() => {
