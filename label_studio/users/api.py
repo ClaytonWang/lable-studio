@@ -170,7 +170,28 @@ class UserAPI(viewsets.ModelViewSet):
         return super(UserAPI, self).retrieve(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
-        return super(UserAPI, self).partial_update(request, *args, **kwargs)
+        kwargs['partial'] = True
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        old_pwd = request.data.get('old_pwd')
+        new_pwd = request.data.get('new_pwd')
+        if old_pwd and new_pwd:
+            if not instance.check_password(old_pwd):
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data=dict(error=f'旧密码错误')
+                )
+            instance.set_password(new_pwd)
+            instance.save()
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         return super(UserAPI, self).destroy(request, *args, **kwargs)
