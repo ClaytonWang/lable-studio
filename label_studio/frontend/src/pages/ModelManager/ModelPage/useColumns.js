@@ -7,6 +7,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
 import { confirm } from "@/components/Modal/Modal";
 import { useAPI } from "@/providers/ApiProvider";
+import { useConfig } from "@/providers/ConfigProvider";
 
 const ModelState = {
   1: "初始",
@@ -30,6 +31,7 @@ export const useColumns = () => {
   const [modalExp, setModalExp] = useState(null);
   const [modalEdt, setModaEdt] = useState(null);
   const api = useAPI();
+  const config = useConfig();
 
   const handlDel = (model) => {
     confirm({
@@ -146,7 +148,7 @@ export const useColumns = () => {
               (() => {
                 return [
                   record.state === 3 ? <Spin indicator={loadingIcon} /> : <a key="export" onClick={() => { setModalExp(record); }}>导出</a>,
-                  (record.version === "1.0" && record.state === 4) || record.state === 3 ? null : (<a key="del" style={{ color: 'red' }} onClick={() => { handlDel(record); }}>删除</a>),
+                  (record.version === "1.0" && record.state === 4) || record.state === 3 || config.user?.group === "user" ? null : (<a key="del" style={{ color: 'red' }} onClick={() => { handlDel(record); }}>删除</a>),
                   record.type === "rule" && record.state === 4 ? (<a key="edit" onClick={() => { setModaEdt(record); }}>编辑参数</a>) : null,
                 ];
               })()
