@@ -277,19 +277,22 @@ const Configurator = ({ columns, config, project, template, setTemplate, onBrows
         }
       });
     } else {
-      template.controls.map(c => {
-        if (c.tagName === 'Choices') {
-          Array.from(c.children).map(label => {
-            template.removeLabel(label);
-          });
-          //对话生成模板
-          if (template.config.indexOf('template-conversational-ai-response-generation') !== -1) {
-            template.addLabels(c, ['升级','不升级']);
-          } else {
-            template.addLabels(c, ['套餐','语音','流量',"办理","否定","默认","肯定","不办理","返回主屏幕"]);
+      //项目创建页
+      if (!pageReadonly) {
+        template.controls.map(c => {
+          if (c.tagName === 'Choices') {
+            Array.from(c.children).map(label => {
+              template.removeLabel(label);
+            });
+            //对话生成模板
+            if (template.config.indexOf('template-conversational-ai-response-generation') !== -1) {
+              template.addLabels(c, ['升级','不升级']);
+            } else {
+              template.addLabels(c, ['套餐','语音','流量',"办理","否定","默认","肯定","不办理","返回主屏幕"]);
+            }
           }
-        }
-      });
+        });
+      }
     }
 
   }, []);
