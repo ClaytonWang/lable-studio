@@ -70,7 +70,7 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
         template_type = dict(TEMPLATE_MODEL_TYPE_MAPPING).get(template_type)
         filter_params = dict(is_delete=False)
         if state:
-            filter_params = dict(state=state)
+            filter_params['state'] = state
         base = data.get('base')
 
         # 人在环路会带project id来查询
