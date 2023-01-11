@@ -21,7 +21,7 @@ const LeftContextMenu = ({ className }) => (
   <StaticContent
     id="context-menu-left"
     className={className}
-    raw={ true}
+    raw={true}
   >{(template) => <Breadcrumbs fromTemplate={template} />}</StaticContent>
 );
 
@@ -30,7 +30,7 @@ const RightContextMenu = ({ className, ...props }) => {
 
   return ContextComponent ? (
     <div className={className}>
-      <ContextComponent {...props} {...(contextProps ?? {})}/>
+      <ContextComponent {...props} {...(contextProps ?? {})} />
     </div>
   ) : (
     <StaticContent
@@ -85,7 +85,7 @@ export const Menubar = ({
   const providerValue = useMemo(() => ({
     PageContext,
 
-    setContext(ctx){
+    setContext(ctx) {
       setTimeout(() => {
         setPageContext({
           ...PageContext,
@@ -126,24 +126,24 @@ export const Menubar = ({
             <div className={`${menubarClass.elem('trigger')} main-menu-trigger`}>
               {/* <NineDays /> */}
               {/* <b style={{ height:35,borderLeft:'1px solid #ccc' }}></b> */}
-              <span style={{ color: '#000',fontWeight: 'bold',fontSize:13 }}>
-              人在环路自动化平台
+              <span style={{ color: '#000', fontWeight: 'bold', fontSize: 13 }}>
+                人在环路自动化平台
               </span>
               {/* <img src={absoluteURL("/static/icons/logo-black.svg")} alt="Label Studio Logo" height="22"/> */}
-              <Hamburger opened={sidebarOpened}/>
+              <Hamburger opened={sidebarOpened} />
             </div>
           </Dropdown.Trigger>
 
           <div className={menubarContext}>
-            <LeftContextMenu className={contextItem.mod({ left: true })}/>
+            <LeftContextMenu className={contextItem.mod({ left: true })} />
 
-            <RightContextMenu className={contextItem.mod({ right: true })}/>
+            <RightContextMenu className={contextItem.mod({ right: true })} />
           </div>
 
           <Dropdown.Trigger ref={useMenuRef} align="right" content={(
             <Menu>
               <Menu.Item
-                icon={<LsSettings/>}
+                icon={<LsSettings />}
                 label={t("Account & Settings")}
                 href="/user/account"
                 data-external
@@ -156,7 +156,7 @@ export const Menubar = ({
                 data-external
               /> */}
               <Menu.Item
-                icon={<LsDoor/>}
+                icon={<LsDoor />}
                 label={t("Log Out")}
                 href={absoluteURL("/logout")}
                 data-external
@@ -164,7 +164,7 @@ export const Menubar = ({
             </Menu>
           )}>
             <div className={menubarClass.elem('user')}>
-              <Userpic user={config.user}/>
+              <Userpic user={config.user} />
             </div>
           </Dropdown.Trigger>
         </div>
@@ -185,18 +185,16 @@ export const Menubar = ({
                 <Menu.Item
                   label={t("Projects")}
                   to="/projects"
-                  icon={<IconFolder/>}
+                  icon={<IconFolder />}
                   data-external
                   exact
                 />
                 {
-                  !config.user.noauth_page.some((v) => {
-                    return v.name === "organization";
-                  }) && (
+                  config.user.group === 'admin' && (
                     <Menu.Item
                       label={t("People")}
                       to="/organization"
-                      icon={<IconPersonInCircle/>}
+                      icon={<IconPersonInCircle />}
                       data-external
                       exact
                     />
@@ -209,25 +207,25 @@ export const Menubar = ({
                     <Menu.Item
                       label={t("Models Management")}
                       to="/model-manager"
-                      icon={<LsSettings/>}
+                      icon={<LsSettings />}
                       data-external
                       exact
                     />
                   )}
 
-                <Menu.Spacer/>
+                <Menu.Spacer />
 
                 <VersionNotifier showCurrentVersion />
 
-                <Menu.Divider/>
+                <Menu.Divider />
 
                 <Menu.Item
-                  icon={<IconPin/>}
+                  icon={<IconPin />}
                   className={sidebarClass.elem('pin')}
                   onClick={sidebarPin}
                   active={sidebarPinned}
                 >
-                  {sidebarPinned ?  t("Unpin menu", "取消固定") : t("Pin menu", "固定菜单")}
+                  {sidebarPinned ? t("Unpin menu", "取消固定") : t("Pin menu", "固定菜单")}
                 </Menu.Item>
 
               </Menu>
