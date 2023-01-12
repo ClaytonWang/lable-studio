@@ -347,13 +347,19 @@ def preprocess_clean(project_id, model_ids, task_data, _uuid):
     if model_ids:
         model_query = ModelManager.objects.filter(
             id__in=model_ids
-        ).values('id', 'url', 'title', 'hash_id', 'model_parameter')
+        ).values('id', 'url', 'title', 'hash_id', 'model_parameter', 'type')
 
     if len(model_ids) != len(model_query):
         return False, f'{str(model_ids)}模型没有查询到模型'
 
     model_data = {item['id']: item['hash_id'] for item in model_query}
-    model_parameter = {item['id']: item['model_parameter'] for item in model_query}
+    model_parameter = [item['model_parameter'] for item in model_query if item['type'] == 'rule']
+    if len(model_parameter) and model_parameter[0]:
+        try:
+            model_parameter = json.loads(model_parameter[0])
+        except Exception as e:
+            print(e)
+            model_parameter = {}
     hash_ids = [model_data[_id] for _id in model_ids]
     # first_url = urls.pop(0)
     # _params = dict(uuid=_uuid)

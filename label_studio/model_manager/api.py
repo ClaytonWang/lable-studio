@@ -1,5 +1,6 @@
 """This file and its contents are licensed under the Apache License 2.0. Please see the included NOTICE for copyright information and LICENSE for a copy of the license.
 """
+import json
 import logging
 import pathlib
 from urllib import parse
@@ -144,6 +145,15 @@ class ModelManagerViews(MultiSerializerViewSetMixin, ModelViewSet):
 
     def partial_update(self, request, *args, **kwargs):
         self.queryset = ModelManager.objects.filter(pk=kwargs.get('pk'))
+
+        # 模型参数JSON格式校验
+        model_parameter = request.data.get('model_parameter', '')
+        if model_parameter:
+            try:
+                json.loads(model_parameter)
+            except Exception as e:
+                print(e)
+                return Response(status=400, data=dict(message='模型参数不能转成JSON'))
         return super(ModelManagerViews, self).partial_update(
             request, *args,**kwargs)
 
