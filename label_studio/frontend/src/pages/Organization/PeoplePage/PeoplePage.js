@@ -39,15 +39,14 @@ const InvitationModal = (props) => {
       span: 16,
     },
   };
-  const onFinish = useCallback((values) => {
+  const onFinish = useCallback(async (values) => {
     setWaiting(true);
-    api.callApi("createUser",{
+    await api.callApi("createUser",{
       body: values,
-    }).then(() => {
-      setWaiting(false);
-      onClose(true);
     });
 
+    setWaiting(false);
+    onClose(true);
   }, []);
 
   return (
