@@ -41,13 +41,12 @@ const InvitationModal = (props) => {
   };
   const onFinish = useCallback(async (values) => {
     setWaiting(true);
-    const rslt = await api.callApi("createUser",{
+    await api.callApi("createUser",{
       body: values,
     });
 
     setWaiting(false);
-    // onClose(true);
-    console.log(rslt);
+    onClose(true);
   }, []);
 
   return (
