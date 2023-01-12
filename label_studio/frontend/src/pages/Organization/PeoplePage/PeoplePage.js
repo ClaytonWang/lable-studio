@@ -41,13 +41,14 @@ const InvitationModal = (props) => {
   };
   const onFinish = useCallback((values) => {
     setWaiting(true);
-    api.callApi("createUser",{
+    const rslt = api.callApi("createUser",{
       body: values,
     }).then(() => {
       setWaiting(false);
-      onClose(true);
+      // onClose(true);
     });
 
+    console.log(rslt);
   }, []);
 
   return (
