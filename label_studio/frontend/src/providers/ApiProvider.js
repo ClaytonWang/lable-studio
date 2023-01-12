@@ -18,7 +18,7 @@ const errorFormatter = (result) => {
 
   return {
     isShutdown,
-    title: result.error ? "运行错误" : "服务器错误",
+    title: result.error ? "错误" : "服务器错误",
     message: response?.detail ?? result?.error,
     stacktrace: response?.exc_info ?? null,
     version: response?.version,
@@ -72,7 +72,7 @@ const formatRequest  = (method, params, reset) => {
               const res = [];
               const reg = /<Choice value="(\S+)"\/>/g;
               let temp = reg.exec(reset.body.label_config);
-  
+
               while (temp) {
                 res.push(temp[1]);
                 temp = reg.exec(reset.body.label_config);
@@ -80,7 +80,7 @@ const formatRequest  = (method, params, reset) => {
               return res;
             })();
             const templates = (tags.map(tag => `<Header value="${tag}" size="5"/>\n<TextArea name="${tag}" toName="chat" rows="4" editable="true" maxSubmissions="100"/>`)).join('\n');
-  
+
             reset.body.label_config = reset.body.label_config.replace(/<\/Choices>[\s\S]+<\/View>/, `</Choices>\n${templates}\n</View>`);
           }
         }
