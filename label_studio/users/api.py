@@ -152,7 +152,7 @@ class UserAPI(viewsets.ModelViewSet):
         try:
             serializer.is_valid(raise_exception=True)
         except ValidationError as e:
-            return Response(data=dict(error=str(e)))
+            return Response(data=dict(error_msg=str(e)))
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
 
