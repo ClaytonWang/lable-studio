@@ -110,6 +110,12 @@ def user_login(request):
             org_pk = Organization.find_by_user(user).pk
             user.active_organization_id = org_pk
             user.save(update_fields=['active_organization'])
+
+            # update token
+            token, created = Token.objects.get_or_create(user=user)
+            if created is False:
+                token.delete()
+                token = Token.objects.create(user=user)
             return redirect(next_page)
 
     return render(request, 'users/user_login.html', {
