@@ -16,6 +16,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework import generics
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import MethodNotAllowed
 
@@ -148,7 +149,10 @@ class UserAPI(viewsets.ModelViewSet):
 
         data['username'] = data.get('email').split('@')[0]
         serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError as e:
+            return Response(data=dict(error=str(e)))
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
 
