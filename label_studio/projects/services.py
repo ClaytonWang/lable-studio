@@ -40,6 +40,8 @@ def conversational_generation_add_template(project_id, label):
     [dlg]请生成[lb]相关回复
     [dlg]你可以咨询[lb]相关问题
     """
+    if PromptTemplates.objects.filter(project_id=project_id).exists():
+        return
 
     objects = []
     template = ['[dlg]请生成[lb]相关回复', '[dlg]你可以咨询[lb]相关问题']
