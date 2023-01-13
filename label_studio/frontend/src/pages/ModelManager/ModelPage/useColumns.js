@@ -1,10 +1,9 @@
-import { Space } from '../../../components/Space/Space';
 import { Elem } from '../../../utils/bem';
 import { Userpic } from '../../../components';
 import { format } from 'date-fns';
 import { useMemo, useState } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
-import { Button,Spin } from 'antd';
+import { Button,Space,Spin } from 'antd';
 import { confirm } from "@/components/Modal/Modal";
 import { useAPI } from "@/providers/ApiProvider";
 import { useConfig } from "@/providers/ConfigProvider";
@@ -143,17 +142,17 @@ export const useColumns = () => {
         dataIndex: 'action',
         key: 'action',
         render: (_, record) => (
-          <Space size="middle">
+          <>
             {
               (() => {
                 return [
-                  record.state === 3 ? <Spin indicator={loadingIcon} /> : <Button type="link" key="export" disabled={ record.state === 5} onClick={() => { setModalExp(record); }}>导出</Button>,
-                  (record.version === "1.0" && record.state === 4) || record.state === 3 || config.user?.group === "user" ? null : (<Button type="link" key="del" style={{ color: 'red' }} onClick={() => { handlDel(record); }}>删除</Button>),
-                  record.type === "rule" && record.state === 4 ? (<Button type="link" key="edit" onClick={() => { setModaEdt(record); }}>编辑参数</Button>) : null,
+                  record.state === 3 ? <Spin indicator={loadingIcon} /> : <Button type="link" key="export" size="small" disabled={ record.state === 5} onClick={() => { setModalExp(record); }}>导出</Button>,
+                  (record.version === "1.0" && record.state === 4) || record.state === 3 || config.user?.group === "user" ? null : (<Button type="link" key="del" size="small" style={{ color: 'red' }} onClick={() => { handlDel(record); }}>删除</Button>),
+                  record.type === "rule" && record.state === 4 ? (<Button type="link" key="edit" size="small" onClick={() => { setModaEdt(record); }}>编辑参数</Button>) : null,
                 ];
               })()
             }
-          </Space>
+          </>
         ),
       },
     ];
