@@ -178,6 +178,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',
+    'gunicorn',
     'drf_yasg',
     'corsheaders',
     'django_extensions',
@@ -443,7 +444,7 @@ MIN_GROUND_TRUTH = 10
 DATA_UNDEFINED_NAME = '$undefined$'
 LICENSE = {}
 VERSIONS = {}
-VERSION_EDITION = 'Community'
+VERSION_EDITION = 'Community Edition'
 LATEST_VERSION_CHECK = True
 VERSIONS_CHECK_TIME = 0
 ALLOW_ORGANIZATION_WEBHOOKS = get_bool_env('ALLOW_ORGANIZATION_WEBHOOKS', False)
