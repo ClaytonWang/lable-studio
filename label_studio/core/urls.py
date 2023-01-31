@@ -91,9 +91,9 @@ urlpatterns = [
     re_path(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework'))
 ]
 
-if settings.DEBUG:
-    try:
-        import debug_toolbar
-        urlpatterns = [path('__debug__/', include(debug_toolbar.urls))] + urlpatterns
-    except ImportError:
-        pass
+# if settings.DEBUG:
+try:
+    import debug_toolbar
+    urlpatterns = [path('__debug__/', include(debug_toolbar.urls))] + urlpatterns
+except ImportError:
+    pass
